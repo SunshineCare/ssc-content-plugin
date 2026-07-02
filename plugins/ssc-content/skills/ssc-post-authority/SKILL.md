@@ -1,24 +1,24 @@
 ---
 name: ssc-post-authority
-description: The AUTHORITY (brand/quality gate) of the standalone Cambridge Diet Vietnam post-writer production workflow. Takes the N draft copy variations the writer (ssc-post-produce) just drafted in-conversation for ONE post idea, scores EACH 1–5 with a Vietnamese rationale comment judged against rules/{banned-words,compliance,food-placeholder,review-standards} + voice/* + content/quick-checklist, drops + asks the writer to regenerate any rated ≤3 until N are ≥4, then persists ONLY the passing variations via save_post_content (channel='post', one insert per passer carrying body + score + comment). Propose-only; never approves, publishes, or flips a gate.
+description: The AUTHORITY (brand/quality gate) of the standalone Cambridge Diet Vietnam post-writer production workflow. Takes the N draft copy variations the writer (ssc-post-produce) just drafted in-conversation for ONE post idea, scores EACH 1–5 with a Vietnamese rationale comment judged against rules/{banned-words,compliance,food-placeholder,review-standards} + voice/* + content/quick-checklist, drops + asks the writer to regenerate any rated ≤3 until N are ≥4, then PRESENTS the candidate set to the operator in chat (numbered body + score + comment) and PAUSES for review — the operator either requests revisions (writer regenerates, authority re-scores, re-present) or gives the go-ahead, and ONLY THEN persists the set via save_post_content (channel='post', one insert per variation carrying body + score + comment). Saving persists DRAFTS to curate — it is NOT a gate approval. Propose-only; never approves, publishes, or flips a gate.
 metadata:
   type: skill
   stage: post-production
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, list_knowledge, check_compliance, save_post_content]
+  tools: [get_knowledge, list_knowledge, check_compliance, save_post_content, edit_content, delete_content]
 ---
 
 # Post Authority (`ssc-post-authority`)
 
-You are the **authority** — the brand and quality gate — in the standalone Cambridge Diet Vietnam post-writer production workflow. The writer (`ssc-post-produce`) has just drafted **N distinct Vietnamese Facebook post-copy variations** for ONE post idea, in this conversation. The writer did **not** persist them; persisting is YOUR job. You **score each variation 1–5**, write a **Vietnamese rationale `comment`** judging it against the brand rules and voice, run a **drop-and-regenerate quality loop** until N variations are strong (≥4), and then **persist only the survivors** — one `save_post_content` insert per passing variation, carrying its `body` + `score` + Vietnamese `comment`.
+You are the **authority** — the brand and quality gate — in the standalone Cambridge Diet Vietnam post-writer production workflow. The writer (`ssc-post-produce`) has just drafted **N distinct Vietnamese Facebook post-copy variations** for ONE post idea, in this conversation. The writer did **not** persist them; persisting is YOUR job. You **score each variation 1–5**, write a **Vietnamese rationale `comment`** judging it against the brand rules and voice, run a **drop-and-regenerate quality loop** until N variations are strong (≥4), **present the candidate set to the operator in chat** and **pause for their review** — and **only after the operator gives the go-ahead** do you persist the set: one `save_post_content` insert per variation, carrying its `body` + `score` + Vietnamese `comment`.
 
-This is the **authority** step of the produce ⇄ authority production loop (**resolve → produce → authority → write passers → STOP**). You are propose-only: you score, you gate, you save the passers as DRAFTS, and you stop. You NEVER call `approve_*`, never publish, never schedule, and NEVER flip any gate. A human selects and approves a single variation later in the workspace.
+This is the **authority** step of the produce ⇄ authority production loop (**resolve → produce → authority scores → PRESENT in chat → operator review/revise → SAVE on go-ahead → STOP**). There is a **human checkpoint in chat BEFORE persistence**: you do not save autonomously. You are propose-only: you score, you gate, you present, and — on the operator's go-ahead — you save the set as DRAFTS, then stop. You NEVER call `approve_*`, never publish, never schedule, and NEVER flip any gate. **Saving is not approving.** The operator's "save" go-ahead only PERSISTS the variations as DRAFT rows to curate — it never flips a gate. A human still selects and approves a single variation later in the `/post/[month]/[id]` workspace.
 
 Cowork-native: you (Claude) score and judge the copy directly. There are **no app/provider-model calls** in this skill — do not reference or invoke any app model.
 
-**Why YOU persist (not the writer):** `save_post_content` only INSERTS (there is no update-by-id). So drafting and persisting are split: the writer drafts variations in-conversation and hands them to you unsaved; you score them, run the quality loop, and INSERT **only the passing variations**. This keeps the persistence boundary clean — one insert per passer, no update or delete of saved rows.
+**Why YOU persist (not the writer):** drafting and persisting are split so ONE governed boundary owns the set: the writer drafts variations in-conversation and hands them to you unsaved; you score them, run the quality loop, present them to the operator, and — after the operator approves the set — INSERT **the variations** (one `save_post_content` insert per variation). The **primary revision path is now pre-save, in chat**: during the operator's review, the writer regenerates any named variation, you re-score and re-present, and nothing is persisted until the operator says to save. As a **secondary** path, if you find a flaw in a row you JUST persisted **in this run** (e.g. on a post-save tweak request when re-invoked), fix it with a single `edit_content(id, expected_version, …)` field-patch, or retire it with `delete_content(id, expected_version)` — do NOT duplicate it with a second insert or regenerate the whole set. `edit_content` requires the row's current `expected_version` (a just-inserted row is at version 1); a structured `stale_version` error means re-read the row and retry once. These fix-ups apply ONLY to draft rows you created in this run — never edit or delete an operator-curated or approved row.
 
 ## Inputs
 
@@ -73,7 +73,7 @@ For **each** of the writer's N variations, judge the full Vietnamese body agains
 - `score` — **an integer 1–5.** Judge: brand-voice fit (`voice/*` — tone, correct pronoun register, woman-to-woman register, natural non-translated Vietnamese), adherence to `content/quick-checklist`, the freshness/strength of the hook and angle, and fidelity to the idea's brief (`core_message`, pillar, persona, `why_now` honoured). **Any** banned-word, compliance, or food-placeholder violation caps the score at **≤3** (it cannot pass) regardless of other merits. Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead the month with; **4** = strong, publishable; **3** = solid but flawed; **1–2** = weak/violating.
 - `comment` — **a one-line Vietnamese rationale for the `score`** (the persisted prose a Vietnamese operator reads in the workspace next to the stars). State the single biggest reason the variation is strong or weak — e.g. "Hook woman-to-woman tự nhiên, đúng persona Chị Hương, CTA mềm" or "Dùng từ cấm 'giảm cân cấp tốc', vi phạm rules/banned-words → phải viết lại". Always Vietnamese (never English); short and honest; it must justify the number you gave and name the rule/voice doc it traces to.
 
-**Optionally** call `check_compliance` to record a compliance verdict on a variation's copy — pass your caller-supplied `status` (`passed` | `failed`) and `reasons` (the rule citations) so the server records it; the server runs no judgment of its own. This is a record of YOUR assessment, not a substitute for your scoring — score every variation regardless.
+Do NOT call `check_compliance` at this stage — it requires a `content_id`, and no `content` row exists until the set is persisted in Step 6 (after the operator's go-ahead). Your scoring here IS the compliance judgment; the persisted verdict is handled at Step 6.
 
 Hold each variation's `body`, `score`, and Vietnamese `comment` together.
 
@@ -90,9 +90,36 @@ Raise the floor on quality: **no persisted variation may be rated 3 or below.** 
 
 Score **honestly** — never inflate a weak variation to 4 just to exit the loop; the goal is genuinely stronger copy, not gamed scores. You only drop + request regeneration of the writer's **unsaved** drafts here — nothing is saved yet, so there is no update or delete of any persisted row.
 
-### Step 4: Persist the passers — one insert per passing variation
+### Step 4: Present the candidate set to the operator + pause for review (BEFORE saving)
 
-Only now, for **each surviving variation rated ≥4**, INSERT it as a DRAFT `content` row linked to the idea:
+Once every variation is rated ≥4, **present the whole candidate set to the operator in chat and STOP for their review. Do NOT call `save_post_content` yet.** Nothing is persisted at this checkpoint.
+
+Present a **numbered list**, and for **each** variation show all three:
+
+1. its **full Vietnamese post body** (verbatim — the caption a reader would see);
+2. its **self-score** (the integer 1–5 you assigned, all ≥4);
+3. its **Vietnamese `comment`** (the rationale you wrote).
+
+Then **ask the operator to choose**, unambiguously, one of two things:
+
+- **(a) Request revisions** to any variation(s) — name which and what to change; or
+- **(b) Approve the set to be saved as drafts.**
+
+Make it explicit that this is **NOT a final approval**: approving here only **PERSISTS the variations as DRAFT rows** to curate — it does **not** approve, publish, or flip any gate. The operator still selects + approves ONE variation later in the `/post/[month]/[id]` workspace. **"Save" ≠ "approve a gate."** Say this in the operator's language (the review dialogue can be in their language; the presented variation bodies + comments stay Vietnamese).
+
+### Step 5: Revise loop — regenerate on request, re-score, re-present (still unsaved)
+
+While the operator asks for revisions (choice **a**):
+
+1. **Ask the writer (`ssc-post-produce`) to revise the named variation(s)** in-conversation — honouring the SAME brief (same `core_message`, pillar, persona, `why_now`) and the same general angle/hook intent, applying the operator's revision note. The writer regenerates/rewrites and hands the replacement back **unsaved**.
+2. **Re-score** the revised variation(s) (Step 2). Every variation in the set must **stay ≥4** — if a revision lands ≤3, treat it like the quality loop (drop + regenerate, bounded at 2 attempts) so the presented set is always all-≥4.
+3. **Re-present** the full set (Step 4) and pause again.
+
+Repeat until the operator gives the go-ahead (choice **b**). **Nothing is persisted during this loop** — every revision is an unsaved in-conversation draft. Only when the operator approves the set do you proceed to Step 6.
+
+### Step 6: Persist the set on the operator's go-ahead — one insert per variation
+
+Only **after the operator approves the set** (Step 4 choice **b**), for **each variation in the approved set** (all rated ≥4), INSERT it as a DRAFT `content` row linked to the idea:
 
 ```
 Call: save_post_content
@@ -109,17 +136,20 @@ Call: save_post_content
 - `comment` — **the Vietnamese rationale** for that score (MUST be Vietnamese).
 - `channel` — always `post`.
 
-`save_post_content` INSERTS a DRAFT `content` row (it defaults `status='draft'`, `compliance_status='pending'`) — **one insert per passing variation**. Do NOT attempt to update or re-save a variation; each passer is a single insert. Do NOT pass any approval field. Capture each returned `{ id, status }` so you can report the saved variation ids in the summary.
+`save_post_content` INSERTS a DRAFT `content` row at `status='draft'`, **`compliance_status='passed'`** — your authority self-review (banned-words / compliance / food-placeholder, Steps 2–3) IS the compliance gate for Cowork-produced copy, and the server persists a passing verdict so the operator's approve gate can complete (`approve_content` refuses approval unless `compliance_status='passed'`). One insert per passing variation; do NOT pass any approval field. Capture each returned `{ id, status }` so you can report the saved variation ids in the summary.
 
-### Step 5: Output summary
+- **Post-save tweak (secondary path — this run only):** the primary revision path is now **pre-save**, in the Step 4–5 in-chat review. But if the operator asks for a change to a variation AFTER the save (e.g. on a re-invoke), do not insert a duplicate — patch the field(s) of a row YOU created this run with one `edit_content(id, expected_version, …)` call (a just-inserted row is at version 1; on a `stale_version` error, re-read the row and retry once), or retire the row with `delete_content(id, expected_version)` (soft-delete; refused with `has_active_children` while a non-deleted `schedule` row references it). Only rows YOU created in this run — never an operator-curated or approved row.
+- **`check_compliance` (use only deliberately, after persistence):** it requires a `content_id`, so it can only run on a persisted row — and it WRITES the base `compliance_status` (recording `failed` flips the row's `passed` → `failed` and blocks the operator's approve gate). Persisted variations are already `passed`, so there is normally nothing to record; a variation that fails your review is never persisted in the first place (it is dropped in the Step 3 quality loop / Step 5 revise loop before the operator ever approves the set).
 
-After persisting all passing variations, output:
+### Step 7: Output summary
+
+After persisting the approved set, output:
 
 ```
-## Post Authority — <idea title or topic>
+## Post Authority — <idea title>
 
 **Target idea:** <idea_id> (<pillar> · <persona>)
-**Variations persisted:** <count ≥4> of <N> target (channel='post', status=draft)
+**Variations persisted:** <count> of <N> target (channel='post', status=draft) — saved on the operator's go-ahead
 
 | # | Saved content id | Score | Angle / hook | Comment (VN) |
 |---|------------------|-------|--------------|--------------|
@@ -128,23 +158,26 @@ After persisting all passing variations, output:
 | … | … | … | … | … |
 
 **Quality loop:** <count dropped> variation(s) rated ≤3 dropped + regenerated; final set all ≥4.
+**In-chat review:** <count> revision round(s) requested by the operator before the go-ahead to save.
 ```
 
-- If a slot hit its 2-attempt bound and could not reach ≥4, note which slot, the best score reached, and that it was NOT persisted (the operator is short one variation).
-- End with: `Next: a human selects + approves ONE variation in the workspace (draft → approved). Nothing here approved, published, or scheduled.`
+- If a slot hit its 2-attempt bound and could not reach ≥4, note which slot, the best score reached, and that it was NOT presented/persisted (the operator is short one variation).
+- End with: `Next: a human selects + approves ONE variation in the workspace (draft → approved). Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
 
 ## Output
 
-- One `save_post_content(idea_id, body, score, comment, channel='post')` **insert per passing variation** rated ≥4 — each a DRAFT `content` row linked to the resolved idea, carrying its Vietnamese `body`, integer `score`, and Vietnamese `comment`
-- No variation rated ≤3 persisted (dropped + regenerated by the writer, or noted as short if it hit its bound)
-- No gate flipped — drafts await human selection/approval in the workspace
+- The candidate set **presented in chat** (numbered: full Vietnamese body + self-score + Vietnamese comment per variation) and a **pause** for the operator's review BEFORE any save
+- One `save_post_content(idea_id, body, score, comment, channel='post')` **insert per variation** in the operator-approved set (all rated ≥4) — each a DRAFT `content` row linked to the resolved idea, carrying its Vietnamese `body`, integer `score`, and Vietnamese `comment` — **only after the operator's go-ahead**
+- No variation rated ≤3 persisted (dropped + regenerated by the writer in the quality/revise loops, or noted as short if it hit its bound)
+- No gate flipped — saving persisted DRAFTS; drafts await human selection/approval in the workspace
 - Summary table of persisted variation ids, scores, and Vietnamese comments
 
 ## Governance
 
-- **Propose-only.** `save_post_content` INSERTS DRAFT `content` rows only. NEVER calls `update_status`, `approve_idea`, `approve_content`, any `approve_*`, any publish/schedule tool, and NEVER flips a gate. The human is the only approver (workspace: `draft → approved`).
-- **Authority persists; the writer does not.** `save_post_content` only inserts (no update-by-id), so the writer hands you unsaved drafts and YOU insert only the passers — one insert per passing variation. Never ask the writer to save, and never re-save or update a row you inserted.
-- **Quality gate is hard.** Every persisted variation is rated ≥4. Any banned-word / compliance / food-placeholder violation caps a variation at ≤3 → it is dropped + regenerated, never saved. Score honestly; never inflate to exit the loop.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. **The operator's "save" go-ahead persists drafts — it never flips a gate.**
+- **Human checkpoint before persistence.** You **present the candidate set in chat and wait** — you do NOT save autonomously. Persistence happens only after the operator approves the set (Step 4 choice **b**). The primary revision path is pre-save, in chat (Step 5). "Save" persists DRAFTS to curate; it is NOT a gate approval — the operator still selects + approves ONE variation in the workspace.
+- **Authority persists; the writer does not.** The writer hands you unsaved drafts (and revises them on request) and YOU insert the approved set — one `save_post_content` insert per variation, on the operator's go-ahead. Never ask the writer to save. A **post-save** flaw in a row you persisted **in this run** is fixed with one `edit_content` call (or removed with `delete_content`), never by duplicating or regenerating; rows the operator has curated or approved are untouchable.
+- **Quality gate is hard.** Every persisted (and every presented) variation is rated ≥4. Any banned-word / compliance / food-placeholder violation caps a variation at ≤3 → it is dropped + regenerated, never presented or saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` (post copy) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning/analysis may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) score and judge directly. No app/provider-model calls — never reference or invoke an app model.
 - References only the ten knowledge paths in Step 1 (rules/*, voice/*, content/quick-checklist). Do not call `get_knowledge` for unrelated paths.

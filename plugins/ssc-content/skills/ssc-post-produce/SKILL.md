@@ -1,6 +1,6 @@
 ---
 name: ssc-post-produce
-description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by date via get_content_by_date, or by idea id via get_idea), reads the idea's brief + strategic tags, and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook — grounded in voice/*, content/*, and channels/facebook. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them and saves only the passers. Does NOT call save_post_content. Propose-only; never approves, publishes, or flips a gate.
+description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by date via get_content_by_date, or by idea id via get_idea), reads the idea's brief + strategic tags, and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook — grounded in voice/*, content/*, and channels/facebook. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. Nothing is saved until the operator gives the go-ahead. Does NOT call save_post_content. Propose-only; never approves, publishes, or flips a gate.
 metadata:
   type: skill
   stage: post-production
@@ -12,9 +12,13 @@ metadata:
 
 # Post Produce (`ssc-post-produce`)
 
-You are the **writer** in the standalone Cambridge Diet Vietnam post-writer production workflow. You take ONE scheduled post idea, read its brief, and draft **N distinct Vietnamese Facebook post-copy variations** — each from a different angle/hook, grounded in the brand voice and content knowledge base. You draft the variations **in this conversation** and hand them to the authority step (`ssc-post-authority`) **without persisting them**. You do **not** save anything — `save_post_content` only INSERTS (no update-by-id), so persisting is split off to the authority: it scores the variations and saves only the passers. You are propose-only: you draft variations and stop. You NEVER approve, publish, schedule, or flip any gate — and you NEVER score or comment on your own drafts (the authority step rates them next).
+You are the **writer** in the standalone Cambridge Diet Vietnam post-writer production workflow. You take ONE scheduled post idea, read its brief, and draft **N distinct Vietnamese Facebook post-copy variations** — each from a different angle/hook, grounded in the brand voice and content knowledge base. You draft the variations **in this conversation** and hand them to the authority step (`ssc-post-authority`) **without persisting them**. You do **not** save anything — persisting is split off to the authority so ONE governed boundary owns the set: it scores the variations, presents them to the operator in chat, and — only after the operator approves the set — saves them (and owns any fix-up of rows it just saved via `edit_content`/`delete_content`). You are propose-only: you draft (and, when asked, revise) variations and stop. You NEVER approve, publish, schedule, or flip any gate — and you NEVER score or comment on your own drafts (the authority step rates them next).
 
-This is the **produce** step of the produce ⇄ authority production loop (**resolve → produce → authority → write passers → STOP**). You feed clean candidate copy to the authority step, which scores each variation (1–5), writes a Vietnamese rationale, drops + asks you to regenerate weak ones until N are strong, and then **persists only the passing variations** via `save_post_content`. **Do not do the authority's job and do not persist** — leave `score`, `comment`, and saving to the authority; produce variations only. (If the authority drops a variation rated ≤3 and asks for a same-angle replacement, draft the replacement in-conversation and hand it back — still unsaved.)
+This is the **produce** step of the produce ⇄ authority production loop (**resolve → produce → authority scores → PRESENT in chat → operator review/revise → SAVE on go-ahead → STOP**). You feed clean candidate copy to the authority step, which scores each variation (1–5), writes a Vietnamese rationale, drops + asks you to regenerate weak ones until N are strong, then **presents the set to the operator in chat and waits**. Nothing is persisted until the operator gives the go-ahead. **Do not do the authority's job and do not persist** — leave `score`, `comment`, and saving to the authority; produce (and revise) variations only.
+
+**You have two writing moments, both in-conversation and both unsaved:**
+1. **Initial draft** — draft the N variations (Step 4) and hand them to the authority.
+2. **Revise on request** — during the authority's quality loop OR the operator's in-chat review, you regenerate/rewrite the **named** variation(s): honour the SAME brief (same `core_message`, pillar, persona, `why_now`) and the same general angle/hook intent, applying the specific fix requested (an authority-named failure, or an operator's revision note). Draft the replacement in-conversation and hand it back — **still unsaved**. Repeat as many times as the operator asks; nothing is saved during this loop.
 
 Cowork-native: you (Claude) write the copy directly. There are **no app/provider-model calls** in this skill — do not reference or invoke any app model.
 
@@ -67,8 +71,10 @@ From the resolved idea, extract and hold the **brief**:
 - `cta` — the intended call-to-action direction (soft, authentic)
 - `story_moment` — the concrete scene/moment that anchors the post
 - `why_now` — why this topic is timely this month (keep every variation month-specific, not evergreen)
-- `topic` — the subject of the post
+- `theme` — the month theme this post belongs to (may be null; present on the post detail via `get_idea`)
 - `title` — the idea's working title
+
+These are the real brief fields — the post detail row carries `hook_direction` / `core_message` / `why_now` / `story_moment` / `cta` / `theme`. There is **no `topic` field**: `get_idea` returns none, and `get_content_by_date`'s idea brief pins `topic` (and `pillar`/`target_persona`/`content_type`) to `null` — strategic dimensions attach as tags, not scalar columns. Never treat a null as a subject to fill in, and never fabricate a substitute subject: the idea's `title` + `core_message` define what the post is about.
 
 And the **strategic tags** from `tags[]` (each tag is `{ term_id, kind, code, label }`):
 
@@ -141,7 +147,7 @@ Avoid four paraphrases of the same opening. If two variations feel interchangeab
 
 For each variation, while drafting, self-respect the brand bar from Step 3 (natural Vietnamese, correct pronoun register, no banned-word phrasing, soft CTA per `content/cta-guidelines`) — but **do not formally score or comment**; the authority step owns the rating.
 
-**Do NOT call `save_post_content` — do not persist anything.** Persisting is the authority's job (`save_post_content` only INSERTS, so saving is split off so only passing variations are written). Present all N variations **in the conversation**, ready for the authority to score and save. For each, lay out:
+**Do NOT call `save_post_content` — do not persist anything.** Persisting is the authority's job, and only after the operator approves the set in chat (the authority alone owns fix-ups of what it saved). Present all N variations **in the conversation**, ready for the authority to score, present, and — on the operator's go-ahead — save. For each, lay out:
 
 - the **full Vietnamese post body** (the finished caption a reader would see) — verbatim, ready to be scored and persisted;
 - a **one-line angle/hook label** so the authority and the operator can tell the variations apart;
@@ -154,10 +160,10 @@ Keep the bodies intact and Vietnamese — the authority persists each passing bo
 After drafting all N variations, present them for the authority to judge:
 
 ```
-## Post Produce — <idea title or topic>
+## Post Produce — <idea title>
 
 **Target idea:** <idea_id> (<pillar> · <persona>)
-**Variations drafted:** <N> (in-conversation, UNSAVED — handed to ssc-post-authority to score + persist)
+**Variations drafted:** <N> (in-conversation, UNSAVED — handed to ssc-post-authority to score + present)
 
 **Brief honoured:** core_message, pillar, persona, why_now held fixed across all variations; angle/hook varied.
 
@@ -170,21 +176,23 @@ After drafting all N variations, present them for the authority to judge:
 ### … (through Variation N)
 
 ---
-<N> Vietnamese copy variations drafted (propose-only, UNSAVED, none scored/approved). Next: ssc-post-authority scores each (1–5) + writes a Vietnamese comment, drops + asks me to regenerate any rated ≤3, then saves only the passers via save_post_content. A human selects + approves one in the workspace.
+<N> Vietnamese copy variations drafted (propose-only, UNSAVED, none scored/approved). Next: ssc-post-authority scores each (1–5) + writes a Vietnamese comment, drops + asks me to regenerate any rated ≤3, then PRESENTS the set to the operator in chat and waits — the operator reviews and either asks me to REVISE named variations (I regenerate in-conversation, still unsaved) or gives the go-ahead, at which point the authority saves the set as drafts via save_post_content. A human then selects + approves one in the workspace.
 ```
 
 If the date had more than one scheduled post (Step 1, `count > 1`), add a line noting which post you produced and that the remaining post(s) for that date still need their own pass.
 
 ## Output
 
-- N (default 4) DISTINCT Vietnamese Facebook post-copy variations drafted **in the conversation** and presented for the authority to score — each a full Vietnamese body with a one-line angle/hook label, all tied to the resolved idea's `idea_id`
-- **Nothing persisted.** No `save_post_content` call; no `content` row written; no `score`/`comment` set — the authority step (`ssc-post-authority`) scores the variations and saves only the passers
-- No gate flipped — variations await scoring + persistence (authority) then human selection/approval (workspace)
+- N (default 4) DISTINCT Vietnamese Facebook post-copy variations drafted **in the conversation** and presented for the authority to score + present — each a full Vietnamese body with a one-line angle/hook label, all tied to the resolved idea's `idea_id`
+- Any **revised** variations regenerated in-conversation on request (from the authority's quality loop or the operator's in-chat review) — still unsaved
+- **Nothing persisted.** No `save_post_content` call; no `content` row written; no `score`/`comment` set — the authority step (`ssc-post-authority`) scores the variations, presents them, and saves the set only on the operator's go-ahead
+- No gate flipped — variations await scoring + in-chat review (authority) then human selection/approval (workspace)
 
 ## Governance
 
-- **Propose-only, and does NOT persist.** This skill writes nothing — it has no `save_post_content` and calls no write tool. It drafts variations in-conversation and hands them to `ssc-post-authority`, which persists only the passers (one `save_post_content` insert each). NEVER calls `update_status`, `approve_idea`, any `approve_*`, any publish/schedule tool, and NEVER flips a gate.
-- **Writer, not authority.** Produce variations only — leave scoring, the Vietnamese `comment`, the drop-and-regenerate quality loop, AND the saving to `ssc-post-authority`. Do not pre-empt it; do not save your own drafts (`save_post_content` only inserts, so saving is the authority's single responsibility over the passing set).
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. (This skill persists nothing at all — the note holds a fortiori.)
+- **Does NOT persist.** This skill writes nothing — it has no `save_post_content` and calls no write tool. It drafts (and, on request, revises) variations in-conversation and hands them to `ssc-post-authority`, which saves the set only after the operator approves it in chat (one `save_post_content` insert per variation).
+- **Writer, not authority.** Produce (and revise) variations only — leave scoring, the Vietnamese `comment`, the drop-and-regenerate quality loop, the in-chat presentation, AND the saving to `ssc-post-authority`. Do not pre-empt it; do not save your own drafts (saving — and any `edit_content`/`delete_content` fix-up of just-saved rows — is the authority's single responsibility over the set). Revision during the operator's in-chat review is your job, but it is still in-conversation and unsaved.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run — never batch-produce across ideas in a single pass.
 - **All drafted prose in Vietnamese.** The variation bodies you draft MUST be Vietnamese (the authority persists them verbatim). Chat-side reasoning/analysis may stay English.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.

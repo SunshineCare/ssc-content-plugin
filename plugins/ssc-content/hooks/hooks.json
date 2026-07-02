@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^mcp__ssc__(approve|unapprove)_.*$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/approval-gate.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

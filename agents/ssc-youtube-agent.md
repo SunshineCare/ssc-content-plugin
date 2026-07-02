@@ -44,7 +44,7 @@ detection.
 
   ```
   The month context for <period> has not been approved yet.
-  Please run `/ssc.plan <period>` to draft and approve the month context,
+  Please approve the month context in the **Monthly Plan dashboard → Context tab**,
   then re-invoke this agent.
   ```
 

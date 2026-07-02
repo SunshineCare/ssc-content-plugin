@@ -1,5 +1,5 @@
 ---
-description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context to be approved first (/ssc.plan).
+description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context to be approved first (via the Monthly Plan dashboard).
 ---
 
 ## User Input
@@ -10,14 +10,14 @@ $ARGUMENTS
 
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
-- **Period** (`period`, `YYYY-MM`, e.g. `2026-07`). Required. Must match the period used in `/ssc.plan`.
+- **Period** (`period`, `YYYY-MM`, e.g. `2026-07`). Required.
 - **Plan ID** (`plan_id`, optional).
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one.
 
 ## Precondition
 
-Requires the month's **Context phase to be approved** first. If not yet approved, run `/ssc.plan` to complete Tactics → Context, then return here.
+Requires the month's **Context phase to be approved** first. If not yet approved, approve the context in the **Monthly Plan dashboard → Context tab**, then return here.
 
 ## What to do
 

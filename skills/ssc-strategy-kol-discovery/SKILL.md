@@ -1,0 +1,102 @@
+---
+name: ssc-strategy-kol-discovery
+description: Discovers and evaluates Key Opinion Leaders (KOLs) on Facebook, YouTube, and TikTok by fit to the 3 Cambridge Diet Vietnam archetypes. Produces ranked shortlists with audience overlap, tone alignment, and estimated collaboration value. Saves findings via save_strategy_finding (dimension=kol).
+metadata:
+  type: skill
+  stage: strategy
+  brand: cambridge-diet-vn
+  section: strategy
+  capability: edit
+  tools: [get_knowledge, search_knowledge, save_strategy_finding, WebSearch]
+---
+
+# KOL Discovery (`ssc-strategy-kol-discovery`) — FR-014
+
+You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet Vietnam across Facebook, YouTube, and TikTok, filtered by fit to the brand's 3 audience archetypes. You save findings to the strategy brief. You NEVER call any `approve_*` or publish tool.
+
+## Inputs
+
+- `brief_id` — the strategy brief to save findings to
+- `period` — current cycle, e.g. `2026-Q3`
+- Optional `platform` — limit to `facebook`, `youtube`, or `tiktok`
+
+## Procedure
+
+### Step 1: Load brand context
+
+Call `get_knowledge` for:
+- `brand/personas` — the 3 archetypes and their tone/value expectations
+- `brand/positioning` — what Cambridge Diet Vietnam claims
+- `brand/proof-points` — credibility signals the KOL should be able to reinforce
+
+### Step 2: Discover KOLs by persona
+
+For each persona (`brand/personas`: Chị Hương / Chị Mai / Chị Lan), search for Vietnamese health/weight-loss influencers on each platform. Substitute `<year>` with the current year derived from `period` (e.g. `2026-Q3` → `2026`) so queries don't go stale:
+
+**Facebook:**
+- Search: `WebSearch("KOL giảm cân Facebook Việt Nam <year> uy tín")`
+- Search: `WebSearch("influencer sức khỏe phụ nữ Vietnam Facebook page lớn")`
+
+**YouTube:**
+- Search: `WebSearch("kênh YouTube giảm cân Việt Nam <year> nhiều subscribers")`
+- Search: `WebSearch("bác sĩ dinh dưỡng YouTube Vietnam")`
+
+**TikTok** — the brand publishes only on Facebook and YouTube, but TikTok KOLs are in scope because they routinely cross-post to FB/YouTube and signal emerging archetype language. Evaluate them for cross-platform reach, not as a TikTok publishing play:
+- Search: `WebSearch("TikTok giảm cân Việt Nam <year> followers nhiều")`
+
+### Step 3: Evaluate KOL fit
+
+For each discovered KOL, assess:
+
+| Criterion | What to evaluate |
+|-----------|-----------------|
+| **Persona fit** | Which of the 3 personas (Chị Hương 45–55 / Chị Mai 50–60 / Chị Lan 35–45) does their audience lean toward? |
+| **Tone alignment** | Does their voice match Cambridge Diet VN's woman-to-woman tone? (not clinical; not pushy) |
+| **Audience size** | Approximate follower/subscriber count |
+| **Engagement quality** | Comments quality — real questions/testimonials vs generic |
+| **Brand safety** | No medical claims that would violate NĐ-15/2018 |
+| **Existing partnership conflicts** | Search for competing meal replacement brand deals |
+
+### Step 4: Save findings
+
+For each KOL worth shortlisting, call `save_strategy_finding`:
+```
+dimension: kol
+brief_id: <brief_id>
+title: <KOL name> — <platform> — <persona fit>
+detail: <audience size, tone fit, key channel, why they match the persona>
+evidence: { platform: "<fb|yt|tiktok>", url: "<profile link>", persona: "<Chị Hương|Chị Mai|Chị Lan>", est_followers: "<N>" }
+track: proven
+```
+
+If no relevant new KOLs are found this cycle, save one finding: `title: "KOL — no new discoveries this cycle"`.
+
+### Step 5: Output summary
+
+```
+## KOL Discovery — <period>
+
+### Facebook shortlist
+| Name | Persona fit | Est. audience | Tone match |
+|------|--------------|--------------|------------|
+| …    | …            | …            | …          |
+
+### YouTube shortlist
+| …    | …            | …            | …          |
+
+### TikTok shortlist
+| …    | …            | …            | …          |
+
+Recommended for outreach this cycle: <names>
+Findings saved: <N>
+```
+
+## Output language
+
+**Write the finding prose in Vietnamese.** `title` and `detail` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no new discoveries" fallback (translate the English template examples shown above). The structured `evidence` values (platform, url, persona, est_followers) and the `dimension` / `track` enums stay as their literal codes; KOL names and profile URLs stay verbatim; your chat-side reasoning stays English.
+
+## Governance
+
+- Research + save only. No `approve_*`, no content writes.
+- All findings use `dimension: 'kol'` and `track: 'proven'`.
+- Requires `edit` capability.

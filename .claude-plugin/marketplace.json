@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ssc-content-plugin",
+  "description": "Cambridge Diet Vietnam Cowork plugins — ads, posts, YouTube, KB and strategy",
+  "owner": {
+    "name": "SunshineCare"
+  },
+  "plugins": [
+    {
+      "name": "ssc-content",
+      "description": "Cambridge Diet Vietnam — ads, posts, YouTube, KB and strategy workflows for Cowork operators",
+      "author": {
+        "name": "SunshineCare"
+      },
+      "source": "./plugins/ssc-content"
+    }
+  ]
+}

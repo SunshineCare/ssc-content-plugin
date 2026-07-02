@@ -90,7 +90,14 @@ approval in the KB dashboard. Nothing applied."
 
 ## Governance
 
-- Propose-only. NEVER call `approve_knowledge_revision`, `edit_knowledge`,
-  `publish_strategy_knowledge`, or any `approve_*`/publish tool.
+- Propose-only (hard rule): never call any tool that changes approval or
+  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
+  entity, any gate), no `update_status`, no publish. Never edit or delete
+  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
+  draft rows this skill itself created in the current run. Everything else
+  belongs to the operator in the dashboard. `propose_knowledge_revision` is
+  this skill's only write; NEVER call `approve_knowledge_revision` /
+  `reject_knowledge_revision`, `edit_knowledge`, or
+  `publish_strategy_knowledge`.
 - One proposal per path — never submit two proposals targeting the same doc.
 - Requires `edit` capability.

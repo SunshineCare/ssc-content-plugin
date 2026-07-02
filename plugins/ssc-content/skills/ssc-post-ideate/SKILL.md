@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, search_knowledge, get_channel_plan, list_taxonomies, save_idea, delete_idea]
+  tools: [get_knowledge, search_knowledge, get_channel_plan, list_taxonomies, save_idea, delete_idea, update_idea_rating, get_idea]
 ---
 
 # Post Ideate (`ssc-post-ideate`)
@@ -106,7 +106,7 @@ save_idea(
 )
 ```
 
-`save_idea` upserts a DRAFT idea on the post channel, tagged to the plan via `plan_id`. Always pass `channel='post'` and `plan_id=<plan.id>` so the idea is scoped to this post plan. Calling `save_idea` again with corrected fields creates or updates a draft.
+`save_idea` **INSERTS a new DRAFT idea every call** — there is no `id` argument and no upsert; the server always mints a fresh id. Always pass `channel='post'` and `plan_id=<plan.id>` so the idea is scoped to this post plan. To correct an already-saved draft: for **content/field corrections**, call `delete_idea(<id>)` on the flawed draft and save ONE corrected replacement via `save_idea` (never re-call `save_idea` hoping to "update" — that creates a duplicate). For **score/comment-only corrections**, call `update_idea_rating(id, rating, comment?, expected_version)` — it changes only the rating fields, never the lifecycle status; a freshly-saved draft is at version 1, and a `stale_version` error means re-read the row via `get_idea` and retry once with the current version.
 
 **Field guidance:**
 
@@ -156,7 +156,7 @@ Before finalising (or as you save each batch), audit the full set of ~30 ideas a
 
 11. **No duplicate value+frame within a pillar** (per `brand/angles` section 2): Within each pillar group, no more than 2 ideas may share the same `value` AND the same `frame`. If a pillar has >2 ideas with identical value+frame, vary the frame or value on the excess ideas.
 
-**If any check fails:** Fix the violations before saving the affected idea (or update already-saved ideas by calling `save_idea` again with the corrected fields — each call creates or updates a draft). Do not finalise until all 11 checks pass.
+**If any check fails:** Fix the violations before saving the affected idea. For an idea already saved this run, `save_idea` cannot update it (every call INSERTS a new row) — instead call `delete_idea(<id>)` on the flawed draft and save ONE corrected replacement via `save_idea`. If only the score/comment needs correcting, use `update_idea_rating(id, rating, comment?, expected_version)` instead (status unchanged; version 1 for a just-saved draft). Only ever fix drafts YOU created in this run. Do not finalise until all 11 checks pass.
 
 ### Step 5: Quality replacement loop — remove weak ideas and replace them
 
@@ -210,7 +210,7 @@ Curate and approve ideas in the dashboard at: Ideas → <period> (filter channel
 
 ## Governance
 
-- **Propose-only.** `save_idea` creates DRAFT ideas only. NEVER calls `approve_idea`, `approve_channel_plan`, `publish_*`, or any scheduling tool, and NEVER flips a gate.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **No auto-approval.** The human operator curates and approves ideas in the dashboard (the Ideas gate is per-idea `approve_idea` → `status='approved'`).
 - Always gate-check `approved` first (Step 1). If the Research plan is not approved, STOP — do not load the KB or save any idea.
 - References only the ten knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.

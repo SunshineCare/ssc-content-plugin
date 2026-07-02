@@ -166,7 +166,7 @@ Approaches (`context`) saved to the ad channel_plan (propose-state). Approve the
 
 ## Governance
 
-- Propose-only. Writes only via `save_channel_plan` (`context`). NEVER calls `approve_*`, `publish_*`, or any content-creation or scheduling tool.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_channel_plan` (`context`); no content-creation or scheduling tool.
 - NEVER sets `approaches_approved` (the Approaches gate) or any approval flag. Flipping it is a dashboard-only action (`approve_channel_plan`, gate `approaches`).
 - Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB, run research, or write anything.
 - **Does NOT restate the Focus bets.** The Approaches doc adds the creative "how"; it assumes the bets already named in the approved `tactics`. Re-listing the pillar bets / re-justifying the angle selection is forbidden — it makes the dashboard a fragmented duplicate.

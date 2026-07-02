@@ -1,184 +1,153 @@
 ---
 name: ssc-youtube-briefing
-description: Derives the YouTube briefing for a Cambridge Diet Vietnam monthly plan — turns the approved month context + targets into concrete YouTube parameters (video count, format mix by buyer stage, cadence, themes mapped to videos). Writes them onto the plan under targets.youtube. Propose-only; no human gate (flows into ideate).
+description: Derives the YouTube briefing for a Cambridge Diet Vietnam monthly YouTube cycle — turns the approved month context + tactics on the youtube channel_plan into concrete YouTube parameters (long-form/Shorts cadence, video counts by buyer stage and series, themes mapped to videos). Writes the cadence onto the plan detail via save_channel_plan and the distribution via save_plan_targets. Gated on the approved Focus (tactics_approved). Propose-only; the operator approves the briefing (the plan gate) in the content workspace.
 metadata:
   type: skill
-  stage: monthly-plan
+  stage: youtube-pipeline
   brand: cambridge-diet-vn
   section: youtube
-  tools: [get_knowledge, get_monthly_plan, save_monthly_plan]
+  capability: edit
+  tools: [get_knowledge, get_channel_plan, save_channel_plan, save_plan_targets, list_taxonomies]
 ---
 
 # Monthly YouTube Briefing (`ssc-youtube-briefing`)
 
-You derive concrete YouTube video parameters from an approved month context and write them onto the monthly plan. You are propose-only: you write only via `save_monthly_plan` and stop immediately after. There is no human gate after this skill — outputs flow directly into the YouTube ideation phase. You NEVER call any `approve_*`, publish, or schedule tool.
+You derive concrete YouTube video parameters from the approved month context + tactics on the youtube `channel_plan` and write them onto that plan. You write only via `save_channel_plan` (the youtube cadence detail) and `save_plan_targets` (the buyer-stage and series distribution), and stop immediately after. You are propose-only: the operator reviews the briefing in the content workspace (`/content/youtube`) and approves it there — approving flips the plan's `approved` gate (via `approve_channel_plan`, gate `plan`, a dashboard-only action), which opens Ideate.
+
+This is step 1 of the YouTube pipeline (**Briefing → Ideate → Schedule**), keyed on `channel_plans(channel='youtube', period=YYYY-MM)`. There is no monthly-plan dependency — the youtube plan is self-contained.
 
 ## Inputs
 
 - `period` — the plan month, e.g. `2026-07` (YYYY-MM)
-- `plan_id` — the monthly plan document to read from and write to
 
 ## Procedure
 
-### Step 1: Read the plan
+### Step 1: Read the plan and gate-check the Focus
 
-Call `get_monthly_plan(plan_id)` to load the current plan.
+Call:
 
-**Gate-check:** If `contextApproved` is not `true`, STOP immediately and tell the operator:
+```
+Call: get_channel_plan
+  channel: youtube
+  period: <period>
+```
 
-> Context has not been approved yet. Please review and approve the month context in the dashboard before running this skill.
+**Gate-check:** From the returned `{ plan }`, if `plan` is null **or** `plan.tactics_approved` is not `true`, STOP immediately and tell the operator:
+
+> The YouTube month context/tactics have not been approved yet. Please review and approve them in the content workspace (`/content/youtube`) before running the briefing.
 
 Do not proceed past this gate under any circumstances.
 
-If `contextApproved` is `true`, extract and hold the following from the response for use in Steps 3 and 4:
+If `plan.tactics_approved` is `true`, extract and hold from the aggregate:
 
-- `targets` — the full current targets object (must be merged in Step 4, not replaced)
-- `targets.priorityPillars` — the ranked pillar list set by the context phase
-- `targets.themes` — the month themes set by the context phase
-- `targets.keyDates` — key dates or campaign moments for the month
-- `phase_status` — the full current phase_status object (must be merged in Step 4)
+- `plan.id` — the plan id, passed to `save_plan_targets`
+- `plan.context` — the approved month brief (markdown): priority pillars/themes, key dates, seasonal moments
+- `plan.tactics` — the approved month tactics (markdown): the bets and emphasis that shape the video mix
 
 ### Step 2: Load YouTube knowledge
 
 Call `get_knowledge` for each of these three verified paths:
 
-- `channels/youtube` — the YouTube channel strategy: content series, cadence rules (1–2 long-form/week + 1–2 Shorts/week), format catalogue, buyer-stage mapping, SEO priorities, and tone
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai) and their value priorities
-- `brand/journey-stages` — the 7 emotional journey stages and their content implications
+- `channels/youtube` — the YouTube channel strategy: content series, cadence rules, format catalogue, buyer-stage mapping, SEO priorities, and tone
+- `brand/personas` — the core audience archetypes and their value priorities (the archetype names and definitions live in this document — do not assume them)
+- `brand/journey-stages` — the emotional journey stages and their content implications
 
-Read these documents carefully. Use them to assign video counts per buyer stage and select formats appropriate to each stage and persona.
+Read these documents carefully. Use them to assign video counts per buyer stage and select series appropriate to each stage and persona. These documents are the source of truth for cadence, series, and personas — never substitute remembered values.
 
 ### Step 3: Derive YouTube parameters
 
-Using the plan's `targets.priorityPillars`, `targets.themes`, and `targets.keyDates` from Step 1, and the knowledge loaded in Step 2, derive the following three parameters:
+Using `plan.context` + `plan.tactics` from Step 1 and the knowledge from Step 2, derive:
 
-**A. Video count by buyer stage (`stageMix`)**
+**A. Cadence (`longFormPerWeek`, `shortsPerWeek`)**
 
-Assign video counts to the three buyer stages (awareness, consideration, decision) such that:
+Read the channel's long-form and Shorts cadence from `channels/youtube` and adjust for the month's tactics (a push month may run the top of the cadence range; a consolidation month the bottom). Do NOT assume a fixed count — the cadence in the document plus the month's tactics decide it. From the chosen weekly cadence and the number of publish weeks in `period`, compute the month's total long-form count and total Shorts count.
 
-- The total across all stages represents the month's planned long-form video output — typically 4–8 long-form videos for the month (derived from the 1–2 per week cadence in `channels/youtube`).
-- Awareness-stage videos dominate when the month themes target new audiences or brand-building; consideration-stage dominates when themes address trust and education; decision-stage videos are used sparingly (1–2) to support consultants closing.
-- Priority content series from `channels/youtube` (Kiều My Documentary, Chị Em Chúng Mình, Khoa Học Giải Thích, Tâm Sự Phụ Nữ, Customer Stories) inform the stage assignment — e.g. documentary = awareness, science series = consideration, customer stories = decision.
-- Also estimate Shorts count for the month (typically 4–8 Shorts at 1–2/week) — Shorts reuse Facebook Reels content and complement long-form; list them separately in the output.
+**B. Video count by buyer stage (the `buyer_stage` distribution)**
 
-**B. Format mix by buyer stage (`formatMix`)**
+Assign the month's long-form total across the buyer stages defined in the `buyer_stage` taxonomy (awareness / consideration / decision) such that:
 
-For each buyer stage, specify the recommended video format(s) from the `channels/youtube` catalogue. Rules:
+- The split follows the month's themes and tactics: brand-building/new-audience months weight awareness; trust/education months weight consideration; decision-stage videos support consultants closing and are used per the guidance in `channels/youtube`.
+- The series → stage affinities in `channels/youtube` (and the `youtube_series` taxonomy metadata) inform the assignment — e.g. the documentary series leans awareness, the science series leans consideration, customer stories lean decision.
 
-- Use series names exactly as they appear in `channels/youtube`: e.g. `documentary`, `consultant-spotlight`, `science-explained`, `womens-conversation`, `customer-story`, `shorts`.
-- Assign each planned video to its series. Derive from the content series descriptions in `channels/youtube` and the pillar distribution — education-heavy months lean toward `science-explained`; social-proof months lean toward `customer-story` and `consultant-spotlight`; brand-building months lean toward `documentary` and `womens-conversation`.
-- No series should receive zero videos unless it is genuinely off-strategy for the month (explain briefly in the output table).
+**C. Video count by series (the `youtube_series` distribution)**
 
-**C. Themes mapped to videos (`themes`)**
+Assign each planned video (long-form + Shorts) to a series from the `youtube_series` taxonomy / `channels/youtube` catalogue. Derive from the series descriptions and the month's pillar/theme emphasis. No series should receive zero videos unless it is genuinely off-strategy for the month (explain briefly in the output table).
 
-For each month theme from `targets.themes`, map it to the YouTube context:
-- Which content series it primarily activates.
-- Which buyer stage it targets (awareness / consideration / decision).
-- Which persona archetype(s) it speaks to (from `brand/personas`).
-- The most suitable format(s) for videos in that theme.
+**D. Themes mapped to videos**
 
-### Step 4: Write YouTube params onto the plan
+For each month theme in `plan.context`/`plan.tactics`, map it to: the series it primarily activates, the buyer stage it targets, the persona archetype(s) it speaks to (from `brand/personas`), and the video length class. This mapping is presented in the Step 5 output for the operator and recorded in the targets rows' `meta` (below).
 
-Call `save_monthly_plan` with:
+### Step 4: Write the briefing onto the plan (only the fields you own)
 
-- `plan_id` — unchanged
-- `period` — unchanged
-- `targets` — the **full merged** targets object. Start from the `targets` object read in Step 1. Add a `youtube` key to it:
+The per-channel save tools have patch semantics — `save_channel_plan` updates only the fields you pass (unset fields are preserved), so send ONLY what this skill owns. Do NOT re-send `context`, `tactics`, `status`, or any field another step wrote.
 
-  ```json
-  {
-    "priorityPillars": "<carry through unchanged from Step 1>",
-    "themes": "<carry through unchanged from Step 1>",
-    "keyDates": "<carry through unchanged from Step 1>",
-    "youtube": {
-      "videoCount": {
-        "longForm": <total long-form count for the month>,
-        "shorts": <total Shorts count for the month>
-      },
-      "stageMix": {
-        "awareness": <count>,
-        "consideration": <count>,
-        "decision": <count>
-      },
-      "formatMix": {
-        "documentary": <count>,
-        "consultant-spotlight": <count>,
-        "science-explained": <count>,
-        "womens-conversation": <count>,
-        "customer-story": <count>,
-        "shorts": <count>
-      },
-      "themes": [
-        {
-          "theme": "<theme text>",
-          "series": ["<series-name>"],
-          "buyerStage": "<awareness|consideration|decision>",
-          "personas": ["<archetype-name>"],
-          "formats": ["<series-name>"]
-        }
-      ]
-    }
-  }
-  ```
+**4a. Cadence detail:**
 
-  Do NOT drop any existing keys from `targets` (priorityPillars, themes, keyDates, etc.). `save_monthly_plan` replaces the entire `targets` field — you must send the full merged object.
+```
+Call: save_channel_plan
+  channel: youtube
+  period: <period>
+  detail: { longFormPerWeek: <n>, shortsPerWeek: <n> }
+```
 
-- `phase_status` — the **full merged** phase_status object. Start from the `phase_status` read in Step 1. Set `youtube` to `'in_progress'`:
+**4b. Distribution targets.** First resolve term ids: call `list_taxonomies` (e.g. `list_taxonomies(kind='buyer_stage')` and `list_taxonomies(kind='youtube_series')`, or one unfiltered call) and build `code → id` maps. Then write the distribution as a SET — one row per leaf term with its count:
 
-  ```json
-  {
-    "context": "<carry through unchanged>",
-    "youtube": "in_progress"
-  }
-  ```
+```
+Call: save_plan_targets
+  plan_id: <plan.id>
+  targets: [
+    { term_id: <buyer_stage:awareness id>,     target_value: <n> },
+    { term_id: <buyer_stage:consideration id>, target_value: <n> },
+    { term_id: <buyer_stage:decision id>,      target_value: <n> },
+    { term_id: <youtube_series:… id>,          target_value: <n>,
+      meta: { themes: ["<theme>"], personas: ["<persona code>"] } },
+    …one row per series…
+  ]
+```
 
-  Do NOT drop any existing keys from `phase_status`. `save_monthly_plan` replaces the entire `phase_status` field — you must send the full merged object.
+Pass resolved taxonomy **ids** in `term_id`, never codes. `save_plan_targets` replaces the plan's whole `plan_targets` set (DELETE-then-INSERT) — send the complete distribution (all buyer-stage rows + all series rows) in one call. This skill owns the youtube plan's `plan_targets`, so replacing the set is correct here.
 
-### Step 5: Output the YouTube params table
+### Step 5: Output the YouTube briefing table
 
 After saving, output:
 
 ```
 ## YouTube Briefing — <period>
 
-**Long-form videos:** <N> | **Shorts:** <N>
+**Cadence:** <n> long-form/week + <n> Shorts/week (from channels/youtube + month tactics)
+**Month totals:** <N> long-form | <N> Shorts
 
 ### Stage Mix
 | Buyer Stage | Videos | Primary Series |
 |-------------|--------|----------------|
-| Awareness | <n> | <series> |
-| Consideration | <n> | <series> |
-| Decision | <n> | <series> |
 
-### Format Mix by Series
+### Series Mix
 | Series | Count | Notes |
 |--------|-------|-------|
-| documentary | <n> | priority / mid-tier / off-strategy |
-| consultant-spotlight | <n> | |
-| science-explained | <n> | |
-| womens-conversation | <n> | |
-| customer-story | <n> | |
-| shorts | <n> | reuse from Facebook Reels |
 
 ### Themes → YouTube Mapping
 | Theme | Series | Buyer Stage | Persona(s) |
 |-------|--------|-------------|------------|
 
 ---
-YouTube params saved to plan `<plan_id>`. Phase status: youtube = in_progress.
+Briefing written to the youtube channel_plan (propose-state): detail {longFormPerWeek, shortsPerWeek} + plan_targets (buyer_stage + youtube_series distribution).
+
+Next step: review the briefing in the content workspace (/content/youtube) and approve it (flips the plan's `approved` gate), then re-invoke the agent to begin Ideate.
 ```
 
 ## Output
 
-- `targets.youtube` written to the monthly plan with `videoCount`, `stageMix`, `formatMix`, and `themes`
-- `phase_status.youtube` set to `'in_progress'`
-- All other existing `targets` and `phase_status` keys preserved
+- `detail.longFormPerWeek` / `detail.shortsPerWeek` written to the youtube `channel_plan`
+- `plan_targets` written as a SET: one row per `buyer_stage` term and per `youtube_series` term with `target_value` counts (+ theme/persona `meta` on series rows)
+- No gate flipped — the briefing is a proposal awaiting the operator's plan-gate approval
 
 ## Governance
 
-- Propose-only. Writes only via `save_monthly_plan`. NEVER calls `approve_*`, `publish_*`, or any content-creation or scheduling tool.
-- NEVER sets `contextApproved` or any approval flag.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB or write anything.
+- Write only the fields you own: `detail` via `save_channel_plan` and the `plan_targets` set. Never pass `context`, `tactics`, `status`, or `retrospective` — the save tools patch only provided fields, so omitting them preserves other steps' writes.
+- Derive counts and cadence from `channels/youtube` + the month's tactics/context — never from remembered defaults. Persona archetypes come from `brand/personas` — do not inline persona names.
 - References only the three knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
-- Series names must be exactly `documentary`, `consultant-spotlight`, `science-explained`, `womens-conversation`, `customer-story`, `shorts` — no other values.
-- Valid `phase_status` values are: `pending`, `in_progress`, `proposed`, `done`, `approved`. Do not invent other values.
-- Requires `edit` capability (plus `view` for the knowledge reads).
+- Series and buyer-stage vocabularies are the `youtube_series` and `buyer_stage` taxonomies (via `list_taxonomies`) — never invent codes or ids.
+- Operates only on the youtube channel (`channel='youtube'`); never reads or writes `post`/`ad` state.
+- Requires `edit` capability (plus `view` for the reads).

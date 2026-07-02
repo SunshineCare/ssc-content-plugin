@@ -32,13 +32,17 @@ gate**. The four human gates are dashboard actions — two are plan flags
 (≥1 approved ad set, ≥1 approved concept) — the operator reviews/edits/approves,
 then re-invokes you to advance.
 
-**You never auto-approve, distribute, or apply anything.** You never flip a gate
-— never set `tactics_approved` or `approaches_approved`, never approve an ad set
-or a concept, never call `approve_channel_plan`, `approve_idea`, `update_status`,
-or any publish tool, and never auto-advance past a gate. (The plan-level
-`approved` flag is **no longer part of the ad flow** — the Blueprint gate is now
-per-ad-set approval.) Every output is a proposal a human acts on in the
-dashboard. The child skills own all writes to the plan; you orchestrate and stop.
+**You never auto-approve, distribute, or apply anything.** Propose-only (hard
+rule): never call any tool that changes approval or lifecycle state in either
+direction — no approve_*, no unapprove_* (any entity, any gate), no update_status,
+no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_*
+tools may target ONLY draft rows this skill itself created in the current run.
+Everything else belongs to the operator in the dashboard. (The agent itself writes
+nothing — it only reads and orchestrates — so it creates no rows to edit; the child
+skills own all writes to the plan.) You never auto-advance past a gate. (The
+plan-level `approved` flag is **no longer part of the ad flow** — the Blueprint gate
+is now per-ad-set approval.) Every output is a proposal a human acts on in the
+dashboard; you orchestrate and stop.
 
 ## Inputs
 
@@ -126,6 +130,15 @@ STOP at its gate:
 
 The plan-level `approved` flag plays **no part** in any branch above — the
 Blueprint gate is per-ad-set approval, not a plan flag.
+
+**Gates are NOT monotonic / forward-only.** An operator can *reopen* an earlier
+gate in the dashboard — unapprove the Focus or Approaches, or unapprove a
+previously-approved ad set or concept. Because state detection runs the first
+matching branch top-to-bottom, a reopened gate naturally routes you back to that
+step. But re-run a reopened step **only when the operator asks you to** — do not
+silently redo already-approved work on a re-invocation. And you **NEVER** unapprove
+anything yourself: reopening is a human dashboard action; the agent only ever reads
+state and advances, never walks a gate backward.
 
 **Ad-set check.** "Approved ad sets exist for this plan" is true when
 `get_channel_plan(channel='ad', period)` returns a `plan.ad_slots` row with
@@ -340,9 +353,14 @@ Nothing more to do for this period's Ads pipeline.
 - Nothing is auto-approved, distributed, or applied. The Focus, Approaches,
   Blueprint (rated ad sets), concepts, and retrospective are proposals in
   `brand_os`; operators act on them in dashboards.
-- **The agent never flips a gate.** It never sets `tactics_approved` or
-  `approaches_approved`, **never approves an ad set or a concept**, and never calls
-  `approve_channel_plan`, `approve_idea`, `update_status`, or any publish tool.
+- **The agent never flips a gate.** Propose-only (hard rule): never call any tool
+  that changes approval or lifecycle state in either direction — no approve_*, no
+  unapprove_* (any entity, any gate), no update_status, no publish. Never edit or
+  delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY
+  draft rows this skill itself created in the current run. Everything else belongs
+  to the operator in the dashboard. Gates can be **reopened** by the operator
+  (unapprove in the dashboard); the agent re-runs a reopened step only on operator
+  request and NEVER unapproves anything itself.
   (The plan-level `approved` flag is no longer part of the ad flow — the Blueprint
   gate is per-ad-set approval. `schedule_approved` likewise belongs to the
   post/youtube calendar, not the ad flow.) Each gate is a human dashboard action;

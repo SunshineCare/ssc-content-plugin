@@ -98,6 +98,7 @@ Findings saved: <N>
 
 ## Governance
 
-- Research + save only. No `approve_*`, no content writes.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Research + save only. No content writes.
 - All findings use `dimension: 'youtube_seo'` and `track: 'proven'`.
 - Requires `edit` capability.

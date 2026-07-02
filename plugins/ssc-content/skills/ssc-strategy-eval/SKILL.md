@@ -178,7 +178,8 @@ End with: **Criteria: X/6 pass — Verdict: SUPPORT | MODIFY | REJECT.**
 ## Governance
 
 - Read-only. NEVER call `propose_knowledge_revision`, `edit_knowledge`,
-  `save_knowledge`, `approve_*`, or any write tool.
+  `save_knowledge`, or any write tool.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Every verdict must be traceable to specific KB evidence or named performance
   data — no unsupported strategic opinions.
 - Do not develop the strategy in this skill. If the proposal needs elaboration

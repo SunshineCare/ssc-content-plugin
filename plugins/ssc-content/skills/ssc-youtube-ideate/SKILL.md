@@ -1,42 +1,52 @@
 ---
 name: ssc-youtube-ideate
-description: Generates the month's YouTube video ideas for a Cambridge Diet Vietnam monthly plan — reads the approved targets + YouTube briefing and the channel knowledge base, and produces draft video ideas via save_idea (channel='youtube', tagged to the plan), self-enforcing diversity, hook-variety, and banned-word rules. Propose-only; the ideas are drafts a human curates and approves in the dashboard.
+description: Generates the month's YouTube video ideas for a Cambridge Diet Vietnam monthly YouTube cycle — reads the approved youtube channel_plan (the briefing's buyer-stage + series distribution and cadence detail) and the channel knowledge base, and produces draft video ideas via save_idea (channel='youtube', tagged to the plan), self-enforcing diversity, hook-variety, and banned-word rules. Gated on the approved briefing (the plan gate). Propose-only; the ideas are drafts a human curates and approves in the content workspace.
 metadata:
   type: skill
-  stage: monthly-plan
+  stage: youtube-pipeline
   brand: cambridge-diet-vn
   section: youtube
-  tools: [get_knowledge, get_monthly_plan, save_idea, save_monthly_plan]
+  capability: edit
+  tools: [get_knowledge, get_channel_plan, list_taxonomies, save_idea]
 ---
 
 # Monthly YouTube Ideation (`ssc-youtube-ideate`)
 
-You generate draft YouTube video ideas for a Cambridge Diet Vietnam monthly plan. You read the approved YouTube briefing (video count, stage mix, format mix, themes) from the plan, load the creative and channel knowledge base, generate one idea per planned video via `save_idea` with `channel='youtube'`, and self-enforce diversity and banned-word rules before finalising. You are propose-only: every idea is created as a DRAFT for a human to curate and approve in the dashboard. You NEVER call `approve_idea`, `update_status`, or any publish tool.
+You generate draft YouTube video ideas for a Cambridge Diet Vietnam monthly YouTube cycle. You read the approved youtube `channel_plan` (the briefing's cadence detail + buyer-stage/series distribution), load the creative and channel knowledge base, generate one idea per planned video via `save_idea` with `channel='youtube'`, and self-enforce diversity and banned-word rules before finalising. You are propose-only: every idea is created as a DRAFT for a human to curate and approve in the content workspace (`/content/youtube`).
+
+This is step 2 of the YouTube pipeline (**Briefing → Ideate → Schedule**), keyed on `channel_plans(channel='youtube', period=YYYY-MM)`. There is no monthly-plan dependency — the youtube plan is self-contained.
 
 ## Inputs
 
 - `period` — the plan month, e.g. `2026-07` (YYYY-MM)
-- `plan_id` — the monthly plan document to read from
 
 ## Procedure
 
-### Step 1: Read the plan
+### Step 1: Read the plan and gate-check the briefing
 
-Call `get_monthly_plan(plan_id)` to load the current plan.
+Call:
 
-Extract and hold:
+```
+Call: get_channel_plan
+  channel: youtube
+  period: <period>
+```
 
-- `targets.youtube.videoCount` — the long-form and Shorts counts set by the briefing phase
-- `targets.youtube.stageMix` — the video count per buyer stage (awareness / consideration / decision)
-- `targets.youtube.formatMix` — the series counts (documentary, consultant-spotlight, science-explained, womens-conversation, customer-story, shorts)
-- `targets.youtube.themes` — themes with their series, buyer-stage, and persona mappings
-- `targets.priorityPillars` — ranked pillar list (for tonal weight)
-- `targets.themes` — the month's overarching themes
-- `phase_status` — the full current phase_status object (must be merged in Step 5, not replaced)
+**Gate-check:** From the returned `{ plan }`, if `plan` is null **or** `plan.approved` is not `true`, STOP immediately and tell the operator:
 
-**Gate-check:** If `targets.youtube` is absent or empty, STOP and tell the operator:
+> The YouTube briefing has not been approved yet. Please review and approve the briefing in the content workspace (`/content/youtube`) before running Ideate.
 
-> YouTube briefing has not been written yet. Please run `ssc-youtube-briefing` first to derive the video count, stage mix, and format mix.
+Do not proceed past this gate under any circumstances — do not load the KB or save any idea until the plan is approved.
+
+If `plan.approved` is `true`, extract and hold from the aggregate:
+
+- `plan.id` — the plan id, passed to `save_idea` as `plan_id`
+- `plan.targets` — the briefing distribution as a SET of rows, each `{ term_id, term_kind, term_code, term_label, target_value, meta }`. The `term_kind = 'buyer_stage'` rows give the **video count per buyer stage**; the `term_kind = 'youtube_series'` rows give the **video count per series** (their `meta` may carry theme/persona mappings). Hold each row's `term_id` — you re-tag ideas with these exact ids.
+- `plan.detail.long_form_per_week` / `plan.detail.shorts_per_week` — the approved cadence
+- `plan.tactics` — the approved month tactics (markdown), for tonal/strategic weight
+- `plan.context` — the approved month brief (markdown): themes, key dates, seasonal pain points
+
+**Gate-check:** If `plan.targets` has no `youtube_series` rows, STOP and tell the operator the briefing has not produced a series distribution yet (run `ssc-youtube-briefing` first).
 
 ### Step 2: Load the creative knowledge base
 
@@ -47,65 +57,71 @@ Call `get_knowledge` for each of these eight verified paths:
 - `voice/pronouns` — the pronoun system (Bạn + Mình/Chúng mình for YouTube; matches the channel's "Bạn" + "Mình" xưng hô)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai) and their value priorities
-- `brand/journey-stages` — the 7 emotional journey stages and their content implications
+- `brand/personas` — the core audience archetypes and their value priorities (the archetype names and definitions live in this document — do not assume them)
+- `brand/journey-stages` — the emotional journey stages and their content implications
 - `rules/banned-words` — hard-banned words and phrases (zero tolerance)
 
 Read all eight documents carefully before generating any ideas.
 
 ### Step 3: Generate ideas
 
-Generate exactly the number of ideas required by `targets.youtube.videoCount.longForm` plus `targets.youtube.videoCount.shorts`. Produce ideas grouped by series (matching `targets.youtube.formatMix` counts) to make series-count tracking easier.
+Generate exactly the number of ideas required by the briefing distribution: the sum of the `youtube_series` target counts (long-form + Shorts). Produce ideas grouped by series (matching each series row's `target_value`) to make series-count tracking easier.
 
-For each idea, call `save_idea` with the following field mapping:
+**Resolve every strategic-dimension code → taxonomy id (do this once, before any `save_idea` write).** Call `list_taxonomies` once per needed `kind` — `youtube_series`, `buyer_stage`, `persona`, `journey_stage`, `value`, `format` (the dimensions that apply to the youtube channel) — **or** one unfiltered `list_taxonomies` call, and build a `code → id` map per kind. `save_idea`'s `terms` must carry the matching `taxonomies.id`, never a code, and never an invented id. (For `youtube_series` and `buyer_stage` you can reuse the `term_id`s already present on `plan.targets`.)
+
+For each idea, call `save_idea` with the following field mapping. Narrative fields go in `detail` (the `youtube_idea_details` columns); structural dimensions go in `terms` (resolved taxonomy leaf ids). There is NO `format_decision` blob and NO top-level `pillar`/`target_persona`/`hook_direction` args — any key outside this schema is rejected or lost.
 
 ```
 save_idea(
-  plan_id        = <plan_id>,
-  channel        = 'youtube',
-  source         = 'ai',
-  title          = <Vietnamese video title — specific, natural, search-intent aware>,
-  hook_direction = <opening hook: the first 15 seconds — question, confession, or bold claim that earns the viewer's watch>,
-  pillar         = <content series name, matching formatMix key exactly>,
-  target_persona = <archetype name: 'Chị Lan' | 'Chị Hương' | 'Chị Mai'>,
-  core_message   = <the strategic direction — one clear sentence: what the viewer learns or feels>,
-  cta            = <call-to-action direction — soft, authentic: what we invite viewers to do next (comment / subscribe / consult)>,
-  why_now        = <why this topic is timely for this month's context>,
-  story_moment   = <the concrete scene or opening moment that anchors the video — specific, sensory>,
-  format_decision = {
-    series:       <series name from channels/youtube: 'documentary' | 'consultant-spotlight' | 'science-explained' | 'womens-conversation' | 'customer-story' | 'shorts'>,
-    buyerStage:   <'awareness' | 'consideration' | 'decision'>,
-    videoLength:  <estimated length: 'short (< 3 min)' | 'medium (3–10 min)' | 'long (10–20 min)' | 'documentary (20+ min)'>,
-    journeyStage: <journey stage name from brand/journey-stages>,
-    tonalRegister: <tonal register derived from voice/tone and channels/youtube tone guidance>,
-    theme:        <theme this video belongs to, from targets.youtube.themes>,
-    repurposable: <true | false — whether this video yields a 60–90s Facebook clip or Reel>,
-    seoIntent:    <primary search intent: 'informational' | 'navigational' | 'transactional'>
+  channel   = 'youtube',
+  plan_id   = <plan.id>,
+  source    = 'ai',
+  status    = 'draft',
+  score     = <your self-rating, 1–5 — see Field guidance>,
+  comment   = <one-line rationale for the score, in Vietnamese — see Field guidance>,
+  title     = <Vietnamese video title — specific, natural, search-intent aware>,
+  terms     = [
+    <youtube_series term id — the series this video belongs to>,
+    <buyer_stage term id — awareness | consideration | decision>,
+    <persona term id — the archetype from brand/personas this video speaks to>,
+    <journey_stage term id — the journey stage from brand/journey-stages>,
+    <value term id — the primary brand value angle>,
+    <format term id — video (long-form) or reel (Shorts)>
+  ],
+  detail    = {
+    hookDirection: <opening hook: the first 15 seconds — question, confession, or bold claim that earns the viewer's watch — Vietnamese>,
+    coreMessage:   <the strategic direction — one clear Vietnamese sentence: what the viewer learns or feels>,
+    whyNow:        <why this topic is timely for this month's context — Vietnamese>,
+    storyMoment:   <the concrete scene or opening moment that anchors the video — specific, sensory — Vietnamese>,
+    cta:           <call-to-action direction — soft, authentic: what we invite viewers to do next (comment / subscribe / consult) — Vietnamese>,
+    theme:         <the month theme this video belongs to, from plan.context / the series row's meta — Vietnamese>,
+    videoLength:   <'short' | 'medium' | 'long' | 'documentary'>,
+    repurposable:  <true | false — whether this video yields a 60–90s Facebook clip or Reel>,
+    seoIntent:     <'informational' | 'navigational' | 'transactional'>
   }
 )
 ```
 
-> **Note — experimental-track tagging deferred:** `save_idea` does not yet
-> accept `track` or `confidence` fields — those args are silently stripped and
-> every idea is created with the default `proven` track. Do NOT pass `track` or
-> `confidence` to `save_idea`. (A later spine change can add these fields when
-> the schema supports them.)
+**Experimental track:** `save_idea` supports `track` (`proven` | `experimental`, defaults to `proven`) and `confidence` (`high`/`medium`/`low`, required when experimental). When an idea activates an experimental strategy finding, pass `track='experimental'` with its `confidence`; otherwise omit both and the default `proven` applies.
+
+**Language rule (hard): every persisted prose field MUST be Vietnamese** — `title`, `comment`, and the `detail` fields `hookDirection`, `coreMessage`, `whyNow`, `storyMoment`, `cta`, `theme`. These are persisted artifacts the Vietnamese operator curates in the content workspace. Never save English prose in them; your chat-side reasoning stays English. The enum-valued fields (`videoLength`, `seoIntent`) and the taxonomy ids stay as their literal codes.
 
 **Field guidance:**
 
-- `title` — must be natural Vietnamese, search-intent aware. Use keywords from the SEO priority list in `channels/youtube` where relevant. Titles for long-form should be 50–70 characters; Shorts titles can be shorter.
-- `hook_direction` — YouTube hook must earn the first 15 seconds: a specific question, a surprising claim, or a confession line. Must vary across the batch — avoid repeating the same hook type on consecutive ideas.
-- `pillar` — use the exact series key from `targets.youtube.formatMix` (`documentary`, `consultant-spotlight`, `science-explained`, `womens-conversation`, `customer-story`, `shorts`).
-- `target_persona` — pick from `brand/personas`. Choose the persona whose primary values align with this video's buyer stage and core message.
-- `core_message` — the strategic direction (not a headline). One sentence stating what the viewer takes away — a belief, a reframe, or a transformation signal.
-- `cta` — soft, authentic call-to-action for YouTube viewers. Options include: subscribe with a reason, leave a comment with a specific prompt, visit Facebook/Messenger for personal consultation. No pushy sales language.
-- `why_now` — the month-specific context that makes this topic timely. No video should be purely evergreen.
-- `story_moment` — the concrete opening scene: setting, character, emotion. E.g. "Chị Kiều My sits at her kitchen table at 6am, holding a 20-year-old photo."
-- `format_decision.series` — must match the series name exactly from `channels/youtube`. Do not invent series names.
-- `format_decision.buyerStage` — must be one of `awareness`, `consideration`, `decision`. Derive from `targets.youtube.stageMix` proportions and series suitability.
-- `format_decision.videoLength` — derive from series type: documentaries and Kiều My stories run 20+ min; Khoa Học Giải Thích and Tâm Sự Phụ Nữ run 10–20 min; Chị Em Chúng Mình run 3–10 min; Shorts run < 3 min.
-- `format_decision.repurposable` — mark `true` when the video naturally yields a 60–90s clip or moment for Facebook Reels (per the YouTube → Facebook workflow in `channels/youtube`). Most long-form videos should yield at least one repurposable clip.
-- `format_decision.seoIntent` — awareness-stage videos are typically informational; decision-stage videos can be navigational (brand search) or transactional.
+- `score` — **self-rate every idea on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how strongly the idea serves the month's approved tactics and its series/stage slot, the freshness of its hook, and brand-voice fit. Rate honestly and use the full range — do not give everything 5.
+- `comment` — a **one-line rationale for the `score`, written in natural Vietnamese** (never English): the single biggest reason the idea is strong or weak — e.g. "Hook mở đầu mạnh, khớp giai đoạn Do dự của Chị Hương" or "Góc hơi chung, thiếu khoảnh khắc cụ thể".
+- `title` — natural Vietnamese, search-intent aware. Use keywords from the SEO priority list in `channels/youtube` where relevant. Follow the title-length guidance in `channels/youtube` for long-form vs Shorts.
+- `detail.hookDirection` — the YouTube hook must earn the first 15 seconds: a specific question, a surprising claim, or a confession line. Must vary across the batch — avoid repeating the same hook type on consecutive ideas.
+- `terms` youtube_series — the exact series term from the `youtube_series` taxonomy matching a `plan.targets` series row. Do not invent series.
+- `terms` buyer_stage — derive from the briefing's `buyer_stage` distribution and the series' stage affinity.
+- `terms` persona — pick the archetype from `brand/personas` whose primary values align with this video's buyer stage and core message; tag its `persona` taxonomy term. The valid archetypes are whatever `brand/personas` currently defines — do not assume a fixed list.
+- `detail.coreMessage` — the strategic direction (not a headline). One sentence stating what the viewer takes away — a belief, a reframe, or a transformation signal.
+- `detail.cta` — soft, authentic call-to-action for YouTube viewers: subscribe with a reason, comment on a specific prompt, or visit Facebook/Messenger for personal consultation. No pushy sales language.
+- `detail.whyNow` — the month-specific context that makes this topic timely. No video should be purely evergreen.
+- `detail.storyMoment` — the concrete opening scene: setting, character, emotion, in Vietnamese. E.g. "Chị Kiều My ngồi bên bàn bếp lúc 6 giờ sáng, tay cầm tấm ảnh chụp 20 năm trước."
+- `detail.videoLength` — one of `short`, `medium`, `long`, `documentary`. Derive from the series' format/length metadata in `channels/youtube` (and the `youtube_series` taxonomy) — documentary series run documentary-length; Shorts are `short`.
+- `detail.repurposable` — `true` when the video naturally yields a 60–90s clip or moment for Facebook Reels (per the YouTube → Facebook workflow in `channels/youtube`). Most long-form videos should yield at least one repurposable clip.
+- `detail.seoIntent` — awareness-stage videos are typically `informational`; decision-stage videos can be `navigational` (brand search) or `transactional`.
 
 ### Step 4: Self-check diversity and compliance
 
@@ -113,71 +129,46 @@ Before finalising, audit the full set of ideas against these constraints. The de
 
 **Mandatory checks (all must PASS):**
 
-1. **Series count accuracy**: Count ideas per series. Every series's count must match `targets.youtube.formatMix` exactly. Any deviation = fix before finalising.
+1. **Series count accuracy**: Count ideas per `youtube_series` term. Every series' count must match its `plan.targets` row's `target_value` exactly. Any deviation = fix before finalising.
 
-2. **Stage mix accuracy**: Count ideas per buyer stage (`format_decision.buyerStage`). Totals must match `targets.youtube.stageMix`. Any deviation = fix before finalising.
+2. **Stage mix accuracy**: Count ideas per `buyer_stage` term. Totals must match the briefing's `buyer_stage` target rows. Any deviation = fix before finalising.
 
-3. **Archetype specificity**: Spot-check 3 ideas. Each must name month-specific pain points or aspirations for its target persona, not generic descriptions. Generic = rewrite.
+3. **Archetype specificity**: Spot-check 3 ideas. Each must name month-specific pain points or aspirations for its tagged persona (per `brand/personas`), not generic descriptions. Generic = rewrite.
 
-4. **Journey stage alignment**: Spot-check 3 ideas. The `journeyStage` must match the content direction — a video at "Nhận ra" must not already propose a solution; a video at "Tiến triển" must not dwell on initial pain. Misaligned = rewrite.
+4. **Journey stage alignment**: Spot-check 3 ideas. The tagged `journey_stage` must match the content direction — a video at "Nhận ra" must not already propose a solution; a video at "Tiến triển" must not dwell on initial pain. Misaligned = rewrite.
 
-5. **Month-specificity**: Count evergreen ideas (those without a month-specific hook or context in `why_now`). If >25% of ideas are purely evergreen, add month-specific context or replace the worst offenders.
+5. **Month-specificity**: Count evergreen ideas (those without a month-specific hook or context in `detail.whyNow`). If >25% of ideas are purely evergreen, add month-specific context or replace the worst offenders.
 
-6. **Hook-opener variety**: Across all video hook directions, no more than 30% may begin with the same opener type (question / confession / bold claim). At least one hook from each type must appear across the batch. Rewrite violating hooks to add variety.
+6. **Hook-opener variety**: Across all `hookDirection`s, no more than 30% may begin with the same opener type (question / confession / bold claim). At least one hook from each type must appear across the batch. Rewrite violating hooks to add variety.
 
 7. **Repurposability coverage**: At least 60% of long-form ideas should have `repurposable: true`. If below threshold, revisit ideas that lack obvious Facebook clip moments.
 
-8. **No banned words**: Scan every `title`, `hook_direction`, `core_message`, and `cta` for any word or phrase listed in `rules/banned-words`. Any match = rewrite that field. Zero tolerance.
+8. **No banned words**: Scan every `title`, `hookDirection`, `coreMessage`, and `cta` for any word or phrase listed in `rules/banned-words`. Any match = rewrite that field. Zero tolerance.
 
-9. **Pronoun consistency**: Every idea targeting `channels/youtube`'s xưng hô convention must use `Bạn` for viewer address and `Mình`/`Chúng mình` for brand self-reference in the `hook_direction` and `cta` fields. Violations = rewrite.
+9. **Pronoun consistency**: Every idea must follow `channels/youtube`'s xưng hô convention — `Bạn` for viewer address and `Mình`/`Chúng mình` for brand self-reference in `hookDirection` and `cta`. Violations = rewrite.
 
-10. **No duplicate title+series within the month**: No two ideas may share the same series AND the same core message direction. If a series has duplicate core messages, vary the angle, persona, or journey stage on the excess ideas.
+10. **No duplicate series+message within the month**: No two ideas may share the same series AND the same core-message direction. If a series has duplicate core messages, vary the angle, persona, or journey stage on the excess ideas.
 
-**If any check fails:** Fix the violations before finalising Step 5. Do not finalise Step 5 until all 10 checks pass.
+**If any check fails:** Fix the violations before finalising Step 5. Do not finalise until all 10 checks pass.
 
-### Step 5: Record phase status
+### Step 5: Output summary
 
-After all ideas have been saved and all self-checks pass, call `save_monthly_plan` to record that the YouTube ideation phase is complete.
-
-Read the current `phase_status` from the plan (loaded in Step 1). Merge by setting `youtube` to `'proposed'` while preserving all other keys:
-
-```json
-{
-  "context": "<carry through unchanged from Step 1>",
-  "youtube": "proposed"
-}
-```
-
-Send the full merged `phase_status` object — do NOT drop any existing keys. `save_monthly_plan` replaces the entire `phase_status` field.
-
-Do NOT modify `targets` in this call unless re-sending the full unchanged `targets` object. Safest pattern: only pass `plan_id`, `period`, and `phase_status` if the tool supports partial updates; otherwise include the full unchanged `targets`.
-
-### Step 6: Output summary
-
-After saving, output:
+The ideas are already tagged to the plan via `plan_id` — no plan write is needed after saving them (there is no phase bookkeeping to record; the plan's gates are the only state, and this skill never touches them). Output:
 
 ```
 ## YouTube Ideation — <period>
 
-**Ideas saved:** <N> drafts (propose-only — awaiting human curation)
+**Ideas saved:** <N> drafts (channel='youtube', propose-only — awaiting human curation)
   Long-form: <n> | Shorts: <n>
 
 ### Series Distribution
 | Series | Target | Saved | Status |
 |--------|--------|-------|--------|
-| documentary | <target> | <actual> | PASS / FAIL |
-| consultant-spotlight | <target> | <actual> | PASS / FAIL |
-| science-explained | <target> | <actual> | PASS / FAIL |
-| womens-conversation | <target> | <actual> | PASS / FAIL |
-| customer-story | <target> | <actual> | PASS / FAIL |
-| shorts | <target> | <actual> | PASS / FAIL |
+| <series term_label> | <target> | <actual> | PASS / FAIL |
 
 ### Stage Mix
 | Buyer Stage | Target | Saved | Status |
 |-------------|--------|-------|--------|
-| Awareness | <target> | <actual> | PASS / FAIL |
-| Consideration | <target> | <actual> | PASS / FAIL |
-| Decision | <target> | <actual> | PASS / FAIL |
 
 ### Diversity Check Results
 | Constraint | Threshold | Actual | Status |
@@ -186,28 +177,27 @@ After saving, output:
 | Repurposability coverage | ≥60% long-form | <count> | PASS / FAIL |
 | Month-specificity (evergreen) | ≤25% | <count> | PASS / FAIL |
 | Banned words | 0 | 0 | PASS |
-| Duplicate title+series | 0 | <count> | PASS / FAIL |
+| Duplicate series+message | 0 | <count> | PASS / FAIL |
 | Pronoun consistency | 0 violations | <count> | PASS / FAIL |
 
-Phase status: youtube = proposed
-
 ---
-Curate and approve ideas in the dashboard at: Ideas → <period> → YouTube
+Curate and approve the video ideas in the content workspace (/content/youtube). Approving ≥1 idea opens Schedule; then re-invoke the agent.
 ```
 
 ## Output
 
-- Draft ideas saved via `save_idea(plan_id, channel='youtube', source='ai', …)` — all DRAFT status
-- `phase_status.youtube` set to `'proposed'` on the monthly plan
-- All other existing `phase_status` and `targets` keys preserved
-- Summary table showing series distribution accuracy and diversity check results
+- Draft ideas saved via `save_idea(channel='youtube', plan_id, source='ai', status='draft', …)` — narrative fields in `detail`, structural dimensions in `terms`, all DRAFT status, tagged to the youtube plan
+- No gate flipped — ideas are drafts awaiting human curation
+- Summary table showing series/stage distribution accuracy and diversity check results
 
 ## Governance
 
-- **Propose-only.** `save_idea` creates DRAFT ideas only. NEVER calls `approve_idea`, `update_status`, `publish_*`, or any scheduling tool.
-- **No auto-approval.** The human operator curates and approves ideas in the dashboard.
-- `channel` must always be set to `'youtube'` in every `save_idea` call. Never omit it.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Always gate-check `plan.approved` first (Step 1). If the briefing is not approved, STOP — do not load the KB or save any idea.
+- **Every persisted prose field is Vietnamese** (title, comment, hookDirection, coreMessage, whyNow, storyMoment, cta, theme) — hard rule, never English.
+- `channel` must always be `'youtube'` and `plan_id` must always be set in every `save_idea` call.
+- `terms` carry resolved taxonomy **ids** (via `list_taxonomies` / the plan's target rows) — never codes, never invented ids. Series, stages, personas, and values come from the taxonomies and KB docs, not from remembered lists.
 - References only the eight knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
 - The diversity thresholds in Step 4 are sourced from `rules/banned-words` and `channels/youtube` — those documents are the source of truth; the numeric guidance above is informational only.
-- Valid `phase_status` values are: `pending`, `in_progress`, `proposed`, `done`, `approved`. The value set here is `proposed`.
-- Requires `edit` capability.
+- Operates only on the youtube channel (`channel='youtube'`); never reads or writes `post`/`ad` state.
+- Requires `edit` capability (plus `view` for the reads).

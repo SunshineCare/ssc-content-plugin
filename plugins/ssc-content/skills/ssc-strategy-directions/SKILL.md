@@ -108,5 +108,6 @@ then re-invoke ssc-strategy-agent to run the 8 dimensions steered by these direc
 - Propose-only. Drafts and persists directions via `set_brief_directions` only.
 - **Never runs any dimension skill** — drafting directions and running dimensions are separate phases, gated by human approval.
 - **Never approves.** There is no approve tool here; approval is a dashboard-only action requiring the `approve` capability.
-- No `approve_*` tools, no `edit_knowledge`, no `publish_strategy_knowledge`.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+  No `edit_knowledge`, no `publish_strategy_knowledge`.
 - Requires `edit` capability.

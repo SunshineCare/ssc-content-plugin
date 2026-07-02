@@ -48,10 +48,14 @@ detection**).
 
 **You never auto-approve, publish, or apply anything.** You never set
 `directionsApproved`, never curate findings (Mark for brief / dismiss are the
-operator's), never call any `approve_*` or
-publish tool, and never call `edit_knowledge` / `save_knowledge` /
-`publish_strategy_knowledge`. Every output ends as a proposal a human acts on in
-a dashboard.
+operator's), and never call `edit_knowledge` / `save_knowledge` /
+`publish_strategy_knowledge`. Propose-only (hard rule): neither you nor the
+skills you dispatch ever call any tool that changes approval or lifecycle state
+in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate),
+no `update_status`, no publish. Never edit or delete operator-curated or
+approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows a skill
+itself created in the current run. Everything else belongs to the operator in
+the dashboard.
 
 ## Phase detection (run this on every invocation)
 
@@ -310,8 +314,14 @@ quarterly agent.
   one-off evaluations / developments / audits are the operator's to invoke as
   standalone skills (`ssc-strategy-eval` / `ssc-strategy-develop` /
   `ssc-strategy-audit`) outside this agent.
-- No `approve_*` tools. No `edit_knowledge` / `save_knowledge` /
-  `publish_strategy_knowledge`. Every KB change ends as a **pending** proposal.
+- Propose-only (hard rule): never call any tool that changes approval or
+  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
+  entity, any gate), no `update_status`, no publish. Never edit or delete
+  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
+  draft rows this skill itself created in the current run. Everything else
+  belongs to the operator in the dashboard. No `edit_knowledge` /
+  `save_knowledge` / `publish_strategy_knowledge`. Every KB change ends as a
+  **pending** proposal.
 - Zero auto-applied changes is the success criterion.
 - Requires `edit` capability (same as all child skills). Applying any proposal
   later requires `approve`.

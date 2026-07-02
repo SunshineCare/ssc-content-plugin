@@ -31,7 +31,7 @@ Re-run this command (same `period` / `brief_id`) after each gate to advance to t
 
 ## Governance
 
-Nothing auto-approves, auto-publishes, or auto-applies. Every phase ends at a human gate in a dashboard. Running the cycle and curating findings (**Mark for brief** / dismiss) require `edit`; approving directions and applying KB revisions require `approve`.
+Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Every phase ends at a human gate in a dashboard. Running the cycle and curating findings (**Mark for brief** / dismiss) require `edit`; approving directions and applying KB revisions require `approve`.
 
 ## After it runs
 

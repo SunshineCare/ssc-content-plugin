@@ -159,6 +159,7 @@ Approve the calendar in the dashboard to finalise the publish schedule (flips `s
 
 ## Governance
 
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **Propose-only.** Writes only via `save_schedule_entries`. NEVER calls `approve_*`, `approve_channel_plan`, `publish_*`, `save_idea`, or any content-creation or social-scheduling tool, and NEVER flips a gate.
 - **No auto-approval.** The operator reviews and approves the calendar in the dashboard. Flipping the Calendar gate (`schedule_approved`) is a dashboard-only action requiring the `approve` capability (via `approve_channel_plan`, gate `schedule`).
 - Always gate-check `approved` first (Step 1). If the Research plan is not approved, STOP — do not read ideas or write anything.

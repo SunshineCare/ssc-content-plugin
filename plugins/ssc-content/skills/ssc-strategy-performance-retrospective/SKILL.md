@@ -168,7 +168,8 @@ Findings saved: <N>
 - **Read + synthesise only.** Never call ingestion tools (`pull_fb_performance`,
   `pull_all_ad_performance`) — those hit external APIs, need connected accounts, and
   write snapshots; they are out of scope. Never author analysis rows, never write
-  content, never `approve_*`. The only write this skill makes is `save_strategy_finding`.
+  content. The only write this skill makes is `save_strategy_finding`.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - A null digest is **not** "no data" — read the ingested organic and ad sources before
   concluding. An empty ingested read means *not ingested* (for ads, usually no connected
   account), not *no platform activity* — report it as no-data, don't pull.

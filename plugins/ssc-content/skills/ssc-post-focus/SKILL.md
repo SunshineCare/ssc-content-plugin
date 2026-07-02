@@ -128,6 +128,7 @@ Next step: review, edit, and approve the Focus in the dashboard (flips `tactics_
 
 ## Governance
 
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Propose-only. Writes only via `save_channel_plan`.
 - **Never approves.** Does not set `tactics_approved`, `approved`, `schedule_approved`, or any approval flag. Flipping the Focus gate is a dashboard-only action requiring the `approve` capability (via `approve_channel_plan`, gate `tactics`).
 - Does not call `get_strategy_brief` — the agent resolves the strategy and passes it in.

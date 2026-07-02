@@ -124,7 +124,7 @@ Derive the cold theme/audience ad sets **the approved Approaches (`context`) + F
 
 Realize the L2 ad-set set from `ad/campaign-architecture` **v3.0**. The core principle: **an ad set = an AUDIENCE/OBJECTIVE; a creative = an ANGLE.** L2 ad sets are **NOT** split by content pillar. The old v2.0 "4 fixed pillar ad sets" (`L2_Empathy` / `L2_Science` / `L2_Solution` / `L2_SocialProof`, each mapped 1:1 to a pillar) is **RETIRED and WRONG** — it conflated a creative angle with an ad-set unit. Do not enumerate it.
 
-**v3.0 L2 = a set of omnipresence ad sets, each carrying exactly ONE creative** (`creative_count = 1` per L2 ad set). The **omnipresence ad-set range and the CORE/TEST ratio live in `ad/campaign-architecture` v3.0 — read them from the KB; do not restate fixed numbers in this skill.** Both counts flow from the month's `tactics`/`context` applied to the KB's range + ratio; neither is hard-coded:
+**v3.0 L2 = a set of omnipresence ad sets, each carrying the L2 creative count defined by `ad/campaign-architecture` v3.0 — currently exactly ONE creative per L2 ad set** (the KB-derived L2 count, v3.0: 1; if the KB bumps it, follow the KB). The **omnipresence ad-set range and the CORE/TEST ratio also live in `ad/campaign-architecture` v3.0 — read them from the KB; do not restate fixed numbers in this skill.** Both counts flow from the month's `tactics`/`context` applied to the KB's range + ratio; neither is hard-coded:
 
 - **CORE = person-led (~60%).** The proven cheap-reach person winners + real-person portrait/story variants — Kiều My, Bác Đỗ Dung, Thắm + variants (derive Kiều My angles from `programme/kieu-my-story`; reuse only EXISTING consented real-person assets, never fabricate). This is the **reach engine** — person/story creative gets CPM < 10k. Each CORE ad set's `value` leans **social-proof / lived-proof** (e.g. `lived-proof`, `social-proof`). The CORE count **fills the remainder** to keep the ~60/40 split and the 7–10 total.
 - **TEST = concept experiments DERIVED FROM THE MONTH'S TACTICS (~40%).** However many strategically-different concept tests the approved Focus `tactics` + Approaches `context` call for — **do NOT hard-code the test count; read it from the month's tactics**. Each TEST ad set is **non-person-led** (a new angle / format / hook), placed on the **generic L2 leaf**, carries a **budget cap + a win gate** (promote to CORE if it beats the person-led < 10k CPM benchmark; else kill + rotate), and its `value` is chosen **per-test from that test's concept** (not fixed).
@@ -146,7 +146,7 @@ For each L2 ad set (CORE and TEST alike):
   - `placements`: **manual placements** per KB (ưu tiên Feed/Reels).
   - `kpi`: `"reach/CPM/frequency"` — **NEVER cost-per-purchase**.
   - For a TEST ad set, append a `build_spec.note` flagging `"test: budget cap + win gate (vượt benchmark person-led <10k CPM thì promote lên CORE, không thì kill + rotate)"`.
-- **`creative_count`**: **exactly `1`** for every L2 ad set (an L2 ad set carries exactly ONE creative in v3.0).
+- **`creative_count`**: the **KB-derived L2 count (v3.0: 1)** for every L2 ad set — per `ad/campaign-architecture` v3.0; if the KB bumps it, follow the KB.
 
 Heritage (60 năm / EU) + flavour are **conversion proof → L3**, never L2 awareness hooks — do not assign them as an L2 ad set's angle.
 
@@ -205,10 +205,10 @@ If `plan.retrospective` carries tier grades, honour them tier-correctly when set
 4. **Archetype balance:** List the primary archetype per L1 slot. If a persona with a higher allocation priority (per `ad/strategy §2.2`) is completely absent from L1 while a lower-priority persona appears on multiple slots, reassign one slot.
 5. **Against coverage:** Count L1 slots with an against intent. At least 2 should have one.
 6. **Tonal-register validity:** Every L1 register must be one of `confessor`, `educator`, `friend`. No other values. (L2/L3/YouTube leave register null.)
-7. **L2 omnipresence model (v3.0) correctness:** L2 is the v3.0 omnipresence set — the **ad-set range + CORE/TEST ratio per `ad/campaign-architecture` v3.0** (read from the KB, not restated here), with the CORE and TEST counts **derived from the month's `tactics`/`context`** (NOT hard-coded), **each L2 ad set `creative_count = 1`**, each Awareness / Reach / ABO / warm ≤50k / manual placements, freq-cap = (total L2 ad sets ÷ cap-days). CORE rows lean a person-led social-proof / lived-proof value; TEST rows sit on the generic L2 leaf with the test concept's value + a `build_spec.note` flagging "test: budget cap + win gate (beat person-led <10k CPM)". The retired v2.0 "4 fixed pillar ad sets" (`L2_Empathy`/`L2_Science`/`L2_Solution`/`L2_SocialProof`) must NOT appear.
+7. **L2 omnipresence model (v3.0) correctness:** L2 is the v3.0 omnipresence set — the **ad-set range + CORE/TEST ratio per `ad/campaign-architecture` v3.0** (read from the KB, not restated here), with the CORE and TEST counts **derived from the month's `tactics`/`context`** (NOT hard-coded), **each L2 ad set carrying the KB-derived L2 count (v3.0: 1)**, each Awareness / Reach / ABO / warm ≤50k / manual placements, freq-cap = (total L2 ad sets ÷ cap-days). CORE rows lean a person-led social-proof / lived-proof value; TEST rows sit on the generic L2 leaf with the test concept's value + a `build_spec.note` flagging "test: budget cap + win gate (beat person-led <10k CPM)". The retired v2.0 "4 fixed pillar ad sets" (`L2_Empathy`/`L2_Science`/`L2_Solution`/`L2_SocialProof`) must NOT appear.
 8. **Tier-KPI correctness (mandatory):** Every `build_spec.kpi` is tier-correct — L1 = cost-per-purchase, L3 = cost-per-purchase, L2 = reach/CPM/frequency (NEVER cost-per-purchase), YouTube = CPV. Scan every ad set; fix any mismatch before saving.
 9. **No flight dates:** No `build_spec` (or `peak_window`, or any note) carries an ad-set start/stop/launch/pause date. Ad sets run continuously.
-10. **Creative-count arithmetic:** Write scratch addition summing each ad set's `creative_count`: "L1: sum across the L1 ad sets = X. L2: 1 × (# L2 ad sets) = Y (every L2 ad set carries exactly 1 creative). L3: sum across the L3 ad sets = H. YouTube: sum = Z. Total = X+Y+H+Z." Confirm each conversion ad set (L1/L3) clears the `ad/creative-guidelines` Andromeda floor, every L2 ad set is exactly 1, and the total is what you intend. Fix any shortfall before saving.
+10. **Creative-count arithmetic:** Write scratch addition summing each ad set's `creative_count`: "L1: sum across the L1 ad sets = X. L2: (KB-derived L2 count, v3.0: 1) × (# L2 ad sets) = Y. L3: sum across the L3 ad sets = H. YouTube: sum = Z. Total = X+Y+H+Z." Confirm each conversion ad set (L1/L3) clears the `ad/creative-guidelines` Andromeda floor, every L2 ad set carries the KB-derived L2 count (v3.0: 1), and the total is what you intend. Fix any shortfall before saving.
 11. **Budget-share tier-correctness:** The per-ad-set `build_spec.budgetShare` values are sized tier-correctly (L1 funnel-intake ~1.8–2× warm; L3 the money tier; L2 divided across the CORE+TEST ad sets with each TEST on a budget cap and CORE person-led carrying the bulk, never sized on cost-per-purchase; YouTube per §3). Each is a level/% — not a flight date.
 12. **Scoring:** Scored every ad set 1–5 with a Vietnamese `comment`; used the full range (not all 5s). Every `score` is an integer 1–5 and every `comment` is in Vietnamese.
 13. **Banned-words scan:** Re-read every Vietnamese word in slot names, build-spec strings, and score comments. If any banned term from `rules/banned-words` appears, replace it before proceeding.
@@ -225,7 +225,7 @@ Every ad set from Step 3 (L1 slots + the L2 omnipresence ad sets + L3 + YouTube)
 Each entry passes:
 - **Every layer:** `layer_term_id` (the resolved campaign_layer id for L1/L2/L3/YouTube), `slot_name` (the ad-set name), `score` (integer 1–5), `comment` (one-line Vietnamese rationale), `creative_count` (integer), `build_spec` (the 9-key object). **Do NOT set `status`** — it defaults to `'proposed'`.
 - **L1 entries additionally:** `primary_persona_term_id`, `value_term_id`, `frame_term_id`, `tonal_register_term_id`, `peak_window`, `format_pref`.
-- **L2 entries:** `value_term_id` (CORE = a person-led social-proof/lived-proof value id; TEST = the test concept's value id) and `creative_count: 1`; leave persona/frame/register null. TEST rows carry a `build_spec.note` flagging the budget cap + win gate.
+- **L2 entries:** `value_term_id` (CORE = a person-led social-proof/lived-proof value id; TEST = the test concept's value id) and `creative_count` = the KB-derived L2 count (v3.0: 1); leave persona/frame/register null. TEST rows carry a `build_spec.note` flagging the budget cap + win gate.
 - **L3 / YouTube entries:** may leave `primary_persona_term_id`/`frame_term_id`/`tonal_register_term_id` null (set `value_term_id` only if a value clearly applies).
 
 ```
@@ -244,7 +244,7 @@ Call: save_ad_plan_slots
       format_pref:              "<video/carousel>",
       score:                    <1-5>,
       comment:                  "<một câu lý do bằng tiếng Việt>",
-      creative_count:           <n ≥ 3-4>,
+      creative_count:           <the ad/creative-guidelines Andromeda floor for a conversion ad set>,
       build_spec: {
         campaign: "Lớp 1 — Chuyển đổi", objective: "Messages | Purchase",
         audience: "<cold/broad summary, VN>", optimizationGoal: "Conversations | Purchase",
@@ -252,13 +252,13 @@ Call: save_ad_plan_slots
         frequencyCap: "n/a", placements: "<per KB, VN>", kpi: "cost-per-purchase"
       }
     },
-    // ----- L2 omnipresence (v3.0): CORE/TEST counts derived from tactics × the KB range+ratio, each creative_count: 1 -----
+    // ----- L2 omnipresence (v3.0): CORE/TEST counts derived from tactics × the KB range+ratio, each creative_count = KB-derived L2 count (v3.0: 1) -----
     {
       // CORE — person-led (the < 10k CPM reach engine)
       layer_term_id: "<L2 campaign_layer leaf id>", slot_name: "Kiều My (chân dung)",
       value_term_id: "<lived-proof / social-proof value leaf id>",
       score: <1-5>, comment: "<một câu lý do bằng tiếng Việt>",
-      creative_count: 1,
+      creative_count: <KB-derived L2 count, v3.0: 1>,
       build_spec: {
         campaign: "Lớp 2 — Awareness (Omnipresence)", objective: "Awareness",
         audience: "<warm — L1 non-converters / engagement audiences, ≤50k, VN>", optimizationGoal: "Reach",
@@ -272,7 +272,7 @@ Call: save_ad_plan_slots
       layer_term_id: "<L2 campaign_layer leaf id>", slot_name: "Test: <khái niệm theo tactics>",
       value_term_id: "<the test concept's own value leaf id>",
       score: <1-5>, comment: "<một câu lý do bằng tiếng Việt>",
-      creative_count: 1,
+      creative_count: <KB-derived L2 count, v3.0: 1>,
       build_spec: {
         campaign: "Lớp 2 — Awareness (Omnipresence)", objective: "Awareness",
         audience: "<warm, ≤50k, VN>", optimizationGoal: "Reach",
@@ -288,7 +288,7 @@ Call: save_ad_plan_slots
     {
       layer_term_id: "<L3 campaign_layer leaf id>", slot_name: "Tái chuyển đổi (warm hợp nhất)",
       score: <1-5>, comment: "<một câu lý do bằng tiếng Việt>",
-      creative_count: <n ≥ 3-4>,
+      creative_count: <the ad/creative-guidelines Andromeda floor for a conversion ad set>,
       build_spec: {
         campaign: "Lớp 3 — Tái chuyển đổi", objective: "Messages | Purchase",
         audience: "<warm/hot retarget — engagers/viewers/visitors, VN>", optimizationGoal: "Conversations | Purchase",
@@ -382,7 +382,7 @@ Stop after this output.
 
 ## Governance
 
-- **Propose-only.** Writes only via `save_ad_plan_slots`. NEVER calls any `approve_*`, `create_*` (`create_campaign`/`create_adset`/`create_ad`), `publish_*`, `update_budget`, `pause_*`/`resume_*`/`duplicate_ad`, `save_ad_schedule_weeks`, `save_idea`, or content-creation/scheduling tool. Writes **rated proposed ad sets, never approves any ad set, and never flips a gate.** This step plans the deployment; it does not deploy and does not schedule.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_ad_plan_slots` (never `create_*` — `create_campaign`/`create_adset`/`create_ad` — `publish_*`, `update_budget`, `pause_*`/`resume_*`/`duplicate_ad`, `save_ad_schedule_weeks`, `save_idea`, or any content-creation/scheduling tool). Writes **rated proposed ad sets, never approves any ad set, and never flips a gate** — this step plans the deployment; it does not deploy and does not schedule.
 - **Rates every ad set.** Each ad set carries an honest `score` (1–5) + a one-line Vietnamese `comment`, exactly as `ssc-ads-ideate` scores concepts — full range, no inflation. Symmetric with Ideate: each ad set is a rated card the operator approves individually.
 - **Never approves an ad set; never sets `status`.** Each row's `status` defaults to `'proposed'`. The operator approves ad sets one by one in the dashboard; approving ≥1 ad set opens Ideate. There is no plan-level `approved` gate for the ad flow — approval is per-ad-set.
 - Always gate-check `approaches_approved` first (Step 1). If the Approaches are not approved, STOP — do not load the KB, derive ad sets, or write anything.

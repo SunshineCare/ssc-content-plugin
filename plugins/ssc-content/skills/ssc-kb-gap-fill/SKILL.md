@@ -63,7 +63,10 @@ Before calling `propose_knowledge_revision` for any draft, verify every item:
 - [ ] `evidence_note` is present and explains why the gap exists (required, FR-061)
 - [ ] Draft style matches neighbouring docs in the same category (tone, structure,
       heading depth)
-- [ ] No `save_knowledge`, `edit_knowledge`, or `approve_*` calls in this run
+- [ ] No `save_knowledge`, `edit_knowledge`, `approve_*`, `unapprove_*`,
+      `update_status`, or publish calls in this run; no `edit_*`/`delete_*`
+      call targeting anything other than a draft row this skill itself created
+      in the current run
 
 If any item fails, fix before submitting.
 
@@ -80,8 +83,13 @@ End with a count of gaps found and drafts proposed.
 
 ## Governance
 
-- Propose-only. NEVER add to the live KB; never call `save_knowledge`,
-  `publish_strategy_knowledge`, `approve_*`, or publish tools.
+- Propose-only (hard rule): never call any tool that changes approval or
+  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
+  entity, any gate), no `update_status`, no publish. Never edit or delete
+  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
+  draft rows this skill itself created in the current run. Everything else
+  belongs to the operator in the dashboard. NEVER add to the live KB; never
+  call `save_knowledge` or `publish_strategy_knowledge`.
 - Keep drafts atomic — one concept per doc — to match the KB taxonomy. Do not
   restructure existing docs (out of scope).
 - Requires `edit` capability.

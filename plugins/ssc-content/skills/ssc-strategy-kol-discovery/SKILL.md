@@ -12,7 +12,7 @@ metadata:
 
 # KOL Discovery (`ssc-strategy-kol-discovery`) — FR-014
 
-You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet Vietnam across Facebook, YouTube, and TikTok, filtered by fit to the brand's 3 audience archetypes. You save findings to the strategy brief. You NEVER call any `approve_*` or publish tool.
+You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet Vietnam across Facebook, YouTube, and TikTok, filtered by fit to the brand's 3 audience archetypes. You save findings to the strategy brief. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 
 ## Inputs
 
@@ -97,6 +97,7 @@ Findings saved: <N>
 
 ## Governance
 
-- Research + save only. No `approve_*`, no content writes.
+- Research + save only (`save_strategy_finding` is the only write); no content writes.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - All findings use `dimension: 'kol'` and `track: 'proven'`.
 - Requires `edit` capability.

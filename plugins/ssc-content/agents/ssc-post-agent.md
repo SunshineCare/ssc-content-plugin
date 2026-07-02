@@ -29,10 +29,15 @@ detection**) and running the **next open step**, then **stopping at the next ope
 gate**. The four human gates are dashboard actions on the post `channel_plan` —
 the operator reviews/edits/approves, then re-invokes you to advance.
 
-**You never auto-approve, distribute, or apply anything.** You never flip a gate
-— never set `tactics_approved`, `approved`, or `schedule_approved`, never call
-`approve_channel_plan`, `approve_idea`, `update_status`, or any publish tool, and
-never auto-advance past a gate. Every output is a proposal a human acts on in the
+**You never auto-approve, distribute, or apply anything.** Propose-only (hard
+rule): never call any tool that changes approval or lifecycle state in either
+direction — no approve_*, no unapprove_* (any entity, any gate), no
+update_status, no publish — and never edit or delete operator-curated or approved
+rows. You never auto-advance past a gate. Gates are not strictly monotonic: the
+operator can reopen one in the dashboard (un-approve); if a gate you expected is
+not set, treat that step as the next open step and re-run it only when the
+operator asked for rework — never un-approve anything yourself. Every output is a
+proposal a human acts on in the
 dashboard. The child skills own all writes to the plan; you orchestrate and stop.
 
 ## Inputs

@@ -47,7 +47,7 @@ If the approved subset is non-empty, extract and hold from the aggregate:
   - `layer` — the resolved campaign layer (L1 / L2 / L3 / YouTube)
   - `creative_count` — **the exact number of concepts to produce for THIS ad set** (the single source of count truth)
   - `build_spec` — the ad set's Meta build map (objective/audience/optimization/budget/cap/placements/KPI), for tonal/contextual weight
-  - **L1 rows additionally:** `primary_persona`/`value`/`frame`/`tonal_register`/`peak_window`/`format_pref` (the creative-steering dimensions). **L2 rows carry their own `value` on the slot row** (the Blueprint set it per the v3.0 omnipresence model — a CORE person-led ad set leans social-proof / lived-proof; a TEST concept ad set carries that test's own value); read it from the row, never re-pick it. L3/YouTube rows carry a `value` only if one clearly applied. **Every L2 row has `creative_count = 1`** (one creative per L2 ad set).
+  - **L1 rows additionally:** `primary_persona`/`value`/`frame`/`tonal_register`/`peak_window`/`format_pref` (the creative-steering dimensions). **L2 rows carry their own `value` on the slot row** (the Blueprint set it per the v3.0 omnipresence model — a CORE person-led ad set leans social-proof / lived-proof; a TEST concept ad set carries that test's own value); read it from the row, never re-pick it. L3/YouTube rows carry a `value` only if one clearly applied. **An L2 row's `creative_count` is read from the row like every other layer** — never assume it is 1 (the row is the authority; fill exactly what it says).
 - `plan.tactics` — the approved Focus (markdown), for tonal/strategic weight
 - `plan.context` — the approved Approaches (markdown): the creative HOW per layer, audience triggers, differentiation, experiments — for tonal/strategic weight
 
@@ -98,7 +98,7 @@ The structural concept only tags the lane + dimensions — it never writes a per
 Walk the **approved** ad-set subset only and write out the count plan explicitly — **one line per approved ad-set row, taking each count from that row's `creative_count`** (do not invent or redistribute counts; the Blueprint already decided them). Unapproved ad sets are omitted entirely:
 ```
 L1:  [slot-name]=<row.creative_count>, ...      subtotal=X
-L2:  [<L2 ad-set name>]=1, [<L2 ad-set name>]=1, ...   subtotal=Y  (every L2 ad set's creative_count is 1; Y = # of approved L2 ad sets)
+L2:  [<L2 ad-set name>]=<row.creative_count>, ...        subtotal=Y
 L3:  [slot-name]=<n>, ...                        subtotal=W
 YT:  [YouTube — Shorts]=<n>, [YouTube — In-stream]=<n>   subtotal=V
 Total: Z  (= sum of every APPROVED row's creative_count)
@@ -154,7 +154,7 @@ save_idea(
 )
 ```
 
-`save_idea` upserts a DRAFT idea on the ad channel, tagged to the plan via `plan_id` and to its ad set via `detail.slotId`. Always pass `channel='ad'` and `plan_id=<plan.id>`. Calling `save_idea` again with corrected fields creates or updates a draft. (The MCP layer runs a taxonomy backstop on `terms` — cardinality / applicability / required / min-count / layer-pool — so resolve ids correctly; an invalid term set is rejected.)
+`save_idea` INSERTS a new DRAFT idea on the ad channel, tagged to the plan via `plan_id` and to its ad set via `detail.slotId`. Always pass `channel='ad'` and `plan_id=<plan.id>`. **`save_idea` is insert-only** — it takes no `id` and never updates an existing row; calling it again with corrected fields would create a duplicate. To correct a concept you already saved, `delete_idea(<id>)` the flawed draft and save the corrected concept as a fresh `save_idea` call (the same delete + re-save loop Step 6 prescribes). (The MCP layer runs a taxonomy backstop on `terms` — cardinality / applicability / required / min-count / layer-pool — so resolve ids correctly; an invalid term set is rejected.)
 
 **Field guidance:**
 
@@ -170,7 +170,7 @@ save_idea(
   - **Shared (max 1 across both):** `exp-morning-routine` (may appear in L1 OR L2, not both)
   - **L3/YouTube: experience is L1/L2-pooled and does NOT apply here — OMIT experience** (or use only the shared `exp-morning-routine`). There is no L3/YouTube experience pool, and the `save_idea` backstop rejects any L1/L2-pool experience term on an L3/YouTube concept — do not attach one.
 - `terms` frame — frame code from `brand/angles §3`. Must be marked ★ or ◆ for the creative's layer in the Frame × Layer table. "-" = forbidden for that layer.
-- `detail.slotId` — **always set**: the `id` of the `ad_plan_slots` row (`plan.ad_slots[].id`) for the ad set this concept fills. The Blueprint models EVERY ad set (L1 theme slots, the ~7–10 L2 omnipresence ad sets, L3, YouTube) as its own row, so every concept — for every layer — carries its ad set's row id here. Never omit it.
+- `detail.slotId` — **always set**: the `id` of the `ad_plan_slots` row (`plan.ad_slots[].id`) for the ad set this concept fills. The Blueprint models EVERY ad set (L1 theme slots, the L2 omnipresence ad sets, L3, YouTube) as its own row, so every concept — for every layer — carries its ad set's row id here. Never omit it.
 - `detail.notes` — structural shorthand for the operator: layer / ad-set name / format / the chosen dimensions. NOT ad copy. The format intent (`reel` / `video` / `carousel` / `image` / `story`) lives here — YouTube Shorts must be `reel` or `video`; YouTube In-stream must be `video`.
 - `score` — **self-rate every concept on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how strongly the concept serves the month's approved tactics and its slot, the structural integrity (frame × layer validity, archetype fit, angle freshness within the slot). Rate honestly and **use the full range** — do not give everything 5. 5 = a standout you'd lead the month with; 3 = solid; 1–2 = weak/filler. Nothing auto-approves on it.
 - `comment` — a **one-line rationale for the `score`, written in natural Vietnamese** (shown next to the stars for a Vietnamese operator): the single biggest reason the concept is strong or weak — e.g. "Frame confession khớp L1 Chị Hương, góc against sắc" or "Trùng value+frame với concept khác trong slot, thiếu khác biệt". Always Vietnamese (never English); keep it short and honest; it should justify the number you gave.
@@ -183,7 +183,7 @@ Before finalising (perform checks per batch and then across the full set), audit
 
 0. **Authenticity (hard gate — check FIRST).** No concept attributes an invented story / quote / specific to a real named person. Every person-led concept is either (a) a Kiều My angle traceable to `programme/kieu-my-story` / `voice/founder-voice`, or (b) a reuse of an existing consented consultant/customer asset — and its `detail.notes` names that source. ZERO "new real-person story" concepts. Any violation → drop the concept or convert it to persona-illustrative / non-person before proceeding.
 
-1. **Creative count per approved ad set (all layers)** — Count concepts per **approved** ad set and compare to **that ad set's row `creative_count`**. This covers EVERY layer among the approved subset — L1 theme slots, the ~7–10 L2 omnipresence ad sets (each with `creative_count = 1`), L3, and YouTube — by their own row count (for a pre-migration plan with no row `creative_count`, fall back to that ad set's `creative_count_config` figure). Every approved ad set's saved count must equal its row's `creative_count` exactly; an unapproved ad set must have **zero** concepts. Any deviation = fix before finalising.
+1. **Creative count per approved ad set (all layers)** — Count concepts per **approved** ad set and compare to **that ad set's row `creative_count`**. This covers EVERY layer among the approved subset — L1 theme slots, the L2 omnipresence ad sets, L3, and YouTube — by their own row count (for a pre-migration plan with no row `creative_count`, fall back to that ad set's `creative_count_config` figure). Every approved ad set's saved count must equal its row's `creative_count` exactly; an unapproved ad set must have **zero** concepts. Any deviation = fix before finalising.
 
 2. **Archetype presence in L1** — All 3 archetypes (Chị Lan, Chị Hương, Chị Mai) must appear in L1 per the `brand/angles §5` archetype rule. If any is absent, reassign a concept now.
 
@@ -195,7 +195,7 @@ Before finalising (perform checks per batch and then across the full set), audit
 
 6. **Per-slot frame cap** — Enforce the per-slot frame cap + the minimum-distinct-frames rule for multi-creative slots, both from `brand/angles §5`.
 
-7. **L2 diversity across ad sets** — Each L2 ad set carries exactly ONE creative, so there is no within-ad-set frame pair to check. Instead enforce the L2 cross-ad-set diversity rule in `brand/angles §5` (avoid two L2 ad sets sharing the same frame **and** value; the omnipresence roster should span distinct angles — person-led CORE variants + concept TESTs).
+7. **L2 diversity across ad sets** — An L2 ad set typically carries a single creative (its row's `creative_count`), so there is usually no within-ad-set frame pair to check; where an L2 row carries more than one, apply the per-ad-set frame rules from `brand/angles §5` to it too. Across ad sets, enforce the L2 cross-ad-set diversity rule in `brand/angles §5` (avoid two L2 ad sets sharing the same frame **and** value; the omnipresence roster should span distinct angles — person-led CORE variants + concept TESTs).
 
 8. **L2 value source** — Every L2 concept must carry **its own ad set's `value` from the slot row** (`ad_slots[].value` / `value_term_id`, set by the Blueprint per the v3.0 model: CORE person-led leans social-proof / lived-proof, TEST carries the test concept's own value). Read it from the row; do not re-pick it from `brand/angles`.
 
@@ -219,7 +219,7 @@ Before finalising (perform checks per batch and then across the full set), audit
 
 18. **Awareness fit (per `ad/awareness-framework`)** — Each concept's angle type / value / frame fits its ad set's diagnosed awareness stage (cold-tier audiences → problem/curiosity/solution-benefit; warm-tier → proof/comparison/direct), and the lineup honors the sophistication stance (mechanism + identification, not bare claims). Any mismatch = reframe before finalising.
 
-**If any check fails:** Fix the violations by updating the `save_idea` call for the affected concept (each call creates or updates a draft). Do not finalise Step 6 until all 18 checks pass.
+**If any check fails:** Fix the violations by replacing the affected concept — `delete_idea(<id>)` the flawed draft, then save the corrected concept via a fresh `save_idea` call (`save_idea` is insert-only; re-calling it does not update the existing row). Do not finalise Step 6 until all 18 checks pass.
 
 **Diversity summary (write before finalising):**
 
@@ -305,6 +305,7 @@ Curate and approve ad concepts in the dashboard at: Ideas → <period> (filter c
 
 ## Governance
 
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **Propose-only.** `save_idea` creates DRAFT concepts only. NEVER calls `approve_idea`, `approve_channel_plan`, `publish_*`, or any scheduling tool, and NEVER flips a gate.
 - **Title = the concept; dimensions = `terms`.** The `title` is the ad's main concept as ONE concise Vietnamese line — nothing else (no layer/persona/frame/value codes, no `/`-delimited structural string, no parenthetical taxonomy code, no slot name). The structural dimensions are carried ONLY by `terms` (resolved taxonomy ids), surfaced to the operator as chips; the format intent lives in `detail.notes`.
 - **No finished copy.** Beyond the concept title, do NOT produce finished ad copy — no `vietnameseHeadline`, `hook`, `painPoint`, `messagingAngle`, body, or CTA. This skill stops at the concepts gate; finished copy is the deferred `ssc.ads-writer`'s job.

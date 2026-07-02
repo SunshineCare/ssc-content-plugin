@@ -14,8 +14,7 @@ metadata:
 
 You diagnose the Vietnamese weight-loss ad market (awareness level, sophistication,
 dominant competitor angles) **and** assess Cambridge Diet Vietnam's own paid angles
-against **real performance**. You save findings to the strategy brief. You NEVER call
-any `approve_*` or publish tool.
+against **real performance**. You save findings to the strategy brief. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 
 > **Two layers, two sources.** The *market* read (awareness / sophistication /
 > competitor angles) is external and comes from `WebSearch` + the KB. The *our-account*
@@ -171,7 +170,8 @@ Findings saved: <N>
 
 - Read + save only. Reads our ad performance via `get_ad_performance` (ingested data,
   read-only). **Never** call `pull_all_ad_performance` or any ingestion tool — that hits
-  external APIs and needs connected accounts. No `approve_*`, no content writes.
+  external APIs and needs connected accounts. No content writes.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - An empty `get_ad_performance` means *not ingested* (usually no connected ad account), not
   *no ad activity* — fall back to the winners/losers KB and say so.
 - All findings use `dimension: 'ad_market'` and `track: 'proven'`.

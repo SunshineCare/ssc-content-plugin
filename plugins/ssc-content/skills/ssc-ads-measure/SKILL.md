@@ -170,7 +170,7 @@ Retrospective written to the ad channel_plan (propose-state, no gate). Next mont
 
 ## Governance
 
-- **Synthesis + save only.** Writes only via `save_channel_plan` (the `retrospective` field). No writes to performance tables, no `approve_*`, no content writes, no idea/schedule writes.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Synthesis + save only: writes only via `save_channel_plan` (the `retrospective` field) — no writes to performance tables, no content writes, no idea/schedule writes.
 - **No gate.** Measure is the one ungated step; `retrospective` is propose-state output, never an approval. The skill never sets `tactics_approved`, `approaches_approved`, or `approved`.
 - Reads the **ingested** ad performance via `get_ad_performance`; never triggers ingestion (`pull_*`) and never fabricates metrics. The `get_performance_analysis` digest is optional cross-channel context only — a null there is NOT a no-data condition.
 - Records "no prior ad performance this cycle" gracefully only when `get_ad_performance` returns no rows — never invents spend/CTR/cost-per-result.

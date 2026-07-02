@@ -1,5 +1,5 @@
 ---
-description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context to be approved first (via the Monthly Plan dashboard).
+description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context/tactics to be approved first (in the content workspace).
 ---
 
 ## User Input
@@ -11,35 +11,38 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Period** (`period`, `YYYY-MM`, e.g. `2026-07`). Required.
-- **Plan ID** (`plan_id`, optional).
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one.
 
 ## Precondition
 
-Requires the month's **Context phase to be approved** first. If not yet approved, approve the context in the **Monthly Plan dashboard → Context tab**, then return here.
+Requires the month's **context/tactics on the YouTube plan to be approved** first (the `tactics_approved` gate). If not yet approved, approve it in the content workspace (`/content/youtube`), then return here.
 
 ## What to do
 
 This command is a thin entry point — no orchestration logic. Dispatch the
-**`ssc-youtube-agent`**, passing `period` (and `plan_id` if provided). The agent
-is state-driven: it reads the plan's `phase_status` and runs whichever YouTube
-phase is next, then stops at the human gate.
+**`ssc-youtube-agent`**, passing `period`. The agent is state-driven: it reads
+the YouTube `channel_plan`'s gate booleans (`tactics_approved`, `approved`,
+`schedule_approved`) and runs whichever YouTube step is next, then stops at the
+human gate.
 
 | Phase | The agent does | Then the operator… |
 |---|---|---|
-| **Briefing** | Reads approved context + KB → drafts a YouTube briefing (formats × buyer-stage × cadence) | Reviews in the **Monthly Plan dashboard → YouTube tab**, re-runs this command |
-| **Ideate** | Generates draft video ideas via `save_idea`, tagged to the plan | **Curates** the ideas in the **YouTube tab**, re-runs this command |
-| **Schedule** | Proposes the publish schedule | **Approves** the schedule in the **YouTube tab** |
+| **Briefing** | Reads approved context/tactics + KB → drafts a YouTube briefing (formats × buyer-stage × cadence) | Reviews + approves the briefing in `/content/youtube` (opens Ideate), re-runs this command |
+| **Ideate** | Generates draft video ideas via `save_idea`, tagged to the plan | **Curates** the ideas in `/content/youtube`, re-runs this command |
+| **Schedule** | Proposes the publish calendar as `schedule_entries` | **Approves** the calendar in `/content/youtube` |
 
-Re-run this command (same `period`/`plan_id`) after each gate.
+Re-run this command (same `period`) after each gate.
 
 ## Governance
 
 Nothing auto-approves, auto-applies, or auto-publishes. Every phase ends at a
-human gate. Running requires `edit`; approving requires `approve`.
+human gate. The agent is propose-only — it never changes approval or lifecycle
+state in either direction (no approve_*/unapprove_*/publish) and never edits or
+deletes operator-curated rows. Running requires `edit`; approving requires
+`approve` (operator, in the workspace).
 
 ## After it runs
 
-Point the operator to the **Monthly Plan dashboard → YouTube tab**. Posts, Ads,
-and YouTube run independently after context is approved.
+Point the operator to the content workspace (`/content/youtube`). Posts, Ads,
+and YouTube run independently once each channel's context/tactics are approved.

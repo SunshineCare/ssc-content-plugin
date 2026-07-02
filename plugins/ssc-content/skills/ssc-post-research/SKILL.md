@@ -201,6 +201,7 @@ Brief (`context`), pillar distribution (`plan_targets`), and format mix/totals (
 
 ## Governance
 
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Propose-only. Writes only via `save_channel_plan` and `save_plan_targets`. NEVER calls `approve_*`, `publish_*`, or any content-creation or scheduling tool.
 - NEVER sets `approved` (the Research gate) or any approval flag. Flipping it is a dashboard-only action (`approve_channel_plan`, gate `plan`).
 - Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB, run research, or write anything.

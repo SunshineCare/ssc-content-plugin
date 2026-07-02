@@ -29,9 +29,14 @@ runs the knowledge-base health cycle and stops at the human gate.
 
 ## Governance
 
-Nothing auto-approves, auto-applies, or auto-publishes. Every revision ends at a
-human gate in the Knowledge dashboard. Running requires `edit`; approving a
-revision requires `approve`.
+Propose-only (hard rule): never call any tool that changes approval or
+lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
+entity, any gate), no `update_status`, no publish. Never edit or delete
+operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
+draft rows this skill itself created in the current run. Everything else
+belongs to the operator in the dashboard. Every revision ends at a human gate
+in the Knowledge dashboard. Running requires `edit`; approving a revision
+requires `approve`.
 
 ## After it runs
 

@@ -141,6 +141,7 @@ Retrospective written to the post channel_plan (propose-state, no gate). Next mo
 
 ## Governance
 
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **Synthesis + save only.** Writes only via `save_channel_plan` (the `retrospective` field). No writes to performance tables, no `approve_*`, no content writes, no idea/schedule writes.
 - **No gate.** Measure is the one ungated step; `retrospective` is propose-state output, never an approval.
 - Measures the **live page** via `get_post_performance` (after `pull_fb_performance`), never the DB plan. The `get_performance_analysis` digest is optional cross-channel context only — a null there is NOT a no-data condition.

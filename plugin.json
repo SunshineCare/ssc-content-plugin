@@ -1,0 +1,18 @@
+{
+  "name": "ssc-content",
+  "version": "1.0.0",
+  "description": "Cambridge Diet Vietnam — ads, posts, YouTube, KB and strategy workflows for Cowork operators",
+  "author": {
+    "name": "SunshineCare"
+  },
+  "mcpServers": {
+    "ssc": {
+      "type": "http",
+      "url": "https://ssc.sunshinecare.vn/bos/mcp",
+      "oauth": {
+        "clientId": "ssc-content-plugin",
+        "callbackPort": 3119
+      }
+    }
+  }
+}

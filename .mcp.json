@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ssc": {
+      "type": "http",
+      "url": "https://ssc.sunshinecare.vn/bos/mcp",
+      "oauth": {
+        "clientId": "ssc-content-plugin",
+        "callbackPort": 3119
+      }
+    }
+  }
+}

@@ -42,4 +42,4 @@ Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at
 
 ## After it runs
 
-Point the operator to the **Posts pipeline dashboard** for the step that just ran. The Posts pipeline runs independently of the Ads and YouTube channels — `/ssc.ads` and `/ssc.youtube` proceed on their own.
+Point the operator to the **Posts pipeline dashboard** for the step that just ran. The Posts pipeline runs independently of the Ads and YouTube channels — `/ssc.ads-plan` and `/ssc.youtube` proceed on their own.

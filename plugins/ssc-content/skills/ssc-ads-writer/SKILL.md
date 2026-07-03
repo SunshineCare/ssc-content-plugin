@@ -33,9 +33,9 @@ One of (the concept selector):
 
 Optional (variation counts — **configurable**):
 
-- `n_headlines` — number of headline variations. **Default 4.**
-- `n_copies` — number of primary-text (copy) variations. **Default 3.**
-- `n_descriptions` — number of link-description variations. **Default 3.**
+- `n_headlines` — number of headline variations. **Default 5.**
+- `n_copies` — number of primary-text (copy) variations. **Default 5.**
+- `n_descriptions` — number of link-description variations. **Default 5.**
 
 ## Procedure
 
@@ -207,9 +207,9 @@ Apply the brand's headline craft (sourced from `ad/headline-formulas` + `ad/crea
 
 Produce **only the active section's** variations (from Step 2), not all three:
 
-- if active = **`headline`** — `n_headlines` variations (default **4**). Each a SHORT on-creative hook (per the length discipline), a *different* hook quality/pattern from the Bank. No two headlines may be paraphrases of one opening.
-- if active = **`copy`** — `n_copies` variations (default **3**). Each the **primary text / body**: a hook line that **builds on an APPROVED headline** (from Step 4) → the concept's benefit expressed through its `value`+`frame` → a **soft, compliant CTA from `ad/cta-catalog`**. Vary the angle/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception).
-- if active = **`description`** — `n_descriptions` variations (default **3**). Each a tight **link-description** line (one benefit + a soft CTA) that **compresses an APPROVED copy's promise** (from Step 4), distinct from the others.
+- if active = **`headline`** — `n_headlines` variations (default **5**). Each a SHORT on-creative hook (per the length discipline), a *different* hook quality/pattern from the Bank. No two headlines may be paraphrases of one opening.
+- if active = **`copy`** — `n_copies` variations (default **5**). Each the **primary text / body**: a hook line that **builds on an APPROVED headline** (from Step 4) → the concept's benefit expressed through its `value`+`frame` → a **soft, compliant CTA from `ad/cta-catalog`**. Vary the angle/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception).
+- if active = **`description`** — `n_descriptions` variations (default **5**). Each a tight **link-description** line (one benefit + a soft CTA) that **compresses an APPROVED copy's promise** (from Step 4), distinct from the others.
 
 Every variation is **finished Vietnamese ad text** for the active section. Express the SAME concept (`idea.title` + its `value`/`frame`/`persona`/layer) — what varies is the hook/angle/wording, not the strategic spine.
 
@@ -335,7 +335,7 @@ Call: save_post_content
 
 ## Output
 
-- **Saved, not presented.** For the single active section, per-section DRAFT `content` rows via `save_post_content(channel='ad', idea_id, section, body, score, comment)` — the section's count (default 4 headlines / 3 copies / 3 descriptions), every saved variation rated ≥4 with a Vietnamese comment. Saved immediately after scoring; there is no in-chat candidate presentation or revise loop. Saving persists drafts; it is NOT approval/selection.
+- **Saved, not presented.** For the single active section, per-section DRAFT `content` rows via `save_post_content(channel='ad', idea_id, section, body, score, comment)` — the section's count (default 5 headlines / 5 copies / 5 descriptions), every saved variation rated ≥4 with a Vietnamese comment. Saved immediately after scoring; there is no in-chat candidate presentation or revise loop. Saving persists drafts; it is NOT approval/selection.
 - **One section per invocation.** The operator approves in the dashboard and re-invokes for the next section; `copy` builds on the approved headline(s), `description` on the approved headline(s) + copy(ies).
 - No variation rated ≤3 persisted (dropped + regenerated, or noted as short if it hit its bound).
 - No gate flipped, no row edited or deleted — drafts await the operator's review/edit/approve in `/ad/[id]`.

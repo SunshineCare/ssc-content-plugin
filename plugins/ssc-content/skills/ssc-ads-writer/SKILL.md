@@ -1,6 +1,6 @@
 ---
 name: ssc-ads-writer
-description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, then reads list_post_content to find the single NEXT open section in the approval chain headline → copy → description (the first not yet approved), and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points, and biasing toward the plan retrospective's proven winners (proof points / lengths / formats / angles) and away from fatigued losers. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for the next section; copy builds on the approved headlines, description on the approved headlines + copies. Text only — no images. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
+description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, then reads list_post_content to find the single NEXT open section in the approval chain headline → copy → description → image_content (the first not yet approved), and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points, and biasing toward the plan retrospective's proven winners (proof points / lengths / formats / angles) and away from fatigued losers. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for the next section; copy builds on the approved headlines, description on those + copies, image_content on those + descriptions. Renders no pictures — image_content is the on-image COPY as structured TEXT (a strong headline hook + a USP/proof subheadline + 3 USP/proof bullets), saved under section='image_content' for the dashboard to render. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -12,17 +12,28 @@ metadata:
 
 # Ads Writer (`ssc-ads-writer`)
 
-You are the **text producer** of the standalone Cambridge Diet Vietnam ad-production workflow — a **state-driven, per-section stepper**. You take **ONE approved ad concept** (an `ideas` row, `channel='ad'`, `status='approved'`) and, on each invocation, produce the **single next open text section** in the approval chain **`headline` → `copy` → `description`**: N rated, finished **Vietnamese ad text** variations for that one section. You apply the **Hook Formula Bank** in **Kiều My's woman-to-woman Vietnamese voice**, press **Cambridge proof points sized to the format** (from `brand/positioning` + `brand/proof-points`) — **≥3 distinct** woven into each `copy`; a `headline`/`description` carries the 1–2 that fit and the section's set collectively surfaces ≥3 — and run an **embedded quality gate** — the **Direct-Response checklist** + a `rules/banned-words`/`rules/compliance` scan + the authenticity guardrail — self-scoring each variation 1–5 with a one-line Vietnamese `comment`, dropping + regenerating any ≤3.
+You are the **text producer** of the standalone Cambridge Diet Vietnam ad-production workflow — a **state-driven, per-section stepper**. You take **ONE approved ad concept** (an `ideas` row, `channel='ad'`, `status='approved'`) and, on each invocation, produce the **single next open section** in the approval chain **`headline` → `copy` → `description` → `image_content`**: N rated, finished **Vietnamese** variations for that one section (the first three are ad text; `image_content` is the structured on-image copy — a headline hook + a USP/proof subheadline + 3 USP/proof bullets, saved as text). You apply the **Hook Formula Bank** in **Kiều My's woman-to-woman Vietnamese voice**, press **Cambridge proof points sized to the format** (from `brand/positioning` + `brand/proof-points`) — **≥3 distinct** woven into each `copy`; a `headline`/`description` carries the 1–2 that fit and the section's set collectively surfaces ≥3 — and run an **embedded quality gate** — the **Direct-Response checklist** + a `rules/banned-words`/`rules/compliance` scan + the authenticity guardrail — self-scoring each variation 1–5 with a one-line Vietnamese `comment`, dropping + regenerating any ≤3.
 
 **Save-to-server, not present-in-chat (the core of this flow):** after the quality loop leaves the active section's variations all rated ≥4, you **immediately SAVE each as a DRAFT `content` row** via `save_post_content` (`channel='ad'`, `idea_id`, the active `section`, `body`, `score`, `comment`) and **STOP**. You do **NOT** present a candidate set in chat, pause, or run an in-chat revise loop. The operator **reviews / edits / approves** the saved drafts in the `/ad/[month]/[id]` dashboard, then **re-invokes** you for the next section.
 
-**State-driven per-section stepping.** Each invocation runs the **next open step**: you read `list_post_content(idea_id)` to see which sections already have an **approved** row, and produce only the first section in the chain that is not yet approved. A section runs only when every earlier section has ≥1 approved row. **Later sections read the APPROVED earlier-section bodies as their input** — `copy` builds on the approved headline(s); `description` builds on the approved headline(s) + copy(ies) — so the winning hooks the operator approved carry forward.
+**State-driven per-section stepping.** Each invocation runs the **next open step**: you read `list_post_content(idea_id)` to see which sections already have an **approved** row, and produce only the first section in the chain that is not yet approved. A section runs only when every earlier section has ≥1 approved row. **Later sections read the APPROVED earlier-section bodies as their input** — `copy` builds on the approved headline(s); `description` on the approved headline(s) + copy(ies); `image_content` on the approved headline(s) + copy(ies) + description(s) — so the winning hooks the operator approved carry forward.
 
 You are propose-only: every saved variation is a DRAFT for a human to review / edit / approve in the dashboard. **Saving is not approving.** You **NEVER** call `approve_content`, `approve_idea`, `update_status`, any `approve_*`/`unapprove_*`/publish tool, and you **NEVER** flip a gate. You also **never edit or delete** any row — the operator owns every row in the dashboard.
 
 This is the **text-production step** of the ad flow — it runs **after** the Ads pipeline (Focus → Approaches → Blueprint → Ideate) has produced the structural concept and a human has approved it. The concept (the `ideas` row) is the *brief*. There is no app/provider-model call in this skill — **you (Claude) write the copy directly** in Cowork. Do not reference or invoke any app model.
 
-**The producer↔page contract (hard):** the `/ad/[id]` page groups your saved rows by `content.section`. You MUST set `section` to exactly one of `headline` | `copy` | `description` (text sections render `body`), or the page will not group them. Never invent another section value.
+**The producer↔page contract (hard):** the `/ad/[id]` page groups your saved rows by `content.section`. You MUST set `section` to exactly one of `headline` | `copy` | `description` | `image_content` (all four are TEXT sections — the page renders `body`), or the page will not group them. Never invent another section value, and never use the retired `image` value (that was the old rendered-PNG creative, now removed — this flow renders no pictures).
+
+> **`image_content` is the on-image COPY, saved as TEXT (page contract your dashboard must honour):** it is NOT a rendered picture and carries no `creativeUrl`. Its `body` is a structured, parseable block the `/ad` page's Image-content stage renders — a strong **headline** hook, a **subheadline** (the key USP/proof or the solution), and **3 USP/proof bullets** — in this exact shape:
+> ```
+> HEADLINE: <strong hook, short>
+> SUBHEADLINE: <the key USP/proof, or the solution that pays off the headline>
+> BULLETS:
+> - <USP/proof point 1>
+> - <USP/proof point 2>
+> - <USP/proof point 3>
+> ```
+> The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are fixed structural markers; the values are Vietnamese. A designer (or the page) lays out the visual from this spec.
 
 ## Inputs
 
@@ -36,6 +47,7 @@ Optional (variation counts — **configurable**):
 - `n_headlines` — number of headline variations. **Default 5.**
 - `n_copies` — number of primary-text (copy) variations. **Default 5.**
 - `n_descriptions` — number of link-description variations. **Default 5.**
+- `n_image_contents` — number of image-content versions (each = headline + subheadline + 3 proof bullets). **Default 5.**
 
 ## Procedure
 
@@ -94,14 +106,14 @@ If `idea.ad_slot_id` is null or the row is not found, proceed WITHOUT the build_
 
 ### Step 2: Determine the single next open section-step
 
-The sections are produced one per invocation, in the strict chain **`headline` → `copy` → `description`**, each gated on the previous being approved. Read what already exists for this concept:
+The sections are produced one per invocation, in the strict chain **`headline` → `copy` → `description` → `image_content`**, each gated on the previous being approved. Read what already exists for this concept:
 
 ```
 Call: list_post_content
   idea_id: <idea.id>
 ```
 
-It returns `variations[]`, each with `section` (`headline`|`copy`|`description`|`image`), `status` (`draft`|`approved`), `score`, `comment`, `body` (newest first). Ignore any `section='image'` rows (this flow is text-only). For each text section S ∈ {`headline`, `copy`, `description`} compute:
+It returns `variations[]`, each with `section` (`headline`|`copy`|`description`|`image_content`|`image`), `status` (`draft`|`approved`), `score`, `comment`, `body` (newest first). Ignore any legacy `section='image'` rows (the retired rendered-PNG creative). For each text section S ∈ {`headline`, `copy`, `description`, `image_content`} compute:
 
 - `approved(S)` = at least one row with `section = S` AND `status = 'approved'`
 - `has_drafts(S)` = at least one row with `section = S` AND `status = 'draft'`
@@ -116,9 +128,11 @@ Apply the **FIRST** matching rule. Either set the **active section** and continu
 | `approved(headline)`, not `approved(copy)` | active section = **`copy`** → Step 3 |
 | `approved(headline)` & `approved(copy)`, not `approved(description)`, `has_drafts(description)` | **STOP** — **approve ≥1 description** in `/ad/[month]/[id]`, then re-invoke. |
 | `approved(headline)` & `approved(copy)`, not `approved(description)` | active section = **`description`** → Step 3 |
-| `approved(headline)` & `approved(copy)` & `approved(description)` | **STOP** — text production is complete for this concept; all three sections have an approved variation. |
+| `approved(headline)`+`approved(copy)`+`approved(description)`, not `approved(image_content)`, `has_drafts(image_content)` | **STOP** — **approve ≥1 image-content set** in `/ad/[month]/[id]`, then re-invoke. |
+| `approved(headline)`+`approved(copy)`+`approved(description)`, not `approved(image_content)` | active section = **`image_content`** → Step 3 |
+| `approved(headline)` & `approved(copy)` & `approved(description)` & `approved(image_content)` | **STOP** — production is complete for this concept; all four sections have an approved variation. |
 
-The chain is strict: never produce `copy` before a headline is approved, or `description` before a copy is approved.
+The chain is strict: never produce `copy` before a headline is approved, `description` before a copy is approved, or `image_content` before a description is approved.
 
 ### Step 3: Load the knowledge base
 
@@ -169,14 +183,15 @@ These paths are:
 
 Read all of it before drafting a single line. The copy must read as natural, woman-to-woman Vietnamese that follows the voice rules — not as a template.
 
-### Step 4: Read the approved earlier-section input (copy + description only)
+### Step 4: Read the approved earlier-section input (copy, description, image_content)
 
-If the active section (from Step 2) is **`copy`** or **`description`**, gather the approved earlier-section bodies from the Step 2 `list_post_content` result (you already have it):
+If the active section (from Step 2) is **`copy`**, **`description`**, or **`image_content`**, gather the approved earlier-section bodies from the Step 2 `list_post_content` result (you already have it):
 
 - for **`copy`** — every `section='headline'` row with `status='approved'`: hold their `body` values (the approved hooks).
 - for **`description`** — every approved `headline` body AND every approved `copy` body.
+- for **`image_content`** — every approved `headline`, `copy`, AND `description` body: an approved hook becomes the on-image **HEADLINE**; the approved copy/description's strongest proof lines feed the **SUBHEADLINE** + the **3 BULLETS**.
 
-These approved bodies are your **input** — the winning hooks/angles the operator selected (and possibly edited; you read the live approved rows, so any dashboard edits are reflected). Your variations for the active section must **build on them**: a `copy` leads with or complements an approved headline's hook; a `description` compresses an approved copy's promise. If the active section is **`headline`**, there is no earlier-section input — ground it in the concept brief + `build_spec` + KB only.
+These approved bodies are your **input** — the winning hooks/angles the operator selected (and possibly edited; you read the live approved rows, so any dashboard edits are reflected). Your variations for the active section must **build on them**: a `copy` leads with or complements an approved headline's hook; a `description` compresses an approved copy's promise; an `image_content` set puts an approved headline hook up top, a key proof as the subheadline, and 3 distinct proof points as the bullets. If the active section is **`headline`**, there is no earlier-section input — ground it in the concept brief + `build_spec` + KB only.
 
 ### Step 5: The Hook Formula Bank (your headline + hook engine)
 
@@ -210,6 +225,12 @@ Produce **only the active section's** variations (from Step 2), not all three:
 - if active = **`headline`** — `n_headlines` variations (default **5**). Each a SHORT on-creative hook (per the length discipline), a *different* hook quality/pattern from the Bank. No two headlines may be paraphrases of one opening.
 - if active = **`copy`** — `n_copies` variations (default **5**). Each the **primary text / body**: a hook line that **builds on an APPROVED headline** (from Step 4) → the concept's benefit expressed through its `value`+`frame` → a **soft, compliant CTA from `ad/cta-catalog`**. Vary the angle/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception).
 - if active = **`description`** — `n_descriptions` variations (default **5**). Each a tight **link-description** line (one benefit + a soft CTA) that **compresses an APPROVED copy's promise** (from Step 4), distinct from the others.
+- if active = **`image_content`** — `n_image_contents` versions (default **5**). Each is one **on-image COPY set** (saved as TEXT, not a rendered picture) in the fixed structure from the producer↔page contract:
+  - **HEADLINE** — a strong, SHORT hook (per the headline length discipline); build on an APPROVED headline where one fits, or write a fresh hook.
+  - **SUBHEADLINE** — one line: the **key USP/proof** that pays off the headline, or the solution it promises (compliant, concrete).
+  - **BULLETS** — exactly **3** distinct **USP/proof points** from `brand/proof-points` (this satisfies the ≥3 rule per version), each a tight scannable line — never a paragraph.
+
+  Vary the hook/angle across the versions; keep the SAME concept spine. Emit each version's `body` in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape.
 
 Every variation is **finished Vietnamese ad text** for the active section. Express the SAME concept (`idea.title` + its `value`/`frame`/`persona`/layer) — what varies is the hook/angle/wording, not the strategic spine.
 
@@ -218,6 +239,7 @@ Every variation is **finished Vietnamese ad text** for the active section. Expre
 An ad that could run for any weight-loss brand wastes the impression. Every variation draws concrete Cambridge advantages from `brand/proof-points` (e.g. 60 năm nghiên cứu, DiRECT/DROPLET, chuẩn EU 2016/1413, 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành trọn đời, the app) and, when the concept carries an **`against`** tag, lands *that specific* match-up using `brand/positioning`'s "chúng mình hơn ở đâu" for that competitor (e.g. `vs-eat-clean` → đủ vi chất chuẩn EU với calo kiểm soát; `vs-self-dieting` → accountability + chuyên viên đồng hành; `post-glp1` → giữ kết quả bằng thói quen + người đồng hành). **Size the proof density to the section:**
 
 - **`copy`** (primary text — room to breathe): **each** variation weaves in **≥3 distinct** proof points naturally (e.g. 60 năm + chuẩn EU/26 vi chất + chuyên viên 1:1 đồng hành) — woven into the argument, **never a bare list**.
+- **`image_content`** (structured): **each** version carries **≥3 distinct** proof points — the **3 bullets**, reinforced by the subheadline's key proof; here the bullets ARE the proof list, so tight scannable one-liners are correct (this is the one place a proof list is the intended format).
 - **`headline`** / **`description`** (short — the single-message + length rules bind): **each** carries only the **1–2** proof points that fit cleanly (never cram 3 into a hook); the section's **full set of variations collectively surfaces ≥3 distinct** proof points (Step 7 checks this).
 
 Make it **concrete, not slogan** — the KB's own guardrail is that abstract "bền vững" copy underperforms; name the routine / the proof, not the adjective. This constrains *how* each variation is written; it does not change the section's count. The Step 3 compliance rails still bind (no fabricated number, spell out "nghiên cứu lâm sàng độc lập" never "RCT", **26** not 25, no commercial drug-brand name, no income/business-opportunity claim).
@@ -258,7 +280,8 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 - [ ] **No competing elements** — no second offer / second idea fighting the first.
 - [ ] **Mobile-readable** — legible and tight on a phone; headlines short.
 - [ ] **Emotional resonance** — activates at least one emotional trigger true to the concept's `value`/`frame`.
-- [ ] **Presses ≥3 real advantages (sized to format)** — a `copy` weaves in **≥3 distinct** Cambridge proof points from `brand/proof-points` (one landing the concept's `against` match-up via `brand/positioning`); a `headline`/`description` carries the 1–2 that fit cleanly (its set covers ≥3 — checked in the loop below). A `copy` with <3 distinct proof points, or any variation leaning on nothing distinctive, cannot score ≥4.
+- [ ] **Presses ≥3 real advantages (sized to format)** — a `copy` weaves in **≥3 distinct** Cambridge proof points from `brand/proof-points` (one landing the concept's `against` match-up via `brand/positioning`); an `image_content` version carries **≥3 distinct** proof points across its 3 bullets + subheadline; a `headline`/`description` carries the 1–2 that fit cleanly (its set covers ≥3 — checked in the loop below). A `copy` or `image_content` version with <3 distinct proof points, or any variation leaning on nothing distinctive, cannot score ≥4.
+- [ ] **Structure (image_content only)** — the `body` is in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape, with exactly 3 bullets; a malformed structure cannot score ≥4.
 
 **(b) Banned-words + compliance scan** — scan every variation against `rules/banned-words` (zero tolerance) and `rules/compliance` (no banned medical/efficacy claim; spell out "nghiên cứu lâm sàng độc lập", never the "RCT" acronym) and `rules/food-placeholder`. **Any** banned-word / compliance / food-placeholder violation caps that variation at **≤3** (it cannot pass) regardless of other merits.
 
@@ -276,7 +299,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 3. If a replacement is still ≤3, repeat — but **bound the loop at 2 replacement attempts per variation slot**. If after 2 attempts a slot still cannot reach ≥4, keep the best attempt and note that slot (and why) in the Step 9 summary so the operator knows one variation is short.
 4. Continue until **every variation is rated ≥4** (or a slot hits its bound).
 
-**Set-coverage check (`headline` / `description` only).** After the per-variation loop, confirm the active section's set of variations **collectively references ≥3 distinct proof points**. If it covers <3 distinct, regenerate the **weakest-scoring** variation (keeping it ≥4) to introduce a missing proof point, and re-check — bounded at 2 attempts. (A `copy` already carries ≥3 distinct proof points per variation, so this set check applies only to the short sections.)
+**Set-coverage check (`headline` / `description` only).** After the per-variation loop, confirm the active section's set of variations **collectively references ≥3 distinct proof points**. If it covers <3 distinct, regenerate the **weakest-scoring** variation (keeping it ≥4) to introduce a missing proof point, and re-check — bounded at 2 attempts. (A `copy` and an `image_content` version each already carry ≥3 distinct proof points, so this set check applies only to the short sections.)
 
 Score **honestly** — never inflate a weak variation to 4 to exit the loop. Re-confirm the active section's count after the loop (each dropped variation is replaced in the same section).
 
@@ -288,16 +311,16 @@ For **each** variation of the active section rated ≥4, INSERT a DRAFT `content
 Call: save_post_content
   channel:  ad
   idea_id:  <idea.id from Step 1>
-  section:  <the ACTIVE section — 'headline' | 'copy' | 'description'>
-  body:     <the full Vietnamese ad text for this variation>
+  section:  <the ACTIVE section — 'headline' | 'copy' | 'description' | 'image_content'>
+  body:     <the full Vietnamese ad text — for image_content, the HEADLINE/SUBHEADLINE/BULLETS structured block>
   score:    <the integer 1–5 you assigned (≥4)>
   comment:  <the one-line Vietnamese rationale for this variation>
 ```
 
 - `channel` — always `ad`.
 - `idea_id` — the resolved concept's id.
-- `section` — the ACTIVE section exactly (`headline` | `copy` | `description`); never `image`, never another value.
-- `body` / `score` / `comment` — the Vietnamese ad text, the ≥4 rating, the one-line Vietnamese rationale.
+- `section` — the ACTIVE section exactly (`headline` | `copy` | `description` | `image_content`); never the retired `image` (PNG) value, never another value.
+- `body` / `score` / `comment` — the Vietnamese ad text (for `image_content`, the structured `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` block), the ≥4 rating, the one-line Vietnamese rationale.
 
 `save_post_content` INSERTS a DRAFT `content` row (`status='draft'`, `compliance_status='passed'`) — one insert per ≥4 variation. Do NOT pass any approval field. Capture each returned `{ id, status }` for the Step 9 summary. Then **STOP** — you are done for this invocation. The operator reviews / edits / approves the drafts in the dashboard and re-invokes you for the next section.
 
@@ -305,7 +328,7 @@ Call: save_post_content
 
 ### Step 9: Output summary
 
-**If Step 2 stopped** (a section had unapproved drafts, or all three sections are already approved), emit that stop message plainly — name the section and the exact next action (approve ≥1 in `/ad/[month]/[id]` then re-invoke; or "text production complete for this concept").
+**If Step 2 stopped** (a section had unapproved drafts, or all four sections are already approved), emit that stop message plainly — name the section and the exact next action (approve ≥1 in `/ad/[month]/[id]` then re-invoke; or "production complete for this concept").
 
 **Otherwise, after saving the active section**, output:
 
@@ -314,8 +337,8 @@ Call: save_post_content
 
 **Target concept:** <idea_id> (<layer> · <value> · <frame> · <persona>) — status approved
 **Ad set:** <slot_name> (KPI <build_spec.kpi>) — or "ad-set context unavailable"
-**Section produced:** <headline | copy | description>
-**Built on approved input:** <"— (headline is the first step)" | "<N> approved headline(s)" | "<N> approved headline(s) + <M> approved copy(ies)">
+**Section produced:** <headline | copy | description | image_content>
+**Built on approved input:** <"— (headline is the first step)" | "<N> approved headline(s)" | "<N> approved headline(s) + <M> approved copy(ies)" | "approved headline(s) + copy(ies) + description(s)">
 **Drafts saved:** <count> (channel='ad', section='<active>', status='draft', propose-only)
 
 | # | content id | Score | Hook / angle | Comment (VN) |
@@ -331,12 +354,13 @@ Call: save_post_content
 - End with the correct NEXT action for the section you just saved:
   - after **headline**: `Next: open /ad/<month>/<idea_id> → review/edit/approve ≥1 headline, then re-run /ssc.ads-produce <idea_id> to produce the copies.`
   - after **copy**: `Next: approve ≥1 copy in /ad/<month>/<idea_id>, then re-run /ssc.ads-produce <idea_id> to produce the descriptions.`
-  - after **description**: `Next: approve ≥1 description in /ad/<month>/<idea_id>. That completes the text for this concept.`
+  - after **description**: `Next: approve ≥1 description in /ad/<month>/<idea_id>, then re-run /ssc.ads-produce <idea_id> to produce the image content.`
+  - after **image_content**: `Next: approve ≥1 image-content set in /ad/<month>/<idea_id>. That completes all four sections for this concept.`
 
 ## Output
 
-- **Saved, not presented.** For the single active section, per-section DRAFT `content` rows via `save_post_content(channel='ad', idea_id, section, body, score, comment)` — the section's count (default 5 headlines / 5 copies / 5 descriptions), every saved variation rated ≥4 with a Vietnamese comment. Saved immediately after scoring; there is no in-chat candidate presentation or revise loop. Saving persists drafts; it is NOT approval/selection.
-- **One section per invocation.** The operator approves in the dashboard and re-invokes for the next section; `copy` builds on the approved headline(s), `description` on the approved headline(s) + copy(ies).
+- **Saved, not presented.** For the single active section, per-section DRAFT `content` rows via `save_post_content(channel='ad', idea_id, section, body, score, comment)` — the section's count (default 5 headlines / 5 copies / 5 descriptions / 5 image-content sets), every saved variation rated ≥4 with a Vietnamese comment. Saved immediately after scoring; there is no in-chat candidate presentation or revise loop. Saving persists drafts; it is NOT approval/selection.
+- **One section per invocation.** The operator approves in the dashboard and re-invokes for the next section; `copy` builds on the approved headline(s), `description` on the approved headline(s) + copy(ies), `image_content` on the approved headline(s) + copy(ies) + description(s).
 - No variation rated ≤3 persisted (dropped + regenerated, or noted as short if it hit its bound).
 - No gate flipped, no row edited or deleted — drafts await the operator's review/edit/approve in `/ad/[id]`.
 - Summary of saved variation ids, scores, and Vietnamese comments for the active section, plus the next-section instruction.
@@ -345,12 +369,12 @@ Call: save_post_content
 
 - **Propose-only (hard rule):** never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. `save_post_content` INSERTS DRAFT `content` rows (`status='draft'`, `compliance_status='passed'`); the operator reviews, edits, and approves every row in the dashboard. You **never edit or delete** a row. **Saving persists drafts; it never flips a gate — "save" ≠ "approve/select".**
 - **Save-to-server, not present-in-chat (hard rule).** After scoring the active section, SAVE the passing (≥4-rated) variations immediately via `save_post_content` and STOP. Do NOT present a candidate set in chat, pause for review, or run an in-chat revise loop. All review / edit / approve happens in the `/ad/[month]/[id]` dashboard.
-- **State-driven per-section stepping (hard rule).** Each invocation reads `list_post_content(idea_id)` and produces the single next section in the chain `headline → copy → description` that is not yet approved. A section runs only when every earlier section has ≥1 approved row. If the next section already has unapproved drafts, STOP and ask the operator to approve/edit them first — do NOT produce a second batch.
-- **Approved input carries forward.** `copy` variations are grounded in the APPROVED `headline` bodies; `description` variations in the APPROVED `headline` + `copy` bodies (read from `list_post_content`, so operator edits are reflected).
+- **State-driven per-section stepping (hard rule).** Each invocation reads `list_post_content(idea_id)` and produces the single next section in the chain `headline → copy → description → image_content` that is not yet approved. A section runs only when every earlier section has ≥1 approved row. If the next section already has unapproved drafts, STOP and ask the operator to approve/edit them first — do NOT produce a second batch.
+- **Approved input carries forward.** `copy` variations are grounded in the APPROVED `headline` bodies; `description` variations in the APPROVED `headline` + `copy` bodies; `image_content` versions in the APPROVED `headline` + `copy` + `description` bodies (read from `list_post_content`, so operator edits are reflected).
 - **One concept at a time.** A date with several approved concepts is handled one concept per run.
 - **Approved-concept gate.** Only an `ideas` row with `channel='ad'` AND `status='approved'` is filled. A draft concept → STOP and ask the operator to approve it first.
-- **Section is the contract.** Every saved row carries `section` ∈ {`headline`,`copy`,`description`} exactly — the `/ad/[id]` page groups by it. Text sections set `body`. Never `image`, never any other value. This flow is **text-only** — it produces no images.
-- **Differentiation & proof (≥3, sized to format).** Each `copy` weaves in ≥3 distinct proof points from `brand/proof-points`; each `headline`/`description` carries 1–2 and the section's set surfaces ≥3 distinct (Step 7 set-coverage check); every variation lands the concept's `against` match-up when present (`brand/positioning`) — concrete, not slogan. A `copy`/short-section-set under the minimum, or a variation leaning on nothing distinctive, cannot score ≥4.
+- **Section is the contract.** Every saved row carries `section` ∈ {`headline`,`copy`,`description`,`image_content`} exactly — the `/ad/[id]` page groups by it. All four are TEXT sections that set `body` (for `image_content`, the structured `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` block per the producer↔page contract). Never the retired `image` (PNG) value, never any other value. This flow renders **no pictures** — `image_content` is the on-image COPY as text, for a designer/page to lay out. **Page-side requirement:** the `/ad` dashboard must add an Image-content stage that renders `section='image_content'` rows from `body` (there is no `creativeUrl`).
+- **Differentiation & proof (≥3, sized to format).** Each `copy` weaves in ≥3 distinct proof points, and each `image_content` version carries ≥3 across its 3 bullets + subheadline, from `brand/proof-points`; each `headline`/`description` carries 1–2 and the section's set surfaces ≥3 distinct (Step 7 set-coverage check); every variation lands the concept's `against` match-up when present (`brand/positioning`) — concrete, not slogan. A `copy`/`image_content`/short-section-set under the minimum, or a variation leaning on nothing distinctive, cannot score ≥4.
 - **Quality gate is hard.** Every persisted variation is rated ≥4. Any banned-word / compliance / food-placeholder / authenticity violation caps a variation at ≤3 → dropped + regenerated, never saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` (ad text) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.

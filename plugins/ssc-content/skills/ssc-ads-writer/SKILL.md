@@ -102,6 +102,8 @@ Call: get_knowledge
     "voice/founder-voice",
     "brand/woman-to-woman",
     "brand/angles",
+    "brand/positioning",
+    "brand/proof-points",
     "ad/creative-guidelines",
     "ad/headline-formulas",
     "ad/cta-catalog",
@@ -122,6 +124,8 @@ These paths are:
 - `voice/founder-voice` — Kiều My's founder voice (the ad text speaks woman-to-woman in her register).
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in.
 - `brand/angles` — the full angle system (value / entry / against / experience dimensions, frame codes) — so the copy expresses the concept's tagged angle faithfully.
+- `brand/positioning` — the competitive positioning: the "Cỗ Máy Bền Vững" (chuyên viên + app) and the "chúng mình hơn ở đâu" reasoning per competitor — so the copy can press the concept's `against` match-up.
+- `brand/proof-points` — the credibility lookup table (real, compliant proof: 60 năm, DiRECT/DROPLET, chuẩn EU 2016/1413, 26 vi chất, chương trình 6 bước, chuyên viên 1:1, đồng hành trọn đời, app, Kiều My từ 2004) — each row names the competitor it beats.
 - `ad/creative-guidelines` — ad creative principles and what makes Cambridge Diet ad copy convert.
 - `ad/headline-formulas` — the brand's headline formulas and length discipline (the source for the Hook Formula Bank patterns below).
 - `ad/cta-catalog` — the approved CTA phrasings (soft, authentic, compliant) — the source for every variation's call-to-action.
@@ -168,6 +172,10 @@ Produce, for the ONE concept:
 
 Every variation is **finished Vietnamese ad text**, ready for the page to curate. Express the SAME concept (`idea.title` + its `value`/`frame`/`persona`/layer) — what varies is the hook/angle/wording, not the strategic spine.
 
+**Differentiation & proof — press the advantage, don't state a generic benefit (read FIRST):**
+
+An ad that could run for any weight-loss brand wastes the impression. Every variation must lean on **≥1 concrete Cambridge advantage** drawn from `brand/proof-points` (e.g. 60 năm nghiên cứu, DiRECT/DROPLET, chuẩn EU 2016/1413, 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành trọn đời, the app). When the concept carries an **`against`** tag, land *that specific* match-up using `brand/positioning`'s "chúng mình hơn ở đâu" for that competitor (e.g. `vs-eat-clean` → đủ vi chất chuẩn EU với calo kiểm soát; `vs-self-dieting` → accountability + chuyên viên đồng hành; `post-glp1` → giữ kết quả bằng thói quen + người đồng hành). Make it **concrete, not slogan** — the KB's own guardrail is that abstract "bền vững" copy underperforms; name the routine / the proof, not the adjective. This constrains *how* each variation is written; it does not add a section or change the counts. The Step 2 compliance rails still bind (no fabricated number, spell out "nghiên cứu lâm sàng độc lập" never "RCT", **26** not 25, no commercial drug-brand name, no income/business-opportunity claim).
+
 **Authenticity guardrail — real people are real, never fabricated (read FIRST):**
 
 The ad text may speak in **Kiều My's woman-to-woman voice** — but voice is NOT licence to invent biography. Every variation belongs to ONE of three lanes; obey its rule. NEVER fabricate a story, quote, event, number, or lived experience and attribute it to a real named person.
@@ -193,6 +201,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 - [ ] **No competing elements** — no second offer / second idea fighting the first.
 - [ ] **Mobile-readable** — legible and tight on a phone; headlines short.
 - [ ] **Emotional resonance** — activates at least one emotional trigger true to the concept's `value`/`frame`.
+- [ ] **Presses a real advantage** — leans on ≥1 concrete Cambridge USP / proof point from `brand/proof-points` (not a generic benefit any brand could claim); if the concept has an `against` tag, it lands that specific match-up (`brand/positioning`). A flat, undifferentiated variation cannot score ≥4.
 
 **(b) Banned-words + compliance scan** — scan every variation against `rules/banned-words` (zero tolerance) and `rules/compliance` (no banned medical/efficacy claim; spell out "nghiên cứu lâm sàng độc lập", never the "RCT" acronym) and `rules/food-placeholder`. **Any** banned-word / compliance / food-placeholder violation caps that variation at **≤3** (it cannot pass) regardless of other merits.
 
@@ -324,6 +333,6 @@ After persisting the approved variations, output:
 - **Quality gate is hard.** Every persisted variation is rated ≥4. Any banned-word / compliance / food-placeholder / authenticity violation caps a variation at ≤3 → dropped + regenerated, never saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` (ad text) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the knowledge paths in Step 2 (voice/*, brand/woman-to-woman, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge paths in Step 2 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `get_knowledge` reads).

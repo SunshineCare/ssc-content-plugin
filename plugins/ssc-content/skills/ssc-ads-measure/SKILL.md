@@ -1,13 +1,13 @@
 ---
 name: ssc-ads-measure
-description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Synthesises a retrospective (tier grades + winning vs fatigued angles, what to carry forward) and writes it to channel_plans.retrospective via save_channel_plan. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus reads this retrospective to carry winning angles forward and drop fatigued ones.
+description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Synthesises a retrospective (tier grades + winning vs fatigued angles — and, where the winning/losing ad-sets' content is identifiable via get_idea + list_post_content, winning vs fatigued proof points, copy lengths, and formats) and writes it to channel_plans.retrospective via save_channel_plan. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus reads this retrospective to carry winning angles forward and drop fatigued ones; the ad-production writer (ssc-ads-writer) reads it to lean on the proven proof points / lengths / formats and avoid fatigued ones.
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan]
+  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan, get_idea, list_post_content]
 ---
 
 # Ads Measure (`ssc-ads-measure`)
@@ -87,6 +87,7 @@ Now extract the angle learnings from the grades:
 - **Winning angles** (🟢) — map each back to its layer/slot and the angle it carried (value / against / frame); cite the tier's KPI number (cost-per-purchase for L1/L3; reach/CPM/frequency for L2). These carry forward.
 - **Fatigued / inefficient angles** (🔴) — map each back to its layer/slot/angle and name the tier-specific fatigue signal. These drop or refresh.
 - **Cross-channel** — fold in any digest signal from Step 1b (`adCampaignHealth`, conversion gaps) only if present.
+- **Winning vs fatigued proof points, copy lengths, and formats** — for the clearest 🟢 winners and 🔴 losers, map the ad-set → its slot → its concept(s) (via `detail.slotId`), then read those concepts' content with `get_idea` + `list_post_content` and note which **proof points** the converting copy leaned on, which **copy-length** band performed, and which **format** won vs fatigued. This is a *directional* signal — an ad-set can carry several creatives, so do not over-attribute; where the content isn't identifiable, stay at the angle level and say so. (This is what the ad-production writer, `ssc-ads-writer`, reads back from `retrospective` to lean on proven proof-points/lengths/formats and drop fatigued ones.)
 
 Ground every grade in an actual ingested metric from `get_ad_performance` — do not fabricate numbers. Where you cannot map an ad set back to a known slot/angle, say so and lean on the layer-level read.
 
@@ -107,6 +108,12 @@ Write a tight markdown retrospective (under ~400 words), structured so next mont
 
 ### Fatigued / inefficient angles (drop or refresh)
 - <fatigued slot/layer/angle> — <named fatigue signal: rising cost-per-purchase (L1/L3) or frequency >3.5 (L2)>
+
+### Winning proof points · lengths · formats (carry forward — the writer reads these)
+- <e.g. "proof '60 năm + chuẩn EU / 26 vi chất' converted on L3"; "copy dài kể-chuyện thắng ở L2"; "format carousel thắng cold L1"> — or "no content-level signal this cycle"
+
+### Fatigued proof points · lengths · formats (drop / refresh)
+- <e.g. "hook 1 dòng chung chung mỏi"; "format ảnh tĩnh mỏi ở L2"> — or "none observed"
 
 ### Budget / efficiency fixes for next month
 - <reallocation or angle-refresh action, or "none observed">
@@ -178,4 +185,5 @@ Retrospective written to the ad channel_plan (propose-state, no gate). Next mont
 - **KPI is tier-locked.** Cost-per-purchase grades ONLY the conversion tiers (L1, L3); L2 omnipresence is graded on reach/CPM/ThruPlay/frequency and warm-pool contribution — NEVER on cost-per-purchase (grading L2 on cost-per-purchase mis-kills the funnel-nurture tier). Per-tier thresholds are read live from `ad/strategy` + `ad/campaign-architecture` (KB wins over any inline number).
 - **NEVER writes `monthly_plans`, `targets.ads`, or `phase_status`** — those belonged to the retired shared-head model. Output goes only to the ad `channel_plan`'s `retrospective`.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state, and never writes to a different period's plan.
-- Requires `edit` capability (plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` reads).
+- Reads winning/losing ad-sets' content via `get_idea` + `list_post_content` **only to name the proof points / lengths / formats they used** — read-only, no content writes, and a directional signal (an ad-set may carry several creatives; do not over-attribute).
+- Requires `edit` capability (plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` / `get_idea` / `list_post_content` reads).

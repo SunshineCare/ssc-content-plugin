@@ -1,6 +1,6 @@
 ---
 name: ssc-ads-writer
-description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, then reads list_post_content to find the single NEXT open section in the approval chain headline → copy → description (the first not yet approved), and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for the next section; copy builds on the approved headlines, description on the approved headlines + copies. Text only — no images. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
+description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, then reads list_post_content to find the single NEXT open section in the approval chain headline → copy → description (the first not yet approved), and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points, and biasing toward the plan retrospective's proven winners (proof points / lengths / formats / angles) and away from fatigued losers. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for the next section; copy builds on the approved headlines, description on the approved headlines + copies. Text only — no images. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -89,6 +89,8 @@ From `{ plan }`, find the `plan.ad_slots[]` row whose `id === idea.ad_slot_id` a
 - the row's `value` / `frame` / `primary_persona` where present (these mirror the idea's structural tags — reconcile; the tags are authoritative for the concept).
 
 If `idea.ad_slot_id` is null or the row is not found, proceed WITHOUT the build_spec (use the idea's structural tags alone), and note in the Step 9 summary that the ad-set context was unavailable. Do NOT stop — the concept's tags are enough to write to.
+
+**Also hold the plan's `retrospective` (winners/losers — the learning signal).** The same `{ plan }` carries `plan.retrospective` — the markdown `ssc-ads-measure` wrote last cycle: which **angles, proof points, copy lengths, and formats** WON (carry forward) versus FATIGUED / ran inefficiently (drop or refresh). Hold it — it steers Steps 6–7: lean toward the proven winners, steer clear of the fatigued losers, and never resurrect a retired loser. If `plan.retrospective` is absent or says "no prior ad performance this cycle" / "no content-level signal", there is no performance signal yet — fall back to the KB best-practice (Steps 3, 5) and note that in the Step 9 summary.
 
 ### Step 2: Determine the single next open section-step
 
@@ -220,6 +222,17 @@ An ad that could run for any weight-loss brand wastes the impression. Every vari
 
 Make it **concrete, not slogan** — the KB's own guardrail is that abstract "bền vững" copy underperforms; name the routine / the proof, not the adjective. This constrains *how* each variation is written; it does not change the section's count. The Step 3 compliance rails still bind (no fabricated number, spell out "nghiên cứu lâm sàng độc lập" never "RCT", **26** not 25, no commercial drug-brand name, no income/business-opportunity claim).
 
+**Learn from winners/losers — bias toward what converted (read the retrospective from Step 1b):**
+
+If `plan.retrospective` carries performance learnings, bias your drafting toward its **WINNING** signals and away from its **FATIGUED** ones, on all four dimensions:
+
+- **Proof points** — lead with the specific proofs the retrospective says converted (choose them first among your ≥3); de-emphasise any it marks fatigued.
+- **Copy length** — favour the length band that performed for this section/tier (e.g. longer story copy that won at L2, tight direct copy that won at L3).
+- **Format** — echo the winning format's structure/rhythm (and avoid the one flagged fatigued), within this text-only flow.
+- **Angle** (value/against/frame) — reinforce the winning angle; never resurrect a loser the retrospective retired.
+
+This biases *how* you draft; it never overrides compliance, authenticity, or the ≥3-proof-points rule. When there is no retrospective signal, fall back to the KB best-practice (Steps 3, 5).
+
 **Authenticity guardrail — real people are real, never fabricated (read FIRST):**
 
 The ad text may speak in **Kiều My's woman-to-woman voice** — but voice is NOT licence to invent biography. Every variation belongs to ONE of three lanes; obey its rule. NEVER fabricate a story, quote, event, number, or lived experience and attribute it to a real named person.
@@ -253,7 +266,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 
 **Self-score each variation `1–5`** (integer) and write a one-line Vietnamese `comment`:
 
-- `score` — judge Hook-Bank strength + Direct-Response fit + faithfulness to the concept's angle (`value`/`frame`/`persona`/layer) + voice fit (natural woman-to-woman Vietnamese, correct pronouns) + section discipline (headline length / copy structure / description tightness). Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead with; **4** = strong, ready to curate; **3** = solid but flawed; **1–2** = weak/violating.
+- `score` — judge Hook-Bank strength + Direct-Response fit + faithfulness to the concept's angle (`value`/`frame`/`persona`/layer) + voice fit (natural woman-to-woman Vietnamese, correct pronouns) + section discipline (headline length / copy structure / description tightness) + alignment with the retrospective's winners/losers (Step 1b — reward a variation leaning on a proven-winning proof point / length / format / angle; mark down one that repeats a flagged-fatigued loser). Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead with; **4** = strong, ready to curate; **3** = solid but flawed; **1–2** = weak/violating.
 - `comment` — **one-line Vietnamese rationale** for the score: the single biggest reason it is strong or weak, naming the rule/voice doc it traces to — e.g. "Hook tò mò sắc, đúng frame confession của concept, CTA mềm khớp cta-catalog" or "Dùng từ cấm trong rules/banned-words → phải viết lại". Always Vietnamese; short; it must justify the number.
 
 **Quality-replacement loop** — **no saved variation may remain ≤3**:
@@ -342,5 +355,6 @@ Call: save_post_content
 - **All persisted prose in Vietnamese.** The saved `body` (ad text) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.
 - References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
+- **Learns from winners/losers (read-only).** Reads `plan.retrospective` (via the existing `get_channel_plan` call — no new tool) and biases drafting toward its proven-winning proof points / lengths / formats / angles and away from the fatigued losers, never resurrecting a retired loser. It is a read; it never flips a gate. No retrospective (or a "no data" note) → fall back to KB best-practice.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_post_content` / `get_knowledge` reads).

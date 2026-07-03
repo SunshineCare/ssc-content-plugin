@@ -121,3 +121,21 @@ Structural, per the harness-less repo:
 ## Open questions
 
 None. The four architecture decisions (re-invoke per step; logic in the writer skill; keep the quality loop; remove `ads-creative` entirely) and the two micro-decisions (stop-on-unapproved-drafts; drop edit/delete tools) were resolved during brainstorming.
+
+## Addendum (2026-07-03): ≥3 USP/proof-point minimum + posts scope
+
+A post-approval requirement from the operator: **every ad and every post must lean on at least 3 USP/proof points** (from `brand/proof-points` / `brand/positioning`) — strengthening the earlier `≥1`. The minimum is **sized to the format**, because a short unit cannot carry 3 without breaking the brand's own single-message / short-headline / compliance rules:
+
+- **Ads `copy`** (primary text) **and all posts** (long enough): each variation **weaves in ≥3 distinct proof points**, naturally — woven into the argument, never a bare list — one landing the concept's `against` match-up when it carries one.
+- **Ads `headline` / `description`** (short): each carries only the **1–2** proof points that fit cleanly (never cram 3 into a hook); the section's **variation set collectively surfaces ≥3 distinct** proof points.
+
+The quality gate enforces it: a `copy`/post with <3 distinct proof points **cannot score ≥4**; for `headline`/`description`, after the per-variation loop a **set-coverage check** confirms ≥3 distinct proof points across the section's set and regenerates the weakest variation to fill any gap. Compliance rails are unchanged (no fabricated number; "nghiên cứu lâm sàng độc lập" not "RCT"; **26** not 25; no drug-brand name; no income/MLM claim).
+
+**Posts are now in scope** (operator chose to fold them into this plan). The post producers get the same rule:
+
+- `ssc-post-produce` — add `brand/proof-points` + `brand/positioning` to its Step 3 KB load; draft each variation weaving in ≥3 distinct proof points.
+- `ssc-post-authority` — add `brand/proof-points` to its Step 1 KB load; add the "<3 distinct proof points → cannot score ≥4" gate criterion to Step 2.
+
+Files added to scope: `plugins/ssc-content/skills/ssc-post-produce/SKILL.md`, `plugins/ssc-content/skills/ssc-post-authority/SKILL.md`.
+
+**Known tension (flagged, not blocking):** not every post pillar is proof-heavy (a purely cultural / seasonal / community post can read as an ad if forced to carry 3 hard proof points). The rule is implemented as stated ("each post ≥3, woven naturally"); if specific pillars should be exempt, that is a one-line future refinement (a pillar carve-out) — to be added on request.

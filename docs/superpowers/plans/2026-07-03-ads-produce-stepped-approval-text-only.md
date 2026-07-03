@@ -416,14 +416,14 @@ F=plugins/ssc-content/skills/ssc-ads-writer/SKILL.md
 echo "tools line:"; grep -n 'tools:' $F
 echo "list_post_content present (>0): $(grep -c 'list_post_content' $F)"
 echo "edit/delete removed (0): $(grep -c 'edit_content\|delete_content' $F)"
-echo "present-in-chat/revise removed (0): $(grep -ci 'present the candidate set\|pause for review\|revise loop\|go-ahead' $F)"
+echo "old present/pause STEP removed (0): $(grep -ciE '^### step .*(present the candidate|pause for operator)' $F)"  # NOTE: the phrases "present"/"revise loop" still appear in NEGATIONS ("you do NOT present…") — that is correct; only an ACTIVE present/pause step heading is the defect
 echo "ads-creative removed (0): $(grep -c 'ads-creative' $F)"
 echo "state machine present (>0): $(grep -c 'next open section\|Determine the single next open' $F)"
 echo "USP preserved: positioning=$(grep -c 'brand/positioning' $F) proof=$(grep -c 'brand/proof-points' $F)"
 echo "≥3 rule: distinct-proof-points=$(grep -c 'distinct proof points' $F) gateline=$(grep -c 'real advantages' $F) setcheck=$(grep -c 'Set-coverage check' $F)"
 echo "save-to-server present (>0): $(grep -c 'Save the active section' $F)"
 ```
-Expected: tools line is exactly `[get_knowledge, get_idea, get_channel_plan, list_post_content, save_post_content]`; `list_post_content` >0; edit/delete = 0; present-in-chat/revise = 0; ads-creative = 0; state machine >0; positioning ≥1, proof ≥1; distinct-proof-points ≥3, gateline = 1, setcheck ≥1; save-to-server >0.
+Expected: tools line is exactly `[get_knowledge, get_idea, get_channel_plan, list_post_content, save_post_content]`; `list_post_content` >0; edit/delete = 0; old present/pause step = 0; ads-creative = 0; state machine >0; positioning ≥1, proof ≥1; distinct-proof-points ≥3, gateline = 1, setcheck ≥1; save-to-server >0.
 
 - [ ] **Step 4: Propose-only guard**
 
@@ -570,13 +570,13 @@ new_string:
 Run:
 ```bash
 CMD=plugins/ssc-content/commands/ssc.ads-produce.md
-echo "command image/creative mentions (0): $(grep -ciE 'image|creative|screenshot|playwright|ads-creative' $CMD)"
+echo "command image-PRODUCER refs (0): $(grep -ciE 'ads-creative|upload_creative|screenshot|playwright' $CMD)"  # NOTE: "text-only — no images" clarification prose is EXPECTED and fine; only image-PRODUCER/tool refs are defects
 test -d plugins/ssc-content/skills/ssc-ads-creative && echo "creative dir STILL EXISTS (FAIL)" || echo "creative dir GONE (OK)"
 echo "skill dirs now (33): $(ls -d plugins/ssc-content/skills/*/ | wc -l | tr -d ' ')"
 echo "ads-creative in live files (0): $(grep -rIn 'ads-creative' plugins/ CLAUDE.md 2>/dev/null | wc -l | tr -d ' ')"
 echo "CLAUDE.md skill count line:"; grep -n '× <name>/SKILL.md' CLAUDE.md
 ```
-Expected: command image/creative mentions = 0; creative dir GONE; skill dirs = 33; ads-creative in live files = 0; CLAUDE.md count line reads `33 ×`.
+Expected: command image-producer refs = 0 (the phrase "text-only — no images" is expected clarification, not a defect); creative dir GONE; skill dirs = 33; ads-creative in live files = 0; CLAUDE.md count line reads `33 ×`.
 
 - [ ] **Step 8: Commit (path-scoped — includes the operator's staged CLAUDE.md base + these edits)**
 

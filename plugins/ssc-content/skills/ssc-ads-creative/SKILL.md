@@ -1,6 +1,6 @@
 ---
 name: ssc-ads-creative
-description: The IMAGE producer of the standalone Cambridge Diet Vietnam ad-production workflow. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) + a strong headline (from already-curated headline content rows if present, else derived via the Hook Formula Bank) + brand/visual-identity + rules/{banned-words,compliance,food-placeholder}, then builds a self-contained HTML creative in each of the 5 reference styles (cookie-cutter · ugly · meme · branded · native), sized to the platform, using the Cambridge Diet brand system; screenshots each via Playwright MCP (browser_resize → file:// → PNG), degrading gracefully to HTML-only when Playwright MCP is unavailable. Self-scores each 1–5 + Vietnamese comment and runs an embedded quality gate (Direct-Response checklist + Upload checklist + banned-words-on-image + a check_compliance rules scan). Then PRESENTS each style's creative to the operator in chat as a viewable preview (local screenshot path / in-chat render, and/or an R2 preview link) with its self-score + Vietnamese comment, and PAUSES for review — the operator requests re-renders (rebuild the named style → re-screenshot → re-score → re-present) or approves the set. Only ON THE OPERATOR'S GO-AHEAD does it persist each approved creative as a content DRAFT via save_post_content (channel='ad', idea_id, section='image') + upload the PNG to R2 via upload_creative (Go-SSC presign → creativeUrl) + record a check_compliance verdict. The persisted DB draft row is deferred until go-ahead — no orphan draft rows for rejected creatives. Propose-only; saving persists drafts, never approves a content row, never flips a gate.
+description: The IMAGE producer of the standalone Cambridge Diet Vietnam ad-production workflow. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) + a strong headline (from already-curated headline content rows if present, else derived via the Hook Formula Bank) + brand/visual-identity + brand/positioning + brand/proof-points + rules/{banned-words,compliance,food-placeholder}, then builds a self-contained HTML creative in each of the 5 reference styles (cookie-cutter · ugly · meme · branded · native), sized to the platform, using the Cambridge Diet brand system; screenshots each via Playwright MCP (browser_resize → file:// → PNG), degrading gracefully to HTML-only when Playwright MCP is unavailable. Self-scores each 1–5 + Vietnamese comment and runs an embedded quality gate (Direct-Response checklist + Upload checklist + banned-words-on-image + a check_compliance rules scan). Then PRESENTS each style's creative to the operator in chat as a viewable preview (local screenshot path / in-chat render, and/or an R2 preview link) with its self-score + Vietnamese comment, and PAUSES for review — the operator requests re-renders (rebuild the named style → re-screenshot → re-score → re-present) or approves the set. Only ON THE OPERATOR'S GO-AHEAD does it persist each approved creative as a content DRAFT via save_post_content (channel='ad', idea_id, section='image') + upload the PNG to R2 via upload_creative (Go-SSC presign → creativeUrl) + record a check_compliance verdict. The persisted DB draft row is deferred until go-ahead — no orphan draft rows for rejected creatives. Propose-only; saving persists drafts, never approves a content row, never flips a gate.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -86,13 +86,15 @@ Hold the chosen headline string; it is the same across the 5 style variations (t
 
 ### Step 2: Load the knowledge base
 
-Call `get_knowledge` for the visual + ad + rules knowledge that grounds the creative. **When you are running right after `ssc-ads-writer` in the same conversation**, most of these paths (`brand/angles`, `ad/{creative-guidelines,headline-formulas,platform-constraints}`, `voice/founder-voice`, `content/quick-checklist`, `rules/{banned-words,compliance,food-placeholder}`, `programme/kieu-my-story`) are already in context — fetch **only the paths not already loaded** (at minimum `brand/visual-identity`, which the writer does not load, plus any of the above missing from the session). On a standalone run, fetch them all:
+Call `get_knowledge` for the visual + ad + rules knowledge that grounds the creative. **When you are running right after `ssc-ads-writer` in the same conversation**, most of these paths (`brand/positioning`, `brand/proof-points`, `brand/angles`, `ad/{creative-guidelines,headline-formulas,platform-constraints}`, `voice/founder-voice`, `content/quick-checklist`, `rules/{banned-words,compliance,food-placeholder}`, `programme/kieu-my-story`) are already in context — fetch **only the paths not already loaded** (at minimum `brand/visual-identity`, which the writer does not load, plus any of the above missing from the session). On a standalone run, fetch them all:
 
 ```
 Call: get_knowledge
   paths: [
     "brand/visual-identity",
     "brand/angles",
+    "brand/positioning",
+    "brand/proof-points",
     "ad/creative-guidelines",
     "ad/headline-formulas",
     "ad/platform-constraints",
@@ -109,6 +111,8 @@ These paths are:
 
 - `brand/visual-identity` — **the brand system: palette (hex), fonts, logo, visual register.** Every style uses these — Cambridge Diet colors, not the reference's generic defaults.
 - `brand/angles` — the angle system, so the visual expresses the concept's tagged `value`+`frame` faithfully.
+- `brand/positioning` — the competitive positioning + "chúng mình hơn ở đâu" per competitor — so the creative can press the concept's `against` contrast.
+- `brand/proof-points` — the credibility lookup table (60 năm, DiRECT/DROPLET, chuẩn EU, 26 vi chất, chuyên viên 1:1, …) — the source for the branded style's real proof line and any on-image stat.
 - `ad/creative-guidelines` — ad creative principles + the headline-on-image legibility bar.
 - `ad/headline-formulas` — headline craft + the short-headline length discipline (for the Step 1b derive path).
 - `ad/platform-constraints` — platform dimensions, safe zones, text-density limits (drives the Upload checklist + `browser_resize`).
@@ -134,6 +138,8 @@ For the chosen dimensions (default square 1200×1200 / landscape per `ad/platfor
 **Match style to the concept + audience.** Use the awareness/tier read (cold/L1 problem-aware → ugly/meme/cookie-cutter that stop the scroll; warm/L3 most-aware → branded/native that build credibility and close; L2 omnipresence person-led → native/branded). The concept's `frame` (confession → native/person-led; safety/EU → branded; mechanism → branded/cookie-cutter) steers the pick.
 
 Write each HTML file descriptively: `ad-<idea-slug>-<style>.html` (idea slug = kebab-cased title, truncated). Apply the headline-font-size discipline from `ad/headline-formulas` / `ad/creative-guidelines` (shorter headline → larger; if it needs explaining it's too complex). Keep every word that appears on the image legible at 50% zoom (mobile bar).
+
+**Differentiation & proof — the creative must press an advantage:** a creative that could run for any weight-loss brand wastes the impression. Each creative leans on **≥1 concrete Cambridge advantage** from `brand/proof-points`, and when the concept carries an **`against`** tag the layout expresses *that* contrast — most naturally the **branded** style (a real proof line: "60 năm", "nghiên cứu lâm sàng độc lập", "chuẩn EU", "26 vi chất") and the **meme** style (old-way → Cambridge-way = the competitor contrast from `brand/positioning`'s "chúng mình hơn ở đâu"). Concrete, not slogan. All on-image proof stays inside the compliance rails in Step 5 (no fabricated number, **26** not 25, spell out "nghiên cứu lâm sàng độc lập" never "RCT", no commercial drug-brand name, no income/business-opportunity claim).
 
 **Authenticity guardrail (read FIRST — same three lanes as the writer):** never put a fabricated story / quote / number / result attributed to a real named person on the creative. Kiều My's *voice/opinions* are fine; her biography ONLY from `programme/kieu-my-story`. Other real people only via an existing consented asset. Personas framed as representative ("nhiều chị…"), never as a named real testimonial. Non-person (science/product/6-step/app/EU) — free.
 
@@ -161,6 +167,7 @@ For **each** style variation, run the gate and self-score. **Do NOT `save_post_c
 - [ ] **No competing elements** — nothing fights the headline for attention.
 - [ ] **Mobile-readable** — every on-image word legible at 50% zoom.
 - [ ] **Emotional resonance** — true to the concept's `value`/`frame`.
+- [ ] **Presses a real advantage** — the creative leans on ≥1 concrete Cambridge USP / proof point (not a generic benefit any brand could claim); if the concept has an `against` tag, the layout lands that specific match-up. A flat, undifferentiated creative cannot score ≥4.
 
 **(b) The Upload checklist** — each PNG must pass (the Meta/page upload bar):
 
@@ -310,6 +317,6 @@ After persisting + uploading the operator-approved creatives, output:
 - **Playwright MCP optional — degrade gracefully.** Without it, present the HTML as an HTML-only candidate and, on the operator's go-ahead, save the content row (HTML noted, no PNG upload) and tell the operator manual capture is needed; never stop the run for a missing Playwright MCP.
 - **All persisted prose in Vietnamese.** The saved `comment` (and any saved Vietnamese `title`/`body`) MUST be Vietnamese; on-image copy is Vietnamese. Chat-side reasoning may stay English.
 - **Cowork-native.** You (Claude) build the HTML directly. No app/provider-model calls — never reference or invoke an app provider model.
-- References only the knowledge paths in Step 2 (brand/visual-identity, brand/angles, ad/{creative-guidelines,headline-formulas,platform-constraints}, voice/founder-voice, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge paths in Step 2 (brand/visual-identity, brand/positioning, brand/proof-points, brand/angles, ad/{creative-guidelines,headline-formulas,platform-constraints}, voice/founder-voice, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_idea` / `get_knowledge` reads).

@@ -33,7 +33,7 @@ This is the **text-production step** of the ad flow — it runs **after** the Ad
 > - <USP/proof point 2>
 > - <USP/proof point 3>
 > ```
-> The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are fixed structural markers; the values are Vietnamese. A designer (or the page) lays out the visual from this spec.
+> The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are fixed structural markers; the values are Vietnamese and **short** — this is on-image text, read at a glance (a few-word headline, a short subheadline phrase, terse keyword bullets, never sentences). A designer (or the page) lays out the visual from this spec.
 
 ## Inputs
 
@@ -152,6 +152,7 @@ Call: get_knowledge
     "brand/proof-points",
     "ad/creative-guidelines",
     "ad/headline-formulas",
+    "ad/platform-constraints",
     "ad/cta-catalog",
     "content/quick-checklist",
     "rules/banned-words",
@@ -174,6 +175,7 @@ These paths are:
 - `brand/proof-points` — the credibility lookup table (real, compliant proof: 60 năm, DiRECT/DROPLET, chuẩn EU 2016/1413, 26 vi chất, chương trình 6 bước, chuyên viên 1:1, đồng hành trọn đời, app, Kiều My từ 2004) — each row names the competitor it beats.
 - `ad/creative-guidelines` — ad creative principles and what makes Cambridge Diet ad copy convert.
 - `ad/headline-formulas` — the brand's headline formulas and length discipline (the source for the Hook Formula Bank patterns below).
+- `ad/platform-constraints` — on-image text-density / legibility limits — the brevity bar for the `image_content` step (text ON a visual, read at a glance).
 - `ad/cta-catalog` — the approved CTA phrasings (soft, authentic, compliant) — the source for every variation's call-to-action.
 - `content/quick-checklist` — what to avoid and the quality bar.
 - `rules/banned-words` — hard-banned words and phrases (zero tolerance; any match forces a fail).
@@ -225,12 +227,12 @@ Produce **only the active section's** variations (from Step 2), not all three:
 - if active = **`headline`** — `n_headlines` variations (default **5**). Each a SHORT on-creative hook (per the length discipline), a *different* hook quality/pattern from the Bank. No two headlines may be paraphrases of one opening.
 - if active = **`copy`** — `n_copies` variations (default **5**). Each the **primary text / body**: a hook line that **builds on an APPROVED headline** (from Step 4) → the concept's benefit expressed through its `value`+`frame` → a **soft, compliant CTA from `ad/cta-catalog`**. Vary the angle/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception).
 - if active = **`description`** — `n_descriptions` variations (default **5**). Each a tight **link-description** line (one benefit + a soft CTA) that **compresses an APPROVED copy's promise** (from Step 4), distinct from the others.
-- if active = **`image_content`** — `n_image_contents` versions (default **5**). Each is one **on-image COPY set** (saved as TEXT, not a rendered picture) in the fixed structure from the producer↔page contract:
-  - **HEADLINE** — a strong, SHORT hook (per the headline length discipline); build on an APPROVED headline where one fits, or write a fresh hook.
-  - **SUBHEADLINE** — one line: the **key USP/proof** that pays off the headline, or the solution it promises (compliant, concrete).
-  - **BULLETS** — exactly **3** distinct **USP/proof points** from `brand/proof-points` (this satisfies the ≥3 rule per version), each a tight scannable line — never a paragraph.
+- if active = **`image_content`** — `n_image_contents` versions (default **5**). Each is one **on-image COPY set** — text that sits **ON a visual, read at a glance**, so **every element is SHORT, punchy, and minimal-word** (fewer words win; a designer must fit it on the image; stay within `ad/platform-constraints`' on-image text-density bar). Saved as TEXT in the fixed structure from the producer↔page contract:
+  - **HEADLINE** — a very short, bold hook (aim ~3–6 words, one glance) — the shortest text in the whole flow, tighter than the `headline` section. Build on an APPROVED headline where one fits, but **trim it to on-image length**; no sub-clauses.
+  - **SUBHEADLINE** — one short phrase (aim ~4–8 words): the **key USP/proof**, or the solution that pays off the headline. Compliant, concrete — a phrase, not a sentence.
+  - **BULLETS** — exactly **3** distinct **USP/proof points** from `brand/proof-points` (this satisfies the ≥3 rule), each a **terse keyword phrase (aim ~2–5 words)** — e.g. "60 năm khoa học", "Chuẩn EU · 26 vi chất", "Chuyên viên 1:1 đồng hành" — **never a sentence or paragraph**.
 
-  Vary the hook/angle across the versions; keep the SAME concept spine. Emit each version's `body` in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape.
+  **Cut every word that isn't load-bearing** — on-image text lives or dies on brevity. Vary the hook/angle across the versions; keep the SAME concept spine. Emit each version's `body` in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape.
 
 Every variation is **finished Vietnamese ad text** for the active section. Express the SAME concept (`idea.title` + its `value`/`frame`/`persona`/layer) — what varies is the hook/angle/wording, not the strategic spine.
 
@@ -281,7 +283,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 - [ ] **Mobile-readable** — legible and tight on a phone; headlines short.
 - [ ] **Emotional resonance** — activates at least one emotional trigger true to the concept's `value`/`frame`.
 - [ ] **Presses ≥3 real advantages (sized to format)** — a `copy` weaves in **≥3 distinct** Cambridge proof points from `brand/proof-points` (one landing the concept's `against` match-up via `brand/positioning`); an `image_content` version carries **≥3 distinct** proof points across its 3 bullets + subheadline; a `headline`/`description` carries the 1–2 that fit cleanly (its set covers ≥3 — checked in the loop below). A `copy` or `image_content` version with <3 distinct proof points, or any variation leaning on nothing distinctive, cannot score ≥4.
-- [ ] **Structure (image_content only)** — the `body` is in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape, with exactly 3 bullets; a malformed structure cannot score ≥4.
+- [ ] **Structure + brevity (image_content only)** — the `body` is in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape with exactly 3 bullets, AND every element is short enough to read at a glance ON an image (per `ad/platform-constraints`): a few-word bold headline, a short subheadline phrase, terse keyword bullets — never sentences/paragraphs. A malformed **or wordy** `image_content` version cannot score ≥4.
 
 **(b) Banned-words + compliance scan** — scan every variation against `rules/banned-words` (zero tolerance) and `rules/compliance` (no banned medical/efficacy claim; spell out "nghiên cứu lâm sàng độc lập", never the "RCT" acronym) and `rules/food-placeholder`. **Any** banned-word / compliance / food-placeholder violation caps that variation at **≤3** (it cannot pass) regardless of other merits.
 
@@ -378,7 +380,7 @@ Call: save_post_content
 - **Quality gate is hard.** Every persisted variation is rated ≥4. Any banned-word / compliance / food-placeholder / authenticity violation caps a variation at ≤3 → dropped + regenerated, never saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` (ad text) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/platform-constraints, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
 - **Learns from winners/losers (read-only).** Reads `plan.retrospective` (via the existing `get_channel_plan` call — no new tool) and biases drafting toward its proven-winning proof points / lengths / formats / angles and away from the fatigued losers, never resurrecting a retired loser. It is a read; it never flips a gate. No retrospective (or a "no data" note) → fall back to KB best-practice.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_post_content` / `get_knowledge` reads).

@@ -45,13 +45,14 @@ Call: get_knowledge
     "voice/tone",
     "voice/pronouns",
     "brand/woman-to-woman",
+    "brand/proof-points",
     "voice/vietnamese-rules",
     "voice/vocabulary",
     "content/quick-checklist"
   ]
 ```
 
-These ten paths are your scoring rubric:
+These paths are your scoring rubric:
 
 - `rules/banned-words` — hard-banned words and phrases (zero tolerance; any match forces a fail)
 - `rules/compliance` — NĐ-15/2018 and brand compliance constraints (no banned medical/efficacy claims)
@@ -60,6 +61,7 @@ These ten paths are your scoring rubric:
 - `voice/tone` — the brand tone and voice principles
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị) — must be correct in every variation
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in
+- `brand/proof-points` — the credibility lookup table — the rubric for the ≥3-distinct-proof-points minimum (Step 2)
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules (no translated-English feel)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `content/quick-checklist` — what to avoid and the quality bar
@@ -70,7 +72,7 @@ If you are unsure which paths exist, call `list_knowledge` (optionally `list_kno
 
 For **each** of the writer's N variations, judge the full Vietnamese body against the knowledge from Step 1 and assign:
 
-- `score` — **an integer 1–5.** Judge: brand-voice fit (`voice/*` — tone, correct pronoun register, woman-to-woman register, natural non-translated Vietnamese), adherence to `content/quick-checklist`, the freshness/strength of the hook and angle, and fidelity to the idea's brief (`core_message`, pillar, persona, `why_now` honoured). **Any** banned-word, compliance, or food-placeholder violation caps the score at **≤3** (it cannot pass) regardless of other merits. Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead the month with; **4** = strong, publishable; **3** = solid but flawed; **1–2** = weak/violating.
+- `score` — **an integer 1–5.** Judge: brand-voice fit (`voice/*` — tone, correct pronoun register, woman-to-woman register, natural non-translated Vietnamese), adherence to `content/quick-checklist`, the freshness/strength of the hook and angle, and fidelity to the idea's brief (`core_message`, pillar, persona, `why_now` honoured). **Any** banned-word, compliance, or food-placeholder violation caps the score at **≤3** (it cannot pass) regardless of other merits. **A variation carrying fewer than 3 distinct Cambridge proof points (from `brand/proof-points`) also caps at ≤3** — a post that could run for any brand is not publishable; strong copy weaves in ≥3 (60 năm, chuẩn EU / 26 vi chất, chuyên viên 1:1, …). Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead the month with; **4** = strong, publishable; **3** = solid but flawed; **1–2** = weak/violating.
 - `comment` — **a one-line Vietnamese rationale for the `score`** (the persisted prose a Vietnamese operator reads in the workspace next to the stars). State the single biggest reason the variation is strong or weak — e.g. "Hook woman-to-woman tự nhiên, đúng persona Chị Hương, CTA mềm" or "Dùng từ cấm 'giảm cân cấp tốc', vi phạm rules/banned-words → phải viết lại". Always Vietnamese (never English); short and honest; it must justify the number you gave and name the rule/voice doc it traces to.
 
 Do NOT call `check_compliance` at this stage — it requires a `content_id`, and no `content` row exists until the set is persisted in Step 6 (after the operator's go-ahead). Your scoring here IS the compliance judgment; the persisted verdict is handled at Step 6.
@@ -177,9 +179,9 @@ After persisting the approved set, output:
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. **The operator's "save" go-ahead persists drafts — it never flips a gate.**
 - **Human checkpoint before persistence.** You **present the candidate set in chat and wait** — you do NOT save autonomously. Persistence happens only after the operator approves the set (Step 4 choice **b**). The primary revision path is pre-save, in chat (Step 5). "Save" persists DRAFTS to curate; it is NOT a gate approval — the operator still selects + approves ONE variation in the workspace.
 - **Authority persists; the writer does not.** The writer hands you unsaved drafts (and revises them on request) and YOU insert the approved set — one `save_post_content` insert per variation, on the operator's go-ahead. Never ask the writer to save. A **post-save** flaw in a row you persisted **in this run** is fixed with one `edit_content` call (or removed with `delete_content`), never by duplicating or regenerating; rows the operator has curated or approved are untouchable.
-- **Quality gate is hard.** Every persisted (and every presented) variation is rated ≥4. Any banned-word / compliance / food-placeholder violation caps a variation at ≤3 → it is dropped + regenerated, never presented or saved. Score honestly; never inflate to exit the loop.
+- **Quality gate is hard.** Every persisted (and every presented) variation is rated ≥4. Any banned-word / compliance / food-placeholder violation — or carrying <3 distinct Cambridge proof points — caps a variation at ≤3 → it is dropped + regenerated, never presented or saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` (post copy) AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning/analysis may stay English; nothing written to the row may.
 - **Cowork-native.** You (Claude) score and judge directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the ten knowledge paths in Step 1 (rules/*, voice/*, content/quick-checklist). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge paths in Step 1 (rules/*, voice/*, brand/woman-to-woman, brand/proof-points, content/quick-checklist). Do not call `get_knowledge` for unrelated paths.
 - Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_knowledge` / `list_knowledge` reads).

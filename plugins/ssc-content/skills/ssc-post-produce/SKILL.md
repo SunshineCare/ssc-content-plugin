@@ -94,6 +94,8 @@ Call: get_knowledge
     "voice/tone",
     "voice/pronouns",
     "brand/woman-to-woman",
+    "brand/positioning",
+    "brand/proof-points",
     "voice/vietnamese-rules",
     "voice/vocabulary",
     "content/pillars",
@@ -106,11 +108,13 @@ Call: get_knowledge
   ]
 ```
 
-These twelve paths are:
+These paths are:
 
 - `voice/tone` — the brand tone and voice principles
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị) — get this right in every variation
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in
+- `brand/positioning` — the competitive positioning + "chúng mình hơn ở đâu" per competitor (the source for pressing our edge)
+- `brand/proof-points` — the credibility lookup table (60 năm, DiRECT/DROPLET, chuẩn EU, 26 vi chất, chuyên viên 1:1, …) — each post weaves in ≥3 distinct of these
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules (no translated-English feel)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `content/pillars` — the content pillar strategy (to honour the idea's pillar)
@@ -136,6 +140,8 @@ The Posts channel is written in **Kiều My's voice** — but voice is NOT licen
 3. **Personas (Chị Hương / Chị Mai / Chị Lan) and the general reader.** Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45 thấy…", "có chị từng…") — NEVER as a specific named real testimonial.
 
 Non-person content (science/mechanism, product, app, 6-step) — write freely. When in doubt, write representative ("nhiều chị…") rather than a fabricated specific. A fabricated real-person story is an automatic fail at the authority gate (NĐ-15 + brand authenticity).
+
+**Proof points — weave ≥3 into every post (read FIRST):** each variation must lean on **≥3 distinct** Cambridge USP / proof points from `brand/proof-points` (e.g. 60 năm nghiên cứu, DiRECT/DROPLET, chuẩn EU / 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành, the app), woven naturally into the post's argument — **never a bare list** — and pressing our edge per `brand/positioning` when the post contrasts with an alternative. Keep them concrete, not slogans, and inside the compliance rails (no fabricated number; spell out "nghiên cứu lâm sàng độc lập" never "RCT"; **26** not 25; no commercial drug-brand name; no income/business-opportunity claim). A variation carrying fewer than 3 distinct proof points is dropped at the authority gate.
 
 **Make them genuinely DISTINCT.** The brief (`core_message`, pillar, persona, `why_now`) is fixed; the **angle and hook are not**. Give each variation a different way in — for example:
 
@@ -196,6 +202,6 @@ If the date had more than one scheduled post (Step 1, `count > 1`), add a line n
 - **One post at a time.** A date with several scheduled posts is handled one idea per run — never batch-produce across ideas in a single pass.
 - **All drafted prose in Vietnamese.** The variation bodies you draft MUST be Vietnamese (the authority persists them verbatim). Chat-side reasoning/analysis may stay English.
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the ten knowledge paths in Step 3 (voice/*, brand/woman-to-woman, content/*, channels/facebook). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, content/*, channels/facebook). Do not call `get_knowledge` for unrelated paths.
 - Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_content_by_date` / `get_idea` / `get_knowledge` / `list_knowledge` reads).

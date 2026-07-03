@@ -65,7 +65,7 @@ Confirm `channel === 'ad'`; if not, STOP. Hold:
 - Plan lineage is via `idea_id` (the idea carries its own `plan_id`); `save_post_content` does not take `plan_id`.
 - `idea.title` — the concept's main idea (one Vietnamese line) — the visual spine.
 - `idea.ad_notes` — the structural shorthand + the **format intent** (`reel`/`video`/`carousel`/`image`/`story`) + the lane/source note (esp. for person-led concepts). (Top-level field — there is no `detail` object.)
-- `idea.tags[]` — the structural dimensions: **layer** (audience/tier), **value** + **frame** (the visual angle), **persona** (who the creative pictures).
+- `idea.tags[]` — the structural dimensions: **layer** (audience/tier), **value** + **frame** (the visual angle), **persona** (who the creative pictures), and any **entry** / **against** / **experience** present — the **`against`** tag drives the Step 3 differentiation contrast.
 
 ### Step 1b: Resolve the headline that goes on the creative
 

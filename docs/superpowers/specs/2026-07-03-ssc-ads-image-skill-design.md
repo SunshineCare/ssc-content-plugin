@@ -1,6 +1,13 @@
 # ssc-ads-image — ad-visual production skill (design spec)
 
-Status: DRAFT / for review — no skill file lands until this is approved.
+> **SUPERSEDED (2026-07-05)** by
+> [`2026-07-05-ssc-ads-image-component-composition-design.md`](2026-07-05-ssc-ads-image-component-composition-design.md).
+> That spec replaces this whole-scene draft→refine pipeline with a component-based
+> one (background → model-into-background → product upload → composite). The
+> BrandOS/Go-`resource` architecture analysis below is carried forward; the
+> pipeline and hard-paste-always rule are not. Kept for history.
+
+Status: SUPERSEDED (was DRAFT / for review)
 Date: 2026-07-03
 
 ## Goal

@@ -197,7 +197,7 @@ If the active section (from Step 2) is **`headline`**, **`description`**, or **`
 
 These live approved bodies are your **input** — the winning copies the operator selected (and possibly edited; you read the live approved rows, so any dashboard edits are always reflected). Your variations for the active section must **build on them**: a `headline` distils an approved copy's hook; a `description` compresses an approved copy's promise; an `image_content` version leverages an approved **copy** — that copy's hook distilled into the on-image HEADLINE up top, a key proof from it as the subheadline, and 3 distinct proof points as the bullets. If the active section is **`copy`**, there is **no** earlier-section input — ground it in the concept brief + `build_spec` + KB + the Hook Formula Bank only (the copy owns the hook).
 
-### Step 5: The Hook Formula Bank (your headline + hook engine)
+### Step 5: The Hook Formula Bank (your copy-hook + headline engine)
 
 Apply the brand's headline craft (sourced from `ad/headline-formulas` + `ad/creative-guidelines` — read the live numbers/patterns there; the guidance below is the operating frame) to write the **opening hook of each `copy`** (the copy is the first section — this is where the hook is born) and, at the headline step, the short standalone `headline` **distilled from an approved copy's hook**.
 

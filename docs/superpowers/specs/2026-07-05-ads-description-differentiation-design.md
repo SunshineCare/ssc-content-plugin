@@ -1,7 +1,7 @@
 # Design: description must complement — not echo — the headline
 
 **Date:** 2026-07-05
-**Status:** proposed — awaiting operator review (author was away at the placement decision; **Approach A chosen as the reliable, self-contained default** — see Placement)
+**Status:** IMPLEMENTED. Operator directed "check ad/copy-checklist and revise this skill accordingly." Finding: **`ad/copy-checklist` (v5) already exists on the BrandOS server and already contains the exact Description spec** (its "Bước 2B: Viết Description" section + the Bước 4 checklist item). The gap was never the KB — it was that **the skill never loaded `ad/copy-checklist`**. So the fix is **Approach B/C grounded in the existing doc**: wire the writer to load + apply it (no authoring needed). The Approach-A framing below is retained for the decision trail but was superseded by this finding.
 **Scope:** `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md` only
 **Builds on:** the copy-first reorder (`2026-07-05-ads-produce-copy-first-reorder-design.md`)
 
@@ -50,16 +50,32 @@ check** (Step 7) so the honest-scoring loop drops + regenerates offenders.
 4. **Diversity rule.** No description may repeat an approved headline's angle;
    the description set spans **distinct proofs / beats**.
 
-## Placement — Approach A (skill-only), and why
+## Placement — resolved by inspecting the live KB (supersedes Approach A)
 
-The operator suggested the spec "ideally in `ad/copy-checklist`." Finding:
-**`ad/copy-checklist` is not referenced anywhere in the skill** — the writer
-loads `ad/creative-guidelines`, `ad/headline-formulas`, `ad/cta-catalog`, and
-`content/quick-checklist`, but no copy-checklist. The writer only obeys prose it
-actually **loads and enforces**, so KB content alone would not change output
-unless the skill both loads the doc and applies it.
+The operator then directed: "check `ad/copy-checklist` and revise this skill
+accordingly." Inspecting the live BrandOS KB settled the open question:
 
-Three options were considered:
+- **`ad/copy-checklist` (id `9ABnZuOYJ4anwaN9`, v5, "Copy Checklist") EXISTS**
+  and **already contains the full Description spec** as its section
+  **"Bước 2B: Viết Description"** — verbatim the four rules (complement-don't-echo,
+  lead-with-one-concrete-proof + vary, layer-aware L2/L1/L3, diverse set) plus a
+  worked sleep-topic example — AND the matching pre-submit checklist item in
+  **Bước 4** ("Description BỔ TRỢ headline … KHÔNG lặp lại góc của headline").
+- **But the skill never loaded it.** The writer's Step 3 `get_knowledge` list
+  had `ad/creative-guidelines`, `ad/headline-formulas`, `ad/cta-catalog`,
+  `content/quick-checklist` — no `ad/copy-checklist`. The writer only obeys prose
+  it loads, so the authoritative spec was invisible to it.
+
+**Chosen fix (what was implemented):** wire the writer to **load and apply**
+`ad/copy-checklist` — add it to Step 3, and inline its Bước 2B rules as the
+operating frame in Steps 4/6 + a Bước 4-derived cap in Step 7 (citing the doc as
+the live authoritative source, matching how Step 5 treats `ad/headline-formulas`).
+Nothing was authored on the server; the doc already held the spec. This is
+Approach B/C **grounded in the existing doc** — strictly better than the
+originally-defaulted Approach A, since the durable spec already lives in the
+tunable KB.
+
+The original three-option analysis (retained for the trail):
 
 - **A — Skill-only (CHOSEN).** Encode the four rules directly in
   `ssc-ads-writer/SKILL.md` as a drafting rule (Steps 4 & 6) AND a Step 7
@@ -79,7 +95,12 @@ Three options were considered:
 bug within this repo, and it is the exact floor of C — a later `ad/copy-checklist`
 doc (B) is a clean additive follow-up, not a redo.
 
-## Design — the three edits (all in `ssc-ads-writer/SKILL.md`)
+## Design — the edits (all in `ssc-ads-writer/SKILL.md`)
+
+**Edit 0 — Step 3 loads `ad/copy-checklist`.** Add the path to the
+`get_knowledge` list (now 19 paths, under the 20-path cap) and a descriptive
+bullet naming it the authoritative source for the description-differentiation
+rules (its Bước 2B + Bước 4). Without this, none of the edits below would bite.
 
 ### 1. Step 4 — description input (reframe why the headlines are read)
 
@@ -150,7 +171,9 @@ a rule in the scoring gate is enforced):
 - **Frontmatter description, the `/ssc.ads-produce` command, the agent, CLAUDE.md**
   — no change; this refines *how* a description is written, not the chain. (The
   frontmatter's "description compresses those copies" stays true.)
-- **No new KB path** loaded in Step 3 (layer info comes from `build_spec`).
+- **The layer-aware rule keys off the `build_spec`** already held in Step 1b — no
+  new dependency there. (Step 3 does gain one KB path, `ad/copy-checklist`, which
+  is where the layer-nuanced Description spec lives.)
 
 ## Testing / verification
 

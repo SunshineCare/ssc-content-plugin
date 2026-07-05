@@ -54,12 +54,33 @@ simplification and is consistent with how `image_content` already works.
 
 ## The new chain and per-section input dependencies
 
-| Section | Order | Gated on (must be approved) | Input it builds on | Behavior change |
+The **copy is the source of truth** for the whole concept — every downstream
+section (headline, description, image_content) leads from the approved copies.
+Headline and description are *secondary distillations* of the copy, not
+independent inputs.
+
+| Section | Order | Gated on (must be approved) | Input it builds on (copy-led) | Behavior change |
 |---|---|---|---|---|
 | **copy** | 1st | *nothing* | concept brief + `build_spec` + KB + Hook Formula Bank | **Now the cold-start section.** Each copy leads with its own hook line — this is where the hook is *discovered*. (Removes today's "builds on an approved headline" input.) |
-| **headline** | 2nd | ≥1 `copy` | approved **copy** bodies (pooled) | **New behavior:** distils a short standalone on-creative headline from the approved copies' hooks — the same discipline `image_content` already uses (distil the hook; an approved copy may sharpen wording, but do not merely restate). |
-| **description** | 3rd | `copy` + `headline` | approved **copy** (and headline) | Essentially unchanged — it already compresses the approved copy's promise. |
-| **image_content** | 4th | `copy` + `headline` + `description` | approved copy + headline + description | **Unchanged** — still last; still anchors each version to one approved copy and distils that copy's hook. |
+| **headline** | 2nd | ≥1 `copy` | **approved copy** bodies (pooled), reloaded live | **New behavior:** distils a short standalone on-creative headline from the approved copies' hooks — the same discipline `image_content` already uses (distil the hook; do not merely restate). |
+| **description** | 3rd | `copy` + `headline` | **approved copy** (primary — compress its promise), reloaded live; approved headline as a secondary hook reference | **Sharpened:** explicitly copy-led. Description compresses an approved copy's promise into one tight benefit/CTA line; the headline is only a secondary reference, not the anchor. |
+| **image_content** | 4th | `copy` + `headline` + `description` | **approved copy** (anchor + hook), reloaded live; + approved headline + description | **Unchanged in behavior** — still anchors each version to one approved copy and distils that copy's hook; wording made explicit that copy is the anchor. |
+
+### Copy is the source of truth — live-reload before every downstream section — DECIDED
+
+Because the operator can **edit an approved copy in the `/ad/[id]` dashboard at
+any time** (including after the headline was already produced/approved), each
+downstream section MUST ground in the **current** approved copy bodies:
+
+- Every invocation already re-reads `list_post_content(idea_id)` (Step 2) and
+  reads approved bodies from *that* result (Step 4) — so the stateless
+  per-invocation stepper reloads live rows by construction. This design promotes
+  that from a parenthetical to a **hard rule**: the writer NEVER reuses a cached
+  or prior-run copy body; the headline, description, and image_content steps each
+  read the live approved copy rows for the concept and distil from those.
+- Concretely: `copy → operator approves C1 → headline (distils C1) → operator
+  approves H1 → operator edits C1 in the UI → description run reads the *edited*
+  C1`. The edit is always reflected because each run re-fetches.
 
 ### Headline anchoring (multi-copy case) — DECIDED
 
@@ -92,25 +113,37 @@ description is approved.
 
 ### A. `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md` (the core)
 
-Only **two substantive logic changes**; everything else is reordering the chain
-string and the input-dependency prose.
+Three substantive logic changes; everything else is reordering the chain string
+and the input-dependency prose.
 
 - **Step 6 `copy` instruction:** "a hook line that builds on an APPROVED headline"
   → "a hook line grounded in the concept brief + `build_spec` + Hook Formula Bank"
   (no earlier-section input; the copy owns the hook).
 - **Step 6 `headline` instruction:** change from an independent hook written from
-  the brief → distil a short standalone headline from the **pooled approved copy
-  hooks** (free distillation across all approved copies), reusing the
+  the brief → distil a short standalone headline from the **pooled live approved
+  copy hooks** (free distillation across all approved copies), reusing the
   `image_content` distillation discipline.
+- **Step 6 `description` instruction:** make it explicitly **copy-led** — compress
+  a live approved copy's promise; the approved headline is only a secondary
+  reference, not the anchor.
 
 Reordering / rewording passes (no behavior change beyond the two above):
 - frontmatter `description` (chain string + "copy builds on approved headline…").
 - body intro (chain string).
 - **Step 2** stepper table + the "chain is strict" sentence → the reordered gate
   chain above.
-- **Step 4** (read approved earlier-section input): `copy` now has *no* earlier
-  input (cold start); `headline` reads pooled approved copy bodies; `description`
-  reads approved copy (+ headline); `image_content` unchanged.
+- **Step 4** (read approved earlier-section input) — the copy-led + live-reload
+  rewrite:
+  - `copy` now has *no* earlier input (cold start).
+  - `headline` reads the pooled **live** approved copy bodies (free distillation).
+  - `description` **leads from the live approved copy** (compress its promise);
+    the approved headline is only a secondary hook reference, not the anchor.
+  - `image_content` unchanged in behavior — anchors each version to one **live**
+    approved copy; wording clarified that copy is the anchor.
+  - Promote the existing "you read the live approved rows, so any dashboard edits
+    are reflected" parenthetical to a stated hard rule: never reuse a cached/
+    prior-run copy body; every downstream section re-reads the live approved copy
+    rows because the operator may have edited them in the UI.
 - **Step 5** (Hook Formula Bank): reframe so the Bank drives the **copy's opening
   hook first** (where hooks are born); the headline step distils that hook.
 - **Step 9** summary "Built on approved input" line + the four next-action lines,

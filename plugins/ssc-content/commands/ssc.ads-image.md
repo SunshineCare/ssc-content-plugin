@@ -21,7 +21,7 @@ Optional:
 
 If no `idea_id` is given, ask the operator for one (one question) before dispatching. Do not invent one.
 
-This command is the **visual-production half** of the Ads pipeline. It runs **after** the concept's text chain (`headline → copy → description → image_content`) is complete — specifically, it produces visuals only once the concept's **`image_content` text section is approved** in the dashboard (`/ssc.ads-produce` produces that text; the operator approves it). It operates **per concept** and **per layer**, never on a whole plan: it reads **no** `channel_plan` gate flags (`tactics_approved`/`approaches_approved`/Blueprint state). There is no `/ssc.ads-plan` precondition beyond an approved concept with approved `image_content`.
+This command is the **visual-production half** of the Ads pipeline. It runs **after** the concept's text chain (`copy → headline → description → image_content`) is complete — specifically, it produces visuals only once the concept's **`image_content` text section is approved** in the dashboard (`/ssc.ads-produce` produces that text; the operator approves it). It operates **per concept** and **per layer**, never on a whole plan: it reads **no** `channel_plan` gate flags (`tactics_approved`/`approaches_approved`/Blueprint state). There is no `/ssc.ads-plan` precondition beyond an approved concept with approved `image_content`.
 
 ## What to do
 

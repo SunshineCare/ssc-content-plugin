@@ -58,7 +58,7 @@ its agent, and a skill together:
 | Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Focus → Research → Ideate → Schedule → Measure |
 | Posts (produce) | `/ssc.post-writer` | `ssc-post-writer-agent` | produce ⇄ authority loop |
 | Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Blueprint → Ideate → Measure |
-| Ads (produce) | `/ssc.ads-produce` | *(direct)* | ads-writer — text only, state-driven per-section stepper (headline → copy → description) |
+| Ads (produce) | `/ssc.ads-produce` | *(direct)* | ads-writer — text only, state-driven per-section stepper (copy → headline → description) |
 | YouTube | `/ssc.youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
 | Knowledge base | `/ssc.kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
 | Strategy (quarterly) | `/ssc.strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |

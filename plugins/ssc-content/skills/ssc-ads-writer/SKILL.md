@@ -44,7 +44,7 @@ One of (the concept selector):
 
 Optional (section targeting):
 
-- `section` — one of `headline` | `description` | `image_content`. Names the specific section to produce this invocation, regardless of whether the others are approved yet, and even if this section already has an approved row (produces a fresh revision). Omit to auto-pick: the first of `headline → description → image_content` (nominal order) without an approved row yet. Has no effect before `copy` is approved — `copy` is always the mandatory first section regardless of this argument.
+- `section` — one of `headline` | `description` | `image_content`. Names the specific section to produce this invocation, regardless of whether the others are approved yet, and even if this section already has an approved row (produces a fresh revision). Omit (or pass a value that isn't `headline`/`description`/`image_content`) to auto-pick: the first of `headline → description → image_content` (nominal order) without an approved row yet. Has no effect before `copy` is approved — `copy` is always the mandatory first section regardless of this argument.
 
 Optional (variation counts — **configurable**):
 
@@ -130,11 +130,11 @@ Apply the **FIRST** matching rule. Either set the **active section** and continu
 | not `approved(copy)` | active section = **`copy`** → Step 3 |
 | `approved(copy)`; a `section` input names `headline`, `description`, or `image_content`; `has_drafts(<that section>)` | **STOP** — that section has unreviewed drafts pending; **approve/reject them** in `/ad/[month]/[id]` first, then re-invoke. |
 | `approved(copy)`; a `section` input names `headline`, `description`, or `image_content` | active section = **the named section** → Step 3 (produces a fresh batch whether or not it already has an approved row) |
-| `approved(copy)`; no `section` input; every one of `headline`/`description`/`image_content` already has an approved row | **STOP** — all three text sections have an approved variation; name a `section` for a fresh revision, or run `/ssc.ads-produce <idea_id> creative_brief` for the handoff brief. |
-| `approved(copy)`; no `section` input; the first of `headline → description → image_content` (nominal order) without an approved row has pending drafts (`has_drafts`) | **STOP** — that section has unreviewed drafts pending; **approve/reject them** in `/ad/[month]/[id]` first, then re-invoke. |
-| `approved(copy)`; no `section` input | active section = **the first of `headline → description → image_content` without an approved row** → Step 3 |
+| `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content`; every one of `headline`/`description`/`image_content` already has an approved row | **STOP** — all three text sections have an approved variation; name a `section` for a fresh revision, or run `/ssc.ads-produce <idea_id> creative_brief` for the handoff brief. |
+| `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content`; the first of `headline → description → image_content` (nominal order) without an approved row has pending drafts (`has_drafts`) | **STOP** — that section has unreviewed drafts pending; **approve/reject them** in `/ad/[month]/[id]` first, then re-invoke. |
+| `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content` | active section = **the first of `headline → description → image_content` without an approved row** → Step 3 |
 
-`headline`, `description`, and `image_content` are **not** chained to each other — only to `copy`. Never produce anything before `copy` is approved; once `copy` has an approved row, any of the other three can be targeted in any order, any number of times.
+`headline`, `description`, and `image_content` are **not** chained to each other — only to `copy`. Never produce anything before `copy` is approved; once `copy` has an approved row, any of the other three can be targeted in any order, any number of times. A `section` value that names none of the three (omitted, or an unrecognized/typo'd value such as `copy` or `headlines`) is treated identically — it falls through to auto-pick, never to undefined behavior.
 
 ### Step 3: Load the knowledge base
 

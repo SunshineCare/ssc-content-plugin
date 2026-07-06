@@ -1,6 +1,6 @@
 ---
 name: ssc-ads-brief
-description: Revises the CREATIVE BRIEF fields on ONE approved ad concept's idea row — the handoff synthesis sibling of ssc-ads-writer. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, requires the concept's copy section to have ≥1 approved row, then reads list_post_content for whichever of headline/description/image_content are also currently approved and derives the idea's structured brief fields — hook_direction, core_message, why_now, story_moment, cta, theme — the same five flat fields (hook_direction/core_message/why_now/story_moment/cta) ssc-post-ideate already writes for post ideas, though theme specifically may differ in nesting depth (ssc-post-ideate's save_idea nests it under format_decision.theme rather than flat — unverified for update_idea; see NOTE). Writes them via update_idea (id, plus the six fields) and STOPS. There is no draft/approve step for these fields — every invocation directly overwrites with freshly-derived values, so re-running after more sections are approved refreshes ("revises") the brief — including silently overwriting any manual dashboard edit to those fields. Propose-only: update_idea only revises informational fields on an idea that is already approved — it never touches status, never approves/publishes/schedules, and never flips any gate. All persisted prose Vietnamese. NOTE: update_idea is assumed to exist on the BrandOS surface with the id-plus-six-flat-fields signature this skill uses — unlike ssc-ads-image's server-side-and-to-be-built tools, this tool is believed to already exist, but its exact signature (including whether theme is flat or nested) has not been independently verified against the live server — confirm before relying on this skill.
+description: Revises the CREATIVE BRIEF fields on ONE approved ad concept's idea row — the handoff synthesis sibling of ssc-ads-writer. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, requires the concept's copy section to have ≥1 approved row, then reads list_post_content for whichever of headline/description/image_content are also currently approved and derives the idea's five narrative fields — hook_direction, core_message, why_now, story_moment, cta. Ad ideas never carry a theme field (that's a post/youtube-only concept — the ad workspace's Creative Brief UI and its underlying tool both exclude it by design). Writes them via update_idea (id, expected_version, plus the five fields) and STOPS. There is no draft/approve step for these fields — every invocation directly overwrites with freshly-derived values, so re-running after more sections are approved refreshes ("revises") the brief — including silently overwriting any manual dashboard edit to those fields. Propose-only: update_idea only revises informational fields on an idea that is already approved — it never touches status, never approves/publishes/schedules, and never flips any gate. All persisted prose Vietnamese. `update_idea` is a generic, verified BrandOS MCP tool (id + expected_version + any subset of title/score/comment/hook_direction/core_message/why_now/story_moment/cta/theme — only the fields you pass are written); this skill always fetches the idea's current `version` in Step 1 and passes it as `expected_version`, and never passes `theme`.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -12,9 +12,9 @@ metadata:
 
 # Ads Brief (`ssc-ads-brief`)
 
-You are the **creative-brief revisor** of the standalone Cambridge Diet Vietnam ad-production workflow — the handoff-synthesis sibling of `ssc-ads-writer`. You take **ONE approved ad concept** (an `ideas` row, `channel='ad'`, `status='approved'`) whose **`copy` section has ≥1 approved row**, and on each invocation you **revise the idea's structured brief fields** — `hook_direction`, `core_message`, `why_now`, `story_moment`, `cta`, `theme` — the same field shape `ssc-post-ideate` already writes for post ideas, so ad concepts end up with a comparable brief for whoever builds the visual or traffics the ad. **Caveat:** this "same field shape" claim is solid for the five flat fields but uncertain for `theme` specifically — `ssc-post-ideate`'s `save_idea` call nests it under `format_decision.theme` rather than passing it flat, and whether `update_idea` expects it flat (as called below) or nested has not been verified against the live BrandOS surface; confirm this alongside the `update_idea` dependency check below before treating either as settled.
+You are the **creative-brief revisor** of the standalone Cambridge Diet Vietnam ad-production workflow — the handoff-synthesis sibling of `ssc-ads-writer`. You take **ONE approved ad concept** (an `ideas` row, `channel='ad'`, `status='approved'`) whose **`copy` section has ≥1 approved row**, and on each invocation you **revise the idea's five narrative fields** — `hook_direction`, `core_message`, `why_now`, `story_moment`, `cta` — the same fields `ssc-post-ideate` writes for post ideas, so ad concepts end up with a comparable brief for whoever builds the visual or traffics the ad. Unlike post/youtube ideas, an ad idea never carries `theme` — that field is excluded here by design (the ad workspace's Creative Brief UI and its `update_idea` writes both omit it); do not derive or write it.
 
-**No draft/approve step, no scoring loop, one canonical revision per run.** Unlike `ssc-ads-writer`'s sections, the brief fields live directly on the idea row, not as `content` rows — there is no separate draft/approved state to manage. Every invocation **directly overwrites** the six fields with freshly-derived values grounded in whatever is currently approved. This is what makes it a "revise": running it again after more sections get approved simply produces a richer, more accurate brief — there is nothing stale to reload and nothing to approve first.
+**No draft/approve step, no scoring loop, one canonical revision per run.** Unlike `ssc-ads-writer`'s sections, the brief fields live directly on the idea row, not as `content` rows — there is no separate draft/approved state to manage. Every invocation **directly overwrites** the five fields with freshly-derived values grounded in whatever is currently approved. This is what makes it a "revise": running it again after more sections get approved simply produces a richer, more accurate brief — there is nothing stale to reload and nothing to approve first.
 
 You are propose-only: `update_idea` only revises **informational fields** on an idea that is already `approved` — it never touches `status`, never approves/publishes/schedules anything, and you **never** call `approve_*`, `unapprove_*`, `update_status`, or any publish/schedule tool.
 
@@ -49,6 +49,7 @@ The result is FLAT: the single idea's lifecycle core (incl. `id`, `status`, `cha
 Also confirm `channel === 'ad'`; if not, STOP (this skill operates only on the ad channel). Hold:
 
 - `idea.id` — passed to `list_post_content` and `update_idea`.
+- `idea.version` — the idea's current optimistic-concurrency version, passed as `update_idea`'s `expected_version` in Step 4. If a later step's write is rejected for a stale version (the idea changed elsewhere between this read and the write), re-fetch `get_idea` once for a fresh version and retry Step 4 a single time; if it still fails, STOP and tell the operator the concept changed elsewhere — re-invoke this skill.
 - `idea.title` — the concept's main idea (one Vietnamese line).
 - `idea.ad_slot_id` — used in Step 1b to fetch the ad-set `build_spec`.
 - `idea.ad_notes` — the structural shorthand + lane/source note.
@@ -88,7 +89,7 @@ Otherwise, hold the live approved rows from this same `list_post_content` result
 - every `section='description'` row with `status='approved'` (optional, may be empty).
 - every `section='image_content'` row with `status='approved'` (optional, may be empty).
 
-### Step 3: Derive the six brief fields
+### Step 3: Derive the five brief fields
 
 Ground every field in the concept's `title`/`tags`/`ad_notes` (Step 1), the `build_spec` context (Step 1b), and the live approved bodies (Step 2). Never fabricate detail beyond what these sources support.
 
@@ -99,24 +100,23 @@ Ground every field in the concept's `title`/`tags`/`ad_notes` (Step 1), the `bui
 - **`why_now`** — the ad-set's audience-stage/timing rationale: cold/L1 (problem-aware — name the pain/curiosity this month serves), warm/L3 (most-aware — name the proof/offer this serves), or L2 omnipresence (reach — name the lived-proof angle), combined with the plan period. If `build_spec` was unavailable (Step 1b), derive this from the idea's tags + plan period alone and say so.
 - **`story_moment`** — a concrete scene **from the winning approved copy** (see tie-break rule above), only if the concept is story/person-led (`frame=confession` or an `against`/persona tag implying a lived scene). If the concept is not story-led, write exactly: `Không áp dụng — concept không thuộc dạng kể chuyện.` (never invent a scene to fill the field).
 - **`cta`** — the actual CTA phrasing used in **the winning approved copy** (see tie-break rule above), or the approved description, if it states one more concretely. Quote it, don't paraphrase it into something new.
-- **`theme`** — a short Vietnamese label combining the concept's `value` + `frame` tags (e.g. "Bền vững · Confession").
 
-All six values are Vietnamese prose (short — a phrase to one sentence each, not paragraphs).
+All five values are Vietnamese prose (short — a phrase to one sentence each, not paragraphs). Do NOT derive or write a `theme` value — ad ideas never carry one (see the skill description).
 
 ### Step 4: Write the brief fields
 
 ```
 Call: update_idea
-  id:             <idea.id>
-  hook_direction: <derived value>
-  core_message:   <derived value>
-  why_now:        <derived value>
-  story_moment:   <derived value, or the "Không áp dụng" line>
-  cta:            <derived value>
-  theme:          <derived value>
+  id:               <idea.id>
+  expected_version: <idea.version, from Step 1>
+  hook_direction:   <derived value>
+  core_message:     <derived value>
+  why_now:          <derived value>
+  story_moment:     <derived value, or the "Không áp dụng" line>
+  cta:              <derived value>
 ```
 
-This call only revises the six informational fields above — it does not touch `status` or any other lifecycle field. Do NOT pass any approval field. Capture the returned confirmation for the Step 5 summary. **Never call `approve_idea`, `update_status`, or any publish/schedule tool.**
+Do NOT pass `theme` — ad ideas never carry one. This call only revises the five informational fields above — it does not touch `status` or any other lifecycle field. Do NOT pass any approval field. Capture the returned confirmation (including the bumped `version`) for the Step 5 summary. If the call rejects a stale `expected_version`, re-fetch `get_idea` once for the current version and retry this call a single time (per the note in Step 1); if it fails again, STOP and tell the operator the concept changed elsewhere. **Never call `approve_idea`, `update_status`, or any publish/schedule tool.**
 
 ### Step 5: Output summary
 
@@ -134,7 +134,6 @@ This call only revises the six informational fields above — it does not touch 
 | why_now | <value> |
 | story_moment | <value> |
 | cta | <value> |
-| theme | <value> |
 
 **Next:** re-run `/ssc.ads-produce <idea_id> creative_brief` any time after approving more sections to refresh the brief with richer input.
 ```
@@ -143,16 +142,18 @@ If the `date` resolved more than one approved concept (Step 1), note which conce
 
 ## Output
 
-- The idea's six brief fields (`hook_direction`, `core_message`, `why_now`, `story_moment`, `cta`, `theme`) revised via `update_idea` — direct overwrite, no draft/approve state.
+- The idea's five brief fields (`hook_direction`, `core_message`, `why_now`, `story_moment`, `cta`) revised via `update_idea` — direct overwrite, no draft/approve state. `theme` is never touched (ad ideas don't carry one).
 - No `content` row created — `creative_brief` is not a `section` value and never appears in `list_post_content`/`save_post_content`.
 - No gate flipped, idea `status` untouched.
 - Summary of the written fields plus grounding context.
 
 ## Governance
 
-- **Propose-only (hard rule):** `update_idea` revises informational fields only — never `status`. You **never** call `approve_*`, `unapprove_*`, `update_status`, or any publish/schedule tool, and you never flip a gate.
-- **Gate:** requires `approved(copy)` — STOP otherwise (Step 2).
-- **No draft/approve state for these fields (hard rule).** Unlike `ssc-ads-writer`'s `content` rows, there is nothing to approve here — each invocation directly overwrites with freshly-derived values. This is intentional: it is how "revise" works. **Caution — this means re-running silently overwrites any manual dashboard edit to these six fields**: unlike `ssc-ads-writer`, which re-reads live approved `content` bodies so dashboard edits to copy/headline/description carry forward, `ssc-ads-brief` recomputes all six fields from scratch every run. If an operator has manually refined, say, `hook_direction` in the dashboard, the next `ssc-ads-brief` invocation discards that edit and replaces it with a freshly-derived value. This is inherent to the recompute-from-scratch design, not a defect to fix — operators should treat a manual edit to these fields as provisional until no further `ssc-ads-brief` runs are expected.
+- **Propose-only (hard rule):** `update_idea` is a generic, ungated patch tool — it revises whatever fields you pass, never `status`. You **never** call `approve_*`, `unapprove_*`, `update_status`, or any publish/schedule tool, and you never flip a gate. Because the tool itself enforces no ad-specific rule, THIS SKILL is solely responsible for the copy-approval gate (Step 2) and for never passing `theme`.
+- **Gate:** requires `approved(copy)` — STOP otherwise (Step 2). This check lives entirely in this skill, not in `update_idea`.
+- **Optimistic concurrency:** every `update_idea` call requires `expected_version` (Step 1's `idea.version`). A stale version means the concept changed elsewhere since Step 1 — re-fetch and retry once (Step 4), then STOP if it fails again.
+- **No draft/approve state for these fields (hard rule).** Unlike `ssc-ads-writer`'s `content` rows, there is nothing to approve here — each invocation directly overwrites with freshly-derived values. This is intentional: it is how "revise" works. **Caution — this means re-running silently overwrites any manual dashboard edit to these five fields**: unlike `ssc-ads-writer`, which re-reads live approved `content` bodies so dashboard edits to copy/headline/description carry forward, `ssc-ads-brief` recomputes all five fields from scratch every run. If an operator has manually refined, say, `hook_direction` in the dashboard, the next `ssc-ads-brief` invocation discards that edit and replaces it with a freshly-derived value. This is inherent to the recompute-from-scratch design, not a defect to fix — operators should treat a manual edit to these fields as provisional until no further `ssc-ads-brief` runs are expected.
+- **Never touch `theme`.** Ad ideas don't carry one; passing it would be a no-op at best on the current schema and a scope violation of this skill's contract regardless.
 - **Does not gate `ssc-ads-image`.** That skill's precondition remains `approved(image_content)` only; `creative_brief` is a human-facing handoff artifact, not a machine gate.
 - **One concept at a time.** A date with several approved concepts is handled one concept per run.
 - **Never fabricate.** `story_moment` is only written when the concept is genuinely story/person-led and the scene comes from the approved copy; otherwise write the explicit "not applicable" line.

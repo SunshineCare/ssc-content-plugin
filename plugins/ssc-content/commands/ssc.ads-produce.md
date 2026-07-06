@@ -11,16 +11,17 @@ metadata:
 $ARGUMENTS
 ```
 
-Consider the user input above before proceeding (if not empty). Expected input:
+Consider the user input above before proceeding (if not empty). Expected inputs — **one of**:
 
-- **Ad concept idea ID** (`idea_id`) — the id of ONE approved ad concept (an `ideas` row, `channel='ad'`, `status='approved'`). Required. This is the key the dispatched skill reads and writes against.
+- **Date** (`date`, format `YYYY-MM-DD` — a calendar day, e.g. `2026-07-14`). Resolved to the approved ad concept(s) for that day. If several concepts are scheduled that day, the dispatched skill works ONE concept per invocation.
+- **Ad concept idea ID** (`idea_id`) — the id of ONE approved ad concept (an `ideas` row, `channel='ad'`, `status='approved'`). This is the key the dispatched skill reads and writes against.
+
+If neither `date` nor `idea_id` is given, ask the operator for one (one question) before dispatching. Do not invent one.
 
 Optional:
 
 - **Section** (`section`) — one of `headline` | `description` | `image_content` | `creative_brief`. Names what to produce/revise this invocation. Omit to auto-pick the next open text section (`copy` first if not yet approved, else the first of `headline → description → image_content` without an approved row). `creative_brief` is **never** auto-picked — request it explicitly once ready for the handoff brief.
-- **Period** (`period`, format `YYYY-MM`) — informational only; the month the concept belongs to, used when pointing the operator at `/ad/[month]/[id]`. The dispatched skill resolves everything from the `idea_id`.
-
-If no `idea_id` is given, ask the operator for one (one question) before dispatching. Do not invent one.
+- **Period** (`period`, format `YYYY-MM`) — informational only; the month the concept belongs to, used when pointing the operator at `/ad/[month]/[id]`. The dispatched skill resolves everything from the `idea_id`/`date`.
 
 This command is the **text-production half** of the Ads pipeline. It runs **after** the Ads pipeline's **Ideate** step — a concept is only worked once it has been ideated and **approved** in the dashboard. It operates **per concept** and **per section**, never on a whole plan: it reads **no** `channel_plan` gate flags (`tactics_approved`/`approaches_approved`/Blueprint state). There is **no** `/ssc.plan` or `/ssc.ads` precondition beyond an approved concept.
 

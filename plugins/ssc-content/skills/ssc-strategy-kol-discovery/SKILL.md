@@ -1,6 +1,6 @@
 ---
 name: ssc-strategy-kol-discovery
-description: Discovers and evaluates Key Opinion Leaders (KOLs) on Facebook, YouTube, and TikTok by fit to the 3 Cambridge Diet Vietnam archetypes. Produces ranked shortlists with audience overlap, tone alignment, and estimated collaboration value. Saves findings via save_strategy_finding (dimension=kol).
+description: Discovers and evaluates Key Opinion Leaders (KOLs) on Facebook, YouTube, and TikTok by fit to the Cambridge Diet Vietnam audience personas (per brand/personas). Produces ranked shortlists with audience overlap, tone alignment, and estimated collaboration value. Saves findings via save_strategy_finding (dimension=kol).
 metadata:
   type: skill
   stage: strategy
@@ -12,7 +12,7 @@ metadata:
 
 # KOL Discovery (`ssc-strategy-kol-discovery`) — FR-014
 
-You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet Vietnam across Facebook, YouTube, and TikTok, filtered by fit to the brand's 3 audience archetypes. You save findings to the strategy brief. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet Vietnam across Facebook, YouTube, and TikTok, filtered by fit to the brand's audience personas as currently listed in `brand/personas`. You save findings to the strategy brief. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 
 ## Inputs
 
@@ -25,13 +25,14 @@ You discover and evaluate Key Opinion Leaders (KOLs) relevant to Cambridge Diet 
 ### Step 1: Load brand context
 
 Call `get_knowledge` for:
-- `brand/personas` — the 3 archetypes and their tone/value expectations
+- `brand/personas` — the current audience personas (name, age range, priority tier) and their tone/value expectations. Treat this as the live source of truth for how many personas exist and what they're called — do not assume a fixed count.
+- `brand/persona-huong`, `brand/persona-lan`, `brand/persona-mai`, `brand/persona-thao` — each persona's detail doc (a persona's `brand/persona-<slug>` path is its taxonomy `code` with the `chi-` prefix stripped, e.g. `chi-huong` → `brand/persona-huong`; this is a batch/research skill covering every persona in one run, so load all currently-documented detail docs). Each carries real vocabulary to echo/avoid, channel and trust behaviour, and tone guidance specific to that persona — use this to judge whether a candidate KOL's actual audience, voice, and platform habits match a *specific* persona's documented language and channels, not just a name/age-bracket guess.
 - `brand/positioning` — what Cambridge Diet Vietnam claims
 - `brand/proof-points` — credibility signals the KOL should be able to reinforce
 
 ### Step 2: Discover KOLs by persona
 
-For each persona (`brand/personas`: Chị Hương / Chị Mai / Chị Lan), search for Vietnamese health/weight-loss influencers on each platform. Substitute `<year>` with the current year derived from `period` (e.g. `2026-Q3` → `2026`) so queries don't go stale:
+For each persona currently listed in `brand/personas` (today: Chị Hương / Chị Lan / Chị Mai / Chị Thảo), search for Vietnamese health/weight-loss influencers on each platform. Substitute `<year>` with the current year derived from `period` (e.g. `2026-Q3` → `2026`) so queries don't go stale:
 
 **Facebook:**
 - Search: `WebSearch("KOL giảm cân Facebook Việt Nam <year> uy tín")`
@@ -50,7 +51,7 @@ For each discovered KOL, assess:
 
 | Criterion | What to evaluate |
 |-----------|-----------------|
-| **Persona fit** | Which of the 3 personas (Chị Hương 45–55 / Chị Mai 50–60 / Chị Lan 35–45) does their audience lean toward? |
+| **Persona fit** | Which of the personas currently listed in `brand/personas` (today: Chị Hương 45–55 / Chị Lan 35–44 / Chị Mai 50–60 / Chị Thảo 30–40) does their audience lean toward? |
 | **Tone alignment** | Does their voice match Cambridge Diet VN's woman-to-woman tone? (not clinical; not pushy) |
 | **Audience size** | Approximate follower/subscriber count |
 | **Engagement quality** | Comments quality — real questions/testimonials vs generic |
@@ -65,7 +66,7 @@ dimension: kol
 brief_id: <brief_id>
 title: <KOL name> — <platform> — <persona fit>
 detail: <audience size, tone fit, key channel, why they match the persona>
-evidence: { platform: "<fb|yt|tiktok>", url: "<profile link>", persona: "<Chị Hương|Chị Mai|Chị Lan>", est_followers: "<N>" }
+evidence: { platform: "<fb|yt|tiktok>", url: "<profile link>", persona: "<Chị Hương|Chị Lan|Chị Mai|Chị Thảo>", est_followers: "<N>" }
 track: proven
 ```
 

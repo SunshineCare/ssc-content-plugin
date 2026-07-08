@@ -33,17 +33,18 @@ per-persona research loops until this is fixed.
   of 3 named archetypes", `ssc-ads-ideate`'s "all 3 archetypes must appear in
   L1") with logic that reads each persona's priority tier from
   `brand/personas` instead.
-- Add an explicit Chị Thảo eligibility-gate check (breastfeeding screening,
-  per `content/customer-suitability-triage`) to every skill that could select
-  or write for her: `ssc-post-ideate`, `ssc-ads-ideate`, `ssc-youtube-ideate`,
-  `ssc-ads-writer`, `ssc-post-produce`, `ssc-video-script`, `ssc-post-authority`.
 - Verify (no functional change expected) `ssc-youtube-briefing` and
   `ssc-youtube-ideate`'s existing dynamic-persona-list pattern still holds as
   the reference example.
 
 **Not included:** authoring or revising any KB document content (already live);
 creating the missing `chi-thao` persona taxonomy term (operator's job in
-BrandOS directly — outside this repo, no tool here can write it).
+BrandOS directly — outside this repo, no tool here can write it); enforcing
+Chị Thảo's breastfeeding-eligibility screening rule in any skill's compliance
+gate — a real rule in `brand/persona-thao`, but a persona-specific hardcoded
+check would contradict this change's own premise of not special-casing a
+specific persona in skill prose. It belongs to a separate, explicitly-scoped
+change if pursued.
 
 ## Capabilities
 
@@ -51,8 +52,7 @@ BrandOS directly — outside this repo, no tool here can write it).
 - `persona-context-grounding`: the cross-cutting rule that any skill writing,
   ideating, or researching content targeted at a specific persona must resolve
   and load that persona's KB detail doc (not just the `brand/personas`
-  summary), must never hardcode the persona name list or count, and must
-  enforce Chị Thảo's eligibility gate wherever she could be selected.
+  summary), and must never hardcode the persona name list or count.
 
 ### Modified Capabilities
 - (none — no existing `openspec/specs/*` capability covers persona handling

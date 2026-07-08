@@ -81,6 +81,8 @@ Also confirm `channel === 'ad'`; if not, STOP (this skill operates only on the a
 - `idea.ad_notes` — the structural shorthand + the lane/source note (top-level field, not `detail.notes`; esp. for person-led concepts; see the authenticity guardrail).
 - `idea.tags[]` — the **structural dimensions** (resolved taxonomy terms): the **layer** (`kind='campaign_layer'`), **value** (`kind='value'`), **frame** (`kind='frame'`), **persona** (`kind='persona'`), and any **entry** / **against** / **experience** present — the **`against`** tag drives the differentiation match-up in Step 6. The **format** intent (`reel`/`video`/`carousel`/`image`/`story`) is in `ad_notes`.
 
+**Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. `chi-huong` → `brand/persona-huong`, `chi-lan` → `brand/persona-lan`, `chi-mai` → `brand/persona-mai`, `chi-thao` → `brand/persona-thao`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later. Hold this ONE resolved path forward into Step 3 (load only the one detail doc for the persona actually in play this concept, not all four).
+
 The structural dimensions are the brief you must honour: every variation expresses the concept's `title` through its `value` + `frame` + `persona`, aimed at the layer's audience. Do not drift off the concept's angle.
 
 ### Step 1b: Resolve the ad-set `build_spec`
@@ -165,6 +167,8 @@ Call: get_knowledge
   ]
 ```
 
+... plus `brand/persona-<slug>` — the resolved persona's detail doc (Step 1). It carries that persona's ranked trigger points with content guidance, her objections and how to dismantle them, real vocabulary to echo/avoid, and myths to debunk — ground the Hook Formula Bank (Step 5) and every variation's hooks/angles/lines in this doc rather than writing to the persona name alone.
+
 These paths are:
 
 - `voice/tone` — the brand tone and voice principles.
@@ -222,6 +226,8 @@ Apply the brand's headline craft (sourced from `ad/headline-formulas` + `ad/crea
 - A **confession / first-line scene** open ("Có một dạo mình…") — for `frame=confession`/person-led concepts, derived ONLY from `programme/kieu-my-story`.
 - An **identification** open (echo an attitude, not a claim) — for cold/unaware audiences and the sophistication-3–4 stance (lead with mechanism — independent science / the 6-step — + identification — Kiều My — not a bare benefit claim).
 
+**Ground hooks in the persona's detail doc.** Draw on the resolved `brand/persona-<slug>` doc (Step 1, loaded in Step 3) when writing every hook — open with (or answer) one of her ranked trigger points, pre-empt or dismantle one of her stated objections, and echo her real vocabulary (never a word her doc flags to avoid). This is what makes a hook feel written *for* this persona rather than for personas in general.
+
 **Short-headline length discipline** (the `headline` section is the on-creative hook): keep headlines SHORT — the brand's headline-length rule in `ad/headline-formulas` is the bar; a headline that needs explaining is too complex for an ad. Read the exact char ceilings from that doc; aim well under them. The `copy` (primary text) may run longer (a hook line + benefit + soft CTA), and the `description` (link description) is one tight benefit/CTA line.
 
 **Map the angle type to the audience first.** Before writing, diagnose the ad set's awareness stage from its tier/audience (cold/problem-aware L1 → Problem / Curiosity / Solution-benefit; warm/most-aware L3 → Proof / Comparison / Direct-offer; L2 omnipresence → social-proof / lived-proof, never a hard offer) and pick the hook accordingly. Do not put a warm offer hook on a cold audience, or a cold pain hook on a warm one.
@@ -269,7 +275,7 @@ The ad text may speak in **Kiều My's woman-to-woman voice** — but voice is N
 
 1. **Kiều My (real founder).** Her *voice, opinions, and educational framing* are yours to write. Her **personal story, anecdotes, events, results, timeline, or quotes are NOT** — ground any of those ONLY in `programme/kieu-my-story` + `voice/founder-voice`. If the concept's `ad_notes` names a source (e.g. `nguồn: programme/kieu-my-story`), honour exactly that material; never invent beyond it.
 2. **Other real people (customers, consultants).** Use a testimonial / story / result ONLY if the concept's brief hands you a real, consented, existing one (`reuse existing <name> asset`). **Never invent a named customer, a "Chị X giảm Ykg" result, a consultant anecdote, or a quote.**
-3. **Personas (Chị Hương / Chị Mai / Chị Lan) and the general reader.** Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45 thấy…") — NEVER as a specific named real testimonial.
+3. **Personas (the archetypes currently listed in `brand/personas` — do not assume which ones, or how many) and the general reader.** Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45 thấy…") — NEVER as a specific named real testimonial.
 
 Non-person content (science / mechanism, product / flavour, the 6-step, the app, safety / EU) — write freely. When in doubt, write representative ("nhiều chị…") rather than a fabricated specific. A fabricated real-person story is an automatic fail.
 

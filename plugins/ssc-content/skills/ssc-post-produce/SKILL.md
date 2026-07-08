@@ -79,10 +79,12 @@ These are the real brief fields — the post detail row carries `hook_direction`
 And the **strategic tags** from `tags[]` (each tag is `{ term_id, kind, code, label }`):
 
 - the **pillar** tag (`kind = 'pillar'`) — the content pillar this post belongs to
-- the **persona** tag (`kind = 'persona'`) — the audience archetype (Chị Lan / Chị Hương / Chị Mai)
+- the **persona** tag (`kind = 'persona'`) — the audience archetype (per `brand/personas` — do not assume which ones, or how many)
 - any other strategic-dimension tags present (e.g. frame, value, emotion)
 
 The brief is the strategic frame you must honour. The `core_message`, `pillar`, `persona`, and `why_now` are fixed across all N variations — what changes is the **angle and hook**. Do not drift off the brief's pillar/persona/message.
+
+**Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. `chi-huong` → `brand/persona-huong`, `chi-lan` → `brand/persona-lan`, `chi-mai` → `brand/persona-mai`, `chi-thao` → `brand/persona-thao`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later. Hold this ONE resolved path forward into Step 3 (you load only the one detail doc for the persona actually in play this run, not all four).
 
 ### Step 3: Load the knowledge base
 
@@ -107,6 +109,8 @@ Call: get_knowledge
     "voice/founder-voice"
   ]
 ```
+
+... plus `brand/persona-<slug>` — the resolved persona's detail doc (see Step 2). It carries that persona's ranked trigger points with content guidance, her objections and how to dismantle them, real vocabulary to echo/avoid, and myths to debunk — ground the variations' hooks, angles, and lines in this doc rather than writing to the persona name alone.
 
 These paths are:
 
@@ -137,11 +141,13 @@ The Posts channel is written in **Kiều My's voice** — but voice is NOT licen
 
 1. **Kiều My (real founder).** Her *voice, opinions, and educational framing* are yours to write. Her **personal story, anecdotes, events, results, timeline, or quotes are NOT** — ground any of those ONLY in `programme/kieu-my-story` + `voice/founder-voice` (loaded in Step 3). Never invent a biographical specific beyond what those docs contain; re-read them each run (do not hard-code her stories).
 2. **Other real people (customers, consultants).** Use a testimonial / story / result ONLY if the brief hands you a real, consented, existing one. **Never invent a named customer, a "Chị X giảm Ykg" result, a consultant anecdote, or a quote.**
-3. **Personas (Chị Hương / Chị Mai / Chị Lan) and the general reader.** Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45 thấy…", "có chị từng…") — NEVER as a specific named real testimonial.
+3. **Personas (the archetypes currently listed in `brand/personas` — do not assume which ones, or how many) and the general reader.** Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45 thấy…", "có chị từng…") — NEVER as a specific named real testimonial.
 
 Non-person content (science/mechanism, product, app, 6-step) — write freely. When in doubt, write representative ("nhiều chị…") rather than a fabricated specific. A fabricated real-person story is an automatic fail at the authority gate (NĐ-15 + brand authenticity).
 
 **Proof points — weave ≥3 into every post (read FIRST):** each variation must lean on **≥3 distinct** Cambridge USP / proof points from `brand/proof-points` (e.g. 60 năm nghiên cứu, DiRECT/DROPLET, chuẩn EU / 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành, the app), woven naturally into the post's argument — **never a bare list** — and pressing our edge per `brand/positioning` when the post contrasts with an alternative. Keep them concrete, not slogans, and inside the compliance rails (no fabricated number; spell out "nghiên cứu lâm sàng độc lập" never "RCT"; **26** not 25; no commercial drug-brand name; no income/business-opportunity claim). A variation carrying fewer than 3 distinct proof points is dropped at the authority gate.
+
+**Ground hooks and lines in the persona's detail doc.** Draw on the resolved `brand/persona-<slug>` doc loaded in Step 3 when drafting — open with (or answer) one of her ranked trigger points, pre-empt or dismantle one of her stated objections, and echo her real vocabulary (never the words her doc flags to avoid). This is what makes a variation feel written *for* this persona rather than for personas in general.
 
 **Make them genuinely DISTINCT.** The brief (`core_message`, pillar, persona, `why_now`) is fixed; the **angle and hook are not**. Give each variation a different way in — for example:
 

@@ -49,7 +49,8 @@ If `plan.tactics_approved` is `true`, extract and hold:
 
 Call `get_knowledge` for each of these verified paths:
 
-- `brand/personas` — the three core audience archetypes (who we are writing for)
+- `brand/personas` — the audience archetypes (who we are writing for) and their pain points, motivations, and priority tiers. The archetype names, the count, and their priority tiers all live in this document — never assume a fixed count or a fixed name list; re-read it every run.
+- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections, real vocabulary, myths to debunk, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a BATCH skill (the month brief's "Seasonal Pain Points & Archetype Mapping" section maps several personas at once), so load every currently-listed persona's detail doc upfront — Step 5 grounds each named archetype's seasonal trigger in her actual detail-doc trigger points instead of a generic mapping.
 - `brand/journey-stages` — where personas sit in the weight-loss journey (awareness → commitment → maintenance)
 - `brand/positioning` — Cambridge Diet Vietnam's brand promise and differentiation
 - `content/pillars` — the content pillar strategy and the pillar names (what topics CDV should own)
@@ -87,7 +88,7 @@ Call `save_channel_plan` with `channel='post'`, `period`, and `context` — a ma
 <Bullet list of holidays, observances, and significant dates for the month. Flag which dates are most relevant to executing the approved tactics.>
 
 ## Seasonal Pain Points & Archetype Mapping
-<3–5 seasonal health/weight-loss pain points, each mapped to the most relevant persona archetype(s) from brand/personas. Prioritise pain points that align with or amplify the approved tactics. Name the archetype, describe the seasonal trigger, and explain why it matters this month.>
+<3–5 seasonal health/weight-loss pain points, each mapped to the most relevant persona archetype(s) from brand/personas (however many are currently listed — not a fixed count). Prioritise pain points that align with or amplify the approved tactics. Name the archetype, describe the seasonal trigger, and explain why it matters this month. Draw each named archetype's seasonal trigger from her `brand/persona-<slug>` detail doc's ranked trigger-point list — match this month's seasonal/cultural-calendar findings (Step 3) to one of her stated triggers rather than inventing one generically.>
 
 ## Competitor & Platform Watch
 <Brief notes (2–4 bullets) on competitor activity or platform signals observed in Step 3. If nothing significant was found, state that clearly rather than padding.>
@@ -206,7 +207,7 @@ Brief (`context`), pillar distribution (`plan_targets`), and format mix/totals (
 - NEVER sets `approved` (the Research gate) or any approval flag. Flipping it is a dashboard-only action (`approve_channel_plan`, gate `plan`).
 - Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB, run research, or write anything.
 - Research (Step 3) is intentionally light — 3–5 queries maximum. Do not expand into a deep multi-source pass; that is the strategic review's job.
-- Reference only the 5 knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
+- Reference only the knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
 - Format names must be exactly `image`, `carousel`, `video`, `reel` — no other values.
 - `detail` must carry only post-channel keys; the repo rejects ad/youtube keys for a post plan.
 - Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state.

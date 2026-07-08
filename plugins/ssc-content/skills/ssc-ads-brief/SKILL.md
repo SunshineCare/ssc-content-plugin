@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_idea, get_channel_plan, list_post_content, update_idea]
+  tools: [get_idea, get_channel_plan, list_post_content, get_knowledge, update_idea]
 ---
 
 # Ads Brief (`ssc-ads-brief`)
@@ -55,6 +55,8 @@ Also confirm `channel === 'ad'`; if not, STOP (this skill operates only on the a
 - `idea.ad_notes` — the structural shorthand + lane/source note.
 - `idea.tags[]` — the structural dimensions: **layer** (`kind='campaign_layer'`), **value** (`kind='value'`), **frame** (`kind='frame'`), **persona** (`kind='persona'`), and any **entry** / **against** / **experience** present.
 
+**Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. `chi-huong` → `brand/persona-huong`, `chi-lan` → `brand/persona-lan`, `chi-mai` → `brand/persona-mai`, `chi-thao` → `brand/persona-thao`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later. Hold this ONE resolved path forward into Step 1c's knowledge-base load.
+
 ### Step 1b: Resolve the ad-set `build_spec`
 
 Needed for the `why_now` field's audience-stage/timing rationale. The idea has no `period` field — derive the plan period `YYYY-MM` from this skill's own inputs: use the `date` input's month when a `date` was given; otherwise take the month from the idea's `created_at`; if still ambiguous, ask the operator for the plan month (one question). Then call:
@@ -66,6 +68,16 @@ Call: get_channel_plan
 ```
 
 From `{ plan }`, find the `plan.ad_slots[]` row whose `id === idea.ad_slot_id` and hold its `slot_name`, `layer`, and `build_spec` (`objective`, `audience`, `optimizationGoal`, `placements`, `frequencyCap`, `budgetShare`, tier `kpi`). If `idea.ad_slot_id` is null or the row is not found, proceed WITHOUT the build_spec (derive `why_now` from the idea's tags + plan period alone) and note that in the Step 5 summary. Do NOT stop.
+
+### Step 1c: Load the persona's detail doc
+
+```
+Call: get_knowledge
+  paths:
+    - brand/persona-<slug>   # the resolved persona's detail doc (Step 1) — the ONE path this single-target skill loads
+```
+
+It carries this persona's ranked trigger points with content guidance, her objections and how to dismantle them, real vocabulary to echo/avoid, myths to debunk, channel/trust behaviour, buying behaviour, and tone guidance. Ground Step 3's derivation of `hook_direction`/`core_message`/`why_now`/`story_moment`/`cta` in this doc — not just in the persona's name/label. If `idea.tags[]` carries no persona tag (`kind='persona'`), skip this call, derive Step 3's fields without persona-detail grounding, and note that in the Step 5 summary. Do NOT stop.
 
 ### Step 2: Gate — require an approved `copy`
 
@@ -91,15 +103,15 @@ Otherwise, hold the live approved rows from this same `list_post_content` result
 
 ### Step 3: Derive the five brief fields
 
-Ground every field in the concept's `title`/`tags`/`ad_notes` (Step 1), the `build_spec` context (Step 1b), and the live approved bodies (Step 2). Never fabricate detail beyond what these sources support.
+Ground every field in the concept's `title`/`tags`/`ad_notes` (Step 1), the `build_spec` context (Step 1b), the persona's detail doc (Step 1c), and the live approved bodies (Step 2). Never fabricate detail beyond what these sources support.
 
 **Tie-break: which approved `copy` is "the winning approved copy".** When more than one `copy` row is approved, the fields below that ground in a single "winning" copy resolve it the same way: prefer the **highest-scored** approved `copy` (`score`, from Step 2's `list_post_content`); if scores tie, prefer the **most-recently-approved** one — since `list_post_content` returns rows newest first (per `ssc-ads-writer`'s Step 2), take the first (topmost) row among those tied at the highest score. Apply this rule everywhere "the winning approved copy" is referenced below.
 
-- **`hook_direction`** — the opening-hook strategy. Take it from **the winning approved copy's** (see tie-break rule above) opening line; if an approved headline exists, it already distils that hook, so prefer stating the headline's distilled form with a one-clause note of the copy hook it came from.
-- **`core_message`** — one clear Vietnamese sentence stating the strategic argument: `idea.title` sharpened by **the winning approved copy's** (see tie-break rule above) core promise (the transformation/benefit it argues for).
-- **`why_now`** — the ad-set's audience-stage/timing rationale: cold/L1 (problem-aware — name the pain/curiosity this month serves), warm/L3 (most-aware — name the proof/offer this serves), or L2 omnipresence (reach — name the lived-proof angle), combined with the plan period. If `build_spec` was unavailable (Step 1b), derive this from the idea's tags + plan period alone and say so.
-- **`story_moment`** — a concrete scene **from the winning approved copy** (see tie-break rule above), only if the concept is story/person-led (`frame=confession` or an `against`/persona tag implying a lived scene). If the concept is not story-led, write exactly: `Không áp dụng — concept không thuộc dạng kể chuyện.` (never invent a scene to fill the field).
-- **`cta`** — the actual CTA phrasing used in **the winning approved copy** (see tie-break rule above), or the approved description, if it states one more concretely. Quote it, don't paraphrase it into something new.
+- **`hook_direction`** — the opening-hook strategy. Take it from **the winning approved copy's** (see tie-break rule above) opening line; if an approved headline exists, it already distils that hook, so prefer stating the headline's distilled form with a one-clause note of the copy hook it came from. Name which of the persona detail doc's (Step 1c) ranked trigger points the hook answers, or which stated objection it pre-empts, and note whether it echoes her real vocabulary — this gives the reader the *strategic* hook direction, not just the literal opening line.
+- **`core_message`** — one clear Vietnamese sentence stating the strategic argument: `idea.title` sharpened by **the winning approved copy's** (see tie-break rule above) core promise (the transformation/benefit it argues for). Where the persona detail doc (Step 1c) flags a myth she holds, note if the core promise counters it.
+- **`why_now`** — the ad-set's audience-stage/timing rationale: cold/L1 (problem-aware — name the pain/curiosity this month serves), warm/L3 (most-aware — name the proof/offer this serves), or L2 omnipresence (reach — name the lived-proof angle), combined with the plan period. Anchor the pain/curiosity/proof named to a specific ranked trigger point from the persona detail doc (Step 1c) where one applies. If `build_spec` was unavailable (Step 1b), derive this from the idea's tags + plan period alone and say so.
+- **`story_moment`** — a concrete scene **from the winning approved copy** (see tie-break rule above), only if the concept is story/person-led (`frame=confession` or an `against`/persona tag implying a lived scene). Check the scene against the persona detail doc's (Step 1c) buying-behaviour and vocabulary sections so it reads as authentic to how this persona actually behaves and talks. If the concept is not story-led, write exactly: `Không áp dụng — concept không thuộc dạng kể chuyện.` (never invent a scene to fill the field).
+- **`cta`** — the actual CTA phrasing used in **the winning approved copy** (see tie-break rule above), or the approved description, if it states one more concretely. Quote it, don't paraphrase it into something new. Where useful, note in the summary (not the field itself) whether the CTA's directness matches the persona detail doc's (Step 1c) buying-behaviour guidance (e.g. needs more reassurance vs. ready to act).
 
 All five values are Vietnamese prose (short — a phrase to one sentence each, not paragraphs). Do NOT derive or write a `theme` value — ad ideas never carry one (see the skill description).
 
@@ -125,7 +137,7 @@ Do NOT pass `theme` — ad ideas never carry one. This call only revises the fiv
 
 **Target concept:** <idea_id> (<layer> · <value> · <frame> · <persona>) — status approved
 **Ad set:** <slot_name> (KPI <build_spec.kpi>) — or "ad-set context unavailable"
-**Grounded in:** <N> approved copy(ies) + <"no approved headline yet" | "<M> approved headline(s)"> + <"no approved description yet" | "<M> approved description(s)"> + <"no approved image_content yet" | "<M> approved image_content set(s)">
+**Grounded in:** <N> approved copy(ies) + <"no approved headline yet" | "<M> approved headline(s)"> + <"no approved description yet" | "<M> approved description(s)"> + <"no approved image_content yet" | "<M> approved image_content set(s)"> + <"persona detail doc (`brand/persona-<slug>`)" | "persona detail doc unavailable — no persona tag on this concept">
 
 | Field | Value |
 |---|---|
@@ -159,4 +171,4 @@ If the `date` resolved more than one approved concept (Step 1), note which conce
 - **Never fabricate.** `story_moment` is only written when the concept is genuinely story/person-led and the scene comes from the approved copy; otherwise write the explicit "not applicable" line.
 - **All persisted prose in Vietnamese.**
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
-- Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_post_content` reads).
+- Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_post_content` / `get_knowledge` reads).

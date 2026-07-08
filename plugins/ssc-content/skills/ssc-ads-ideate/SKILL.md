@@ -57,10 +57,11 @@ If no **approved** ad set carries a `creative_count` (and there is no `creative_
 
 ### Step 2: Load the structural knowledge base
 
-Call `get_knowledge` for each of these nine verified paths:
+Call `get_knowledge` for each of these thirteen verified paths:
 
 - `brand/angles` — the full angle system: value dimensions (§1.1), entry dimensions (§1.2), against dimensions (§1.3), experience dimensions (§1.4), frame codes (§3), Frame × Layer table, and diversity rules (§5)
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai) and their value priorities, pain points, and entry dimensions
+- `brand/personas` — the core audience archetypes and their value priorities, pain points, entry dimensions, and **priority tiers** (e.g. "cao nhất" / "cao" / "trung bình" / "chọn lọc" — stated in each persona's own section header). The archetype names, the count, and the tiers all live in this document — never assume a fixed count or a fixed name list; re-read it every run.
+- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points, objections + how to dismantle them, real vocabulary to echo/avoid, and myths to debunk. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a BATCH skill (one run spans concepts for every persona across the month's ad sets), so load every currently-listed persona's detail doc upfront — not just one — to ground archetype/entry/against choices in each persona's actual language and objections rather than the summary-only view in `brand/personas`.
 - `ad/creative-guidelines` — minimum creative counts per layer (Andromeda penalty thresholds); creative count verification rules
 - `ad/layer-tones` — tonal register guidance per layer and frame
 - `ad/strategy` — the three-layer ad architecture, L1 creative allocation priorities (§2.2), default budget splits
@@ -69,13 +70,15 @@ Call `get_knowledge` for each of these nine verified paths:
 - `voice/founder-voice` — Kiều My's founder voice (tone for the person-led lane)
 - `ad/awareness-framework` — Market Awareness × Sophistication + Emotion Audit + angle-type lens; the awareness↔tier mapping that drives which angle/value/frame fits each ad set's audience (used in Step 4's Awareness diagnosis)
 
-Read all nine documents carefully before generating any concept. Structural rules in Step 4 and self-checks in Step 5 are sourced from `brand/angles` (§3, §5), `ad/awareness-framework`, and `ad/strategy` — those documents are the source of truth.
+Read all thirteen documents carefully before generating any concept (`brand/personas` plus every currently-listed `brand/persona-<slug>` detail doc together form the full persona-grounding set — load the summary AND every detail doc, not the summary alone). Structural rules in Step 4 and self-checks in Step 5 are sourced from `brand/angles` (§3, §5), `ad/awareness-framework`, and `ad/strategy` — those documents are the source of truth.
 
 ### Step 3: Resolve every structural code → taxonomy id
 
 The structural dimensions on an ad concept (value, entry, against, experience, frame, archetype/persona, campaign layer) are **taxonomy-governed**: `save_idea`'s `terms` array must carry the matching `taxonomies.id`, not the human code. Resolve them once, before any write:
 
 Call `list_taxonomies` once per needed `kind` (`value`, `entry`, `against`, `experience`, `frame`, `persona`, `campaign_layer`), **or** call `list_taxonomies` with no `kind` to get all kinds in one call, and build a `code → id` map per kind from the returned rows (each row carries `code` and its `taxonomies.id`). You will pass the resolved **leaf-term `id`s** in `save_idea`'s `terms`. NEVER pass a code (e.g. a frame code, `L1`) as a `term` and NEVER invent an id.
+
+**Persona taxonomy can lag `brand/personas` (do not invent an id for the gap):** `brand/personas` is the live KB index of personas; the `persona` taxonomy resolved above is a SEPARATE list maintained independently, and it can lag behind the KB doc — a persona can be documented in `brand/personas` before her taxonomy term is added. After building the `persona` code → id map, check every persona currently listed in `brand/personas` against it. If a listed persona has NO corresponding entry in the resolved `persona` code → id map, do NOT invent an id for her and do NOT silently drop her from consideration (e.g. from the archetype-presence check in Step 4/5) — instead carry her forward as untaggable this run, and report her by name in the Step 7 summary so the operator knows to add her taxonomy term rather than assuming full persona coverage was achieved.
 
 The `ad_slots` rows from Step 1 already carry resolved persona/value/frame ids from the Blueprint step — reuse those where a concept inherits its ad set's dimensions (L1 persona/value/frame; the **`value` on each L2 row** — CORE person-led leans social-proof/lived-proof, TEST is the test concept's own value; the L3/YouTube value where one is present), and use the maps above for the per-creative dimensions you vary (entry, against, experience, and any concept-specific value/frame).
 
@@ -88,7 +91,7 @@ Iterate the **approved** ad-set subset from Step 1 (`plan.ad_slots` filtered to 
 Every concept belongs to ONE of three lanes. Choose the lane, then obey its rule. NEVER fabricate a story, quote, event, number, or lived experience and attribute it to a real named person.
 
 1. **Real named person.** **Kiều My is the primary person-led engine** — DERIVE her angles from her documented real story: read `programme/kieu-my-story` + `voice/founder-voice` (loaded in Step 2) and angle *that* material. Do NOT invent anything beyond what those docs contain, and **do NOT hard-code a fixed Kiều My angle list** — re-derive from the live docs every run (her story and positions live there, not in this skill). Consultants / customers (e.g. Bác Đỗ Dung, Thắm): **reuse EXISTING consented assets only** — do NOT generate "new real-person story" concepts (the team cannot source fresh real material per concept). If a slot wants a real-person angle with no existing asset, convert it to lane 2 or 3.
-2. **Persona-illustrative** — the archetypes (Chị Hương / Chị Mai / Chị Lan). Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45…"), but **never dressed as a named real testimonial**.
+2. **Persona-illustrative** — the archetypes currently listed in `brand/personas` (do not assume which ones, or how many — read the live document). Illustrative scenarios are fine, framed as *representative* ("nhiều chị ở tuổi 45…"), but **never dressed as a named real testimonial**.
 3. **Non-person** — science/mechanism, product/flavor, 6-step, app, safety/EU. No person attribution; generate freely.
 
 The structural concept only tags the lane + dimensions — it never writes a person's words. A person-led concept's `detail.notes` MUST name its real source (e.g. `nguồn: programme/kieu-my-story` or `reuse existing <name> asset`), never an invented story.
@@ -116,12 +119,12 @@ Read all stage→angle mappings + craft rules (market's language, specificity > 
 
 **Archetype pre-assignment (L1 only — do this before writing any concept):**
 
-For each **approved** L1 slot, decide which archetype each creative targets. Different archetypes experience the same slot tension differently (life stage, pain points, entry dimensions — see `brand/personas`). Write out:
+For each **approved** L1 slot, decide which archetype each creative targets. Different archetypes experience the same slot tension differently (life stage, pain points, entry dimensions — see `brand/personas` and each persona's own detail doc loaded in Step 2). Write out one line per persona currently listed in `brand/personas` — do not assume a fixed set of names or a fixed count:
 ```
-[slot]: Lan=N, Hương=N, Mai=N
-L1 total: Lan=N, Hương=N, Mai=N
+[slot]: <persona A>=N, <persona B>=N, ...
+L1 total: <persona A>=N, <persona B>=N, ...
 ```
-CHECK (per the `brand/angles §5` archetype rules): all 3 archetypes present in L1, and no slot has all its creatives on one archetype. Fix before proceeding. Follow allocation priorities from `ad/strategy §2.2`.
+CHECK (per the `brand/angles §5` archetype rules, tier-aware per `brand/personas`): every persona `brand/personas` marks at a tier OTHER THAN selective/conditional — i.e. "cao nhất" / "cao" / "trung bình" — must appear at least once across L1 — if one is completely absent, reassign a concept now. A persona marked at a SELECTIVE / conditional ("chọn lọc") priority tier is **not** held to that same bar; her absence from a given cycle's L1 is not itself a violation (read each persona's tier note in `brand/personas` before judging this). Also confirm no single slot has all its creatives on one archetype. Fix before proceeding. Follow allocation priorities from `ad/strategy §2.2`.
 
 **Frame pre-assignment (do this before writing any concept):**
 
@@ -185,7 +188,7 @@ Before finalising (perform checks per batch and then across the full set), audit
 
 1. **Creative count per approved ad set (all layers)** — Count concepts per **approved** ad set and compare to **that ad set's row `creative_count`**. This covers EVERY layer among the approved subset — L1 theme slots, the L2 omnipresence ad sets, L3, and YouTube — by their own row count (for a pre-migration plan with no row `creative_count`, fall back to that ad set's `creative_count_config` figure). Every approved ad set's saved count must equal its row's `creative_count` exactly; an unapproved ad set must have **zero** concepts. Any deviation = fix before finalising.
 
-2. **Archetype presence in L1** — All 3 archetypes (Chị Lan, Chị Hương, Chị Mai) must appear in L1 per the `brand/angles §5` archetype rule. If any is absent, reassign a concept now.
+2. **Archetype presence in L1 (tier-aware)** — Read each persona's priority tier from `brand/personas` (e.g. "cao nhất" / "cao" / "trung bình" / "chọn lọc"). Every persona NOT marked at a selective/conditional ("chọn lọc") tier — i.e. every persona at "cao nhất" / "cao" / "trung bình" — must appear at least once in L1 per the `brand/angles §5` archetype rule — if one is completely absent, reassign a concept now. A persona marked SELECTIVE / conditional priority is **not** held to that same bar: her absence from L1 in a given cycle is not, by itself, a failure — note it in the summary rather than forcing a reassignment purely to secure her presence.
 
 3. **Per-slot archetype balance** — Enforce the per-slot archetype-diversity rule in `brand/angles §5` (a multi-creative L1 slot must span enough distinct archetypes; no archetype may take a whole slot). Read the threshold from §5.
 
@@ -224,7 +227,7 @@ Before finalising (perform checks per batch and then across the full set), audit
 **Diversity summary (write before finalising):**
 
 ```
-L1 archetypes: Lan=N, Hương=N, Mai=N — [PASS/FAIL]
+L1 archetypes (per current `brand/personas` list): <persona A>=N, <persona B>=N, ... — non-selective-tier presence ("cao nhất"/"cao"/"trung bình") [PASS/FAIL]; SELECTIVE-tier presence noted (informational, not a failure)
 Per-slot archetype balance: [list worst slot, e.g. "Slot X: Lan=4" → FAIL]
 Frame usage per layer: [list frame→count for any frame with count>1]
 not-suffering: appears on N concepts — [PASS/FAIL]
@@ -277,7 +280,8 @@ One row per **approved** `ad_plan_slots` ad set (only `status === 'approved'`) a
 ### Structural Diversity Check
 | Constraint | Threshold | Actual | Status |
 |------------|-----------|--------|--------|
-| L1 archetypes present (all 3) | 3 | <N> | PASS / FAIL |
+| L1 archetypes present (non-selective tier, per `brand/personas`) | every non-selective-tier persona ("cao nhất"/"cao"/"trung bình") ≥1 | <N> present / <M> required | PASS / FAIL |
+| L1 archetypes present (SELECTIVE tier, per `brand/personas`) | none required (informational) | <N> present | n/a |
 | Worst-slot archetype imbalance | ≤all-one-archetype per 4-slot | <worst slot> | PASS / FAIL |
 | not-suffering coverage | per §5 | <N> | PASS / FAIL |
 | Against concentration (max per code) | per §5 | <worst code pct> | PASS / FAIL |
@@ -292,6 +296,9 @@ One row per **approved** `ad_plan_slots` ad set (only `status === 'approved'`) a
 
 ### Quality scores
 All saved concepts ≥ 4★: <yes / no — list any bounded positions>
+
+### Persona taxonomy coverage
+Personas listed in `brand/personas` with no corresponding `persona` taxonomy term (untaggable this run — add their taxonomy term before assuming full persona coverage): <none / list of persona names>
 
 ---
 Curate and approve ad concepts in the dashboard at: Ideas → <period> (filter channel = ad). Approving ≥1 concept opens the Ideas gate; then re-invoke the agent to run **Measure** (the final step — there is no Schedule step in the ad flow; the deployment blueprint already lives in the approved Blueprint).

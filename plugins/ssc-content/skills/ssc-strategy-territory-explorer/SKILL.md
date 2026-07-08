@@ -31,7 +31,8 @@ You explore **genuinely new** content/ad angles for Cambridge Diet Vietnam — t
 Call `get_knowledge` for:
 - `brand/angles` — EXCLUDE every officially-defined angle (THE source of truth for the ad+content angle taxonomy)
 - `content/pillars` — EXCLUDE these
-- `brand/personas` — use these (Chị Hương / Chị Mai / Chị Lan) to evaluate whether a new territory could resonate
+- `brand/personas` — the current audience personas (name, age range, priority tier). Treat this as the live source of truth for how many personas exist and what they're called — do not assume a fixed count. Use these to evaluate whether a new territory could resonate.
+- `brand/persona-huong`, `brand/persona-lan`, `brand/persona-mai`, `brand/persona-thao` — each persona's detail doc (a persona's `brand/persona-<slug>` path is its taxonomy `code` with the `chi-` prefix stripped, e.g. `chi-huong` → `brand/persona-huong`; this is a batch skill evaluating candidate territories against every persona in one run, so load all currently-documented detail docs). Each carries ranked trigger points, objections, and real vocabulary to echo/avoid — use this to judge whether a candidate territory would actually resonate with a *specific* persona's documented pain points/language, not just her name/age bracket.
 - `brand/positioning` — use to filter for brand fit
 
 Use `search_knowledge` to check if candidate new territories are already covered.
@@ -61,7 +62,7 @@ For each candidate:
 | Dimension | Question |
 |-----------|----------|
 | **Brand fit** | Does it fit CDV's woman-to-woman tone and positioning? |
-| **Audience resonance** | Which persona(s) — Chị Hương / Chị Mai / Chị Lan — would respond? |
+| **Audience resonance** | Which persona(s) currently listed in `brand/personas` (today: Chị Hương / Chị Lan / Chị Mai / Chị Thảo) would respond? |
 | **Compliance risk** | Any NĐ-15/2018 concerns? (medical claims, testimonial rules) |
 | **Production cost** | Easy (text post) / Medium (video) / Hard (events, partnerships) |
 | **Confidence** | How strong is the evidence this would work? (high/medium/low) |
@@ -77,7 +78,7 @@ dimension: new_territories
 brief_id: <brief_id>
 title: "New territory — <angle/theme name>"
 detail: <what the territory is, which persona it targets, why CDV hasn't explored it, how it would work as content or ad>
-evidence: { persona: "<Chị Hương|Chị Mai|Chị Lan|all>", format_candidates: ["post", "reel", "youtube-short"], compliance_notes: "<any NĐ-15 considerations>" }
+evidence: { persona: "<Chị Hương|Chị Lan|Chị Mai|Chị Thảo|all>", format_candidates: ["post", "reel", "youtube-short"], compliance_notes: "<any NĐ-15 considerations>" }
 track: experimental
 confidence: high | medium | low
 cost_risk: high | medium | low

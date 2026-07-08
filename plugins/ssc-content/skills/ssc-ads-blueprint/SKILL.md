@@ -64,7 +64,7 @@ Call `get_knowledge` for each of these verified paths:
 - `ad/campaign-tracking` — custom-audience definitions (e.g. `L2_Engagers_75pct_21d`) the L3 consolidated audience is built from.
 - `ad/layer-tones` — tonal register guidance per layer/frame (the source for each L1 `tonal_register`).
 - `brand/angles` — value dimensions (§1.1), entry dimensions (§1.2), against dimensions (§1.3), experience dimensions (§1.4), frame codes (§3) and the Frame × Layer table.
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai) and their pain points / entry dimensions.
+- `brand/personas` — the core audience archetypes and their pain points / entry dimensions / priority tiers (e.g. "cao nhất" / "cao" / "trung bình" / "chọn lọc"). The names, the count, and the tiers all live in this document — do not assume them; re-read it every run.
 - `content/pillars` — the content pillar strategy and pillar names (used as a *creative* angle vocabulary; an L2 ad set is NOT one pillar — see the v3.0 omnipresence model below).
 - `programme/kieu-my-story` — Kiều My's REAL founder story: the source for the person-led L2 CORE angles (the proven cheap-reach person engine). Person-led concepts are DERIVED from this doc, never fabricated.
 - `rules/banned-words` — hard-banned Vietnamese words/compounds — verify every slot name and every Vietnamese string in a build_spec.
@@ -100,7 +100,7 @@ Derive the cold theme/audience ad sets **the approved Approaches (`context`) + F
 - **Steering dimensions** (L1 only):
   - `slot_name`: a concise, natural Vietnamese ad-set name — the concept/theme ONLY, with **NO layer prefix** (never `"Lớp 1/2/3 —"`, `"L1/L2/L3 —"`, or `"YouTube —"`; the layer is carried by `layer_term_id` + the section header, so a prefix is redundant clutter). Use the EXACT name consistently everywhere (Ideate matches concepts to slots by `slot_id`; the name must read cleanly for the operator). This no-layer-prefix rule applies to L1/L2/L3/YouTube alike.
   - `peak_window`: the peak relevance window, e.g. `"đỉnh điểm tuần 1-2"` — a window for rotating creative, **NOT** a start/stop flight date.
-  - `primary_persona`: exactly ONE primary archetype (`Chị Lan`, `Chị Hương`, or `Chị Mai`) — not two.
+  - `primary_persona`: exactly ONE persona, chosen from whichever personas `brand/personas` currently lists — not two.
   - `value`: the primary value dimension from `brand/angles §1.1` (e.g. `emotional-permission`, `science-based-program`).
   - `frame`: the recommended frame code from `brand/angles §3` — must be marked ★ or ◆ for L1 in the Frame × Layer table.
   - `against` *(slot-level intent)*: the against dimension from `brand/angles §1.3` this slot contrasts with (e.g. `vs-self-dieting`, `vs-mlm`) — or none if genuinely absent. **At least 2** of the L1 slots should carry an against intent (Ideate distributes against codes per-creative). Honour the differentiation direction from the Approaches.

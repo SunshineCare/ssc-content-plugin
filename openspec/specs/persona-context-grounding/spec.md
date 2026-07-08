@@ -1,4 +1,17 @@
-## ADDED Requirements
+# persona-context-grounding
+
+## Purpose
+
+The cross-cutting rule that any skill writing, ideating, or researching content
+targeted at a specific Cambridge Diet Vietnam persona must resolve and load
+that persona's KB detail doc (`brand/persona-<slug>`) — not just the
+`brand/personas` summary index — and must never hardcode the persona name
+list or count. Single-target skills load the one relevant detail doc; batch
+skills load every currently-listed persona's detail doc. Persona balance
+checks read priority tier from `brand/personas` rather than assuming
+symmetric treatment across personas.
+
+## Requirements
 
 ### Requirement: Persona detail-doc path resolution
 
@@ -57,17 +70,3 @@ Skills that enforce persona balance or exclusivity across a plan/slot set (`ssc-
 
 - **WHEN** `ssc-ads-ideate` evaluates archetype presence in L1 and one listed persona is marked "chọn lọc" (selective priority) in `brand/personas`
 - **THEN** the check does not require that persona's presence in L1 on the same basis as a "cao nhất" (top-priority) persona
-
-### Requirement: Chị Thảo eligibility-gate check
-
-Any skill that could select, write, or score content targeting Chị Thảo (`ssc-post-ideate`, `ssc-ads-ideate`, `ssc-youtube-ideate`, `ssc-ads-writer`, `ssc-post-produce`, `ssc-video-script`, `ssc-post-authority`) SHALL include an explicit checklist step verifying that any such content either (a) addresses an already-weaned mother, or (b) is nurture/education-only framing consistent with `brand/persona-thao`'s screening guidance — and MUST NOT invite or assume a still-breastfeeding reader as a purchase-ready target.
-
-#### Scenario: Ad copy targeting Chị Thảo passes the eligibility check
-
-- **WHEN** `ssc-ads-writer` writes copy for a concept tagged persona `chi-thao`
-- **THEN** its quality gate includes a check that the copy does not invite a still-breastfeeding reader to start the programme, and either targets an already-weaned mother or stays nurture/education-only
-
-#### Scenario: Idea generation flags a Thảo-targeted concept for the gate
-
-- **WHEN** `ssc-ads-ideate` generates a concept tagged persona `chi-thao`
-- **THEN** the concept's framing respects the weaning gate (does not pitch VLCD start to a still-breastfeeding mother)

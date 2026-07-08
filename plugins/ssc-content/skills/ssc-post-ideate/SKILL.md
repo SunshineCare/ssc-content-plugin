@@ -51,20 +51,21 @@ The pillar distribution and format mix come from the plan aggregate (`targets` +
 
 ### Step 2: Load the creative knowledge base
 
-Call `get_knowledge` for each of these ten verified paths:
+Call `get_knowledge` for each of these fourteen verified paths:
 
 - `brand/angles` — the 3-tier angle system (dimensions: value, entry, against, experience; frames; diversity rules)
 - `voice/tone` — the brand tone and voice principles
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai) and their value priorities
+- `brand/personas` — the core audience archetypes and their value priorities (the archetype names, count, and priority tiers live in this document — do not assume them)
+- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`; today's four are `brand/persona-huong`, `brand/persona-lan`, `brand/persona-mai`, `brand/persona-thao`) — the per-persona detail docs `brand/personas` points to: ranked trigger points with content guidance, objections, real vocabulary, myths, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a **batch** run spanning every persona, so load every currently-listed persona's detail doc upfront (not just one) — they supply the concrete, month-specific pain points `rules/review-standards` criterion 2 requires, instead of a generic description
 - `brand/journey-stages` — the 7 emotional journey stages and their content implications
 - `content/quick-checklist` — what to avoid and quality requirements
 - `rules/banned-words` — hard-banned words and phrases (zero tolerance)
 - `rules/review-standards` — the 7 mandatory review criteria and diversity thresholds
 
-Read all ten documents carefully before generating any ideas. The diversity thresholds in Step 4 are sourced from `rules/review-standards` and `brand/angles` — always defer to those documents as the source of truth.
+Read all fourteen documents carefully before generating any ideas. The diversity thresholds in Step 4 are sourced from `rules/review-standards` and `brand/angles` — always defer to those documents as the source of truth.
 
 ### Step 3: Generate ~30 ideas
 
@@ -85,7 +86,7 @@ save_idea(
   title         = <Vietnamese post title — specific, natural, not translated>,
   hook_direction = <opening hook strategy or first-line direction>,
   pillar        = <pillar name, matching a plan.targets pillar term exactly>,
-  target_persona = <archetype name: 'Chị Lan' | 'Chị Hương' | 'Chị Mai'>,
+  target_persona = <persona name, chosen from whichever personas brand/personas currently lists>,
   core_message  = <the strategic direction — one clear sentence>,
   cta           = <call-to-action direction, soft and authentic>,
   why_now       = <why this topic is timely for this month>,
@@ -115,7 +116,7 @@ save_idea(
 - `title` — must be natural Vietnamese, not a translated phrase. Specific to the month's context (not evergreen), per `rules/review-standards` criterion 4.
 - `hook_direction` — the opening strategy: what question, confession line, or statement opens the post. Must vary across the batch (see hook-opener diversity in Step 4).
 - `pillar` — use the exact pillar name from a `plan.targets` pillar term (`term_label`/`term_code`).
-- `target_persona` — pick from `brand/personas`. Choose the persona whose primary values align with this idea's `angles.value`. Every idea must clearly address Chị Lan, Chị Hương, or Chị Mai, with specific month-context pain points (per `rules/review-standards` criterion 2).
+- `target_persona` — pick from whichever personas `brand/personas` currently lists (do not assume a fixed list). Choose the persona whose primary values align with this idea's `angles.value`. Every idea must clearly address its target persona with specific month-context pain points, drawn from that persona's detail doc (`brand/persona-<slug>`, loaded in Step 2) rather than invented generically — not a generic description (per `rules/review-standards` criterion 2).
 - `core_message` — the strategic direction (not a headline). One sentence stating the argument or transformation this post carries.
 - `cta` — soft, authentic call-to-action. No pushy sales language (per `rules/review-standards` criterion 7).
 - `why_now` — the month-specific context that makes this idea timely. No idea should be purely evergreen (per `rules/review-standards` criterion 4: >20% evergreen = FAIL).
@@ -136,7 +137,7 @@ Before finalising (or as you save each batch), audit the full set of ~30 ideas a
 
 1. **Pillar count accuracy** (per `rules/review-standards` criterion 1): Count ideas per pillar. Every pillar's count must match the pillar distribution in `plan.targets` exactly. Any deviation = fix before finalising.
 
-2. **Archetype specificity** (per `rules/review-standards` criterion 2): Spot-check 3 ideas. Each must name month-specific pain points for its target persona (Chị Lan, Chị Hương, Chị Mai), not generic descriptions. Generic = rewrite.
+2. **Archetype specificity** (per `rules/review-standards` criterion 2): Spot-check 3 ideas. Each must name month-specific pain points for its target persona — one of the personas currently listed in `brand/personas` — drawn from that persona's detail-doc trigger-point section (Step 2), not generic descriptions. Generic = rewrite.
 
 3. **Journey stage alignment** (per `rules/review-standards` criterion 3): Spot-check 3 ideas. The `journeyStage` must match the content direction — an idea in stage "Nhận ra" must not already propose a solution; an idea in stage "Tiến triển" must not dwell on initial pain. Misaligned = rewrite.
 

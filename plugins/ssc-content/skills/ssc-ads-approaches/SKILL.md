@@ -53,7 +53,8 @@ Call `get_knowledge` for each of these verified paths:
 - `ad/campaign-architecture` — L1/L2/L3 campaign structure, ad set roles, audience definitions
 - `ad/awareness-framework` — Market Awareness × Sophistication + Emotion Audit + angle-type lens; shape each layer's approach by the audience's awareness stage
 - `brand/angles` — value dimensions (§1.1), entry dimensions (§1.2), against dimensions (§1.3), experience dimensions (§1.4), frame codes (§3) and Frame × Layer table
-- `brand/personas` — the three core audience archetypes (Chị Lan, Chị Hương, Chị Mai), their pain points, motivations, and entry dimensions
+- `brand/personas` — the audience archetypes and their pain points, motivations, and entry dimensions. The archetype names, the count, and their priority tiers all live in this document — never assume a fixed count or a fixed name list; re-read it every run.
+- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections, real vocabulary, myths to debunk, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a BATCH skill (one run selects 2–3 personas to feature out of however many are currently listed), so load every currently-listed persona's detail doc upfront — not just the ones you end up featuring — so the "Audience & triggers" section can name each featured persona's actual seasonal trigger instead of a generic one.
 - `content/pillars` — the content pillar strategy and pillar names
 - `rules/banned-words` — hard-banned Vietnamese words/compounds — verify every Vietnamese string you write
 
@@ -109,8 +110,12 @@ awareness hooks (belong at L1/L3, not L2). Shape each layer by its audience's **
 
 ## Audience & triggers
 <Map the month's personas to their concrete creative triggers for paid. For 2–3 of the
-archetypes from brand/personas, name the seasonal trigger this month and the entry dimension /
-pain point a creative should open on. Keep it about the creative entry, not the bet selection.>
+archetypes from brand/personas (a selection out of however many personas are currently listed —
+not a fixed total), name the seasonal trigger this month and the entry dimension / pain point a
+creative should open on. Draw each featured persona's seasonal trigger from her
+`brand/persona-<slug>` detail doc's ranked trigger-point list — match this month's seasonal
+context (Step 3) to one of her stated triggers rather than inventing a generic one. Keep it
+about the creative entry, not the bet selection.>
 
 ## Differentiation
 <How Cambridge Diet VN's paid creative should be visibly different this month — given the

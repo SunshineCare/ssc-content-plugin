@@ -26,8 +26,8 @@ material to work from.
 3. **Nutrition science** — new evidence relevant to meal-replacement / weight
    management that strengthens or undermines an existing claim.
 4. **Vietnamese cultural shifts** — language, trends, seasonal/holiday framing,
-   audience sentiment relevant to the three archetypes (Chị Lan, Chị Hương,
-   Chị Mai).
+   audience sentiment relevant to the personas currently listed in
+   `brand/personas` (do not assume a fixed count or name list).
 
 ## Procedure
 

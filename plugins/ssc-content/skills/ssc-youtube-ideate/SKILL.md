@@ -50,7 +50,7 @@ If `plan.approved` is `true`, extract and hold from the aggregate:
 
 ### Step 2: Load the creative knowledge base
 
-Call `get_knowledge` for each of these eight verified paths:
+Call `get_knowledge` for each of these twelve verified paths:
 
 - `channels/youtube` — the YouTube channel strategy: content series descriptions, cadence rules, SEO priorities, tone, Shorts approach, and the YouTube → Facebook repurposing workflow
 - `voice/tone` — the brand tone and voice principles
@@ -58,16 +58,19 @@ Call `get_knowledge` for each of these eight verified paths:
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules
 - `brand/personas` — the core audience archetypes and their value priorities (the archetype names and definitions live in this document — do not assume them)
+- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections + how to dismantle them, real vocabulary to echo/avoid, and myths to debunk. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a **batch** run spanning ideas across every persona and series in one pass, so load every currently-listed persona's detail doc upfront — not just one — to ground each video's pain points and aspirations in that persona's actual trigger points and vocabulary rather than the summary-only view in `brand/personas`.
 - `brand/journey-stages` — the emotional journey stages and their content implications
 - `rules/banned-words` — hard-banned words and phrases (zero tolerance)
 
-Read all eight documents carefully before generating any ideas.
+Read all twelve documents carefully before generating any ideas (`brand/personas` plus every currently-listed `brand/persona-<slug>` detail doc together form the full persona-grounding set — load the summary AND every detail doc, not the summary alone).
 
 ### Step 3: Generate ideas
 
 Generate exactly the number of ideas required by the briefing distribution: the sum of the `youtube_series` target counts (long-form + Shorts). Produce ideas grouped by series (matching each series row's `target_value`) to make series-count tracking easier.
 
 **Resolve every strategic-dimension code → taxonomy id (do this once, before any `save_idea` write).** Call `list_taxonomies` once per needed `kind` — `youtube_series`, `buyer_stage`, `persona`, `journey_stage`, `value`, `format` (the dimensions that apply to the youtube channel) — **or** one unfiltered `list_taxonomies` call, and build a `code → id` map per kind. `save_idea`'s `terms` must carry the matching `taxonomies.id`, never a code, and never an invented id. (For `youtube_series` and `buyer_stage` you can reuse the `term_id`s already present on `plan.targets`.)
+
+**Persona taxonomy can lag `brand/personas` (do not invent an id for the gap):** `brand/personas` is the live KB index of personas; the `persona` taxonomy (the `kind='persona'` map built above) is a SEPARATE list maintained independently, and it can lag behind the KB doc — a persona can be documented in `brand/personas` before her taxonomy term is added. After building the code → id maps, check every persona currently listed in `brand/personas` against the resolved `kind='persona'` map. If a listed persona has NO corresponding entry there, do NOT invent an id for her and do NOT tag any idea's `persona` term to her this run — carry her forward as untaggable, and report her by name in the Step 5 summary so the operator knows to add her taxonomy term rather than assuming full persona coverage was achieved.
 
 For each idea, call `save_idea` with the following field mapping. Narrative fields go in `detail` (the `youtube_idea_details` columns); structural dimensions go in `terms` (resolved taxonomy leaf ids). There is NO `format_decision` blob and NO top-level `pillar`/`target_persona`/`hook_direction` args — any key outside this schema is rejected or lost.
 
@@ -133,7 +136,7 @@ Before finalising, audit the full set of ideas against these constraints. The de
 
 2. **Stage mix accuracy**: Count ideas per `buyer_stage` term. Totals must match the briefing's `buyer_stage` target rows. Any deviation = fix before finalising.
 
-3. **Archetype specificity**: Spot-check 3 ideas. Each must name month-specific pain points or aspirations for its tagged persona (per `brand/personas`), not generic descriptions. Generic = rewrite.
+3. **Archetype specificity**: Spot-check 3 ideas. Each must name month-specific pain points or aspirations for its tagged persona (per `brand/personas`), drawn from that persona's detail-doc trigger-point section (Step 2) rather than invented generically — not generic descriptions. Generic = rewrite.
 
 4. **Journey stage alignment**: Spot-check 3 ideas. The tagged `journey_stage` must match the content direction — a video at "Nhận ra" must not already propose a solution; a video at "Tiến triển" must not dwell on initial pain. Misaligned = rewrite.
 
@@ -180,6 +183,9 @@ The ideas are already tagged to the plan via `plan_id` — no plan write is need
 | Duplicate series+message | 0 | <count> | PASS / FAIL |
 | Pronoun consistency | 0 violations | <count> | PASS / FAIL |
 
+### Persona taxonomy coverage
+Personas listed in `brand/personas` with no corresponding `persona` taxonomy term (untaggable this run — add their taxonomy term before assuming full persona coverage): <none / list of persona names>
+
 ---
 Curate and approve the video ideas in the content workspace (/content/youtube). Approving ≥1 idea opens Schedule; then re-invoke the agent.
 ```
@@ -197,7 +203,7 @@ Curate and approve the video ideas in the content workspace (/content/youtube). 
 - **Every persisted prose field is Vietnamese** (title, comment, hookDirection, coreMessage, whyNow, storyMoment, cta, theme) — hard rule, never English.
 - `channel` must always be `'youtube'` and `plan_id` must always be set in every `save_idea` call.
 - `terms` carry resolved taxonomy **ids** (via `list_taxonomies` / the plan's target rows) — never codes, never invented ids. Series, stages, personas, and values come from the taxonomies and KB docs, not from remembered lists.
-- References only the eight knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
+- References only the twelve knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
 - The diversity thresholds in Step 4 are sourced from `rules/banned-words` and `channels/youtube` — those documents are the source of truth; the numeric guidance above is informational only.
 - Operates only on the youtube channel (`channel='youtube'`); never reads or writes `post`/`ad` state.
 - Requires `edit` capability (plus `view` for the reads).

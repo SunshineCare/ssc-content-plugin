@@ -41,8 +41,6 @@ term in BrandOS directly.
   content actually targets.
 - Ideation/research skills stop hardcoding a fixed persona name/count and
   instead defer to `brand/personas` as the live source of truth.
-- Chị Thảo's eligibility gate is an explicit, checked step wherever her
-  persona could plausibly be selected — not just documented prose.
 - Persona priority tiers (not all 4 personas are equal-priority or
   equal-eligibility) are read from `brand/personas`, not assumed symmetric.
 
@@ -52,6 +50,10 @@ term in BrandOS directly.
   this repo and outside what any available tool can do.
 - Changing `brand/personas` itself, or any other KB doc.
 - Changing the `save_idea`/`save_ad_plan_slots`/taxonomy tool surfaces.
+- Enforcing Chị Thảo's breastfeeding-eligibility screening rule anywhere.
+  It's a real rule in `brand/persona-thao`, but hardcoding a persona-specific
+  compliance branch would contradict this change's own premise (see Decision
+  4, superseded).
 
 ## Decisions
 
@@ -103,17 +105,19 @@ personas are not held to the same required-L1-presence bar as "cao nhất"
 ones) rather than re-deriving a new numeric rule (e.g. "top 3 of 4 by tier")
 that would itself go stale on the next persona-count change.
 
-### 4. Chị Thảo eligibility gate as a named checklist item, not a scan rewrite
+### 4. (Superseded) Chị Thảo eligibility gate — dropped from scope
 
-Every writing/ideation/scoring skill already runs some form of embedded
-quality gate (banned-words/compliance scan, authenticity guardrail). Rather
-than folding the breastfeeding-eligibility check into those existing scans
-(which are worded generically and shouldn't grow persona-specific branches),
-add it as its own named line: "if this content targets Chị Thảo, confirm it
-either addresses an already-weaned mother or is nurture/education-only —
-never assume/invite a still-breastfeeding reader." This keeps the existing
-scans generic and makes the Thảo-specific rule independently auditable/removable
-if her doc's guidance changes later.
+An earlier version of this design added a named "Chị Thảo eligibility gate"
+checklist item to every writing/ideation/scoring skill, hardcoding
+`persona == chi-thao` as a special case. Dropped during implementation: this
+change's entire premise is to stop hardcoding specific persona names/codes
+into skill prose (Decision 1), and adding a new hardcoded single-persona
+compliance branch reintroduces that exact anti-pattern one layer down — even
+though the underlying rule (breastfeeding screening, per `brand/persona-thao`)
+is real and verified. If this rule needs enforcing in skills, it belongs to
+its own explicitly-scoped change — e.g. a generic "honor whatever eligibility
+precondition the targeted persona's detail doc states" capability, not a
+hardcoded Thảo-specific line bundled into a de-hardcoding sweep.
 
 ## Risks / Trade-offs
 

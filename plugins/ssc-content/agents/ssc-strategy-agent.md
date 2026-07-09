@@ -145,10 +145,12 @@ skill calls `save_strategy_finding` internally. If a skill finds no signals, it
 saves a "no new signals" finding and moves on — you proceed regardless.
 
 Each dimension skill **self-rates its own findings** — `score` (1–5) plus a
-Vietnamese `comment` rationale — as a signal-strength signal for the operator's
-curation (Mark for brief vs dismiss). This is informational only: it does not
-gate anything, no finding is dropped or regenerated for a low score, and you
-never compute, override, or second-guess a child skill's self-rating.
+Vietnamese `comment` rationale — and applies its own **quality gate** before
+saving: a candidate finding rated ≤3 is dropped and replaced with a different
+candidate (bounded at 2 replacement attempts per slot); only findings rated ≥4
+ever reach the brief. That drop/replace loop is internal to each dimension
+skill — you never compute, override, or second-guess a child skill's
+self-rating or its gate decisions.
 
 **Resume / idempotency:** the dimension skills are *not* individually idempotent —
 re-running one appends duplicate findings. When resuming a brief, read the brief's
@@ -204,9 +206,10 @@ Curation: not started (Mark for brief to select what carries into Phase 3)
 
 **Total findings: <total>** · Experimental (new territories): <N>
 
-Each finding carries a self-rating (`score` 1–5) + Vietnamese `comment` in the
-Strategy dashboard — a signal-strength cue to help you prioritize, not a
-pass/fail gate.
+Every finding here already cleared its dimension skill's quality gate
+(self-rated ≥4, Vietnamese `comment`) — weaker candidates were dropped and
+replaced before saving. Use the score to prioritize among these already-strong
+signals in the Strategy dashboard.
 
 Next: open the Strategy dashboard → curate findings — **Mark for brief** (accept)
 the ones to carry forward, dismiss the rest. Then re-invoke me to run the
@@ -230,9 +233,10 @@ reads from it.
 `marked_only=true` for this `period` — these curated findings are first-class
 **evidence** for the KB pass (especially for staleness and angle-drift: a marked
 competitor/audience/ad-market finding is direct grounding for revising the docs
-it contradicts or outdates). Each carries the dimension skill's self-rating
-(`score` 1–5 + Vietnamese `comment`) — treat a higher score as stronger evidence
-when several marked findings compete to justify the same revision, but the
+it contradicts or outdates). Each already cleared its dimension skill's quality
+gate (`score` always ≥4 + Vietnamese `comment` — weaker candidates were dropped
+and replaced before saving) — treat a 5 as stronger evidence than a 4 when
+several marked findings compete to justify the same revision, but the
 operator's mark/dismiss curation remains the actual selection; you never
 re-filter marked findings by score.
 

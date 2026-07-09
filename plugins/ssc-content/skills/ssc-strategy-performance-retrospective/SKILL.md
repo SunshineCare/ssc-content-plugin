@@ -126,9 +126,11 @@ conversion data this cycle" rather than inferring.
 
 ### Step 7: Save findings
 
-Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this learning is (real ingested metric outranks a digest-only inference; a clear signal outranks a marginal one) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this learning is (real ingested metric outranks a digest-only inference; a clear signal outranks a marginal one) — and a one-line Vietnamese `comment` explaining that score.
 
-For each meaningful learning — ground every claim in a real ingested metric:
+**Quality gate — only score ≥4 is saved.** If a candidate learning rates ≤3, drop it (never save it) and go back to Step 6 for a different metric-grounded learning to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 8 summary. Score honestly; never inflate a weak learning to 4 just to pass the gate.
+
+For each finding rated ≥4 — ground every claim in a real ingested metric:
 ```
 dimension: performance_retrospective
 brief_id: <brief_id>
@@ -139,7 +141,7 @@ evidence: <one of:>
   organic:   { source: "post_performance", permalink: "<post url>", metric: "engagement|views", value: "<n>" }
   paid:      { source: "ad_performance",   level: "adset|ad|campaign", name: "<ad-set/campaign>", metric: "spend|cost_per_result|ctr|purchases", value: "<n>" }
 track: proven
-score: <1–5 self-rating>
+score: <integer 4 or 5>
 comment: <one-line Vietnamese rationale for the score>
 ```
 
@@ -161,6 +163,7 @@ comment: <one-line Vietnamese rationale for the score>
 ### Conversion fixes for content strategy
 - <finding>
 
+Findings dropped (rated ≤3, no ≥4 replacement found): <N>
 Findings saved: <N>
 ```
 
@@ -179,5 +182,5 @@ Findings saved: <N>
   concluding. An empty ingested read means *not ingested* (for ads, usually no connected
   account), not *no platform activity* — report it as no-data, don't pull.
 - All findings use `dimension: 'performance_retrospective'` and `track: 'proven'`.
-- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
+- Every candidate finding is self-rated before saving; only findings rated ≥4 are persisted via `save_strategy_finding`. A candidate rated ≤3 is dropped and replaced with a different metric-grounded learning (bounded at 2 attempts per slot) — never saved, never inflated to pass.
 - Requires `edit` capability.

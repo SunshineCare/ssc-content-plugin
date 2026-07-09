@@ -60,9 +60,11 @@ For each discovered KOL, assess:
 
 ### Step 4: Save findings
 
-Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this KOL candidate is (persona fit + tone alignment + audience quality) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this KOL candidate is (persona fit + tone alignment + audience quality) — and a one-line Vietnamese `comment` explaining that score.
 
-For each KOL worth shortlisting, call `save_strategy_finding`:
+**Quality gate — only score ≥4 is saved.** If a shortlisted KOL rates ≤3, drop it (never save it) and go back to Step 2 to discover a different KOL for that persona to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 5 summary. Score honestly; never inflate a weak candidate to 4 just to pass the gate.
+
+For each finding rated ≥4, call `save_strategy_finding`:
 ```
 dimension: kol
 brief_id: <brief_id>
@@ -70,11 +72,11 @@ title: <KOL name> — <platform> — <persona fit>
 detail: <audience size, tone fit, key channel, why they match the persona>
 evidence: { platform: "<fb|yt|tiktok>", url: "<profile link>", persona: "<Chị Hương|Chị Lan|Chị Mai|Chị Thảo>", est_followers: "<N>" }
 track: proven
-score: <1–5 self-rating>
+score: <integer 4 or 5>
 comment: <one-line Vietnamese rationale for the score>
 ```
 
-If no relevant new KOLs are found this cycle, save one finding: `title: "KOL — no new discoveries this cycle"` — omit `score`/`comment` (there is nothing to rate).
+If no KOL clears the gate this cycle, save one finding: `title: "KOL — no new discoveries this cycle"` — omit `score`/`comment` (there is nothing to rate).
 
 ### Step 5: Output summary
 
@@ -93,6 +95,7 @@ If no relevant new KOLs are found this cycle, save one finding: `title: "KOL —
 | …    | …            | …            | …          |
 
 Recommended for outreach this cycle: <names>
+Findings dropped (rated ≤3, no ≥4 replacement found): <N>
 Findings saved: <N>
 ```
 
@@ -105,5 +108,5 @@ Findings saved: <N>
 - Research + save only (`save_strategy_finding` is the only write); no content writes.
   Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - All findings use `dimension: 'kol'` and `track: 'proven'`.
-- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
+- Every candidate finding is self-rated before saving; only findings rated ≥4 are persisted via `save_strategy_finding`. A candidate rated ≤3 is dropped and replaced with a different KOL (bounded at 2 attempts per slot) — never saved, never inflated to pass.
 - Requires `edit` capability.

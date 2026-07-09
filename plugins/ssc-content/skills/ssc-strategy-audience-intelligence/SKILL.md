@@ -55,9 +55,11 @@ For each persona, determine:
 
 ### Step 4: Save findings
 
-Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality + strategic relevance to the persona this cycle) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality + strategic relevance to the persona this cycle) — and a one-line Vietnamese `comment` explaining that score.
 
-For each meaningful signal, call `save_strategy_finding`:
+**Quality gate — only score ≥4 is saved.** If a candidate finding rates ≤3, drop it (never save it) and go back to Step 2 for a different signal for that same persona to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 5 summary. Score honestly; never inflate a weak signal to 4 just to pass the gate.
+
+For each finding rated ≥4, call `save_strategy_finding`:
 ```
 dimension: audience
 brief_id: <brief_id>
@@ -65,11 +67,11 @@ title: <persona name> — <one-line signal>
 detail: <2–3 sentence description of what changed and why it matters>
 evidence: { source: "<url or search query>", signal: "<quote or observation>" }
 track: proven
-score: <1–5 self-rating>
+score: <integer 4 or 5>
 comment: <one-line Vietnamese rationale for the score>
 ```
 
-If this dimension yields no new signals, call `save_strategy_finding` once with `title: "Audience — no new signals this cycle"` and `detail: "No meaningful shift detected vs prior KB content."` — omit `score`/`comment` (there is nothing to rate).
+If this dimension yields no signal that clears the gate, call `save_strategy_finding` once with `title: "Audience — no new signals this cycle"` and `detail: "No meaningful shift detected vs prior KB content."` — omit `score`/`comment` (there is nothing to rate).
 
 ### Step 5: Output summary
 
@@ -93,6 +95,7 @@ Emit a plain-text summary:
 FB vs YouTube engagement shift:
 - [any notable channel behaviour change]
 
+Findings dropped (rated ≤3, no ≥4 replacement found): <N>
 Findings saved: <N>
 ```
 
@@ -105,5 +108,5 @@ Findings saved: <N>
 - Saves findings only; no `edit_knowledge`, no `publish_strategy_knowledge`.
   Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Each `save_strategy_finding` call uses `dimension: 'audience'` and `track: 'proven'`.
-- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
+- Every candidate finding is self-rated before saving; only findings rated ≥4 are persisted via `save_strategy_finding`. A candidate rated ≤3 is dropped and replaced with a different signal (bounded at 2 attempts per slot) — never saved, never inflated to pass.
 - Requires `edit` capability.

@@ -22,7 +22,7 @@ This command is a thin entry point — it holds **no** orchestration logic. Disp
 | Phase | The agent does | Then the operator… |
 |---|---|---|
 | **1 — Directions** | Drafts research directions onto the brief | Edits + **approves** them in the **Strategy dashboard**, then re-runs this command |
-| **2 — Dimensions** | Runs the 8 dimension skills → findings | **Curates** findings — **Mark for brief** (accept) / dismiss (decline) — in the **Strategy dashboard**, then re-runs this command |
+| **2 — Dimensions** | Runs the 8 dimension skills → findings, each self-rated 1–5 with a Vietnamese rationale | **Curates** findings — **Mark for brief** (accept) / dismiss (decline), using the self-rating as a prioritization cue — in the **Strategy dashboard**, then re-runs this command |
 | **3 — KB feedback** | Turns the curated findings (+ a KB review/audit) into **propose-only KB revisions** | **Approves** each revision in the **KB dashboard** |
 
 Re-run this command (same `period` / `brief_id`) after each gate to advance to the next phase.

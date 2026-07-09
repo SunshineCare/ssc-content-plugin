@@ -57,6 +57,8 @@ Compare discovered keyword clusters against the current YouTube content in KB (`
 
 ### Step 4: Save findings
 
+Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this cluster is (search-signal strength + strategic relevance this cycle) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score.
+
 For each keyword cluster worth producing content for:
 ```
 dimension: youtube_seo
@@ -65,9 +67,11 @@ title: "<stage> cluster — <cluster name>"
 detail: <2-3 sentence description: what searchers want, estimated volume signal, recommended video format and length>
 evidence: { stage: "<awareness|consideration|decision>", sample_queries: ["…","…"], search_signal: "<high|medium|low>" }
 track: proven
+score: <1–5 self-rating>
+comment: <one-line Vietnamese rationale for the score>
 ```
 
-If no new clusters found: `title: "YouTube SEO — no new keyword clusters this cycle"`.
+If no new clusters found: `title: "YouTube SEO — no new keyword clusters this cycle"` — omit `score`/`comment` (there is nothing to rate).
 
 ### Step 5: Output summary
 
@@ -94,11 +98,12 @@ Findings saved: <N>
 
 ## Output language
 
-**Write the finding prose in Vietnamese.** `title` and `detail` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including any "no new signals" fallback (translate the English template examples shown above). The structured `evidence` values (volumes, stage codes) and the `dimension` / `track` enums stay as their literal codes; the Vietnamese keyword strings you research stay verbatim (they are data, not prose); your chat-side reasoning stays English.
+**Write the finding prose in Vietnamese.** `title`, `detail`, and `comment` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including any "no new signals" fallback (translate the English template examples shown above). The structured `evidence` values (volumes, stage codes) and the `dimension` / `track` enums stay as their literal codes; the Vietnamese keyword strings you research stay verbatim (they are data, not prose); your chat-side reasoning stays English.
 
 ## Governance
 
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Research + save only. No content writes.
 - All findings use `dimension: 'youtube_seo'` and `track: 'proven'`.
+- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
 - Requires `edit` capability.

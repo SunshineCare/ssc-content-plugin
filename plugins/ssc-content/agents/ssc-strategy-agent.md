@@ -144,6 +144,12 @@ themes: <brief.directions.themes> }`. If a dimension has no note in
 skill calls `save_strategy_finding` internally. If a skill finds no signals, it
 saves a "no new signals" finding and moves on — you proceed regardless.
 
+Each dimension skill **self-rates its own findings** — `score` (1–5) plus a
+Vietnamese `comment` rationale — as a signal-strength signal for the operator's
+curation (Mark for brief vs dismiss). This is informational only: it does not
+gate anything, no finding is dropped or regenerated for a low score, and you
+never compute, override, or second-guess a child skill's self-rating.
+
 **Resume / idempotency:** the dimension skills are *not* individually idempotent —
 re-running one appends duplicate findings. When resuming a brief, read the brief's
 `dimension_status` first and **skip any dimension already recorded there**
@@ -198,6 +204,10 @@ Curation: not started (Mark for brief to select what carries into Phase 3)
 
 **Total findings: <total>** · Experimental (new territories): <N>
 
+Each finding carries a self-rating (`score` 1–5) + Vietnamese `comment` in the
+Strategy dashboard — a signal-strength cue to help you prioritize, not a
+pass/fail gate.
+
 Next: open the Strategy dashboard → curate findings — **Mark for brief** (accept)
 the ones to carry forward, dismiss the rest. Then re-invoke me to run the
 KB-feedback phase, which turns your marked findings into knowledge-base revision
@@ -220,7 +230,11 @@ reads from it.
 `marked_only=true` for this `period` — these curated findings are first-class
 **evidence** for the KB pass (especially for staleness and angle-drift: a marked
 competitor/audience/ad-market finding is direct grounding for revising the docs
-it contradicts or outdates).
+it contradicts or outdates). Each carries the dimension skill's self-rating
+(`score` 1–5 + Vietnamese `comment`) — treat a higher score as stronger evidence
+when several marked findings compete to justify the same revision, but the
+operator's mark/dismiss curation remains the actual selection; you never
+re-filter marked findings by score.
 
 #### 4a — Review + Audit (run in parallel)
 

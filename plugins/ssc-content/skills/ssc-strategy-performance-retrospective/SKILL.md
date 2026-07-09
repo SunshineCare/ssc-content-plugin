@@ -102,6 +102,7 @@ Report "no prior performance data" **only** when ALL of:
 In that case save the single finding
 `title: "Hồi cứu hiệu suất — chưa có dữ liệu hiệu suất kỳ trước"`,
 `detail: "Không có digest, không có dữ liệu bài đăng đã nạp, và không có snapshot quảng cáo nào đã nạp (có thể chưa kết nối tài khoản quảng cáo). Tiếp tục dùng các góc nội dung đã được KB kiểm chứng, không có tín hiệu hồi cứu mới."`
+(omit `score`/`comment` — there is nothing to rate)
 and skip to Step 8. Otherwise synthesise from whichever ingested sources returned data
 — **a null digest is never on its own a reason to report "no data."**
 
@@ -125,6 +126,8 @@ conversion data this cycle" rather than inferring.
 
 ### Step 7: Save findings
 
+Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this learning is (real ingested metric outranks a digest-only inference; a clear signal outranks a marginal one) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score.
+
 For each meaningful learning — ground every claim in a real ingested metric:
 ```
 dimension: performance_retrospective
@@ -136,6 +139,8 @@ evidence: <one of:>
   organic:   { source: "post_performance", permalink: "<post url>", metric: "engagement|views", value: "<n>" }
   paid:      { source: "ad_performance",   level: "adset|ad|campaign", name: "<ad-set/campaign>", metric: "spend|cost_per_result|ctr|purchases", value: "<n>" }
 track: proven
+score: <1–5 self-rating>
+comment: <one-line Vietnamese rationale for the score>
 ```
 
 ### Step 8: Output summary
@@ -161,7 +166,7 @@ Findings saved: <N>
 
 ## Output language
 
-**Write the finding prose in Vietnamese.** `title` and `detail` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no prior performance data" and "no data this cycle" fallbacks. The structured `evidence` values (source, period, section, metric, value, permalink, level, name) and the `dimension` / `track` enums stay as their literal codes; post permalinks, ad-set/campaign names, and captions stay verbatim; your chat-side reasoning stays English.
+**Write the finding prose in Vietnamese.** `title`, `detail`, and `comment` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no prior performance data" and "no data this cycle" fallbacks. The structured `evidence` values (source, period, section, metric, value, permalink, level, name) and the `dimension` / `track` enums stay as their literal codes; post permalinks, ad-set/campaign names, and captions stay verbatim; your chat-side reasoning stays English.
 
 ## Governance
 
@@ -174,4 +179,5 @@ Findings saved: <N>
   concluding. An empty ingested read means *not ingested* (for ads, usually no connected
   account), not *no platform activity* — report it as no-data, don't pull.
 - All findings use `dimension: 'performance_retrospective'` and `track: 'proven'`.
+- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
 - Requires `edit` capability.

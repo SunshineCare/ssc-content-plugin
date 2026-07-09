@@ -59,6 +59,8 @@ Channel and buyer-stage are **secondary qualifiers** on each pillar gap, sourced
 
 ### Step 5: Save findings
 
+Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this gap is (evidence quality from `get_content_gaps` + strategic relevance this cycle) — and a one-line Vietnamese `comment` explaining that score. This is a signal-strength rating for the operator's curation (Mark for brief vs dismiss) in the Strategy dashboard, not a pass/fail gate — every finding is saved regardless of score; nothing is dropped or regenerated for a low score. `score` is distinct from `evidence.priority`: `priority` ranks urgency among the gaps found, `score` rates how strong the evidence for this particular gap is.
+
 For each meaningful gap:
 ```
 dimension: content_gap
@@ -67,9 +69,11 @@ title: "<pillar or format> gap — <channel>"
 detail: <what's missing, why it matters, recommended content type to fill it>
 evidence: { pillar: "<name>", channel: "<fb|youtube>", stage: "<awareness|consideration|decision>", priority: "<high|medium|low>" }
 track: proven
+score: <1–5 self-rating>
+comment: <one-line Vietnamese rationale for the score>
 ```
 
-If get_content_gaps returns no meaningful gaps: `title: "Content gap — no significant gaps identified this cycle"`.
+If get_content_gaps returns no meaningful gaps: `title: "Content gap — no significant gaps identified this cycle"` — omit `score`/`comment` (there is nothing to rate).
 
 ### Step 6: Output summary
 
@@ -88,11 +92,12 @@ Findings saved: <N>
 
 ## Output language
 
-**Write the finding prose in Vietnamese.** `title` and `detail` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no significant gaps" fallback (translate the English template examples shown above). The structured `evidence` values (pillar, channel, stage, priority) and the `dimension` / `track` enums stay as their literal codes; your chat-side reasoning stays English.
+**Write the finding prose in Vietnamese.** `title`, `detail`, and `comment` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no significant gaps" fallback (translate the English template examples shown above). The structured `evidence` values (pillar, channel, stage, priority) and the `dimension` / `track` enums stay as their literal codes; your chat-side reasoning stays English.
 
 ## Governance
 
 - Research + save only (`save_strategy_finding` is the only write); no content writes.
   Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - All findings use `dimension: 'content_gap'` and `track: 'proven'`.
+- Each substantive finding carries a self-rating (`score` 1–5) + Vietnamese `comment` rationale — a signal-strength signal for the operator's curation, not a pass/fail gate; nothing is dropped for a low score.
 - Requires `edit` capability.

@@ -105,6 +105,7 @@ From `{ plan }`, find the `plan.ad_slots[]` row whose `id === idea.ad_slot_id` a
   - an **L2 omnipresence** ad set (reach/CPM KPI, person-led) → social-proof / lived-proof register, never a hard purchase pitch;
   - a **YouTube** ad set → spoken-rhythm hooks, longer description.
 - the row's `value` / `frame` / `primary_persona` where present (these mirror the idea's structural tags — reconcile; the tags are authoritative for the concept).
+- the row's **`tonal_register`** where present (L1 rows always carry one; L2/L3/YouTube may be null) — the **Kiều My register** (`confessor` | `educator` | `friend`) the Blueprint planned for this ad set. Hold it for Steps 5–7: every variation is written in this register. When the row carries none (or the row is unavailable), pick the register `voice/founder-voice` maps to the concept's frame.
 
 If `idea.ad_slot_id` is null or the row is not found, proceed WITHOUT the build_spec (use the idea's structural tags alone), and note in the Step 9 summary that the ad-set context was unavailable. Do NOT stop — the concept's tags are enough to write to.
 
@@ -175,7 +176,7 @@ These paths are:
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị) — must be correct in every variation.
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules (no translated-English feel).
 - `voice/vocabulary` — approved vocabulary and preferred phrasings.
-- `voice/founder-voice` — Kiều My's founder voice (the ad text speaks woman-to-woman in her register).
+- `voice/founder-voice` — Kiều My's founder voice — **the voice every variation is written in**: all ad text speaks AS her, first person (hook, headline, primary text — there is no separate brand voice), in the ad set's `tonal_register` (Step 1b); reader address follows the doc's live paid-ads pronoun ruling (with `voice/pronouns`). Re-read it each run — the register mapping and Ranh Giới (boundaries) bind.
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in.
 - `brand/angles` — the full angle system (value / entry / against / experience dimensions, frame codes) — so the copy expresses the concept's tagged angle faithfully.
 - `brand/positioning` — the competitive positioning: the "Cỗ Máy Bền Vững" (chuyên viên + app) and the "chúng mình hơn ở đâu" reasoning per competitor — so the copy can press the concept's `against` match-up.
@@ -248,6 +249,10 @@ Produce **only the active section's** variations (from Step 2), not all three:
 
 Every variation is **finished Vietnamese ad text** for the active section. Express the SAME concept (`idea.title` + its `value`/`frame`/`persona`/layer) — what varies is the hook/angle/wording, not the strategic spine.
 
+**Write AS Kiều My — in the ad set's register (read FIRST):**
+
+Every variation is written **as Kiều My**, per `voice/founder-voice` — she is the brand's only narrator; there is no separate brand voice. The narrative text (`copy` hook and body, `headline`, `description`) speaks as her in the first person — never a corporate register, never third-person narration about her — with self-reference and reader address following the live rulings in `voice/founder-voice` + `voice/pronouns` (paid ads have their own pronoun ruling — never hard-code pronouns; the docs rule). Write in the ad set's **`tonal_register`** from Step 1b (`confessor` | `educator` | `friend`); when the row carries none, pick the register `voice/founder-voice` maps to the concept's frame — and keep it consistent within a variation. For `image_content`, the HEADLINE hook is distilled from the anchor copy's hook (already hers); the SUBHEADLINE/BULLETS stay terse proof phrases where the register shows in word choice, not narration. The doc's Ranh Giới bind: she never speaks as a doctor, never promises someone else's result, never slips into ad-speak ("chương trình số 1", "cam kết kết quả").
+
 **Differentiation & proof — press ≥3 concrete advantages, sized to the format (read FIRST):**
 
 An ad that could run for any weight-loss brand wastes the impression. Every variation draws concrete Cambridge advantages from `brand/proof-points` (e.g. 60 năm nghiên cứu, DiRECT/DROPLET, chuẩn EU 2016/1413, 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành trọn đời, the app) and, when the concept carries an **`against`** tag, lands *that specific* match-up using `brand/positioning`'s "chúng mình hơn ở đâu" for that competitor (e.g. `vs-eat-clean` → đủ vi chất chuẩn EU với calo kiểm soát; `vs-self-dieting` → accountability + chuyên viên đồng hành; `post-glp1` → giữ kết quả bằng thói quen + người đồng hành). **Size the proof density to the section:**
@@ -271,7 +276,7 @@ This biases *how* you draft; it never overrides compliance, authenticity, or the
 
 **Authenticity guardrail — real people are real, never fabricated (read FIRST):**
 
-The ad text may speak in **Kiều My's woman-to-woman voice** — but voice is NOT licence to invent biography. Every variation belongs to ONE of three lanes; obey its rule. NEVER fabricate a story, quote, event, number, or lived experience and attribute it to a real named person.
+The ad text speaks in **Kiều My's woman-to-woman voice** (every variation is written AS her — see the voice rule above) — but voice is NOT licence to invent biography. Every variation belongs to ONE of three lanes; obey its rule. NEVER fabricate a story, quote, event, number, or lived experience and attribute it to a real named person.
 
 1. **Kiều My (real founder).** Her *voice, opinions, and educational framing* are yours to write. Her **personal story, anecdotes, events, results, timeline, or quotes are NOT** — ground any of those ONLY in `programme/kieu-my-story` + `voice/founder-voice`. If the concept's `ad_notes` names a source (e.g. `nguồn: programme/kieu-my-story`), honour exactly that material; never invent beyond it.
 2. **Other real people (customers, consultants).** Use a testimonial / story / result ONLY if the concept's brief hands you a real, consented, existing one (`reuse existing <name> asset`). **Never invent a named customer, a "Chị X giảm Ykg" result, a consultant anecdote, or a quote.**
@@ -294,6 +299,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 - [ ] **No competing elements** — no second offer / second idea fighting the first.
 - [ ] **Mobile-readable** — legible and tight on a phone; headlines short.
 - [ ] **Emotional resonance** — activates at least one emotional trigger true to the concept's `value`/`frame`.
+- [ ] **Written as Kiều My, in the ad set's register** — first person per `voice/founder-voice`, in the `tonal_register` held from Step 1b (or the frame-fit register when the row carries none), pronouns per the live paid-ads ruling. An off-voice variation (corporate register, third-person narration about Kiều My, doctor-lecture, ad-speak) cannot score ≥4.
 - [ ] **Presses ≥3 real advantages (sized to format)** — a `copy` weaves in **≥3 distinct** Cambridge proof points from `brand/proof-points` (one landing the concept's `against` match-up via `brand/positioning`); an `image_content` version carries **≥3 distinct** proof points across its 3 bullets + subheadline; a `headline`/`description` carries the 1–2 that fit cleanly (its set covers ≥3 — checked in the loop below). A `copy` or `image_content` version with <3 distinct proof points, or any variation leaning on nothing distinctive, cannot score ≥4.
 - [ ] **Complements, doesn't echo, when a headline exists (`description` only)** — per `ad/copy-checklist` Bước 2B: **if at least one headline is approved**, the description must land a **different beat** than every approved headline (payoff / proof / "so what") and not restate its angle — a description that echoes an approved headline's angle **cannot score ≥4**. Regardless of whether a headline is approved yet, every description must **lead with one concrete proof** (not a vague benefit) and not repeat another description's proof/beat — a description that leads with a vague benefit / no concrete proof **cannot score ≥4**.
 - [ ] **Structure + brevity (image_content only)** — the `body` is in the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` shape with exactly 3 bullets, AND every element is short enough to read at a glance ON an image (per `ad/platform-constraints`): a few-word bold headline, a short subheadline phrase, terse keyword bullets — never sentences/paragraphs. A malformed **or wordy** `image_content` version cannot score ≥4.
@@ -304,7 +310,7 @@ Mirror `ssc-ads-ideate`'s honest-scoring quality-replacement loop. For **each** 
 
 **Self-score each variation `1–5`** (integer) and write a one-line Vietnamese `comment`:
 
-- `score` — judge Hook-Bank strength + Direct-Response fit + faithfulness to the concept's angle (`value`/`frame`/`persona`/layer) + voice fit (natural woman-to-woman Vietnamese, correct pronouns) + section discipline (headline length / copy structure / description tightness) + alignment with the retrospective's winners/losers (Step 1b — reward a variation leaning on a proven-winning proof point / length / format / angle; mark down one that repeats a flagged-fatigued loser). Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead with; **4** = strong, ready to curate; **3** = solid but flawed; **1–2** = weak/violating.
+- `score` — judge Hook-Bank strength + Direct-Response fit + faithfulness to the concept's angle (`value`/`frame`/`persona`/layer) + voice fit (written AS Kiều My in the ad set's `tonal_register` per `voice/founder-voice`, natural woman-to-woman Vietnamese, correct pronouns per the live paid-ads ruling) + section discipline (headline length / copy structure / description tightness) + alignment with the retrospective's winners/losers (Step 1b — reward a variation leaning on a proven-winning proof point / length / format / angle; mark down one that repeats a flagged-fatigued loser). Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead with; **4** = strong, ready to curate; **3** = solid but flawed; **1–2** = weak/violating.
 - `comment` — **one-line Vietnamese rationale** for the score: the single biggest reason it is strong or weak, naming the rule/voice doc it traces to — e.g. "Hook tò mò sắc, đúng frame confession của concept, CTA mềm khớp cta-catalog" or "Dùng từ cấm trong rules/banned-words → phải viết lại". Always Vietnamese; short; it must justify the number.
 
 **Quality-replacement loop** — **no saved variation may remain ≤3**:

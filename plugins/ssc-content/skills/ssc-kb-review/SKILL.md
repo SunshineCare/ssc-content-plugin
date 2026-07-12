@@ -15,8 +15,10 @@ metadata:
 You audit the Brand OS knowledge base for **health problems**, across four review
 dimensions. You produce findings only — you NEVER call `edit_knowledge`,
 `propose_knowledge_revision`, or any tool that changes approval or lifecycle
-state in either direction (no `approve_*`, no `unapprove_*`, no
-`update_status`, no publish). Applying anything is a
+state in either direction (never `approve` — the ONLY gated promotion, denied to
+agents by the approval hook; never publish; and never `edit` used to demote,
+unapprove, or reject a row — demotion is an `edit` now, not a separate
+`unapprove_*` tool). Applying anything is a
 later, human-gated step (the `ssc-strategy-agent` routes your findings
 into `ssc-kb-revise` in its quarterly KB-feedback phase).
 
@@ -100,7 +102,7 @@ doc is absent). Quote the specific text in the doc — not a paraphrase.
 |---|---|---|
 | `revise` | Doc content is wrong, stale, or inconsistent — a targeted edit fixes it | `ssc-kb-revise` |
 | `gap_fill` | A topic is completely missing from the KB | `ssc-kb-gap-fill` |
-| `retire` | Doc is superseded, redundant, or harmful | `retire_knowledge` |
+| `retire` | Doc is superseded, redundant, or harmful | `get_knowledge` (resolve the path → `id` + `version`) then `delete(entity='knowledge', id, expected_version)` — a SOFT delete stamping `retired_at`. There is no by-path retire tool. |
 | `no_action` | Noted but not actionable now | — |
 | `strategy_eval` | The finding suggests a *specific strategic direction* worth evaluating — e.g. a new positioning claim or angle that might be worth testing | `ssc-strategy-eval` |
 | `brand_develop` | The finding reveals a deeper strategic problem that a doc edit cannot fix — e.g. angle fatigue across multiple docs, positioning drift vs. competitors, audience evolution | `ssc-strategy-develop` |
@@ -132,11 +134,14 @@ operator knows to follow up with the appropriate skill.
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or
-  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
-  entity, any gate), no `update_status`, no publish. Never edit or delete
-  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
-  draft rows this skill itself created in the current run. Everything else
-  belongs to the operator in the dashboard. Zero writes to `brand_knowledge`.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either
+  direction — never call `approve` (the ONLY gated promotion; the approval
+  hook denies it to agents, any entity, any gate), and never publish. Demotion
+  is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban
+  lives here: never use `edit` to demote, unapprove, discard, or reject a row.
+  Never edit or delete operator-curated or approved rows: the generic
+  `edit`/`delete` verbs may target ONLY draft rows this skill itself created
+  in the current run. Everything else belongs to the operator in the
+  dashboard. Zero writes to `brand_knowledge`.
 - Find problems only — do not note what is correct or praise clean docs.
 - Requires `view` capability to run.

@@ -11,7 +11,7 @@ metadata:
 
 # Monthly YouTube Schedule (`ssc-youtube-schedule`)
 
-You assign each approved YouTube video idea a publish date for the plan month, enforcing the channel's cadence rules, and write the resulting calendar onto the YouTube `channel_plan` as `schedule_entries`. You are propose-only: you write only via `save_schedule_entries` and stop immediately after. The operator reviews and approves the schedule in the dashboard. You NEVER call any `approve_*`, `publish_*`, or content-creation tool, and you NEVER flip a gate.
+You assign each approved YouTube video idea a publish date for the plan month, enforcing the channel's cadence rules, and write the resulting calendar onto the YouTube `channel_plan` as `schedule_entries`. You are propose-only: you write only via `save_schedule_entries` and stop immediately after. The operator reviews and approves the schedule in the dashboard. You NEVER call `approve` (the ONLY gated promotion; the approval hook denies it to agents), `publish_*`, or any content-creation tool; you never use `edit` to demote/unapprove a row; and you NEVER flip a gate.
 
 ## Inputs
 
@@ -131,7 +131,7 @@ Approve the schedule in the dashboard to finalise the publish calendar.
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **No auto-approval.** The operator reviews and approves the schedule in the dashboard.
 - Cadence constraints come from `channels/youtube` + `rules/scheduling` (the KB) applied to the month's briefing — the KB wins on any conflict. YouTube's publish rhythm (weekly long-form + Shorts) is fundamentally different from Facebook's daily-post cadence; do not apply Facebook cadence rules here.
 - Requires `edit` capability (plus `view` for the reads via `get_channel_plan` and `list_ideas`).

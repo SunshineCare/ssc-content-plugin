@@ -12,7 +12,7 @@ metadata:
 
 # Post Schedule (`ssc-post-schedule`)
 
-You assign each approved post idea a publish date for the plan month, enforcing the brand's cadence rules, and write the resulting calendar onto the post `channel_plan` as `schedule_entries`. You are propose-only: you write only via `save_schedule_entries` and stop immediately after. The operator reviews and approves the calendar in the dashboard. You NEVER call any `approve_*`, `publish_*`, or content-creation tool, and you NEVER flip a gate.
+You assign each approved post idea a publish date for the plan month, enforcing the brand's cadence rules, and write the resulting calendar onto the post `channel_plan` as `schedule_entries`. You are propose-only: you write only via `save_schedule_entries` and stop immediately after. The operator reviews and approves the calendar in the dashboard. You NEVER call `approve` (the ONLY gated promotion; the approval hook denies it to agents), `publish_*`, or any content-creation tool; you never use `edit` to demote/unapprove a row; and you NEVER flip a gate.
 
 This is step 4 of the five-step Posts pipeline (**Focus → Research → Ideate → Schedule → Measure**), keyed on `channel_plans(channel='post', period=YYYY-MM)`. There is no `/ssc.plan` dependency — the post plan is self-contained.
 
@@ -159,9 +159,9 @@ Approve the calendar in the dashboard to finalise the publish schedule (flips `s
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
-- **Propose-only.** Writes only via `save_schedule_entries`. NEVER calls `approve_*`, `approve_channel_plan`, `publish_*`, `save_idea`, or any content-creation or social-scheduling tool, and NEVER flips a gate.
-- **No auto-approval.** The operator reviews and approves the calendar in the dashboard. Flipping the Calendar gate (`schedule_approved`) is a dashboard-only action requiring the `approve` capability (via `approve_channel_plan`, gate `schedule`).
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- **Propose-only.** Writes only via `save_schedule_entries`. NEVER calls `approve` (any entity, incl. `channel_plan`), `publish_*`, `save_idea`, or any content-creation or social-scheduling tool; never uses `edit` to demote/unapprove; and NEVER flips a gate.
+- **No auto-approval.** The operator reviews and approves the calendar in the dashboard. Flipping the Calendar gate (`schedule_approved`) is a dashboard-only action requiring the `approve` capability (via `approve(entity='channel_plan', gate='schedule')`).
 - Always gate-check `approved` first (Step 1). If the Research plan is not approved, STOP — do not read ideas or write anything.
 - References only `rules/scheduling` as the knowledge source (Step 3). Do not call `get_knowledge` for any other path.
 - All cadence thresholds are sourced from `rules/scheduling` — that document is the source of truth; inline numeric guidance above is informational only.

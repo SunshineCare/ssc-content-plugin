@@ -38,8 +38,10 @@ Re-run this command (same `period`) after each gate.
 
 Nothing auto-approves, auto-applies, or auto-publishes. Every phase ends at a
 human gate. The agent is propose-only — it never changes approval or lifecycle
-state in either direction (no approve_*/unapprove_*/publish) and never edits or
-deletes operator-curated rows. Running requires `edit`; approving requires
+state in either direction (never `approve` — the ONLY gated promotion, denied to
+agents by the approval hook; never publish; and never `edit` used to demote or
+unapprove a row, demotion being an `edit` now rather than a separate
+`unapprove_*` tool) and never edits or deletes operator-curated rows. Running requires `edit`; approving requires
 `approve` (operator, in the workspace).
 
 ## After it runs

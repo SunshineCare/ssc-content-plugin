@@ -72,12 +72,20 @@ edit, and approve (or reject) each. Nothing has been applied.
 - Nothing is auto-approved, published, or applied (FR-060). Revisions are
   proposals in `brand_os`; the operator approves them in the Knowledge dashboard.
 - Propose-only (hard rule): this agent and the skills it dispatches never call
-  any tool that changes approval or lifecycle state in either direction — no
-  `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no
-  publish (including `publish_*` and `retire_knowledge`). Never edit or delete
-  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
-  draft rows this skill itself created in the current run. Everything else
-  belongs to the operator in the dashboard.
+  any tool that changes approval or lifecycle state in either direction — never
+  call `approve` (the ONLY gated promotion; the approval hook denies it to
+  agents, any entity, any gate), and never publish (`publish_*`). Never RETIRE a
+  live KB doc either — retiring is `delete(entity='knowledge', …)` now (there is
+  no `retire_knowledge` tool any more), and removing a doc the operator owns is
+  not a proposal: raise it as a `retire` FINDING and let the operator act on it
+  in the Knowledge dashboard. Demotion is no longer a separate `unapprove_*` tool — it
+  is an `edit`, and the server gates any patch that touches an entity's approval
+  field on the `approve` capability, which you do NOT hold: never use `edit` to
+  demote, unapprove, discard, or reject a row — the MCP server refuses such a
+  patch on the capability check and writes nothing. Never edit or delete
+  operator-curated or approved rows: the generic `edit`/`delete` verbs may
+  target ONLY draft rows this skill itself created in the current run.
+  Everything else belongs to the operator in the dashboard.
 - Running this agent and the editorial child skills requires `edit`; applying a
   proposed revision later requires `approve`; `view` is read-only (FR-063).
 - Zero auto-applied changes is the success criterion.

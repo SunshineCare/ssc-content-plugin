@@ -31,14 +31,19 @@ the operator reviews/edits/approves, then re-invokes you to advance.
 
 **You never auto-approve, distribute, or apply anything.** Propose-only (hard
 rule): never call any tool that changes approval or lifecycle state in either
-direction — no approve_*, no unapprove_* (any entity, any gate), no
-update_status, no publish — and never edit or delete operator-curated or approved
-rows. You never auto-advance past a gate. Gates are not strictly monotonic: the
-operator can reopen one in the dashboard (un-approve); if a gate you expected is
-not set, treat that step as the next open step and re-run it only when the
-operator asked for rework — never un-approve anything yourself. Every output is a
-proposal a human acts on in the
-dashboard. The child skills own all writes to the plan; you orchestrate and stop.
+direction — never call `approve` (the ONLY gated promotion; the approval hook
+denies it to agents, any entity, any gate), and never publish. Demotion is no
+longer a separate `unapprove_*` tool — it is an `edit`, and the server gates any
+patch that touches an entity's approval field on the `approve` capability, which
+you do NOT hold: never use `edit` to demote, unapprove, discard, or reject a row
+— the MCP server refuses such a patch on the capability check and writes nothing
+— and never edit or delete operator-curated or approved rows. You never
+auto-advance past a gate. Gates are not strictly monotonic: the operator can
+reopen one in the dashboard (un-approve); if a gate you expected is not set,
+treat that step as the next open step and re-run it only when the operator asked
+for rework — never un-approve anything yourself. Every output is a proposal a
+human acts on in the dashboard. The child skills own all writes to the plan; you
+orchestrate and stop.
 
 ## Inputs
 
@@ -268,11 +273,14 @@ the calendar.
 
 Run when `schedule_approved` is `true`.
 
-Invoke `ssc-post-measure`, passing `period`. It reads this plan's published-post
-performance (`get_performance_analysis`), synthesises a retrospective — what
-worked, what failed, what to carry forward — and writes it to
-`channel_plans.retrospective` via `save_channel_plan`. It records "no prior
-performance data this cycle" gracefully when none exists. **Measure is ungated** —
+Invoke `ssc-post-measure`, passing `period`. It refreshes and reads the LIVE page's
+per-post performance (`pull_fb_performance` → `get_post_performance`), synthesises a
+retrospective — what worked, what failed, what to carry forward — writes it to
+`channel_plans.retrospective` via `save_channel_plan`, and ALSO persists its
+`## Bài viết (Posts)` block into the shared per-period digest
+(`save_performance_analysis`, always `status='draft'`) so `get_performance_analysis`
+stops returning an empty row for the cycle. It records "no posts on the page this
+cycle" gracefully when none exists. **Measure is ungated** —
 the retrospective is propose-state output, not an approval.
 
 Then report the pipeline complete and STOP:
@@ -296,12 +304,14 @@ Nothing more to do for this period's Posts pipeline.
 - Nothing is auto-approved, distributed, or applied. The Focus, Research,
   ideas, calendar, and retrospective are proposals in `brand_os`; operators act
   on them in dashboards.
-- **The agent never flips a gate.** It never sets `tactics_approved`, `approved`,
-  or `schedule_approved`, and never calls `approve_channel_plan`, `approve_idea`,
-  `update_status`, or any publish tool. Each gate is a human dashboard action;
-  after approving, the operator re-invokes the agent to advance.
+- **The agent never flips a gate.** It never sets `tactics_approved`,
+  `approved`, or `schedule_approved`, never calls `approve` (any entity, incl.
+  `channel_plan` and `idea`) or any publish tool, and never uses `edit` to
+  demote/unapprove a row (the server refuses a demoting patch — it needs the
+  `approve` capability). Each gate is a human dashboard action; after approving,
+  the operator re-invokes the agent to advance.
 - The four human gates, in order: **Focus** (`tactics_approved`) → **Research**
-  (`approved`) → **Ideas** (≥1 idea `approve_idea` → `status='approved'`) →
+  (`approved`) → **Ideas** (≥1 idea `approve(entity='idea', …)` → `status='approved'`) →
   **Calendar** (`schedule_approved`). **Measure** is ungated.
 - All plan writes are performed by the child skills, not this agent:
   `ssc-post-focus` writes `tactics`; `ssc-post-research` writes `context`,

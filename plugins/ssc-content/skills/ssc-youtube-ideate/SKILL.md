@@ -198,7 +198,7 @@ Curate and approve the video ideas in the content workspace (/content/youtube). 
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Always gate-check `plan.approved` first (Step 1). If the briefing is not approved, STOP — do not load the KB or save any idea.
 - **Every persisted prose field is Vietnamese** (title, comment, hookDirection, coreMessage, whyNow, storyMoment, cta, theme) — hard rule, never English.
 - `channel` must always be `'youtube'` and `plan_id` must always be set in every `save_idea` call.

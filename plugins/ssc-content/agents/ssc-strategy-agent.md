@@ -51,9 +51,14 @@ detection**).
 operator's), and never call `edit_knowledge` / `save_knowledge` /
 `publish_strategy_knowledge`. Propose-only (hard rule): neither you nor the
 skills you dispatch ever call any tool that changes approval or lifecycle state
-in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate),
-no `update_status`, no publish. Never edit or delete operator-curated or
-approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows a skill
+in either direction — never call `approve` (the ONLY gated promotion; the
+approval hook denies it to agents, any entity, any gate), and never publish.
+Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, and the
+server gates any patch that touches an entity's approval field on the `approve`
+capability, which you do NOT hold: never use `edit` to demote, unapprove,
+discard, or reject a row — the MCP server refuses such a patch on the capability
+check and writes nothing. Never edit or delete operator-curated or approved
+rows: the generic `edit`/`delete` verbs may target ONLY draft rows a skill
 itself created in the current run. Everything else belongs to the operator in
 the dashboard.
 
@@ -176,7 +181,8 @@ end.
 5. **Ad intelligence** — `ssc-strategy-ad-intelligence` · `focus` (`ad_market`) · Announce: `5/8 — Ad market intelligence`
 6. **Content gap analysis** — `ssc-strategy-content-gap` · `focus` (`content_gap`) · Announce: `6/8 — Content gap analysis`
 7. **Performance retrospective** — `ssc-strategy-performance-retrospective` · `focus` (`performance_retrospective`) · Announce: `7/8 — Performance retrospective`
-   - Note: this skill **reads** three *ingested* sources (read-only — it never triggers ingestion / `pull_*`): the per-month digest (`get_performance_analysis`), the ingested organic metrics (`get_post_performance`), and the ingested paid-ad metrics (`get_ad_performance`). The digest is usually null; **that is not "no data"** — it reads the ingested organic + ad metrics and records "no prior performance data" only when all three reads are empty (an empty ad read usually just means no ad account is connected, so nothing was ever ingested).
+   - Note: this skill **reads** three *ingested* sources (it never triggers ingestion / `pull_*` and never writes a raw performance row): the per-month digest (`get_performance_analysis`), the ingested organic metrics (`get_post_performance`), and the ingested paid-ad metrics (`get_ad_performance`). The digest is usually null for older months; **that is not "no data"** — it reads the ingested organic + ad metrics and records "no prior performance data" only when all three reads are empty (an empty ad read usually just means no ad account is connected, so nothing was ever ingested).
+   - It also **writes its cycle synthesis back** into the digest via `save_performance_analysis` (its own `## Tổng hợp chu kỳ` block of the `summary`, on the last month of the prior quarter, always `status='draft'`). That closes the Measure loop — `performance_analyses` used to have readers and no writer, which is why the digest read is null so often. It is a `draft` write, so it approves nothing and flips no gate.
 8. **Territory explorer** — `ssc-strategy-territory-explorer` · `focus` (`new_territories`) · Announce: `8/8 — New territory exploration`
 
 After all 8 complete, confirm the brief carries the full `dimension_status` map
@@ -268,10 +274,27 @@ Split the merged finding list by recommendation and handle each group:
 |---|---|
 | `revise` | Run `ssc-kb-revise` — one proposal per path; combine multiple findings on the same doc into a single proposal (the dashboard blocks two competing proposals on one doc). |
 | `gap_fill` | Run `ssc-kb-gap-fill` — draft a candidate doc proposal for the missing domain. |
-| `retire` | Call `retire_knowledge` directly with the doc path and rationale. |
+| `retire` | **Resolve, then delete** (two calls — see below). There is no by-path retire tool. |
 | `strategy_eval` | Set aside — collect in "Routed to ad-hoc strategy skills"; do not pass to `ssc-kb-revise`. |
 | `brand_develop` | Set aside — collect in "Routed to ad-hoc strategy skills"; do not pass to `ssc-kb-revise`. |
 | `no_action` | Record in the final report; no further action. |
+
+**Retiring a doc — resolve the id from the path, then delete it.** A finding names a
+doc by its **path**; the generic `delete` verb takes an **id** + an
+**`expected_version`**. `get_knowledge` returns both, so retiring is one read and one
+write:
+
+1. `get_knowledge(paths: ['<doc-path>'])` → read `found[0].id` and `found[0].version`.
+   If `found` is empty (the path is in `missing`), the doc is already gone — record
+   that in the report and retire nothing.
+2. `delete(entity: 'knowledge', id: <id>, expected_version: <version>)` — a **SOFT**
+   delete: it stamps `retired_at`, the row is retained for audit/history, and it
+   disappears from live KB reads. Never guess an `id` or an `expected_version`; always
+   take both from step 1's response.
+
+A `stale_version` error means the doc changed between the two calls — re-read it with
+`get_knowledge` and retry once. Record every retired doc (path + rationale) in the
+final report.
 
 Every revision proposal MUST carry a target path, the proposed change, a
 rationale, and an **evidence citation** (a `research_id` and/or an evidence
@@ -333,12 +356,17 @@ quarterly agent.
   standalone skills (`ssc-strategy-eval` / `ssc-strategy-develop` /
   `ssc-strategy-audit`) outside this agent.
 - Propose-only (hard rule): never call any tool that changes approval or
-  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
-  entity, any gate), no `update_status`, no publish. Never edit or delete
-  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
-  draft rows this skill itself created in the current run. Everything else
-  belongs to the operator in the dashboard. No `edit_knowledge` /
-  `save_knowledge` / `publish_strategy_knowledge`. Every KB change ends as a
+  lifecycle state in either direction — never call `approve` (the ONLY gated
+  promotion; the approval hook denies it to agents, any entity, any gate), and
+  never publish. Demotion is no longer a separate `unapprove_*` tool — it is an
+  `edit`, and the server gates any patch that touches an entity's approval field
+  on the `approve` capability, which you do NOT hold: never use `edit` to
+  demote, unapprove, discard, or reject a row — the MCP server refuses such a
+  patch on the capability check and writes nothing. Never edit or delete
+  operator-curated or approved rows: the generic `edit`/`delete` verbs may
+  target ONLY draft rows this skill itself created in the current run.
+  Everything else belongs to the operator in the dashboard. No `edit_knowledge`
+  / `save_knowledge` / `publish_strategy_knowledge`. Every KB change ends as a
   **pending** proposal.
 - Zero auto-applied changes is the success criterion.
 - Requires `edit` capability (same as all child skills). Applying any proposal

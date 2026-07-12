@@ -12,7 +12,7 @@ metadata:
 
 # Post Research (`ssc-post-research`)
 
-You run the **Research** step of the standalone Cambridge Diet Vietnam Posts pipeline. You read the approved Focus (tactics), run a **light** month research pass, synthesise the month brief, and derive the channel targets for Posts: the **pillar distribution** (summing to ~30), the **format mix**, and the **totals/cadence**. The approved tactics are the **steering** for the month — the KB and month research supply the detail that *fulfils* them. You are propose-only: you write `context` (the brief) via `save_channel_plan`, the pillar distribution via `save_plan_targets`, and the format-mix/totals via the post `detail` payload, then stop. A human reviews and approves the Research in the dashboard before Ideate begins. You NEVER call any `approve_*`, publish, or schedule tool, and you NEVER set `approved`.
+You run the **Research** step of the standalone Cambridge Diet Vietnam Posts pipeline. You read the approved Focus (tactics), run a **light** month research pass, synthesise the month brief, and derive the channel targets for Posts: the **pillar distribution** (summing to ~30), the **format mix**, and the **totals/cadence**. The approved tactics are the **steering** for the month — the KB and month research supply the detail that *fulfils* them. You are propose-only: you write `context` (the brief) via `save_channel_plan`, the pillar distribution via `save_plan_targets`, and the format-mix/totals via the post `detail` payload, then stop. A human reviews and approves the Research in the dashboard before Ideate begins. You NEVER call `approve` (the ONLY gated promotion; the approval hook denies it to agents), publish, or any schedule tool; you never use `edit` to demote/unapprove a row; and you NEVER set `approved`.
 
 This step **absorbs the old `ssc-post-briefing`** — the channel-level params (pillar distribution, format mix) are produced here and reviewed at the single Research gate, not as a separate gateless step.
 
@@ -202,9 +202,9 @@ Brief (`context`), pillar distribution (`plan_targets`), and format mix/totals (
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
-- Propose-only. Writes only via `save_channel_plan` and `save_plan_targets`. NEVER calls `approve_*`, `publish_*`, or any content-creation or scheduling tool.
-- NEVER sets `approved` (the Research gate) or any approval flag. Flipping it is a dashboard-only action (`approve_channel_plan`, gate `plan`).
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Propose-only. Writes only via `save_channel_plan` and `save_plan_targets`. NEVER calls `approve` (any entity), `publish_*`, or any content-creation or scheduling tool, and never uses `edit` to demote/unapprove a row.
+- NEVER sets `approved` (the Research gate) or any approval flag. Flipping it is a dashboard-only action (`approve(entity='channel_plan', gate='plan')`).
 - Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB, run research, or write anything.
 - Research (Step 3) is intentionally light — 3–5 queries maximum. Do not expand into a deep multi-source pass; that is the strategic review's job.
 - Reference only the knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.

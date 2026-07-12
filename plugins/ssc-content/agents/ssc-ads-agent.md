@@ -34,15 +34,20 @@ then re-invokes you to advance.
 
 **You never auto-approve, distribute, or apply anything.** Propose-only (hard
 rule): never call any tool that changes approval or lifecycle state in either
-direction — no approve_*, no unapprove_* (any entity, any gate), no update_status,
-no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_*
-tools may target ONLY draft rows this skill itself created in the current run.
-Everything else belongs to the operator in the dashboard. (The agent itself writes
-nothing — it only reads and orchestrates — so it creates no rows to edit; the child
-skills own all writes to the plan.) You never auto-advance past a gate. (The
-plan-level `approved` flag is **no longer part of the ad flow** — the Blueprint gate
-is now per-ad-set approval.) Every output is a proposal a human acts on in the
-dashboard; you orchestrate and stop.
+direction — never call `approve` (the ONLY gated promotion; the approval hook
+denies it to agents, any entity, any gate), and never publish. Demotion is no
+longer a separate `unapprove_*` tool — it is an `edit`, and the server gates any
+patch that touches an entity's approval field on the `approve` capability, which
+you do NOT hold: never use `edit` to demote, unapprove, discard, or reject a row
+— the MCP server refuses such a patch on the capability check and writes
+nothing. Never edit or delete operator-curated or approved rows: the generic
+`edit`/`delete` verbs may target ONLY draft rows this skill itself created in
+the current run. Everything else belongs to the operator in the dashboard. (The
+agent itself writes nothing — it only reads and orchestrates — so it creates no
+rows to edit; the child skills own all writes to the plan.) You never
+auto-advance past a gate. (The plan-level `approved` flag is **no longer part of
+the ad flow** — the Blueprint gate is now per-ad-set approval.) Every output is
+a proposal a human acts on in the dashboard; you orchestrate and stop.
 
 ## Inputs
 
@@ -324,11 +329,13 @@ Measure follows the Ideas gate directly — there is no Schedule step in the ad
 flow.
 
 Invoke `ssc-ads-measure`, passing `period`. It reads this plan's ingested ad
-performance (`get_ad_performance` + optional `get_performance_analysis`),
-synthesises a retrospective — which angles won, which fatigued, what to carry
-forward — and writes it to `channel_plans.retrospective` via `save_channel_plan`.
-It records "no prior ad performance this cycle" gracefully when none has been
-ingested. **Measure is ungated** — the retrospective is propose-state output, not
+performance (`get_ad_performance` + `get_performance_analysis`), synthesises a
+retrospective — which angles won, which fatigued, what to carry forward — writes it
+to `channel_plans.retrospective` via `save_channel_plan`, and ALSO persists the
+digest's `ad_campaign_health` section + its `## Quảng cáo (Ads)` summary block via
+`save_performance_analysis` (always `status='draft'`) so `get_performance_analysis`
+stops returning an empty row for the cycle. It records "no prior ad performance this
+cycle" gracefully when none has been ingested. **Measure is ungated** — the retrospective is propose-state output, not
 an approval.
 
 Then report the pipeline complete and STOP:
@@ -353,21 +360,27 @@ Nothing more to do for this period's Ads pipeline.
 - Nothing is auto-approved, distributed, or applied. The Focus, Approaches,
   Blueprint (rated ad sets), concepts, and retrospective are proposals in
   `brand_os`; operators act on them in dashboards.
-- **The agent never flips a gate.** Propose-only (hard rule): never call any tool
-  that changes approval or lifecycle state in either direction — no approve_*, no
-  unapprove_* (any entity, any gate), no update_status, no publish. Never edit or
-  delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY
-  draft rows this skill itself created in the current run. Everything else belongs
-  to the operator in the dashboard. Gates can be **reopened** by the operator
-  (unapprove in the dashboard); the agent re-runs a reopened step only on operator
-  request and NEVER unapproves anything itself.
-  (The plan-level `approved` flag is no longer part of the ad flow — the Blueprint
-  gate is per-ad-set approval. `schedule_approved` likewise belongs to the
-  post/youtube calendar, not the ad flow.) Each gate is a human dashboard action;
-  after approving, the operator re-invokes the agent to advance.
+- **The agent never flips a gate.** Propose-only (hard rule): never call any
+  tool that changes approval or lifecycle state in either direction — never call
+  `approve` (the ONLY gated promotion; the approval hook denies it to agents,
+  any entity, any gate), and never publish. Demotion is no longer a separate
+  `unapprove_*` tool — it is an `edit`, and the server gates any patch that
+  touches an entity's approval field on the `approve` capability, which you do
+  NOT hold: never use `edit` to demote, unapprove, discard, or reject a row —
+  the MCP server refuses such a patch on the capability check and writes
+  nothing. Never edit or delete operator-curated or approved rows: the generic
+  `edit`/`delete` verbs may target ONLY draft rows this skill itself created in
+  the current run. Everything else belongs to the operator in the dashboard.
+  Gates can be **reopened** by the operator (unapprove in the dashboard); the
+  agent re-runs a reopened step only on operator request and NEVER unapproves
+  anything itself. (The plan-level `approved` flag is no longer part of the ad
+  flow — the Blueprint gate is per-ad-set approval. `schedule_approved` likewise
+  belongs to the post/youtube calendar, not the ad flow.) Each gate is a human
+  dashboard action; after approving, the operator re-invokes the agent to
+  advance.
 - The four human gates, in order: **Focus** (`tactics_approved`) → **Approaches**
   (`approaches_approved`) → **Blueprint** (≥1 ad set `status='approved'`) →
-  **Ideas** (≥1 concept `approve_idea` → `status='approved'`). **Measure** is
+  **Ideas** (≥1 concept `approve(entity='idea', …)` → `status='approved'`). **Measure** is
   ungated. **Blueprint and Ideas are both per-item curation gates** — the operator
   approves individual ad sets / concepts, not a plan-level flag.
 - All plan writes are performed by the child skills, not this agent:

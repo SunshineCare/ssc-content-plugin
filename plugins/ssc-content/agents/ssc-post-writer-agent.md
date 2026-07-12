@@ -39,11 +39,14 @@ approves a single variation (`draft → approved`), which is the only approval. 
 agent for the same post produces a **fresh** set of variations (the write path inserts new
 draft rows; existing drafts are untouched), so it is idempotent-ish, not destructive.
 
-**You never auto-approve, distribute, or apply anything.** You never select a variation,
-never flip a `draft → approved` lifecycle, never call any `approve_*`, `update_status`, or
-any publish/schedule tool, and never auto-advance past the human gate. Every output is a
-set of draft proposals a human acts on in the workspace. The child skills own all writes;
-you orchestrate and stop.
+**You never auto-approve, distribute, or apply anything.** You never select a
+variation, never flip a `draft → approved` lifecycle, never call `approve` (the
+only gated promotion — the approval hook denies it to agents) or any
+publish/schedule tool, never use `edit` to demote or unapprove a row (the server
+refuses it: demotion needs the `approve` capability, which you do NOT hold), and
+never auto-advance past the human gate. Every output is a set of draft proposals
+a human acts on in the workspace. The child skills own all writes; you
+orchestrate and stop.
 
 ## Inputs
 
@@ -128,9 +131,9 @@ This is a **human checkpoint in the operator's conversation**. The operator eith
 The authority owns all persistence, and it happens **only after the operator approves the
 set** — the agent does NOT save-and-stop autonomously. The primary revision path is now
 **pre-save, in chat**; a flaw caught **after** the save in a row the authority persisted this
-run is a secondary path, corrected in place via `edit_content` or removed via
-`delete_content` (never a duplicate insert). You do **not** call `save_post_content`,
-`update_status`, or any `approve_*`.
+run is a secondary path, corrected in place via `edit(entity='content', …)` or removed via
+`delete(entity='content', …)` (never a duplicate insert). You do **not** call
+`save_post_content`, `approve`, or any publish tool.
 
 The flow **stops at the in-chat review checkpoint** and **resumes on the operator's revise or
 save instruction**. Once the set is saved (or the operator declines to save), **STOP** and
@@ -181,12 +184,16 @@ human gate is the only approval.
 - Nothing is auto-approved, distributed, or applied. The variations are DRAFT `content`
   rows in `brand_os`; the operator selects + approves ONE in the `/post/[month]/[id]`
   workspace (`draft → approved`).
-- **The agent never flips a gate.** Propose-only (hard rule): it never changes approval or
-  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any
-  gate), no `update_status`, no publish — and never edits or deletes operator-curated or
-  approved rows. It never selects/approves a variation, never sets `status`/`approved`, and
-  never calls `save_post_content` or any write tool. The human gate is a workspace action; the
-  agent stops before it.
+- **The agent never flips a gate.** Propose-only (hard rule): it never changes
+  approval or lifecycle state in either direction — never `approve` (the ONLY
+  gated promotion; the approval hook denies it to agents, any entity, any gate),
+  never publish, and never use `edit` to demote/unapprove a row (demotion is no
+  longer a separate `unapprove_*` tool — it is an `edit`, and the server gates
+  it on the `approve` capability, which you do NOT hold — a demoting patch is
+  refused server-side) — and never edits or deletes operator-curated or approved
+  rows. It never selects/approves a variation, never sets `status`/`approved`,
+  and never calls `save_post_content` or any write tool. The human gate is a
+  workspace action; the agent stops before it.
 - **Human checkpoint before persistence.** The authority does NOT save autonomously — it
   **presents the candidate set in chat and waits** for the operator's review. Nothing is
   persisted until the operator gives the go-ahead. The **primary revision path is pre-save,
@@ -203,7 +210,7 @@ human gate is the only approval.
   are split by design: the writer hands the authority unsaved drafts (and revises them during
   the in-chat review), and the authority inserts the operator-approved set of variations rated
   ≥4 — one insert per variation. A **post-save** flaw in a just-persisted row is corrected in
-  place via `edit_content` (never a duplicate). No orphan low-rated drafts.
+  place via `edit(entity='content', …)` (never a duplicate). No orphan low-rated drafts.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run —
   never batch-produce across ideas in a single pass.
 - **All persisted prose in Vietnamese.** Every variation `body` (copy) and rating `comment`

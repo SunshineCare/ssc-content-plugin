@@ -38,7 +38,7 @@ Re-run this command (same `period` / `plan_id`) after each gate to advance to th
 
 ## Governance
 
-Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**: it never changes approval or lifecycle state in either direction (no `approve_*`, no `unapprove_*`, no `update_status`, no publish) and never edits or deletes operator-curated or approved rows. Running steps requires `edit`; approving the Focus, Research, ideas, and calendar requires `approve`.
+Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**: it never changes approval or lifecycle state in either direction (never `approve` — the ONLY gated promotion, denied to agents by the approval hook; never publish; and never `edit` used to demote/unapprove a row, demotion being an `edit` now rather than a separate `unapprove_*` tool) and never edits or deletes operator-curated or approved rows. Running steps requires `edit`; approving the Focus, Research, ideas, and calendar requires `approve`.
 
 ## After it runs
 

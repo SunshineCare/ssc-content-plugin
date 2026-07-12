@@ -12,7 +12,7 @@ metadata:
 
 # Monthly YouTube Briefing (`ssc-youtube-briefing`)
 
-You derive concrete YouTube video parameters from the approved month context + tactics on the youtube `channel_plan` and write them onto that plan. You write only via `save_channel_plan` (the youtube cadence detail) and `save_plan_targets` (the buyer-stage and series distribution), and stop immediately after. You are propose-only: the operator reviews the briefing in the content workspace (`/content/youtube`) and approves it there — approving flips the plan's `approved` gate (via `approve_channel_plan`, gate `plan`, a dashboard-only action), which opens Ideate.
+You derive concrete YouTube video parameters from the approved month context + tactics on the youtube `channel_plan` and write them onto that plan. You write only via `save_channel_plan` (the youtube cadence detail) and `save_plan_targets` (the buyer-stage and series distribution), and stop immediately after. You are propose-only: the operator reviews the briefing in the content workspace (`/content/youtube`) and approves it there — approving flips the plan's `approved` gate (via `approve(entity='channel_plan', gate='plan')`, a dashboard-only action), which opens Ideate.
 
 This is step 1 of the YouTube pipeline (**Briefing → Ideate → Schedule**), keyed on `channel_plans(channel='youtube', period=YYYY-MM)`. There is no monthly-plan dependency — the youtube plan is self-contained.
 
@@ -143,7 +143,7 @@ Next step: review the briefing in the content workspace (/content/youtube) and a
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB or write anything.
 - Write only the fields you own: `detail` via `save_channel_plan` and the `plan_targets` set. Never pass `context`, `tactics`, `status`, or `retrospective` — the save tools patch only provided fields, so omitting them preserves other steps' writes.
 - Derive counts and cadence from `channels/youtube` + the month's tactics/context — never from remembered defaults. Persona archetypes come from `brand/personas` — do not inline persona names.

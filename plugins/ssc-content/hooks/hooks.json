@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "^mcp__ssc__(approve|unapprove)_.*$",
+        "matcher": "^mcp__ssc__(approve|unapprove)(_.*)?$",
         "hooks": [
           {
             "type": "command",

@@ -132,13 +132,13 @@ Next step: review, edit, and approve the Focus in the dashboard (flips `tactics_
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_channel_plan`.
-- **Never approves.** Does not set `tactics_approved`, `approved`, or any approval flag. Flipping the Focus gate is a dashboard-only action requiring the `approve` capability (via `approve_channel_plan`, gate `tactics`).
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_channel_plan`.
+- **Never approves.** Does not set `tactics_approved`, `approved`, or any approval flag. Flipping the Focus gate is a dashboard-only action requiring the `approve` capability (via `approve(entity='channel_plan', gate='tactics')`).
 - Does not call `get_strategy_brief` — the agent resolves the strategy and passes it in.
 - The prior-period read (Step 1) is read-only and never blocks: a missing prior plan or empty `retrospective` is normal.
 - **Tier-correct carry-forward.** When the retrospective carries tier grades, honour each grade's tier: cost-per-purchase judges only L1/L3 (protect/scale L3, keep L1 at funnel-intake); L2 omnipresence is judged on reach/CPM/frequency and is never dropped for low purchases.
 - KB fallback uses only `content/pillars` and `brand/personas` — no other knowledge reads are needed; the passed strategy is the primary driver.
-- No `approve_*` tools, no `edit_knowledge`, no `publish_strategy_knowledge`.
+- No `approve` verb (the ONLY gated promotion), no `edit` used to demote/unapprove a row, no `edit_knowledge`, no `publish_strategy_knowledge`.
 - Does NOT write the creative "how" (per-layer approaches, persona triggers, differentiation) — that is the Approaches step's output (`context`). Does NOT write budget split, layer %, the ad-set build map, or creative counts — those are the Blueprint step's outputs. Focus carries only the bets / tactical intent (`tactics`).
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires `edit` capability (plus `view` for the `get_channel_plan` and `get_knowledge` reads).

@@ -1,18 +1,18 @@
 ---
 name: ssc-ads-measure
-description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Synthesises a retrospective (tier grades + winning vs fatigued angles — and, where the winning/losing ad-sets' content is identifiable via get_idea + list_post_content, winning vs fatigued proof points, copy lengths, and formats) and writes it to channel_plans.retrospective via save_channel_plan. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus reads this retrospective to carry winning angles forward and drop fatigued ones; the ad-production writer (ssc-ads-writer) reads it to lean on the proven proof points / lengths / formats and avoid fatigued ones.
+description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Synthesises a retrospective (tier grades + winning vs fatigued angles — and, where the winning/losing ad-sets' content is identifiable via get_idea + list_post_content, winning vs fatigued proof points, copy lengths, and formats), writes it to channel_plans.retrospective via save_channel_plan, AND persists the paid-ads section (ad_campaign_health) plus its block of the shared per-period digest via save_performance_analysis, so the digest every later phase reads is no longer empty. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus reads this retrospective to carry winning angles forward and drop fatigued ones; the ad-production writer (ssc-ads-writer) reads it to lean on the proven proof points / lengths / formats and avoid fatigued ones.
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan, get_idea, list_post_content]
+  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan, save_performance_analysis, get_idea, list_post_content]
 ---
 
 # Ads Measure (`ssc-ads-measure`)
 
-You run the **Measure** step of the standalone Cambridge Diet Vietnam Ads pipeline. You read the **actual ingested ad performance** from `get_ad_performance`, **grade each ad-set by its TIER on the tier's correct KPI** (a hard rule — see below), translate that into paid-angle learnings (which angles are winning vs fatiguing), and write a **retrospective** onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, retrospective=…)`. The retrospective is markdown prose — which angles worked (carry forward), which fatigued or ran inefficiently (drop or refresh), and what to try next. You only read performance and write the retrospective; you NEVER hand-author performance rows, trigger ingestion (`pull_*`), call `approve_*`, or produce new content.
+You run the **Measure** step of the standalone Cambridge Diet Vietnam Ads pipeline. You read the **actual ingested ad performance** from `get_ad_performance`, **grade each ad-set by its TIER on the tier's correct KPI** (a hard rule — see below), translate that into paid-angle learnings (which angles are winning vs fatiguing), and write a **retrospective** onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, retrospective=…)`. The retrospective is markdown prose — which angles worked (carry forward), which fatigued or ran inefficiently (drop or refresh), and what to try next. You then persist the same findings into the **shared per-period digest** (`performance_analyses`) via `save_performance_analysis` — you own its `ad_campaign_health` section, and one named block of its `summary` — which is what `ssc-post-research`, `ssc-strategy-directions` and `ssc-strategy-performance-retrospective` actually read. You only read performance and write those two artifacts; you NEVER hand-author RAW performance rows, trigger ingestion (`pull_*`), call `approve` (any entity), use `edit` to demote/unapprove a row, or produce new content.
 
 **KPI is TIER-SPECIFIC — never grade every ad-set on the same metric (hard rule, sourced from `ad/strategy` §"Hệ Thống KPI" + `ad/campaign-architecture`):**
 
@@ -147,6 +147,86 @@ Không có dữ liệu hiệu suất quảng cáo nào được nạp vào hệ 
 
 > The ad plan for `period` already exists by the time Measure runs (Focus created it, and the pipeline cleared the Ideas gate). If you want to confirm before writing, an optional `get_channel_plan(channel='ad', period)` read is harmless — but it is not required.
 
+### Step 4b: Persist your block of the shared per-period digest
+
+The `channel_plan` retrospective from Step 4 is the **ad pipeline's** copy. The
+**digest** (`performance_analyses`, one row per `period`) is the **cross-channel**
+copy — the one `ssc-post-research`, `ssc-strategy-directions` and
+`ssc-strategy-performance-retrospective` read via `get_performance_analysis`. Until
+now nothing ever wrote it, so every one of those reads came back empty. Close that
+loop: after Step 4, ALSO save your findings into the digest.
+
+**You are the sole owner of `ad_campaign_health`** — the digest's paid-ads section
+(Red/Yellow/Green + fatigue + LTV:CAC). No other skill writes it. Send the tier
+grades you already computed in Step 3, as structured data:
+
+```
+Call: save_performance_analysis
+  period: <period>
+  ad_campaign_health:
+    tiers:
+      L1: { grade: "green|yellow|red", kpi: "cost_per_purchase", value: <number>, note: "<Vietnamese>" }
+      L2: { grade: "green|yellow|red", kpi: "reach_cpm_frequency", cpm: <number>, frequency: <number>, note: "<Vietnamese>" }
+      L3: { grade: "green|yellow|red", kpi: "cost_per_purchase", value: <number>, note: "<Vietnamese>" }
+    winning_angles: ["<angle>", …]
+    fatigued_angles: ["<angle>", …]
+    ltv_cac: <number or null when it cannot be derived from ingested data>
+  summary: <the merged digest prose — see below>
+```
+
+Include a tier only if you actually graded it; set `ltv_cac: null` rather than
+estimating one. Keep the KPI tier-locked exactly as in Step 3 — L2 is **never**
+graded on cost-per-purchase, in the digest as in the retrospective.
+
+**The `summary` is SHARED — read-modify-write it, never clobber it.**
+`save_performance_analysis` UPSERTS on `period` and applies **only the fields you
+pass** (an omitted field keeps its previously-saved value), so several skills compose
+one row for the cycle. `summary` is a single text field, though, so each writer owns
+exactly ONE named block inside it:
+
+| Block heading | Owner |
+|---|---|
+| `## Quảng cáo (Ads)` | **you** (`ssc-ads-measure`) |
+| `## Bài viết (Posts)` | `ssc-post-measure` |
+| `## Tổng hợp chu kỳ` | `ssc-strategy-performance-retrospective` |
+
+Take the `summary` you already read in **Step 1b** (`{ analysis: null }` ⇒ treat it
+as an empty string). Replace your `## Quảng cáo (Ads)` block if one exists, or append
+it if it does not, and leave every other block **byte-for-byte unchanged**. Pass the
+whole merged string as `summary`.
+
+Your block is the Step-3 retrospective condensed to its carry-forward signal — **in
+Vietnamese**, headings included (the persisted-prose convention: everything stored is
+Vietnamese; only your chat-side reasoning is English):
+
+```
+## Quảng cáo (Ads)
+
+**Trạng thái dữ liệu:** <đầy đủ | một phần | chưa nạp dữ liệu quảng cáo trong kỳ này>
+
+**Điểm theo tầng:** L1 <🟢/🟡/🔴 + số> · L2 <grade + reach/CPM/freq> · L3 <grade + số>
+**Góc thắng (giữ lại):** <…>
+**Góc mỏi / kém hiệu quả (bỏ hoặc làm mới):** <…>
+**Tín hiệu cho tháng sau:** <1-2 câu>
+```
+
+**Pass nothing else.** Do **not** pass `youtube_retention` or `conversion_audit` — no
+skill produces either today, and passing a value you did not measure would fabricate
+data. Omitting them preserves whatever another writer stored.
+
+The digest row is always written as a **`draft`** — the tool takes no `status` and
+cannot mint a `final`. Saving it is not an approval and flips no gate.
+
+In the **no-data case** (Step 1 returned no ingested ad rows), still save, with the
+absence recorded honestly — omit `ad_campaign_health` entirely (do not invent an
+all-red grading) and write only:
+
+```
+## Quảng cáo (Ads)
+
+**Trạng thái dữ liệu:** chưa có dữ liệu hiệu suất quảng cáo nào được nạp trong kỳ này. Không có tín hiệu hồi cứu mới từ hiệu suất thực.
+```
+
 ### Step 5: Output summary
 
 ```
@@ -173,17 +253,20 @@ Retrospective written to the ad channel_plan (propose-state, no gate). Next mont
 ## Output
 
 - `retrospective` written to the ad `channel_plan` (markdown) — or the graceful no-data note when no ad performance has been ingested
+- `ad_campaign_health` (tier grades + winning/fatigued angles + LTV:CAC) and the `## Quảng cáo (Ads)` summary block written into the shared per-period digest (`performance_analyses`, `status='draft'`) via `save_performance_analysis` — merged into the existing `summary`, never clobbering another skill's block
 - No gate flipped (Measure is ungated)
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no approve_*, no unapprove_* (any entity, any gate), no update_status, no publish. Never edit or delete operator-curated or approved rows: edit_*/delete_* tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Synthesis + save only: writes only via `save_channel_plan` (the `retrospective` field) — no writes to performance tables, no content writes, no idea/schedule writes.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Synthesis + save only: writes via `save_channel_plan` (the `retrospective` field) and `save_performance_analysis` (the digest's `ad_campaign_health` + your `## Quảng cáo (Ads)` summary block) — no writes to the RAW performance tables (`ad_performance` is ingestion's, not yours), no content writes, no idea/schedule writes.
 - **No gate.** Measure is the one ungated step; `retrospective` is propose-state output, never an approval. The skill never sets `tactics_approved`, `approaches_approved`, or `approved`.
-- Reads the **ingested** ad performance via `get_ad_performance`; never triggers ingestion (`pull_*`) and never fabricates metrics. The `get_performance_analysis` digest is optional cross-channel context only — a null there is NOT a no-data condition.
+- **Saving the digest is NOT an approval.** `save_performance_analysis` always writes `status='draft'` (the tool takes no `status` and cannot mint a `final`), so it flips no gate and stays inside propose-only.
+- **The digest is shared — never clobber another skill's block.** Read `summary` in Step 1b, replace/append ONLY `## Quảng cáo (Ads)`, and pass no field beyond `ad_campaign_health` (which you alone own): `youtube_retention` / `conversion_audit` have no producer, and passing either would fabricate a measurement you did not take.
+- Reads the **ingested** ad performance via `get_ad_performance`; never triggers ingestion (`pull_*`) and never fabricates metrics. The `get_performance_analysis` digest is optional cross-channel context on the READ side — a null there is NOT a no-data condition — and, on the WRITE side, the row you are contributing `ad_campaign_health` + your summary block to.
 - Records "no prior ad performance this cycle" gracefully only when `get_ad_performance` returns no rows — never invents spend/CTR/cost-per-result.
 - Every "winning"/"fatigued" claim is grounded in an actual ingested metric from `get_ad_performance`.
 - **KPI is tier-locked.** Cost-per-purchase grades ONLY the conversion tiers (L1, L3); L2 omnipresence is graded on reach/CPM/ThruPlay/frequency and warm-pool contribution — NEVER on cost-per-purchase (grading L2 on cost-per-purchase mis-kills the funnel-nurture tier). Per-tier thresholds are read live from `ad/strategy` + `ad/campaign-architecture` (KB wins over any inline number).
 - **NEVER writes `monthly_plans`, `targets.ads`, or `phase_status`** — those belonged to the retired shared-head model. Output goes only to the ad `channel_plan`'s `retrospective`.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state, and never writes to a different period's plan.
 - Reads winning/losing ad-sets' content via `get_idea` + `list_post_content` **only to name the proof points / lengths / formats they used** — read-only, no content writes, and a directional signal (an ad-set may carry several creatives; do not over-attribute).
-- Requires `edit` capability (plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` / `get_idea` / `list_post_content` reads).
+- Requires `edit` capability (for `save_channel_plan` and `save_performance_analysis`), plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` / `get_idea` / `list_post_content` reads.

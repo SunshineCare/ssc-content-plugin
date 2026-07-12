@@ -1,21 +1,25 @@
 ---
 name: ssc-strategy-performance-retrospective
-description: Synthesises the prior cycle's performance for Cambridge Diet Vietnam by READING what's already been ingested into Brand OS — the digested per-month analysis (get_performance_analysis), the ingested per-post Facebook metrics (get_post_performance), and the ingested paid-ad metrics (get_ad_performance). Read-only synthesis — it never triggers ingestion (pull_*) and never writes. Only records "no prior performance data" when all three reads are empty. Saves findings via save_strategy_finding (dimension=performance_retrospective).
+description: Synthesises the prior cycle's performance for Cambridge Diet Vietnam by READING what's already been ingested into Brand OS — the digested per-month analysis (get_performance_analysis), the ingested per-post Facebook metrics (get_post_performance), and the ingested paid-ad metrics (get_ad_performance). It never triggers ingestion (pull_*) and never writes a raw performance row. Only records "no prior performance data" when all three reads are empty. Saves findings via save_strategy_finding (dimension=performance_retrospective) AND writes its cross-source cycle synthesis back into the shared per-period digest via save_performance_analysis (its own summary block, draft) — the write that stops the digest every later phase reads from being permanently empty.
 metadata:
   type: skill
   stage: strategy
   brand: cambridge-diet-vn
   section: strategy
   capability: edit
-  tools: [get_performance_analysis, get_post_performance, get_ad_performance, save_strategy_finding]
+  tools: [get_performance_analysis, get_post_performance, get_ad_performance, save_strategy_finding, save_performance_analysis]
 ---
 
 # Performance Retrospective (`ssc-strategy-performance-retrospective`) — FR-018b
 
 You synthesise the prior cycle's performance for Cambridge Diet Vietnam into
-content- and ad-strategy learnings for the next cycle. You are **read-only
-synthesis**: you READ whatever has been ingested into Brand OS and translate it
-into findings. You never trigger ingestion and never write to performance tables.
+content- and ad-strategy learnings for the next cycle. You READ whatever has been
+ingested into Brand OS and translate it into findings — you never trigger ingestion
+and never write a RAW performance row. You then write your synthesis back into the
+**shared per-period digest** (`performance_analyses`) via `save_performance_analysis`:
+you own one named block of its `summary`. That write matters — the digest had readers
+(you, `ssc-post-research`, `ssc-strategy-directions`) and **no writer at all**, which
+is exactly why your own Step-2 digest read is "frequently null".
 
 > **These reads reflect *ingested* data, not the live platforms.** `get_*` returns
 > only what has already been ingested into Brand OS — it does **not** fetch live
@@ -30,7 +34,9 @@ You read from **three ingested sources** and combine whatever exists:
 
 1. **The digest** — `get_performance_analysis(YYYY-MM)` reads `performance_analyses`,
    the per-month *structured* analysis (ad-campaign health, YouTube retention,
-   conversion audit) written by the performance agent. **Frequently null.**
+   conversion audit) plus a shared `summary`. **Frequently null for older months** —
+   it is written by `ssc-ads-measure` (`ad_campaign_health`), `ssc-post-measure`, and
+   by you (Step 7b); months measured before those writers existed have no row at all.
 2. **Ingested organic metrics** — `get_post_performance` reads the per-post Facebook
    metrics already ingested into the `performance` table.
 3. **Ingested paid-ad metrics** — `get_ad_performance` reads the per-ad / ad-set /
@@ -145,6 +151,70 @@ score: <integer 4 or 5>
 comment: <one-line Vietnamese rationale for the score>
 ```
 
+### Step 7b: Persist the cycle synthesis back into the digest
+
+You are the one skill that reads **all three** sources and synthesises across them.
+That synthesis has to land somewhere the next cycle can read it — and until now it
+did not: `performance_analyses` had readers (this skill, `ssc-post-research`,
+`ssc-strategy-directions`) and **no writer at all**, which is exactly why Step 2's
+digest read is "frequently null". Close that loop by writing your synthesis back.
+
+**Where:** the digest is keyed by **month** (`YYYY-MM`), your review is keyed by
+**quarter**. Write to the **LAST month of the prior quarter** — the one downstream
+consumers actually reach for (`ssc-strategy-directions` reads "the most recent
+available" prior-quarter month; `ssc-post-research` reads the prior month). For
+`2026-Q3` that is `2026-06`.
+
+```
+Call: save_performance_analysis
+  period: <last month of the prior quarter, e.g. 2026-06>
+  summary: <the merged digest prose — see below>
+```
+
+**The digest is SHARED — read-modify-write the `summary`, never clobber it.**
+`save_performance_analysis` UPSERTS on `period` and applies **only the fields you
+pass** (an omitted field keeps its previously-saved value), so several skills compose
+one row for the cycle. `summary` is a single text field, though, so each writer owns
+exactly ONE named block inside it:
+
+| Block heading | Owner |
+|---|---|
+| `## Tổng hợp chu kỳ` | **you** (`ssc-strategy-performance-retrospective`) |
+| `## Quảng cáo (Ads)` | `ssc-ads-measure` |
+| `## Bài viết (Posts)` | `ssc-post-measure` |
+
+Take that month's `summary` as you already read it in **Step 2** (`{ analysis: null }`
+⇒ treat it as an empty string). Replace your `## Tổng hợp chu kỳ` block if one exists,
+or append it if it does not, and leave every other block **byte-for-byte unchanged**.
+Pass the whole merged string as `summary`.
+
+Your block is the cross-source synthesis behind the findings you just saved — **in
+Vietnamese**, headings included (the persisted-prose convention; your chat-side
+reasoning stays English):
+
+```
+## Tổng hợp chu kỳ (<period>)
+
+**Nguồn dữ liệu:** <digest | organic | paid — những nguồn có dữ liệu, hoặc "không có">
+
+**Giữ lại (tín hiệu thắng):** <…>
+**Làm mới / bỏ (tín hiệu thua):** <…>
+**Tín hiệu cho chu kỳ sau:** <1-2 câu>
+```
+
+**Pass NOTHING but `period` and `summary`.** Do **not** pass `ad_campaign_health` —
+`ssc-ads-measure` owns that field and re-writing it from a 120-day lookback would
+overwrite its tier-locked, per-month grading with a coarser one. Do **not** pass
+`youtube_retention` or `conversion_audit` either: you have **no read** for YouTube or
+conversion (Step 6 says so explicitly), so any value — including a `null` meaning "no
+YouTube data" — would be a measurement you never took. Omitting a field preserves
+whatever another writer stored.
+
+The digest row is always written as a **`draft`** — the tool takes no `status` and
+cannot mint a `final`. Saving it is not an approval, promotes nothing, and flips no
+gate; it stays inside propose-only. In the Step-5 **no-data case**, skip this step
+entirely: there is no synthesis to persist and an empty block is worse than none.
+
 ### Step 8: Output summary
 
 ```
@@ -165,6 +235,7 @@ comment: <one-line Vietnamese rationale for the score>
 
 Findings dropped (rated ≤3, no ≥4 replacement found): <N>
 Findings saved: <N>
+Cycle synthesis saved to the digest: <YYYY-MM (block `## Tổng hợp chu kỳ`, draft) | skipped — no data>
 ```
 
 ## Output language
@@ -175,12 +246,22 @@ Findings saved: <N>
 
 - **Read + synthesise only.** Never call ingestion tools (`pull_fb_performance`,
   `pull_all_ad_performance`) — those hit external APIs, need connected accounts, and
-  write snapshots; they are out of scope. Never author analysis rows, never write
-  content. The only write this skill makes is `save_strategy_finding`.
-  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+  write snapshots; they are out of scope. Never hand-author a RAW performance row
+  (`performance` / `ad_performance` belong to ingestion), never write content. This
+  skill makes exactly two writes: `save_strategy_finding` (the findings) and
+  `save_performance_analysis` (your `## Tổng hợp chu kỳ` block of the digest).
+- **Saving the digest is NOT an approval.** `save_performance_analysis` always writes
+  `status='draft'` (the tool takes no `status` and cannot mint a `final`), so it
+  promotes nothing and flips no gate — it stays inside propose-only.
+- **The digest is shared — never clobber another skill's block.** Read the month's
+  `summary` in Step 2, replace/append ONLY `## Tổng hợp chu kỳ`, and pass no field
+  beyond `period` + `summary`: `ad_campaign_health` is `ssc-ads-measure`'s, and you
+  have no YouTube or conversion read at all, so writing `youtube_retention` or
+  `conversion_audit` — even as `null` — would assert a measurement you never took.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - A null digest is **not** "no data" — read the ingested organic and ad sources before
   concluding. An empty ingested read means *not ingested* (for ads, usually no connected
   account), not *no platform activity* — report it as no-data, don't pull.
 - All findings use `dimension: 'performance_retrospective'` and `track: 'proven'`.
 - Every candidate finding is self-rated before saving; only findings rated ≥4 are persisted via `save_strategy_finding`. A candidate rated ≤3 is dropped and replaced with a different metric-grounded learning (bounded at 2 attempts per slot) — never saved, never inflated to pass.
-- Requires `edit` capability.
+- Requires `edit` capability (for `save_strategy_finding` and `save_performance_analysis`).

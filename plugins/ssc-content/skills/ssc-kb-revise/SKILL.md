@@ -90,14 +90,19 @@ approval in the KB dashboard. Nothing applied."
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or
-  lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any
-  entity, any gate), no `update_status`, no publish. Never edit or delete
-  operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY
-  draft rows this skill itself created in the current run. Everything else
-  belongs to the operator in the dashboard. `propose_knowledge_revision` is
-  this skill's only write; NEVER call `approve_knowledge_revision` /
-  `reject_knowledge_revision`, `edit_knowledge`, or
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either
+  direction — never call `approve` (the ONLY gated promotion; the approval
+  hook denies it to agents, any entity, any gate), and never publish. Demotion
+  is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban
+  lives here: never use `edit` to demote, unapprove, discard, or reject a row.
+  Never edit or delete operator-curated or approved rows: the generic
+  `edit`/`delete` verbs may target ONLY draft rows this skill itself created
+  in the current run. Everything else belongs to the operator in the
+  dashboard. `propose_knowledge_revision` is
+  this skill's only write; NEVER call `approve(entity='knowledge_revision', …)`,
+  never use `edit(entity='knowledge_revision', …)` to REJECT a revision
+  (rejection is an `edit` now, not a separate `reject_knowledge_revision` tool —
+  it is the operator's call, not yours), and never call `edit_knowledge` or
   `publish_strategy_knowledge`.
 - One proposal per path — never submit two proposals targeting the same doc.
 - Requires `edit` capability.

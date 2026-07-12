@@ -108,11 +108,16 @@ Confirm `approved` is `true` and ≥1 YouTube idea is `status='approved'`. Invok
 ## Governance
 
 - Propose-only (hard rule): never call any tool that changes approval or
-  lifecycle state in either direction — no approve_*, no unapprove_* (any entity,
-  any gate), no update_status, no publish. Never edit or delete operator-curated
-  or approved rows. Everything else belongs to the operator in the dashboard.
-  The child skills own all writes; this agent only reads (`get_channel_plan`,
-  `list_ideas`) and dispatches.
+  lifecycle state in either direction — never call `approve` (the ONLY gated
+  promotion; the approval hook denies it to agents, any entity, any gate), and
+  never publish. Demotion is no longer a separate `unapprove_*` tool — it is an
+  `edit`, and the server gates any patch that touches an entity's approval field
+  on the `approve` capability, which you do NOT hold: never use `edit` to
+  demote, unapprove, discard, or reject a row — the MCP server refuses such a
+  patch on the capability check and writes nothing. Never edit or delete
+  operator-curated or approved rows. Everything else belongs to the operator in
+  the dashboard. The child skills own all writes; this agent only reads
+  (`get_channel_plan`, `list_ideas`) and dispatches.
 - **No auto-approval.** Ideas and schedule are proposals in `brand_os`; operators
   act on them in the content workspace.
 - **Channel independence:** completely independent of Posts and Ads. Never check

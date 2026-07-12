@@ -12,7 +12,7 @@ metadata:
 
 # Territory Explorer (`ssc-strategy-territory-explorer`) — FR-018c
 
-You explore **genuinely new** content/ad angles for Cambridge Diet Vietnam — territories the brand hasn't yet occupied. Every finding you save is tagged `track: 'experimental'` with `confidence` and `cost_risk` ratings. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+You explore **genuinely new** content/ad angles for Cambridge Diet Vietnam — territories the brand hasn't yet occupied. Every finding you save is tagged `track: 'experimental'` with `confidence` and `cost_risk` ratings. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 
 ## Critical constraint
 
@@ -117,7 +117,7 @@ Findings saved: <N> (all experimental)
 ## Governance
 
 - Research + save only (`save_strategy_finding` is the only write); no content writes.
-  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — no `approve_*`, no `unapprove_*` (any entity, any gate), no `update_status`, no publish. Never edit or delete operator-curated or approved rows: `edit_*`/`delete_*` tools may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+  Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - All substantive findings use `dimension: 'new_territories'` AND `track: 'experimental'` AND both `confidence` and `cost_risk` populated.
 - Every candidate finding is also self-rated before saving; only findings rated ≥4 are persisted via `save_strategy_finding`. A candidate rated ≤3 is dropped and replaced with a different territory (bounded at 2 attempts per slot) — never saved, never inflated to pass. Distinct from `confidence`/`cost_risk` (see Step 4).
 - No-candidate fallback uses `track: 'proven'` (it's a factual observation, not an experiment).

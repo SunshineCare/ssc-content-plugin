@@ -13,11 +13,29 @@
 //   • everything else                                   -> defer (exit 0).
 //
 // This is a backstop, not the primary control — the MCP server still enforces
-// the `approve` capability server-side. See hooks/README or the plugin
-// governance note. Reasons are operator-facing English (chat/system text);
-// only PERSISTED artifact prose is Vietnamese.
+// the `approve` capability server-side, in BOTH directions: promotion via `edit`
+// is refused outright, and a DEMOTING `edit` (un-approve / discard / reject) is
+// refused for an `edit`-only caller, i.e. for every agent. See hooks/README or
+// the plugin governance note. Reasons are operator-facing English (chat/system
+// text); only PERSISTED artifact prose is Vietnamese.
 
-const APPROVAL_TOOL = /^mcp__ssc__(approve|unapprove)_/;
+// Matches BOTH shapes of approval tool:
+//   • legacy per-entity verbs — mcp__ssc__approve_content, mcp__ssc__unapprove_idea, …
+//   • the generic verb itself — mcp__ssc__approve / mcp__ssc__unapprove (no suffix)
+// The `(_|$)` tail is load-bearing. This gate is DEFAULT-ALLOW (a non-match falls
+// through to `process.exit(0)`), so anything this regex misses is affirmatively
+// ALLOWED. A trailing-underscore-only pattern would let the bare generic `approve`
+// verb sail through and hand agents the power to approve their own work — the exact
+// thing this hook exists to prevent. Anchor the tail, never leave it open.
+// Non-approval generic verbs (mcp__ssc__edit, mcp__ssc__delete) must NOT match.
+//
+// And they CANNOT be policed here even in principle: a DEMOTION is now an `edit`
+// patch (`{ status: 'draft' }`), and this hook sees a tool NAME, never a patch
+// body. That half of the propose-only rule is held SERVER-SIDE instead — the
+// generic `edit` requires the `approve` CAPABILITY for any patch touching an
+// entity's approval field, and agents hold only `edit`. Do not try to teach this
+// regex about demotion; it is structurally blind to it, and the server is not.
+const APPROVAL_TOOL = /^mcp__ssc__(approve|unapprove)(_|$)/;
 
 function readStdin() {
   return new Promise((resolve) => {

@@ -1,6 +1,6 @@
 ---
 name: ssc-video-script
-description: Produces the SCRIPT step of the reusable Brand OS video-production workflow (011-video-production) for ONE approved idea + channel (post/ad/youtube). Resolves the idea (by idea_id, or by date via the idea's schedule), starts/resumes its production via start_production, reads the idea's creative brief + strategic tags, loads the channel-appropriate voice/brand/content knowledge base, and drafts the Vietnamese spoken narration (hook → body → soft CTA) — pure narration, no inline shot/on-screen-text cues (a separate future storyboard skill owns those). Self-checks the draft against a quality checklist (proof points, banned words, pronoun register, authenticity guardrail) and revises in place before saving. Saves the narration as the Script step's current value via save_step_value(section='script') and STOPS. Cowork-native — Claude writes the narration directly; no AI-provider tool call. Propose-only: saves a DRAFT slot value only, never calls approve_step/unapprove_step, never flips a gate.
+description: Produces the SCRIPT step of the reusable Brand OS video-production workflow (011-video-production) for ONE approved idea + channel (post/ad/youtube). Resolves the idea (by idea_id, or by date via the idea's schedule), starts/resumes its production via start_production, reads the idea's creative brief + strategic tags, loads the channel-appropriate voice/brand/content knowledge base, and drafts the Vietnamese spoken narration (hook → body → soft CTA) — pure narration, no inline shot/on-screen-text cues (a separate future storyboard skill owns those). Self-checks the draft against a quality checklist (proof points, banned words, pronoun register, authenticity guardrail) and revises in place before saving. Saves the narration as the Script step's current value via save_step_value(section='script') and STOPS. Cowork-native — Claude writes the narration directly; no AI-provider tool call. Propose-only: saves a DRAFT slot value only, never calls approve (entity production_step), never uses edit to demote a step, never flips a gate.
 metadata:
   type: skill
   stage: video-production
@@ -184,12 +184,12 @@ Next: review/edit the narration in the video-production workspace (/video/<produ
 ## Output
 
 - The production's **`script`** step holds exactly one current value: the drafted Vietnamese narration, saved via `save_step_value(production_id, section='script', body, source_model, generation_prompt, expected_version?)` — status `draft`.
-- No gate flipped. No `approve_step`/`unapprove_step` call. No compliance override.
+- No gate flipped. No `approve(entity='production_step', …)` call, and no `edit` used to demote a step. No compliance override.
 - If the idea's production did not yet exist, one was started (`start_production`) — this alone is not a content write.
 
 ## Governance
 
-- Propose-only (hard rule): never call `approve_step`, `unapprove_step`, or any tool that changes approval/lifecycle state. Never call `set_consistency_profile` (a separate concern, not this skill's job) or any generation/asset tool — Script is text-only and Cowork-native.
+- Propose-only (hard rule): never call `approve` (the ONLY gated promotion — any entity, incl. `production_step`; the approval hook denies it to agents), never use `edit` to demote/unapprove a step (demotion is an `edit` now, not a separate `unapprove_step` tool — so the ban lives here), and never call any other tool that changes approval/lifecycle state. Never call `set_consistency_profile` (a separate concern, not this skill's job) or any generation/asset tool — Script is text-only and Cowork-native.
 - **Cowork-native.** You (Claude) write the narration directly. There is no AI-provider/generation tool call in this skill — `save_step_value` is a direct write, not a wrapped generation call. `source_model` records that Claude authored it directly.
 - **Single track.** There is exactly one current script value per production. Re-invoking this skill overrides it (FR-007/FR-009); the prior value's history is retained server-side for audit, not by this skill.
 - **Pure narration only.** Never add shot/scene/on-screen-text cues to the script body — that is the Storyboard step's job (a separate skill, built after this one).

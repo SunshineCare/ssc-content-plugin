@@ -16,7 +16,7 @@ You are the **creative-brief revisor** of the standalone Cambridge Diet Vietnam 
 
 **No draft/approve step, no scoring loop, one canonical revision per run.** Unlike `ssc-ads-writer`'s sections, the brief fields live directly on the idea row, not as `content` rows — there is no separate draft/approved state to manage. Every invocation **directly overwrites** the five fields with freshly-derived values grounded in whatever is currently approved. This is what makes it a "revise": running it again after more sections get approved simply produces a richer, more accurate brief — there is nothing stale to reload and nothing to approve first.
 
-You are propose-only: `update_idea` only revises **informational fields** on an idea that is already `approved` — it never touches `status`, never approves/publishes/schedules anything, and you **never** call `approve_*`, `unapprove_*`, `update_status`, or any publish/schedule tool.
+You are propose-only: `update_idea` only revises **informational fields** on an idea that is already `approved` — it never touches `status`, never approves/publishes/schedules anything, and you **never** call `approve` (the ONLY gated promotion — any entity; the approval hook denies it to agents), never use `edit` to demote/unapprove a row, and never call any publish/schedule tool.
 
 This is the **handoff step** of the ad flow — it runs any time after `copy` is approved (independent of whether headline/description/image_content are approved yet), to give the design/media-buying team a synthesized reference of the concept. It does **not** gate `ssc-ads-image` — that skill's precondition remains `approved(image_content)` only.
 
@@ -128,7 +128,7 @@ Call: update_idea
   cta:              <derived value>
 ```
 
-Do NOT pass `theme` — ad ideas never carry one. This call only revises the five informational fields above — it does not touch `status` or any other lifecycle field. Do NOT pass any approval field. Capture the returned confirmation (including the bumped `version`) for the Step 5 summary. If the call rejects a stale `expected_version`, re-fetch `get_idea` once for the current version and retry this call a single time (per the note in Step 1); if it fails again, STOP and tell the operator the concept changed elsewhere. **Never call `approve_idea`, `update_status`, or any publish/schedule tool.**
+Do NOT pass `theme` — ad ideas never carry one. This call only revises the five informational fields above — it does not touch `status` or any other lifecycle field. Do NOT pass any approval field. Capture the returned confirmation (including the bumped `version`) for the Step 5 summary. If the call rejects a stale `expected_version`, re-fetch `get_idea` once for the current version and retry this call a single time (per the note in Step 1); if it fails again, STOP and tell the operator the concept changed elsewhere. **Never call `approve` (any entity, incl. `idea`) or any publish/schedule tool, and never use `edit` to demote/unapprove a row.**
 
 ### Step 5: Output summary
 
@@ -161,7 +161,7 @@ If the `date` resolved more than one approved concept (Step 1), note which conce
 
 ## Governance
 
-- **Propose-only (hard rule):** `update_idea` is a generic, ungated patch tool — it revises whatever fields you pass, never `status`. You **never** call `approve_*`, `unapprove_*`, `update_status`, or any publish/schedule tool, and you never flip a gate. Because the tool itself enforces no ad-specific rule, THIS SKILL is solely responsible for the copy-approval gate (Step 2) and for never passing `theme`.
+- **Propose-only (hard rule):** `update_idea` is a generic, ungated patch tool — it revises whatever fields you pass, never `status`. You **never** call `approve` (the ONLY gated promotion — any entity; the approval hook denies it to agents), never use `edit` to demote/unapprove a row, never call any publish/schedule tool, and you never flip a gate. Because the tool itself enforces no ad-specific rule, THIS SKILL is solely responsible for the copy-approval gate (Step 2) and for never passing `theme`.
 - **Gate:** requires `approved(copy)` — STOP otherwise (Step 2). This check lives entirely in this skill, not in `update_idea`.
 - **Optimistic concurrency:** every `update_idea` call requires `expected_version` (Step 1's `idea.version`). A stale version means the concept changed elsewhere since Step 1 — re-fetch and retry once (Step 4), then STOP if it fails again.
 - **No draft/approve state for these fields (hard rule).** Unlike `ssc-ads-writer`'s `content` rows, there is nothing to approve here — each invocation directly overwrites with freshly-derived values. This is intentional: it is how "revise" works. **Caution — this means re-running silently overwrites any manual dashboard edit to these five fields**: unlike `ssc-ads-writer`, which re-reads live approved `content` bodies so dashboard edits to copy/headline/description carry forward, `ssc-ads-brief` recomputes all five fields from scratch every run. If an operator has manually refined, say, `hook_direction` in the dashboard, the next `ssc-ads-brief` invocation discards that edit and replaces it with a freshly-derived value. This is inherent to the recompute-from-scratch design, not a defect to fix — operators should treat a manual edit to these fields as provisional until no further `ssc-ads-brief` runs are expected.

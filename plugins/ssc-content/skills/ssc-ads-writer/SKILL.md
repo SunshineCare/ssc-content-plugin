@@ -1,13 +1,13 @@
 ---
 name: ssc-ads-writer
-description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id or by date) plus its ad-set build_spec, then reads list_post_content to find the target section — copy is the mandatory cold start; once copy is approved, headline, description, and image_content are each independently producible (gated only on copy, not on each other), chosen via an optional section argument or auto-picked among those not yet approved — and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points, and biasing toward the plan retrospective's proven winners (proof points / lengths / formats / angles) and away from fatigued losers. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for any of headline/description/image_content in any order, or re-invokes the same section again for a fresh revision; headline distils the approved copies, description compresses those copies (complementing an approved headline when one exists), image_content builds on those copies plus headlines/descriptions when they exist. Renders no pictures — image_content is the on-image COPY as structured TEXT (a strong headline hook + a USP/proof subheadline + 3 USP/proof bullets), saved under section='image_content' for the dashboard to render. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
+description: The TEXT producer of the standalone Cambridge Diet Vietnam ad-production workflow — a STATE-DRIVEN, per-section stepper anchored to ONE chosen angle brief. Resolves ONE approved ad concept (an ideas row, channel='ad', status='approved' — by idea id) plus a REQUIRED approved angle brief_id (read via list_briefs, filtered to that ONE brief — there is no get_brief tool) plus its ad-set build_spec, then reads list_post_content to find the target section — copy is the mandatory cold start, grounded in ONLY that one chosen brief (its five narrative fields + angle_label), never all of the idea's briefs; once copy is approved, headline, description, and image_content are each independently producible (gated only on copy, not on each other), chosen via an optional section argument or auto-picked among those not yet approved — and produces N rated Vietnamese variations for THAT one section — applying the Hook Formula Bank in Kiều My's woman-to-woman voice, pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points, and biasing toward the plan retrospective's proven winners (proof points / lengths / formats / angles) and away from fatigued losers. Runs an embedded quality gate (Direct-Response checklist + banned-words/compliance/authenticity scan), self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then SAVES the passing (≥4-rated) drafts straight to the server via save_post_content (channel='ad', idea_id, section) and STOPS — no in-chat presentation. The operator reviews/edits/approves that section in the /ad/[month]/[id] dashboard, then re-invokes for any of headline/description/image_content in any order, or re-invokes the same section again for a fresh revision; headline distils the approved copies, description compresses those copies (complementing an approved headline when one exists), image_content builds on those copies plus headlines/descriptions when they exist. Renders no pictures — image_content is the on-image COPY as structured TEXT (a strong headline hook + a USP/proof subheadline + 3 USP/proof bullets), saved under section='image_content' for the dashboard to render. Propose-only; never approves, never edits/deletes a row, never flips a gate; saves drafts only. All persisted prose Vietnamese.
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_knowledge, get_idea, get_channel_plan, list_post_content, save_post_content]
+  tools: [get_knowledge, get_idea, get_channel_plan, list_post_content, list_briefs, save_post_content]
 ---
 
 # Ads Writer (`ssc-ads-writer`)
@@ -20,7 +20,7 @@ You are the **text producer** of the standalone Cambridge Diet Vietnam ad-produc
 
 You are propose-only: every saved variation is a DRAFT for a human to review / edit / approve in the dashboard. **Saving is not approving.** You **NEVER** call `approve` (the ONLY gated promotion — any entity, incl. `content` and `idea`; the approval hook denies it to agents) or any publish tool, you **never** use `edit` to demote/unapprove a row, and you **NEVER** flip a gate. You also **never edit or delete** any row — the operator owns every row in the dashboard.
 
-This is the **text-production step** of the ad flow — it runs **after** the Ads pipeline (Focus → Approaches → Blueprint → Ideate) has produced the structural concept and a human has approved it. The concept (the `ideas` row) is the *brief*. There is no app/provider-model call in this skill — **you (Claude) write the copy directly** in Cowork. Do not reference or invoke any app model.
+This is the **text-production step** of the ad flow — it runs **after** the concept has been ideated and approved AND after `/ssc.ads-brief` has produced angle briefs and the operator has **approved one**. The concept (the `ideas` row) plus that **one chosen approved angle brief** are the *brief* every section is written from. There is no app/provider-model call in this skill — **you (Claude) write the copy directly** in Cowork. Do not reference or invoke any app model.
 
 **The producer↔page contract (hard):** the `/ad/[id]` page groups your saved rows by `content.section`. You MUST set `section` to exactly one of `headline` | `copy` | `description` | `image_content` (all four are TEXT sections — the page renders `body`), or the page will not group them. Never invent another section value, and never use the retired `image` value (that was the old rendered-PNG creative, now removed — this flow renders no pictures).
 
@@ -37,10 +37,10 @@ This is the **text-production step** of the ad flow — it runs **after** the Ad
 
 ## Inputs
 
-One of (the concept selector):
+Required:
 
-- `idea_id` — a specific approved ad concept's idea id, targeting that concept directly.
-- `date` — a calendar day (YYYY-MM-DD); resolved to the approved ad concept(s) for that day.
+- `idea_id` — the approved ad concept's idea id (an `ideas` row, `channel='ad'`, `status='approved'`), targeting that concept directly.
+- `brief_id` — the id of the operator's **chosen approved angle brief** for this concept (produced by `/ssc.ads-brief`, approved in the dashboard). It is read via `list_briefs(idea_id)` and filtered to the row whose `id == brief_id` — there is **no `get_brief`** tool. Every section this run is anchored to this one brief. There is **no `date` selector**: a `brief_id` is idea-scoped, so the producer always takes an explicit `idea_id`.
 
 Optional (section targeting):
 
@@ -57,7 +57,7 @@ Optional (variation counts — **configurable**):
 
 ### Step 1: Resolve the approved concept (work ONE concept at a time)
 
-**If given an `idea_id`:** call `get_idea`:
+Call `get_idea` for the required `idea_id`:
 
 ```
 Call: get_idea
@@ -65,8 +65,6 @@ Call: get_idea
 ```
 
 The result is FLAT: the single idea's lifecycle core (incl. `id`, `status`, `channel`, `plan_id`), its ad detail as **top-level fields** (`ad_slot_id` — the `ad_plan_slots` row this concept fills — and `ad_notes`; there is **no** nested `detail` object and **no** `period` field), and its `tags[]` (each `{ term_id, kind, code, label }`). If the idea does not resolve (`{ idea: null }`), STOP and tell the operator the idea id was not found.
-
-**If given a `date`:** resolve the day's approved ad concept(s) for `channel='ad'` and take ONE. If several concepts are scheduled that day, **work ONE concept at a time** — resolve ONE concept and run its next open section-step (Steps 2–9). Announce in the Step 9 summary which concept you produced for and that the remaining concepts for that date still need their own passes (the operator re-invokes per concept). Do NOT batch across concepts in a single run.
 
 **Gate-check (concept must be APPROVED):** the producer only fills **approved** concepts. Read the resolved idea's `status`. If `status !== 'approved'`, STOP and tell the operator:
 
@@ -87,7 +85,7 @@ The structural dimensions are the brief you must honour: every variation express
 
 ### Step 1b: Resolve the ad-set `build_spec`
 
-Fetch the concept's ad set so the copy is tuned to its placement, objective, and audience. The idea has **no `period` field** — derive the plan period `YYYY-MM` from this skill's own inputs: use the `date` input's month when a `date` was given; otherwise take the month from the idea's `created_at`; if that is still ambiguous, ask the operator for the plan month (one question). Then call:
+Fetch the concept's ad set so the copy is tuned to its placement, objective, and audience. The idea has **no `period` field** — derive the plan period `YYYY-MM` from the idea's `created_at`; if that is ambiguous, ask the operator for the plan month (one question). Then call:
 
 ```
 Call: get_channel_plan
@@ -111,6 +109,24 @@ If `idea.ad_slot_id` is null or the row is not found, proceed WITHOUT the build_
 
 **Also hold the plan's `retrospective` (winners/losers — the learning signal).** The same `{ plan }` carries `plan.retrospective` — the markdown `ssc-ads-measure` wrote last cycle: which **angles, proof points, copy lengths, and formats** WON (carry forward) versus FATIGUED / ran inefficiently (drop or refresh). Hold it — it steers Steps 6–7: lean toward the proven winners, steer clear of the fatigued losers, and never resurrect a retired loser. If `plan.retrospective` is absent or says "no prior ad performance this cycle" / "no content-level signal", there is no performance signal yet — fall back to the KB best-practice (Steps 3, 5) and note that in the Step 9 summary.
 
+### Step 1c: Resolve and gate the chosen angle brief
+
+Every section this run is anchored to the ONE approved angle brief the operator chose. There is **no `get_brief`** tool, so read the idea's briefs and select the single row:
+
+```
+Call: list_briefs
+  idea: <idea.id>
+```
+
+From the returned briefs, select the **single** row whose `id === brief_id` (the required input). Then gate:
+
+- **Not found** (no row with that `id` for this idea) → STOP: "brief `<brief_id>` not found for this concept — run `/ssc.ads-brief <idea_id>` and approve one angle first."
+- **Draft** (`status !== 'approved'`) → STOP: "that angle brief is still a draft — approve it in `/ad/[month]/[id]`, then re-invoke."
+
+Hold the chosen brief's **`angle_label`** and its five narrative fields — **`hook_direction`**, **`core_message`**, **`why_now`**, **`story_moment`**, **`cta`** — as **the angle anchor** for every section produced this run. Use **only** this one brief; never pool across the idea's other briefs.
+
+> **Server note (Change 2):** today's server keeps exactly one brief per idea and nulls `angle_label`, so `list_briefs` returns that single brief and `brief_id` resolves it. The one-brief-per-idea limit means there is effectively one angle to anchor to until Change 2 ships (N-per-idea); the anchor plumbing is correct now and becomes multi-angle the moment Change 2 lands.
+
 ### Step 2: Determine the target section
 
 `copy` is the mandatory cold-start section — nothing else can be produced before it is approved. Once `copy` has ≥1 approved row, `headline`, `description`, and `image_content` are each independently producible: gated only on `copy` being approved, not on each other, and each re-invocable at will (even after its own approval, to produce a fresh revision grounded in whatever is currently approved). Read what already exists for this concept:
@@ -133,7 +149,7 @@ Apply the **FIRST** matching rule. Either set the **active section** and continu
 | not `approved(copy)` | active section = **`copy`** → Step 3 |
 | `approved(copy)`; a `section` input names `headline`, `description`, or `image_content`; `has_drafts(<that section>)` | **STOP** — that section has unreviewed drafts pending; **approve/reject them** in `/ad/[month]/[id]` first, then re-invoke. |
 | `approved(copy)`; a `section` input names `headline`, `description`, or `image_content` | active section = **the named section** → Step 3 (produces a fresh batch whether or not it already has an approved row) |
-| `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content`; every one of `headline`/`description`/`image_content` already has an approved row | **STOP** — all three text sections have an approved variation; name a `section` for a fresh revision, or run `/ssc.ads-produce <idea_id> creative_brief` for the handoff brief. |
+| `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content`; every one of `headline`/`description`/`image_content` already has an approved row | **STOP** — all three text sections have an approved variation; name a `section` for a fresh revision. (Angle briefs are produced first, before copy, via `/ssc.ads-brief` — not here.) |
 | `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content`; the first of `headline → description → image_content` (nominal order) without an approved row has pending drafts (`has_drafts`) | **STOP** — that section has unreviewed drafts pending; **approve/reject them** in `/ad/[month]/[id]` first, then re-invoke. |
 | `approved(copy)`; no `section` input, or a `section` input that doesn't name `headline`/`description`/`image_content` | active section = **the first of `headline → description → image_content` without an approved row** → Step 3 |
 
@@ -204,7 +220,7 @@ Since `headline`/`description`/`image_content` no longer gate on each other, whe
 - for **`description`** — every approved `copy` body (the **primary** input for the promise), AND every approved `headline` body **if any exist yet** — read them so the description can **COMPLEMENT** them, never echo them (per `ad/copy-checklist` Bước 2B): the headline carries the hook/problem, so each description must land a **different beat** — the payoff, a concrete proof, or the "so what". If no headline is approved yet, ground the description in the approved copy alone and note in the Step 9 summary that there was no approved headline to complement against.
 - for **`image_content`** — every approved `copy` body (the anchor), AND every approved `headline`/`description` body **if any exist yet**: **anchor each version to one approved `copy`** and distil **that copy's HOOK (its opening / sharpest line) into the on-image HEADLINE** — leverage the winning copy's proven hook, not merely a restated standalone `headline` (an approved `headline`, if one exists, may sharpen the wording, but the copy's hook drives it). If no headline/description is approved yet, derive the SUBHEADLINE + BULLETS from the anchor copy's own proof lines alone, and note the gap in the Step 9 summary.
 
-These live approved bodies are your **input** — the winning copies the operator selected (and possibly edited; you read the live approved rows, so any dashboard edits are always reflected). If the active section is **`copy`**, there is **no** earlier-section input — ground it in the concept brief + `build_spec` + KB + the Hook Formula Bank only (the copy owns the hook).
+These live approved bodies are your **input** — the winning copies the operator selected (and possibly edited; you read the live approved rows, so any dashboard edits are always reflected). If the active section is **`copy`**, there is no earlier *copy-section* input — ground it in the **chosen angle brief** (its `hook_direction`/`core_message`/`why_now`/`story_moment`/`cta` + `angle_label`, held from Step 1c) plus the concept brief + `build_spec` + KB + the Hook Formula Bank (the copy realizes the brief's angle and owns the hook). Use **only** that one brief — never pool across the idea's other briefs.
 
 ### Step 5: The Hook Formula Bank (your copy-hook + headline engine)
 
@@ -237,7 +253,7 @@ Apply the brand's headline craft (sourced from `ad/headline-formulas` + `ad/crea
 
 Produce **only the active section's** variations (from Step 2), not all three:
 
-- if active = **`copy`** — `n_copies` variations (default **5**). Each the **primary text / body**: **a hook line that owns the concept's hook — grounded in the concept brief + `build_spec` + the Hook Formula Bank (Step 5), with NO earlier-section input** → the concept's benefit expressed through its `value`+`frame` → a **soft, compliant CTA from `ad/cta-catalog`**. Vary the angle/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception).
+- if active = **`copy`** — `n_copies` variations (default **5**). Each the **primary text / body**: **a hook line that realizes the chosen angle brief's hook — grounded in the chosen brief (Step 1c — its five narrative fields express this angle) + the concept brief + `build_spec` + the Hook Formula Bank (Step 5)** → the concept's benefit expressed through its `value`+`frame`, in the brief's angle → a **soft, compliant CTA** (the brief's `cta` direction, drawn from `ad/cta-catalog`). Vary the wording/structure across the set (e.g. the emotional cost, the practical "how", the reframe-against-a-misconception) — but every variation stays inside the ONE chosen angle (do not drift to a different trigger/objection/myth).
 - if active = **`headline`** — `n_headlines` variations (default **5**). Each a SHORT on-creative hook (per the length discipline) **distilled from the pooled LIVE approved copies' hooks (Step 4)** — take the sharpest opening lines across all approved copies and compress each to headline length (free distillation, not 1:1); an approved copy may be sharpened in wording, but don't merely restate a full copy line. Use a *different* hook quality/pattern from the Bank across the set; no two headlines may be paraphrases of one opening.
 - if active = **`description`** — `n_descriptions` variations (default **5**). Apply `ad/copy-checklist` **Bước 2B** (the authoritative Description spec — read the live doc). Each a tight **link-description** line built on an approved copy's promise but landing a **different beat than every approved headline** — **complement, don't echo** (restating a headline's hook/problem is a FAIL). **Lead with ONE concrete proof** from `brand/proof-points` (e.g. "26 vi chất chuẩn EU", "60 năm nghiên cứu"), not a vague benefit ("cơn thèm dễ kiểm soát hơn"); **vary which proof across the set** (never three phrasings of "đủ chất"). **Layer-aware** (off the `build_spec` from Step 1b): at **L2** omnipresence use ONE proof tied to the concept's topic — not the full USP stack (heritage / EU are conversion-tier proof) — and keep **≥1 non-proof educational/curiosity variant** for contrast, soft CTA only; at **L1 / L3** lean harder on proof + a CTA-adjacent benefit. **Diverse set:** no description repeats an approved headline's angle or another description's proof/beat.
 - if active = **`image_content`** — `n_image_contents` versions (default **5**). Each is one **on-image COPY set** — text that sits **ON a visual, read at a glance**, so **every element is SHORT, punchy, and minimal-word** (fewer words win; a designer must fit it on the image; stay within `ad/platform-constraints`' on-image text-density bar). Saved as TEXT in the fixed structure from the producer↔page contract:
@@ -349,7 +365,7 @@ Call: save_post_content
 
 ### Step 9: Output summary
 
-**If Step 2 stopped** (a target section had unapproved drafts, or `copy` isn't approved yet, or all three of headline/description/image_content already have an approved row and no `section` was named), emit that stop message plainly — name the section and the exact next action (approve ≥1 in `/ad/[month]/[id]` then re-invoke; or "name a section for a fresh revision, or run creative_brief").
+**If Step 2 stopped** (a target section had unapproved drafts, or `copy` isn't approved yet, or all three of headline/description/image_content already have an approved row and no `section` was named), emit that stop message plainly — name the section and the exact next action (approve ≥1 in `/ad/[month]/[id]` then re-invoke; or "name a section for a fresh revision").
 
 **Otherwise, after saving the active section**, output:
 
@@ -357,6 +373,7 @@ Call: save_post_content
 ## Ads Writer — <concept title> — <ACTIVE SECTION> saved
 
 **Target concept:** <idea_id> (<layer> · <value> · <frame> · <persona>) — status approved
+**Angle brief:** <brief_id> (<angle_label>) — the one chosen approved angle every section is anchored to
 **Ad set:** <slot_name> (KPI <build_spec.kpi>) — or "ad-set context unavailable"
 **Section produced:** <headline | copy | description | image_content>
 **Built on approved input:** <"— (copy is the first step)" | "<N> approved copy(ies)" | "<N> approved copy(ies) + <M> approved headline(s) (if any)" | "<N> approved copy(ies) + approved headline(s)/description(s), whichever are approved">
@@ -371,10 +388,9 @@ Call: save_post_content
 ```
 
 - Note any slot that hit its 2-attempt bound (the best score reached, and that it was NOT saved → the operator is short one variation in that section).
-- If the `date` resolved more than one approved concept (Step 1), note which concept you produced for and that the remaining concept(s) still need their own passes.
 - End with the correct NEXT action for the section you just saved:
-  - after **copy**: `Next: open /ad/<month>/<idea_id> → review/edit/approve ≥1 copy, then re-run /ssc.ads-produce <idea_id> [section] to produce headline/description/image_content in any order.`
-  - after **headline**, **description**, or **image_content**: `Next: review/approve in /ad/<month>/<idea_id>. Run /ssc.ads-produce <idea_id> <section> for either of the other two, re-run this same section any time for a fresh revision, or run /ssc.ads-produce <idea_id> creative_brief once ready for the handoff brief.`
+  - after **copy**: `Next: open /ad/<month>/<idea_id> → review/edit/approve ≥1 copy, then re-run /ssc.ads-produce <idea_id> <brief_id> [section] to produce headline/description/image_content in any order.`
+  - after **headline**, **description**, or **image_content**: `Next: review/approve in /ad/<month>/<idea_id>. Run /ssc.ads-produce <idea_id> <brief_id> <section> for either of the other two, or re-run this same section any time for a fresh revision.`
 
 ## Output
 
@@ -390,7 +406,8 @@ Call: save_post_content
 - **Save-to-server, not present-in-chat (hard rule).** After scoring the active section, SAVE the passing (≥4-rated) variations immediately via `save_post_content` and STOP. Do NOT present a candidate set in chat, pause for review, or run an in-chat revise loop. All review / edit / approve happens in the `/ad/[month]/[id]` dashboard.
 - **State-driven per-section stepping, freed after copy (hard rule).** Each invocation reads `list_post_content(idea_id)` and produces ONE target section: `copy` is the mandatory cold start; once `copy` has ≥1 approved row, `headline`/`description`/`image_content` are each independently producible — gated only on `copy`, never on each other — via an explicit `section` input or auto-picked among those without an approved row. Any of the three may be re-invoked after its own approval for a fresh revision. If the target section already has unapproved drafts, STOP and ask the operator to approve/reject them first — do NOT produce a second batch.
 - **Approved input carries forward (copy is the source of truth).** `headline` variations distil the LIVE APPROVED `copy` bodies (free distillation across all approved copies); `description` variations compress a LIVE APPROVED `copy` promise, complementing the approved `headline`(s) when any exist yet; `image_content` versions anchor to a LIVE APPROVED `copy` and read the approved `headline`/`description` too when they exist yet — all re-read from `list_post_content` each run, so operator edits to copies are always reflected, and none of the three blocks on a section the operator hasn't reached yet.
-- **One concept at a time.** A date with several approved concepts is handled one concept per run.
+- **One concept, one brief per invocation.** The producer takes an explicit `idea_id` + `brief_id`; there is no `date` selector (a `brief_id` is idea-scoped).
+- **Anchored to one approved brief (hard rule).** Every section is written from the single approved angle brief named by `brief_id` — read via `list_briefs(idea_id)` + `id` filter (there is **no `get_brief`** tool); STOP if it is missing or still a draft. `copy` is grounded in **only** that brief (its five narrative fields + `angle_label`), never pooled across the idea's other briefs; `headline`/`description`/`image_content` lead from the approved copy and hold the same one brief as the angle anchor.
 - **Approved-concept gate.** Only an `ideas` row with `channel='ad'` AND `status='approved'` is filled. A draft concept → STOP and ask the operator to approve it first.
 - **Section is the contract.** Every saved row carries `section` ∈ {`headline`,`copy`,`description`,`image_content`} exactly — the `/ad/[id]` page groups by it. All four are TEXT sections that set `body` (for `image_content`, the structured `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` block per the producer↔page contract). Never the retired `image` (PNG) value, never any other value. This flow renders **no pictures** — `image_content` is the on-image COPY as text, for a designer/page to lay out. **Page-side requirement:** the `/ad` dashboard must add an Image-content stage that renders `section='image_content'` rows from `body` (there is no `creativeUrl`).
 - **Differentiation & proof (≥3, sized to format).** Each `copy` weaves in ≥3 distinct proof points, and each `image_content` version carries ≥3 across its 3 bullets + subheadline, from `brand/proof-points`; each `headline`/`description` carries 1–2 and the section's set surfaces ≥3 distinct (Step 7 set-coverage check); every variation lands the concept's `against` match-up when present (`brand/positioning`) — concrete, not slogan. A `copy`/`image_content`/short-section-set under the minimum, or a variation leaning on nothing distinctive, cannot score ≥4.
@@ -400,4 +417,4 @@ Call: save_post_content
 - References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, ad/creative-guidelines, ad/headline-formulas, ad/platform-constraints, ad/cta-catalog, content/quick-checklist, rules/{banned-words,compliance,food-placeholder}, programme/kieu-my-story). Do not call `get_knowledge` for unrelated paths.
 - **Learns from winners/losers (read-only).** Reads `plan.retrospective` (via the existing `get_channel_plan` call — no new tool) and biases drafting toward its proven-winning proof points / lengths / formats / angles and away from the fatigued losers, never resurrecting a retired loser. It is a read; it never flips a gate. No retrospective (or a "no data" note) → fall back to KB best-practice.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
-- Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_post_content` / `get_knowledge` reads).
+- Requires the `edit` capability (plus `view` for the `get_idea` / `get_channel_plan` / `list_briefs` / `list_post_content` / `get_knowledge` reads).

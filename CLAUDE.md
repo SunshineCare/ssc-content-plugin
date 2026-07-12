@@ -40,8 +40,8 @@ its agent, and a skill together:
 
 1. **Commands** (`/ssc.*`) are **thin entry points that hold no orchestration
    logic.** They parse operator input and dispatch a single agent. Exception:
-   `/ssc.ads-produce` dispatches the `ssc-ads-writer` production skill
-   directly rather than through an agent.
+   `/ssc.ads-produce` and `/ssc.ads-brief` dispatch their production skills
+   (`ssc-ads-writer` and `ssc-ads-brief`) directly rather than through an agent.
 2. **Agents** (`ssc-*-agent`) are **orchestrators.** Frontmatter declares
    `orchestrates: [skills…]`, the read-only `tools:` they use to resolve state,
    a `capability` (`view`/`edit`), and `approval-gates: human`. Agents are
@@ -58,7 +58,8 @@ its agent, and a skill together:
 | Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Focus → Research → Ideate → Schedule → Measure |
 | Posts (produce) | `/ssc.post-writer` | `ssc-post-writer-agent` | produce ⇄ authority loop |
 | Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Blueprint → Ideate → Measure |
-| Ads (produce) | `/ssc.ads-produce` | *(direct → ads-writer or ads-brief)* | ads-writer — text only, per-section stepper (copy mandatory; headline/description/image_content freed, each gated only on copy); ads-brief — revises the idea's creative-brief fields any time after copy is approved |
+| Ads (brief) | `/ssc.ads-brief` | *(direct → ads-brief)* | Brief-first FIRST step — produces 4-5 rated DRAFT angle briefs via `save_brief` from concept + persona + build_spec (no copy needed; produce-once; operator approves ONE angle) |
+| Ads (produce) | `/ssc.ads-produce <ideaId> <briefId> [section]` | *(direct → ads-writer)* | Anchored to the chosen approved angle brief — text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy) |
 | YouTube | `/ssc.youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
 | Knowledge base | `/ssc.kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
 | Strategy (quarterly) | `/ssc.strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |

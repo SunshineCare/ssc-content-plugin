@@ -4,6 +4,7 @@
       "type": "http",
       "url": "https://ssc.sunshinecare.vn/bos/mcp",
       "oauth": {
+        "clientId": "ssc-content-plugin",
         "scopes": "bos:access"
       }
     }

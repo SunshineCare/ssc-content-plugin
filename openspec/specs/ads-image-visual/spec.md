@@ -165,11 +165,11 @@ creatives tagged `layer='composite'`.
 ### Requirement: Propose-only governance
 
 The skill SHALL be propose-only: it saves DRAFT creatives and STOPS. It MUST NOT
-call any tool that changes approval or lifecycle state in either direction — no
-`approve_*`, no `unapprove_*`, no `update_status`, no `set_cover`, no
-`reorder_gallery`, no publish, no `update_budget` — and MUST NOT bake any text
-into a visual. All approval, cover-setting, and discarding are operator dashboard
-actions.
+call any tool that changes approval or lifecycle state in either direction —
+never `approve` (the only gated promotion), never `edit` used to
+demote/unapprove/discard a creative, no `set_cover`, no `reorder_gallery`, no
+publish, no `update_budget` — and MUST NOT bake any text into a visual. All
+approval, cover-setting, and discarding are operator dashboard actions.
 
 #### Scenario: No gate is flipped
 

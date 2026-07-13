@@ -2,56 +2,72 @@
 
 ## Purpose
 
-Propose-only, state-driven per-layer production of the ad visual (background → model-into-background → product upload → composite) for one approved Cambridge Diet Vietnam ad concept, via the `/ssc.ads-image` command and `ssc-ads-image` skill, built on the BrandOS image tool contract. The skill saves DRAFT creatives and stops for operator review; it never approves, publishes, sets a cover, or bakes text into a visual.
+Propose-only, state-driven per-layer production of the ad visual (background → model-into-background → product upload → composite) for one approved Cambridge Diet Vietnam ad concept, via the `/ssc.image` command and `ssc-image` skill, built on the BrandOS image tool contract. The skill saves DRAFT creatives and stops for operator review; it never approves, publishes, sets a cover, or bakes text into a visual.
 
 ## Requirements
 
-### Requirement: Command entry point `/ssc.ads-image`
+### Requirement: Command entry point `/ssc.image`
 
-The plugin SHALL provide a `/ssc.ads-image` command as a thin entry point that
-holds no orchestration logic. It SHALL accept an approved ad concept's `idea_id`,
-and dispatch the `ssc-ads-image` skill for that concept. If no `idea_id` is
-provided it SHALL ask the operator for one and MUST NOT invent one.
+The plugin SHALL provide a `/ssc.image` command as a thin entry point that
+holds no orchestration logic. It SHALL accept an approved ad concept's
+`idea_id` **and** the chosen approved angle `brief_id` (both required), and
+dispatch the `ssc-image` skill for that concept and brief. If either `idea_id`
+or `brief_id` is missing it SHALL ask the operator for whichever is missing
+and MUST NOT invent one.
 
-#### Scenario: Dispatch with a valid idea id
+#### Scenario: Dispatch with a valid idea id and brief id
 
-- **WHEN** the operator runs `/ssc.ads-image <idea_id>` for an approved ad concept
-- **THEN** the command dispatches the `ssc-ads-image` skill for that `idea_id` and performs no content work itself
+- **WHEN** the operator runs `/ssc.image <idea_id> <brief_id>` for an approved ad concept and its chosen approved angle brief
+- **THEN** the command dispatches the `ssc-image` skill for that `idea_id` and `brief_id` and performs no content work itself
 
-#### Scenario: Missing idea id
+#### Scenario: Missing idea id or brief id
 
-- **WHEN** the operator runs `/ssc.ads-image` with no argument
-- **THEN** the command asks the operator for an `idea_id` and does not dispatch until one is supplied
+- **WHEN** the operator runs `/ssc.image` with `idea_id` or `brief_id` missing
+- **THEN** the command asks the operator for whichever is missing and does not dispatch until both are supplied
 
-### Requirement: Concept and text-precondition gate
+### Requirement: Concept, angle brief, and variant gate
 
-The `ssc-ads-image` skill SHALL only produce visuals for a concept whose `ideas`
-row has `channel='ad'` AND `status='approved'`, and whose `image_content` text
-section is approved. If either gate fails, the skill MUST STOP and tell the
-operator the exact unmet precondition.
+The `ssc-image` skill SHALL only produce visuals for a concept whose `ideas`
+row has `channel='ad'` AND `status='approved'`, whose `brief_id` resolves to
+an **approved** angle brief for that concept, and whose approved brief has an
+**approved `image_content`** variant (the `image_content_id` anchor). If any
+gate fails, the skill MUST STOP and tell the operator the exact unmet
+precondition.
+
+#### Scenario: Non-ad idea
+
+- **WHEN** the resolved idea's `channel` is not `ad`
+- **THEN** the skill STOPS and tells the operator the post/youtube image flow is not yet wired — phase 2 — and produces no visual
 
 #### Scenario: Concept not approved
 
-- **WHEN** the resolved concept's `status` is not `approved` (or `channel` is not `ad`)
+- **WHEN** the resolved concept's `status` is not `approved`
 - **THEN** the skill STOPS and tells the operator to curate/approve the concept first, and produces no visual
 
-#### Scenario: image_content not yet approved
+#### Scenario: Brief missing or not approved
 
-- **WHEN** the concept is approved but no `image_content` row is approved
-- **THEN** the skill STOPS and tells the operator to approve the `image_content` text first
+- **WHEN** no brief matches the given `brief_id` for the concept, or the matching brief's `status` is not `approved`
+- **THEN** the skill STOPS and tells the operator to approve one angle brief for the concept in the dashboard first, and produces no visual
+
+#### Scenario: image_content variant not yet approved
+
+- **WHEN** the concept and brief are approved but no `image_content` row is approved for that brief
+- **THEN** the skill STOPS and tells the operator to approve the `image_content` text for that angle first, and produces no visual
 
 ### Requirement: State-driven per-layer stepper
 
 The skill SHALL run as a state-driven, per-layer stepper over the strict chain
 `background → model → product → composite`, each layer gated on the previous
-being approved. On each invocation it SHALL read the concept's creative assets
-grouped by `layer` and `status`, work only the first not-yet-approved layer, save
-DRAFT creative(s), and STOP. A layer SHALL run only when every earlier layer has
-at least one approved creative.
+being approved. On each invocation it SHALL resolve the approved `image_content`
+variant for the chosen `brief_id` (its `image_content_id`) and read the
+**variant's** creative assets (`list_creatives(image_content_id)`) grouped by
+`layer` and `status`, work only the first not-yet-approved layer, save DRAFT
+creative(s), and STOP. A layer SHALL run only when every earlier layer has at
+least one approved creative.
 
 #### Scenario: First run produces the background layer
 
-- **WHEN** the concept has no approved creative in any layer
+- **WHEN** the resolved variant has no approved creative in any layer
 - **THEN** the skill works the `background` layer and STOPS after saving its drafts
 
 #### Scenario: Advance to the next layer after approval
@@ -67,15 +83,17 @@ at least one approved creative.
 #### Scenario: All layers approved
 
 - **WHEN** all four layers have an approved creative
-- **THEN** the skill reports visual production complete for the concept and produces nothing further
+- **THEN** the skill reports visual production complete for that variant and produces nothing further
 
 ### Requirement: Background layer generation
 
 For the `background` layer the skill SHALL request 3 negative-space-aware
-background versions via the BrandOS `generate_background` tool (Flux schnell,
-text→image). The prompt SHALL reserve off-center subject space for the model and
-space for the separately-overlaid text. The results SHALL be saved as DRAFT
-creatives tagged `layer='background'`.
+background versions via `generate_background(image_content_id, n, prompt_hints?)`
+(Flux schnell, text→image), keyed on the resolved `image_content_id`. The
+`prompt_hints` SHALL reserve off-center subject space for the model and space
+for the separately-overlaid text; they merge after the server's own
+variant-text + brief prompt. The results SHALL be saved as DRAFT creatives
+tagged `layer='background'`.
 
 #### Scenario: Three negative-space backgrounds
 
@@ -85,12 +103,16 @@ creatives tagged `layer='background'`.
 ### Requirement: Model layer generated into the background, one at a time
 
 For the `model` layer the skill SHALL generate exactly ONE model candidate per
-invocation, conditioned on the approved background (BrandOS `generate_model`, Nano
-Banana image→image), OR place an operator-uploaded real model into the approved
-background. The candidate SHALL be saved as a single DRAFT creative tagged
-`layer='model'`. If an unapproved model draft is still pending, the skill MUST
-STOP and ask the operator to approve or discard it before generating the next
-candidate (one candidate in flight at a time).
+invocation via `generate_model(image_content_id, background_creative_id,
+prompt_hints?)` (Nano Banana, image→image), conditioned on the approved
+background creative, OR place an operator-uploaded real model into the
+approved background via `generate_model(image_content_id,
+background_creative_id, uploaded_media_id, uploaded_media_ref)` (both
+`uploaded_media_id` and `uploaded_media_ref` required together). The candidate
+SHALL be saved as a single DRAFT creative tagged `layer='model'`. If an
+unapproved model draft is still pending, the skill MUST STOP and ask the
+operator to approve or discard it before generating the next candidate (one
+candidate in flight at a time).
 
 #### Scenario: Single background-conditioned candidate
 
@@ -120,12 +142,15 @@ upload and approve the real product image.
 
 ### Requirement: Composite layer with optional product hard-paste
 
-For the `composite` layer the skill SHALL request 2–3 composite variants via the
-BrandOS `compose_ad_visual` tool (Nano Banana image→image), placing the approved
-product into the approved background+model scene. It SHALL support an optional
-per-concept masked hard-paste of the real product PNG for pixel-exact packaging,
-and an optional `layout_hint`. Composites SHALL leave negative space for the
-separately-overlaid text and be saved as DRAFT creatives tagged `layer='composite'`.
+For the `composite` layer the skill SHALL request 2–3 composite variants via
+`compose_ad_visual(image_content_id, n, layout_hint?, hard_paste?,
+prompt_hints?)` (Nano Banana, image→image) — the server resolves the approved
+background+model scene and the approved product for the variant; the skill
+passes no `scene_media_id`/`product_media_id`. It SHALL support an optional
+per-concept masked hard-paste of the real product PNG for pixel-exact
+packaging via `hard_paste`, and an optional `layout_hint`. Composites SHALL
+leave negative space for the separately-overlaid text and be saved as DRAFT
+creatives tagged `layer='composite'`.
 
 #### Scenario: Two-to-three composite variants
 
@@ -159,10 +184,11 @@ actions.
 ### Requirement: Single MCP surface and tool existence
 
 The skill SHALL reference only BrandOS MCP tools on the `ssc` surface and MUST
-NOT call third-party image APIs directly. Every referenced tool
-(`generate_background`, `generate_model`, `compose_ad_visual`, the `layer`-aware
-creatives read, and any reused upload/read tools) MUST exist on the BrandOS
-surface before the skill is used end-to-end.
+NOT call third-party image APIs directly. Every referenced tool —
+`generate_background`, `generate_model`, `compose_ad_visual`, the
+`image_content_id`-keyed creatives read (`list_creatives`), and any reused
+upload/read tools (`get_idea`, `list_briefs`, `list_post_content`) — is
+present on the BrandOS `ssc` surface.
 
 #### Scenario: Only BrandOS tools referenced
 

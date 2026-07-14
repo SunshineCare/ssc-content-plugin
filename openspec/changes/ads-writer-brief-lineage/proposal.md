@@ -1,29 +1,34 @@
 ## Why
 
-`ssc-ads-writer` takes a **required** `brief_id` — every section it produces is written from that one chosen angle — but it saves the row **without** it: `save_post_content(channel='ad', idea_id, section, body, score, comment)`. The server binds `brief_id` automatically **only for `post` content**, so every **ad** content row ends up with a null `brief_id`. The lineage is known at write time and thrown away at the last step.
+`ssc-ads-writer` takes a **required** `brief_id` — every section it produces is written from that one chosen angle — but it saves the row **without** it: `save_post_content(channel='ad', idea_id, section, body, score, comment)`. The lineage is known at write time and dropped at the last step.
 
-That already has a live consequence. `/ssc.image`'s approved-copy gate is specified as brief-scoped ("≥1 approved `copy` **for that brief**") but cannot enforce it — it degrades to idea scope and must announce the fallback (see the Drift Log in `openspec/changes/ssc-image-brief-copy-rewrite/design.md`). Today that is safe only because the server persists exactly one brief per idea. When server **Change 2** lands (N briefs per idea), copy approved for angle A will silently satisfy the gate for angle B, and the visual will be grounded in the wrong angle's story — at fal-credit cost, with no stop. This change must land **before or with** Change 2.
+Omitting it does **not** leave the field empty. Verified against live server data on **2026-07-14**: the server binds a `brief_id` for `ad` content too — **by INFERENCE**, picking one of the idea's approved briefs. Idea `BGerzuw4JrrSz3Qd` carries **five** approved angle briefs, each with its own `angle_label`, and **all 20** of its ad content rows came back stamped with a single `brief_id` (`IeZb6HjExf2PtUJD`) — written by a version of `ssc-ads-writer` that never passed one. The writer's chosen angle was discarded and replaced by the server's guess.
+
+**A silently-inferred stamp is worse than a null.** A null is visible: a consumer can see the lineage is missing and refuse to guess. A wrong `brief_id` is indistinguishable from a right one — nothing errors, nothing looks empty. `/ssc.image` resolves *"the approved copy for **this** angle"* by filtering `list_post_content` rows on `brief_id`; a mis-inferred stamp still matches that filter, so the visual gets grounded in copy written for a **different** angle and tells the wrong story, at fal-credit cost, with **nothing downstream able to detect it**.
+
+This is live, not latent. Server **"Change 2"** (N briefs per idea, `angle_label` persisted) **has shipped** — an idea routinely carries several approved angles, so the brief the server infers is a pick out of five, not a foregone conclusion. `save_post_content` documents that **an explicit value always wins**, so passing `brief_id` is the one thing that overrides the inference.
 
 ## What Changes
 
 - `ssc-ads-writer` passes `brief_id` to `save_post_content` on every save, for every section (`copy`, `headline`, `description`, `image_content`). The value is the `brief_id` the skill already required as an input and already wrote the section from — nothing new is derived or guessed.
-- `save_post_content` already accepts `brief_id` on any channel and documents that "an explicit value always wins", so no server change is needed.
-- `/ssc.image`'s approved-copy gate stops degrading: once ad rows carry a `brief_id`, its preferred brief-scoped filter fires and the idea-scope fallback (and its announcement) becomes dead code for new rows. **Rows written before this change keep a null `brief_id`** and continue to match at idea scope — the fallback must stay until they age out or are backfilled.
+- `save_post_content` already accepts `brief_id` on any channel and documents that "an explicit value always wins", so no server change is needed: the explicit value **overrides the server's inference**.
+- The skill states **why** the argument exists — omitting it stamps an inferred, possibly wrong angle — so a future editor cannot remove it as "redundant" and silently reintroduce wrong-angle grounding.
+- `/ssc.image`'s approved-copy gate takes **brief scope as its normal path** (ad rows carry a `brief_id`). Its idea-scope fallback narrows to rows carrying **no** `brief_id` at all, and only when the idea has exactly **one** brief; a lineage-less row on a multi-brief idea makes `/ssc.image` **STOP**.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `ads-copy-brief-lineage`: every ad content row records the angle brief it was written from, so downstream consumers (notably `/ssc.image`'s copy gate) can resolve "the approved copy for *this* angle" unambiguously.
+- `ads-copy-brief-lineage`: every ad content row records the angle brief it was **written from** — the operator's chosen brief, not one the server inferred — so downstream consumers (notably `/ssc.image`'s copy gate) can resolve "the approved copy for *this* angle" from a trustworthy stamp.
 
 ### Modified Capabilities
 
-None. `ads-image-visual`'s two-scope gate already specifies the brief-scoped path as preferred; this change simply makes that path reachable. No requirement of it changes.
+None. `ads-image-visual`'s copy gate already specifies brief scope as the normal path; this change is what makes the `brief_id` it filters on the angle the copy was actually written from, rather than a server guess. No requirement of it changes.
 
 ## Impact
 
-- **Modified:** `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md` — the `save_post_content` call and the prose describing it.
-- **Unblocks:** the brief-scoped arm of `/ssc.image`'s approved-copy gate.
-- **Prerequisite for:** server **Change 2** (N briefs per idea). Landing Change 2 without this reintroduces wrong-angle grounding.
-- **Backfill (out of scope, worth knowing):** existing ad content rows have a null `brief_id` and cannot be attributed retroactively by the plugin. Since each idea currently has exactly one brief, a server-side backfill could bind them unambiguously — but only while that one-brief-per-idea invariant still holds, i.e. **before** Change 2.
-- **No automated tests** exist in this repo; verification is by review plus a live save + `list_post_content` read confirming the row carries the `brief_id`.
+- **Modified:** `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md` — the `save_post_content` call, the frontmatter description, and the prose explaining why the argument is mandatory.
+- **Fixes:** the trustworthiness of `/ssc.image`'s brief-scoped copy gate. The gate fires either way — it filters on `brief_id`, and the server supplies one — so before this change it fires on a **stamp nobody chose**.
+- **Urgency:** server **Change 2** has already shipped (N briefs per idea, verified live). The wrong-angle hazard is therefore **live today**, not a future risk, and it is silent.
+- **Existing rows (out of scope, worth knowing):** every ad content row written before this change carries a **server-inferred** `brief_id` that may name the wrong angle, and the plugin cannot tell an inferred stamp from an explicit one. No plugin-side repair is possible; whether the server should audit or re-stamp them is an open question (see design.md).
+- **No automated tests** exist in this repo; verification is by review plus a live `list_post_content` read confirming rows carry the `brief_id` the writer passed (that read has been performed — see tasks.md 3.3).

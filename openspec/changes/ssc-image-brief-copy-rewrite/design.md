@@ -59,10 +59,16 @@ supersedes the three earlier `ssc-image` design specs (2026-07-13, 2026-07-05,
 - `/ssc.ads-brief` and `/ssc.ads-produce` — untouched. The `image_content` text section
   keeps being produced by `/ssc.ads-produce <idea_id> <brief_id> image_content` and
   overlaid by the dashboard; it simply has nothing to do with `/ssc.image` any more.
-- The two open **server** requirements (N briefs per idea with `angle_label` persisted;
-  an `edit`-holding operator actually being able to generate) — those live in the
-  BrandOS repo, not here. This change is written to be correct against both the current
-  and the post-fix server.
+- The open **server** requirement (an `edit`-holding operator actually being able to
+  generate — the `insufficient role` refusal) — that lives in the BrandOS repo, not
+  here. This change is written to be correct against both the current and the post-fix
+  server.
+
+- Fixing the **angle lineage of ad content rows** — `ssc-ads-writer` passing `brief_id`
+  to `save_post_content`, so the `brief_id` this skill's copy gate filters on is the
+  angle the copy was actually written from rather than one the server inferred. That is
+  the sibling change `ads-writer-brief-lineage`, which edits a skill this change does
+  not touch.
 - Post / YouTube visual flows. Phase 1 stays **ad channel only**; a non-ad idea stops
   cleanly.
 - Introducing an agent. The command dispatches the skill directly, as today.
@@ -76,8 +82,9 @@ supersedes the three earlier `ssc-image` design specs (2026-07-13, 2026-07-05,
   `generate_background`, `generate_model`, `compose_ad_visual`, `list_creatives`,
   `list_creative_prompts` — keys on the approved angle brief. This is forced by the
   server (the creative surface no longer accepts or exposes `image_content_id`) and it
-  is also the correct model: an angle is what a creative chain belongs to, and once the
-  server persists N briefs per idea, each approved angle gets its own independent chain.
+  is also the correct model: an angle is what a creative chain belongs to, and the
+  server **does** persist N briefs per idea (live — a concept commonly carries four or
+  five approved, labelled briefs), so each approved angle gets its own independent chain.
   *Alternatives rejected:* (a) keep the `image_content` anchor — impossible, the key no
   longer exists server-side, and it encodes the wrong ownership; (b) have the operator
   pass `image_content_id` directly instead of `brief_id` — this just relocates the same
@@ -109,6 +116,35 @@ supersedes the three earlier `ssc-image` design specs (2026-07-13, 2026-07-05,
   best-effort (the shipped skill's posture toward copy) — rejected because "best-effort"
   means the failure is invisible: the operator cannot tell, from the saved draft, whether
   the visual was grounded in the copy or not.
+
+- **The copy gate's scope is three-way: brief scope normal, a narrow announced fallback,
+  and otherwise a STOP.** An idea carries N approved angle briefs (live), and ad content
+  rows carry a populated `brief_id`, so:
+  1. **Brief scope — the normal path.** Filter approved `copy` rows on
+     `brief_id === <brief_id>`. This attributes the copy to *this* angle and nothing else.
+  2. **Idea-scope fallback — reachable only when NO approved `copy` row carries a
+     `brief_id` at all** (a legacy row written before the lineage existed) **AND the idea
+     has exactly ONE brief** (checked at runtime against the `list_briefs` result). Then
+     the idea-scope match is unambiguous — there is only one angle those rows could belong
+     to — and the skill MUST **declare** it on the summary's `Copy matched:` line. A silent
+     fallback is forbidden.
+  3. **STOP — lineage-less rows on a multi-brief idea.** The copy cannot be attributed to
+     an angle, and matching at idea scope would ground the visual in a **possibly-wrong
+     angle's story**, at fal-credit cost, with nothing downstream able to detect it. So the
+     skill stops and routes the operator to `/ssc.ads-produce <idea_id> <brief_id> copy`.
+
+  *Alternative rejected:* "brief-scoped where the data allows it, idea-scoped otherwise,
+  announced" (a two-way rule). Rejected because the *otherwise* branch is exactly the
+  dangerous case: announcing a guess does not make it right, and on a multi-brief idea the
+  announcement would be attached to a visual already grounded in the wrong angle. An
+  announcement is only an honest instrument where the match is genuinely unambiguous —
+  hence the single-brief precondition on the fallback and a STOP everywhere else.
+
+  *A known limit, not a gate:* a `brief_id` on an **older** row may have been **inferred**
+  server-side rather than supplied by the writer that saved it (see the Drift Log). The
+  lineage is good enough to gate on — strictly better than guessing — but it is not
+  infallible, and the skill says so: if a visual comes back telling the wrong angle's
+  story, the row's `brief_id` lineage is the first thing to check.
 
 - **The skill authors the FULL scene prompt; it reaches the engine verbatim.** Each
   generate tool takes a complete `prompt` describing setting, staging, subject placement,
@@ -237,36 +273,35 @@ supersedes the three earlier `ssc-image` design specs (2026-07-13, 2026-07-05,
 
 ## Risks / Trade-offs
 
-- **[Server "Change 2" has not shipped — N briefs per idea with `angle_label` persisted
-  is not live, so today an idea has exactly one brief and the multi-angle payoff is
-  inert.]** → Mitigation: the skill takes an **explicit `brief_id`** and works
-  identically once N briefs exist — the *creative chain* is forward-compatible by
-  construction, with no second edit needed when the server catches up. Until then the
-  change still buys the correct anchor, the copy gate, and verbatim prompts; only the
-  *per-angle chain multiplicity* is deferred. The constraint is stated plainly in the
-  skill body (the same pattern the video skills use for unshipped `generate_*` tools) so
-  the operator is never surprised.
+- **[Ad `copy` rows carry a `brief_id` the *server* may have inferred rather than the
+  writer chosen — so the brief-scoped gate can fire on a wrong angle, silently.]** For
+  `ad` content the server binds `brief_id` **by inference**, picking one of the idea's
+  approved briefs when the caller omits it — and `ssc-ads-writer` historically omitted it
+  (live 2026-07-14: all 20 ad content rows on five-brief idea `BGerzuw4JrrSz3Qd` came
+  back stamped with a single inferred `brief_id`). An inferred stamp is **indistinguishable
+  from an explicit one** in the row, so this skill's brief-scoped filter matches it exactly
+  like a correct one: no error, no empty result, no signal. The visual is grounded in
+  another angle's story at fal-credit cost. (An earlier draft of this document asserted
+  ad rows carried **no** `brief_id` at all and that the gate therefore degraded to idea
+  scope. That was **wrong**; see the Drift Log.) → Mitigation: the real fix is one
+  argument in a **different** skill — `ssc-ads-writer` passing the `brief_id` it already
+  holds ("an explicit value always wins") — tracked as the sibling change
+  `ads-writer-brief-lineage`, which is now urgent rather than anticipatory. This skill's
+  own mitigation is honesty about the limit: it gates on the lineage (strictly better than
+  guessing), and it carries a standing caution that an older row's `brief_id` may have been
+  inferred, so a visual that tells the wrong angle's story means **check the row's lineage
+  first**. Whether the server should audit or re-stamp pre-fix rows is an open question on
+  the sibling change.
 
-- **[The approved-copy gate is NOT brief-scoped in practice — ad `copy` rows carry no
-  `brief_id`, so it degrades to idea scope.]** `save_post_content` accepts `brief_id`,
-  but it is **optional**, and the server binds it automatically **only for `post`
-  content** ("for `post` content the idea's single brief is resolved server-side when
-  omitted"). Nothing binds it for `ad` content — and `ssc-ads-writer`, the skill that
-  writes every ad copy row, calls
-  `save_post_content(channel='ad', idea_id, section, body, score, comment)` and **never
-  passes `brief_id`**. So every ad `copy` row's `brief_id` is null, the brief-scoped
-  filter never fires, and "the approved copy for *this* angle" cannot be resolved from
-  the data. (An earlier draft of this document asserted the opposite — that content rows
-  already carrying `brief_id` made the per-angle resolution unambiguous. That was
-  **wrong**; see the Drift Log.) → Mitigation: the gate falls back to **idea scope**
-  (any approved `copy` for the idea) and the skill **announces the fallback** on its
-  output summary's `Copy matched:` line — a silent degradation is forbidden, because a
-  silent one is exactly what the copy gate exists to prevent. The fallback is harmless
-  today (one brief per idea ⇒ idea scope *is* brief scope), and it is bounded: it stops
-  being safe the moment Change 2 lands, at which point copy approved for angle A would
-  satisfy the gate for angle B and the visual would be grounded in the wrong angle's
-  story, at fal-credit cost. The real fix is one argument in a different skill and is
-  tracked as a prerequisite for Change 2 (Drift Log, follow-up).
+- **[Rows carrying NO `brief_id` at all cannot be attributed to an angle, and an idea has
+  several.]** → Mitigation: the gate does not guess. Idea scope is reachable **only** when
+  no approved `copy` row carries a `brief_id` **and** the idea has exactly **one** brief
+  (checked at runtime via `list_briefs`), in which case the match is unambiguous and is
+  **announced** on the `Copy matched:` line. When lineage-less rows meet a **multi-brief**
+  idea the skill **STOPs**, produces no visual and spends no credits, and routes the
+  operator to `/ssc.ads-produce <idea_id> <brief_id> copy`. Announcing a guess would not
+  make it right — a wrong-angle visual is not repaired by a footnote — so the only two
+  outcomes are an unambiguous match or a stop.
 
 - **[The `insufficient role` refusal on the three generate tools observed live on
   2026-07-13 — a token that held `edit` (every save and `list_creatives` succeeded) was
@@ -374,7 +409,7 @@ unaffected either way — this change writes no data and deletes nothing.
   operator first discards the approval in the dashboard, which keeps the decision with
   the human. Deferred — the current shape is the conservative one and matches
   propose-only.
-- **Once server Change 2 lands and an idea carries several approved angles, is there a
+- **An idea already carries several approved angles (Change 2 has shipped) — is there a
   useful "produce the next layer for every approved angle" batch affordance?** Deferred:
   one concept + one angle per invocation is the invariant today, and a batch mode would
   multiply credit spend per invocation, which cuts directly against the
@@ -382,48 +417,64 @@ unaffected either way — this change writes no data and deletes nothing.
 
 ## Drift Log
 
-### The approved-copy gate is idea-scoped, not brief-scoped
+### The copy gate: brief-scoped → (wrongly) idea-scoped → brief-scoped with a runtime-checked fallback and a STOP
 
-**Original decision.** "An approved `copy` row **for the brief** is a HARD
-precondition" (see Decisions). The Risks section justified it with the claim that
-"content rows already accept `brief_id` on `save_post_content`, so 'the approved copy
-for *this* angle' resolves unambiguously the moment an idea carries several briefs."
+**Original decision — and it was right.** "An approved `copy` row **for the brief** is a
+HARD precondition" (see Decisions): the gate matches approved `copy` rows on
+`brief_id === <brief_id>`, so the visual is grounded in the story of *this* angle and no
+other. That decision survives, unchanged, as the shipped rule's normal path.
 
-**What the implementation does instead.** `plugins/ssc-content/skills/ssc-image/SKILL.md`
-Step 3 applies the `brief_id === <brief_id>` filter **only to `copy` rows that actually
-carry a `brief_id`**, and **falls back to idea scope** — any approved `copy` for the
-idea — when they do not. The fallback is **loudly announced**: Step 3 requires the
-matched scope to be held, and Step 11's output summary prints it on a `Copy matched:`
-line, which names the idea-scope match as a fallback and states that it is only safe
-while the server keeps one brief per idea. The spec delta
-(`specs/ads-image-visual/spec.md`, "Concept, angle brief, and approved-copy gate") has
-been amended to require exactly this two-scope behaviour plus the mandatory
-announcement.
+**The mid-implementation review that got it wrong.** During implementation a review
+concluded that ad content rows carry **no** `brief_id` at all — reasoning that
+`save_post_content`'s `brief_id` is optional, that the server binds it automatically
+"only for `post` content", and that `ssc-ads-writer` never passed one. From that it
+followed that the brief-scoped filter could never fire, so the gate had to **degrade to
+idea scope** with a loud announcement, safe (it was claimed) only while the server kept
+one brief per idea. Both the premise and its safety argument were wrong.
 
-**Why.** The original mitigation was **factually wrong**. On the live BrandOS surface
-`save_post_content`'s `brief_id` is **optional**, and the server binds it automatically
-**only for `post` content** — nothing binds it for `ad` content. And
-`plugins/ssc-content/skills/ssc-ads-writer/SKILL.md`, the skill that writes every ad
-copy row, calls `save_post_content(channel='ad', idea_id, section, body, score, comment)`
-and **never passes `brief_id`**. Every ad `copy` row therefore carries a null `brief_id`,
-the brief-scoped filter can never fire, and a strictly brief-scoped gate would have been
-either unenforceable or (worse) a gate that always fails. Making the spec assert
-brief-scoping while the data cannot support it would have shipped a lie; announcing the
-degradation ships the truth.
+**What live data showed (2026-07-14).** Two facts, each independently fatal to that
+conclusion:
 
-**Blast radius today: none.** The server persists exactly one brief per idea ("Change 2"
-has not shipped), so idea scope and brief scope are the same set. The defect is latent,
-not live.
+1. **Server "Change 2" has shipped.** An idea carries N briefs, each with a populated
+   `angle_label` — idea `BGerzuw4JrrSz3Qd` has **five**, all `status='approved'`, all
+   labelled. So "safe while one brief per idea holds" described a world that no longer
+   existed.
+2. **Ad rows are not null — they are *inferred*.** All **20** ad content rows on that idea
+   carry `brief_id: "IeZb6HjExf2PtUJD"`, written by a version of `ssc-ads-writer` that
+   never passed one. The server binds `brief_id` for `ad` content **by inference**,
+   choosing one brief out of the five.
 
-**Recommended follow-up — a prerequisite for server Change 2.** The real fix is **one
-argument**: have `ssc-ads-writer` pass `brief_id` to `save_post_content` (it already
-holds the chosen `brief_id` — it is a required input to that skill). The live schema
-already supports this on any channel — "an explicit value always wins" — so no server
-change is needed to establish the lineage. That is a **separate change** (it edits
-`ssc-ads-writer`, which this change explicitly does not touch), and it **MUST land
-before or together with server Change 2**: the moment an idea can carry N approved
-briefs while ad copy rows still carry no `brief_id`, copy approved for angle A satisfies
-the gate for angle B and the visual is grounded in the wrong angle's story, at
-fal-credit cost, with no stop. Once ad copy rows carry `brief_id`, `ssc-image`'s
-brief-scoped clause fires on its own and the fallback (and its announcement) retires
-itself with **no edit to `ssc-image`**.
+So the hazard was never a null — it is a **silently inferred, possibly wrong angle stamp**,
+which is strictly worse: a null is a visible absence a consumer can refuse to act on, while
+a wrong stamp matches the brief-scoped filter exactly like a correct one and nothing
+downstream can detect it.
+
+**What the implementation actually does now.**
+`plugins/ssc-content/skills/ssc-image/SKILL.md` Step 3 applies a **three-way** rule:
+
+1. **Brief scope is the NORMAL path** — ad rows carry a `brief_id`, so the
+   `brief_id === <brief_id>` filter is the match.
+2. **Idea-scope fallback** — reachable **only** when no approved `copy` row carries a
+   `brief_id` **at all** *and* the idea has exactly **one** brief (checked at runtime
+   against the Step 2 `list_briefs` result). Unambiguous by construction, and it **must be
+   declared** on the summary's `Copy matched:` line.
+3. **STOP** — lineage-less rows on a **multi-brief** idea. The copy cannot be attributed to
+   an angle; guessing would ground the visual in the wrong angle's story, so the skill stops,
+   produces no visual, spends no credits, and routes the operator to
+   `/ssc.ads-produce <idea_id> <brief_id> copy`.
+
+The spec delta (`specs/ads-image-visual/spec.md`, "Concept, angle brief, and approved-copy
+gate") has been rewritten to require exactly this, including the STOP case.
+
+**Residual risk, and the follow-up.** The `brief_id` on an **older** row may be the server's
+inference rather than the writer's choice, and the two are indistinguishable — the gate can
+therefore still fire on a wrong angle for pre-fix rows. The skill states this limit plainly:
+the lineage is good enough to gate on (strictly better than guessing) but is not infallible,
+and a visual that tells the wrong angle's story means **check the row's `brief_id` lineage
+first**. The real fix is **one argument in a different skill** — `ssc-ads-writer` passing the
+`brief_id` it already holds, since "an explicit value always wins" overrides the inference —
+tracked as the sibling change **`ads-writer-brief-lineage`** (it edits a skill this change
+does not touch). That change is now **urgent rather than anticipatory**: Change 2 has already
+shipped, so the mis-inference is live today. Whether the server should **audit or re-stamp**
+ad content rows written before that fix — its inference rule is undocumented and unaudited —
+is an open question recorded on the sibling change.

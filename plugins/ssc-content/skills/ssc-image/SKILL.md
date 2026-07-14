@@ -95,7 +95,7 @@ It returns `briefs[]`, each with `id`, `status`, `angle_label`, and the five nar
 
 Hold the approved brief's `angle_label` + its five narrative fields — **the angle anchor**. Use **only** this one brief; never pool across the idea's other briefs.
 
-> **Server note (Change 2):** today's server keeps one brief per idea and nulls `angle_label`, so `list_briefs` returns that single brief and `brief_id` resolves it. The per-angle chain multiplicity arrives the moment Change 2 (N briefs per idea, `angle_label` persisted) ships — the anchoring here is already correct and needs no edit then.
+> **An idea can carry SEVERAL approved angle briefs** — that is the live shape today (a single concept commonly holds four or five `status='approved'` briefs, each with its own `angle_label`). **Each approved angle owns its own independent creative chain.** That is exactly why every read and every write in this skill keys on `brief_id`, and why the copy gate in Step 3 must attribute copy to *this* angle rather than to the idea. **Keep the full `briefs[]` result** (specifically: **how many briefs this idea has**) — Step 3's fallback branch needs that count.
 
 ### Step 3: Resolve + gate the approved copy — precondition 3
 
@@ -104,23 +104,26 @@ Call: list_post_content
   idea_id: <idea.id>
 ```
 
-It returns `variations[]`, each with `id`, `section`, `status` (`draft`|`approved`), `score`, `comment`, `body` — and, for `post` content, a server-bound `brief_id`.
+It returns `variations[]`, each with `id`, `section`, `status` (`draft`|`approved`), `score`, `comment`, `body` — and a **`brief_id`** carrying the row's **angle lineage**. **Ad content rows carry a populated `brief_id`** (live today), so the brief-scoped match below is the path that actually fires.
 
-Filter to `section === 'copy'` AND `status === 'approved'` AND — **when the row actually carries a `brief_id`** — `brief_id === <brief_id>`. The brief-scoped clause is the **preferred path** and is forward-compatible: the day ad `copy` rows carry a `brief_id`, it fires on its own.
+**Brief scope is the NORMAL path.** Filter to `section === 'copy'` AND `status === 'approved'` AND `brief_id === <brief_id>`. This is the match; it attributes the copy to **this** angle and to nothing else. It is what grounds the visual in the story the operator actually chose.
 
-> **Known degradation — ad `copy` rows carry NO `brief_id` today. Do not skip this.**
->
-> `ssc-ads-writer` saves ad content via `save_post_content(channel='ad', idea_id, section, body, score, comment)` and **never passes a `brief_id`**; the live `save_post_content` schema binds `brief_id` server-side **only for `post` content**. So **every ad `copy` row's `brief_id` is null today**, the brief-scoped clause never fires, and this gate **falls back to idea scope** — "any approved `copy` for the IDEA".
->
-> That fallback is safe **only** while the server persists **one brief per idea** (pre-"Change 2" — see the Step 2 server note). The moment N briefs per idea exist, copy approved for angle A would pass this gate for angle B, and the visual would be grounded in the **wrong angle's story** — at fal-credit cost. That is exactly why the fallback must be **loud, not silent**.
->
-> **So: whenever you matched copy at idea scope (the rows carried no `brief_id`), you MUST say so in the Step 11 output summary** — the `**Copy matched:**` line. Never let the idea-scoped fallback pass unannounced.
+**The fallback — reachable ONLY when NO approved `copy` row carries a `brief_id` at all** (a legacy row written before the lineage was recorded). *Only then*, consult **how many briefs this idea has** (you already read them all in Step 2 via `list_briefs`) and branch:
 
-- **No approved `copy` row for this brief** (or, under the fallback, for this idea) → STOP (Vietnamese), produce no visual, spend no credits:
+- **The idea has exactly ONE brief** → the idea-scope match is **unambiguous** — there is only one angle those rows could belong to. Match at idea scope (`section === 'copy'` AND `status === 'approved'`), and **DECLARE it** on the Step 11 summary's `**Copy matched:**` line as an idea-scope fallback. Never let it pass unannounced.
+- **The idea has MORE THAN ONE brief** → those rows **cannot be attributed to an angle**. Matching at idea scope would ground the visual in a **possibly-wrong angle's story** — at fal-credit cost, and with nothing downstream able to detect it. **STOP**, produce no visual, spend no credits (Vietnamese):
+
+  > Các bài copy đã duyệt của concept này **không mang thông tin angle** (không có `brief_id`), trong khi concept có **nhiều angle**. Vì vậy không thể xác định copy nào thuộc angle bạn đã chọn — dựng hình lúc này có nguy cơ kể câu chuyện của một angle khác. Hãy chạy `/ssc.ads-produce <idea_id> <brief_id> copy`, duyệt ≥1 bản copy cho đúng angle này trong `/ad/<month>/<idea_id>`, rồi chạy lại `/ssc.image <idea_id> <brief_id>`. **Chưa dựng gì và chưa tốn credit nào.**
+
+**Never guess.** Never pick a brief for a row. Never assume "the idea's only brief" — check the Step 2 brief count. Never match at idea scope when the idea has more than one brief.
+
+- **No approved `copy` row for this brief** (and none reachable via the single-brief fallback) → STOP (Vietnamese), produce no visual, spend no credits:
 
   > Chưa có bài copy nào được duyệt cho angle này. Hãy chạy `/ssc.ads-produce <idea_id> <brief_id> copy`, duyệt ≥1 bản copy trong `/ad/<month>/<idea_id>`, rồi chạy lại `/ssc.image <idea_id> <brief_id>`. Copy là câu chuyện mà hình ảnh phải kể — chưa có copy thì chưa dựng hình.
 
-Hold the approved copy body(ies) — the **meaning** source (Step 4.3) — **and hold which scope matched** (brief-scoped, or the idea-scoped fallback) for the Step 11 summary. From the same result you MAY also hold the approved `headline` / `description` bodies for this brief as extra tone/register signal; they **never gate**, and — like copy — **their words are never named in a prompt**.
+> **Caution — a note, not a gate.** A `brief_id` on an **older** row may have been **inferred server-side** rather than supplied by the writer that saved it (earlier versions of `ssc-ads-writer` never passed one, and the server bound the row to one of the idea's briefs by inference). The lineage is good enough to gate on — it is strictly better than guessing — but it is not infallible. **If the operator reports a visual that feels like the wrong angle's story, the row's `brief_id` lineage is the first thing to check.**
+
+Hold the approved copy body(ies) — the **meaning** source (Step 4.3) — **and hold which scope matched** (brief scope — the normal path — or the single-brief idea-scope fallback) for the Step 11 summary. From the same result you MAY also hold the approved `headline` / `description` bodies for this brief as extra tone/register signal; they **never gate**, and — like copy — **their words are never named in a prompt**.
 
 **Do not look for, read, or gate on an `image_content` row.**
 
@@ -387,7 +390,7 @@ Every typed server error **stops the run** and is reported to the operator **in 
 
 ### Step 11: Output summary
 
-**If any step STOPPED** (non-ad idea; concept not approved; brief missing / not approved; no approved copy; a pending draft with no `revise` note; missing product; all four layers approved; or any server error), emit that stop message plainly — **the reason and the exact next action**, in Vietnamese. Produce no visual.
+**If any step STOPPED** (non-ad idea; concept not approved; brief missing / not approved; no approved copy; **approved copy that carries no angle lineage while the idea has more than one brief** — Step 3; a pending draft with no `revise` note; missing product; all four layers approved; or any server error), emit that stop message plainly — **the reason and the exact next action**, in Vietnamese. Produce no visual.
 
 **Otherwise, after the active layer's DRAFT creative(s) are saved**, output:
 
@@ -397,7 +400,7 @@ Every typed server error **stops the run** and is reported to the operator **in 
 **Target:** idea <idea_id> · brief <brief_id> (<angle_label>)
 **Layer produced:** <background | model | composite>
 **Built on:** <"— (background is the first layer)" | "approved background" | "approved scene (model) + approved product">
-**Copy matched:** <"theo brief (các dòng copy có brief_id)" | "theo concept (fallback) — các dòng copy quảng cáo hiện KHÔNG mang brief_id, nên copy được khớp ở phạm vi idea; chỉ an toàn khi server còn giữ 1 brief/idea">
+**Copy matched:** <"theo brief (các dòng copy đã duyệt mang brief_id — đường chuẩn)" | "theo concept (fallback) — các dòng copy đã duyệt KHÔNG mang brief_id; concept chỉ có DUY NHẤT 1 angle brief nên việc khớp ở phạm vi idea là không mơ hồ">
 **Model:** <the fal model id used, or "server default">
 **Drafts saved:** <count> (layer='<active>', status='draft', propose-only)
 
@@ -428,7 +431,7 @@ End with the correct NEXT action (Vietnamese):
 - **Never write a prompt row directly.** `save_creative_prompt` is **not** in the `tools:` list: the three generate tools persist the layer's prompt row themselves — **including on the revise path** — so a second, divergent way for a prompt to exist never opens up.
 - **Product is real, and the upload is the operator's.** The product is never generated **and never uploaded by you** — `upload_product_creative` is **not** in the `tools:` list. No approved product creative → STOP and ask.
 - **Brief-anchored, state-driven stepping (hard rule).** Each invocation reads `list_creatives(brief_id)` and works the single next unapproved layer in `background → model → product → composite`. A layer runs only when every earlier layer has ≥1 approved creative. Pending drafts (`status='draft'` only — a discarded row is not a pending draft) with no `revise` note → STOP; no second batch, no second in-flight candidate. Every reachable state matches **exactly one** row of the Step 6 table, `revise` states included. **Every read and write keys on `brief_id`; no call ever passes an `image_content_id`.**
-- **Three preconditions, checked in order (hard rule).** (1) the idea is `channel='ad'` + `status='approved'`; (2) `brief_id` is an **approved** angle brief of that idea; (3) **≥1 approved `copy` row exists for that brief** — and because ad `copy` rows carry **no `brief_id` today**, precondition 3 degrades to **idea scope** (see Step 3): safe only pre-"Change 2" (one brief per idea), and when it applies you **must announce it** on the summary's `**Copy matched:**` line. Any failure → STOP with the exact unmet precondition and the exact next action, in Vietnamese, producing **no visual and spending no generation credits**. `image_content` is **not** a precondition, is **never read**, and **nothing is sized or shaped from it**.
+- **Three preconditions, checked in order (hard rule).** (1) the idea is `channel='ad'` + `status='approved'`; (2) `brief_id` is an **approved** angle brief of that idea; (3) **≥1 approved `copy` row exists for that brief**, matched on `brief_id === <brief_id>` — **brief scope is the normal path**, because ad content rows carry a populated `brief_id`. **Never guess an angle for a row.** Only when **no** approved `copy` row carries a `brief_id` at all (legacy rows) does scope widen, and only by the Step 2 brief count: **exactly one brief** → the idea-scope match is unambiguous, use it and **announce it** on the summary's `**Copy matched:**` line; **more than one brief** → the copy **cannot be attributed to an angle** and idea scope would ground the visual in a possibly-wrong angle's story, so **STOP** and route the operator to `/ssc.ads-produce <idea_id> <brief_id> copy`. Any failure → STOP with the exact unmet precondition and the exact next action, in Vietnamese, producing **no visual and spending no generation credits**. `image_content` is **not** a precondition, is **never read**, and **nothing is sized or shaped from it**.
 - **Grounding (hard rule).** Before authoring any prompt: the chosen brief (`angle_label` + the five narrative fields) → the persona detail doc (`brand/persona-<slug>`, mechanically derived; absent tag → structural tags only, never an invented path) → the approved `copy` (**a meaning source — its words are never named**) → the visual + compliance KB (`brand/visual-identity`, `ad/visual-direction-ref`, `ad/creative-guidelines`, `rules/compliance`, `rules/food-placeholder`) → the concept (`title`, `ad_notes`, tags). Approved `headline`/`description` may be read as tone signal; they never gate and their words are never named.
 - **Verbatim, positive-only prompts (hard rule).** You author the COMPLETE scene prompt; it reaches the engine unmodified (there is **no `prompt_hints`** and **no server-side assembly**). (1) Never name the ad copy — not quoted, not paraphrased, not negated. (2) Never negate — everything named gets drawn. (3) Reserve the text zone and the subject zone **geometrically, in the positive**, per the **standing composition rule from the visual KB** (never derived from any overlay-text body). (4) **One image per call** — there is no `n` parameter. (5) **No baked-in text, ever**, achieved through rules 1–3 and never by asking for text's absence. Prompt language is free-form.
 - **The revise path is prompt-level, never a re-roll, and the note is never dropped (hard rule).** `revise: <note>` always applies to the **active layer** and never changes which layer is active. **With pending drafts** (Step 8 case A) → read `list_creative_prompts(brief_id)` + the pending drafts' `generation_prompt`, **rewrite** the prompt applying the note (still obeying the prompt rules), and issue **ONE** generate call for that same layer — never re-issue the unchanged prompt, never a fresh batch; no prompt row → STOP with `prompt_not_found`. **With no pending drafts** (Step 8 case B — e.g. all drafts discarded) → the note is **folded into every prompt authored fresh** for that layer (based on the layer's last prompt row when one still exists); **never author a fresh prompt that ignores the note**, and never raise `prompt_not_found` on this path. The `product` layer is upload-only, so a note cannot apply to it — say so in the STOP.

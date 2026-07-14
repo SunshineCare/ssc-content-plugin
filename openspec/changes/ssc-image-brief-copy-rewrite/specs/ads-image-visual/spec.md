@@ -5,33 +5,48 @@
 The `ssc-image` skill SHALL only produce visuals for a concept whose `ideas` row
 has `channel='ad'` AND `status='approved'`, whose `brief_id` resolves to an
 **approved** angle brief of that concept, and for which at least one **approved
-`copy`** row exists. The three gates SHALL be checked in that order. If any gate
-fails, the skill MUST STOP and tell the operator — in Vietnamese — the exact unmet
-precondition and the exact next action, producing no visual and spending no
-generation credits.
+`copy`** row is attributable to that brief. The three gates SHALL be checked in
+that order. If any gate fails, the skill MUST STOP and tell the operator — in
+Vietnamese — the exact unmet precondition and the exact next action, producing no
+visual and spending no generation credits.
 
-The approved-copy gate SHALL be **brief-scoped where the data allows it, and
-idea-scoped otherwise**:
+An idea carries **N approved angle briefs**, each with its own `angle_label`, and
+each owning its own independent creative chain. The approved-copy gate SHALL
+therefore resolve its scope by this **three-way rule**:
 
-1. **Brief scope (preferred).** When the candidate `copy` rows carry a `brief_id`,
-   the gate SHALL match only rows whose `brief_id` equals the chosen `brief_id`.
-2. **Idea-scope fallback (today's ad rows).** When the rows carry **no** `brief_id`,
-   the gate SHALL fall back to matching any approved `copy` row for the **idea**.
-   This is the live path for ad content: `ssc-ads-writer` calls
-   `save_post_content(channel='ad', idea_id, section, body, score, comment)` and
-   never passes `brief_id`, and the server binds `brief_id` automatically **only
-   for `post` content** — so every ad `copy` row's `brief_id` is null and the
-   brief-scoped clause cannot fire.
+1. **Brief scope — the NORMAL path.** Ad content rows carry a populated
+   `brief_id`, so the gate SHALL filter approved `copy` rows on
+   `brief_id === <brief_id>` and match only those. This attributes the copy to
+   *this* angle and to nothing else, and it is the path that actually fires.
+2. **Idea-scope fallback — narrow, runtime-checked, and announced.** Reachable
+   **ONLY** when **no** approved `copy` row carries a `brief_id` at all (a legacy
+   row written before the lineage was recorded) **AND** the idea has exactly
+   **ONE** brief — a count the skill MUST check at runtime against its
+   `list_briefs` result, never assume. Only then is the idea-scope match
+   unambiguous (there is a single angle those rows could belong to), and the skill
+   SHALL match approved `copy` for the **idea** and MUST **declare that scope on
+   its output summary's `Copy matched:` line**, naming it as a fallback. A silent
+   fallback is FORBIDDEN.
+3. **STOP — no lineage on a multi-brief idea.** When no approved `copy` row carries
+   a `brief_id` **and** the idea has **more than one** brief, the copy CANNOT be
+   attributed to an angle. The skill MUST **STOP**, produce no visual, spend no
+   generation credits, and route the operator to
+   `/ssc.ads-produce <idea_id> <brief_id> copy`. It MUST NOT match at idea scope
+   here: matching would ground the visual in a **possibly-wrong angle's story**, at
+   generation-credit cost, with nothing downstream able to detect it — and an
+   announcement does not repair a wrong-angle visual.
 
-The fallback is sound **only** while the server persists **one brief per idea**
-(pre-"Change 2"). Once an idea can carry N approved briefs, copy approved for
-angle A would satisfy this gate for angle B and the visual would be grounded in
-the wrong angle's story, at generation-credit cost. Therefore the fallback MUST
-be loud: whenever the gate matched at **idea scope**, the skill MUST **declare
-that scope in its output summary** (the `Copy matched:` line), naming it as a
-fallback and stating that it is only safe while one brief per idea holds. A
-silent fallback is FORBIDDEN — the skill MUST NOT match at idea scope without
-announcing it.
+The skill MUST NOT guess an angle for a row, MUST NOT assume "the idea's only
+brief" without checking the count, and MUST NOT widen scope for any reason other
+than the total absence of `brief_id` on the approved `copy` rows.
+
+A `brief_id` on an **older** row MAY have been **inferred server-side** rather than
+supplied by the writer that saved it (for `ad` content the server binds `brief_id`
+by inference when the caller omits it, and an inferred stamp is indistinguishable
+from an explicit one). The gate SHALL still rely on the lineage — it is strictly
+better than guessing — and the skill SHALL state this limit, so that a visual which
+tells the wrong angle's story is diagnosed by checking the row's `brief_id` lineage
+first.
 
 `image_content` SHALL NOT be a gate: the skill MUST NOT require an approved
 `image_content` row, MUST NOT read one, and MUST NOT size or shape anything from
@@ -53,24 +68,34 @@ the finished visual at a later stage.
 - **WHEN** no brief matches the given `brief_id` for the concept, or the matching brief's `status` is not `approved`
 - **THEN** the skill STOPS and tells the operator to approve one angle brief for the concept in the dashboard first, and produces no visual
 
-#### Scenario: Copy rows carry a brief_id — the gate is brief-scoped
+#### Scenario: Copy rows carry a brief_id — the gate matches at brief scope (the normal path)
 
-- **WHEN** the concept and brief are approved and the idea's approved `copy` rows carry a `brief_id`
-- **THEN** the gate matches only the rows whose `brief_id` equals the chosen `brief_id`, ignores copy belonging to any other angle, and the output summary declares that copy was matched **at brief scope**
+- **WHEN** the concept and brief are approved and the idea's approved `copy` rows carry a `brief_id` (the live shape of ad content rows)
+- **THEN** the gate matches only the rows whose `brief_id` equals the chosen `brief_id`, ignores copy belonging to any other angle, and the output summary declares that copy was matched **at brief scope** — the normal path, not a fallback
 
-#### Scenario: Ad copy rows carry no brief_id — the gate falls back to idea scope and says so
+#### Scenario: No lineage at all on a single-brief idea — announced idea-scope fallback
 
-- **WHEN** the concept and brief are approved and the idea's approved `copy` rows carry no `brief_id` (every ad `copy` row today, because `ssc-ads-writer` never passes one and the server binds it only for `post` content)
-- **THEN** the gate matches any approved `copy` row for the **idea**, the skill proceeds, and its output summary declares on the `Copy matched:` line that the match was the **idea-scope fallback** and that it is only safe while the server keeps one brief per idea
+- **WHEN** the concept and brief are approved, **no** approved `copy` row carries a `brief_id`, and the runtime `list_briefs` result shows the idea has exactly **ONE** brief
+- **THEN** the gate matches any approved `copy` row for the **idea** — unambiguous, since there is only one angle those rows could belong to — the skill proceeds, and its output summary declares on the `Copy matched:` line that the match was the **idea-scope fallback**
+
+#### Scenario: No lineage at all on a multi-brief idea — the skill STOPS
+
+- **WHEN** the concept and brief are approved, **no** approved `copy` row carries a `brief_id`, and the runtime `list_briefs` result shows the idea has **MORE THAN ONE** brief
+- **THEN** the skill STOPS, produces no visual and spends no generation credits, and tells the operator (in Vietnamese) that the approved copy cannot be attributed to an angle and to run `/ssc.ads-produce <idea_id> <brief_id> copy` and approve copy for this angle — it MUST NOT match at idea scope, because that would ground the visual in a possibly-wrong angle's story with nothing downstream able to detect it
+
+#### Scenario: The brief count is checked, never assumed
+
+- **WHEN** the skill reaches the no-lineage branch of the copy gate
+- **THEN** it decides between the idea-scope fallback and the STOP by the **actual** number of briefs returned by `list_briefs` for that idea, and it MUST NOT assume "the idea's only brief" or pick a brief for a row by any other means
 
 #### Scenario: The idea-scope fallback is never silent
 
 - **WHEN** the gate has passed by matching copy at idea scope rather than brief scope
 - **THEN** the skill MUST NOT omit the scope from its output summary, and it MUST NOT report the match as brief-scoped
 
-#### Scenario: No approved copy at either scope
+#### Scenario: No approved copy at all
 
-- **WHEN** the concept and the brief are approved but no `copy` row with `status='approved'` exists for that brief — nor, under the fallback, for the idea
+- **WHEN** the concept and the brief are approved but no `copy` row with `status='approved'` exists for that brief — nor, where the single-brief fallback applies, for the idea
 - **THEN** the skill STOPS, tells the operator (in Vietnamese) to run `/ssc.ads-produce <idea_id> <brief_id> copy` and approve one copy, then re-run — and it produces no visual
 
 #### Scenario: image_content is never consulted

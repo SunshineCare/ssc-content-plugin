@@ -46,3 +46,45 @@ A stamp the server inferred is indistinguishable from one the writer supplied, s
 
 - **WHEN** an idea's approved `copy` rows carry no `brief_id` at all (a legacy row written before the lineage was recorded)
 - **THEN** `/ssc.image` applies its own narrowed fallback — idea scope only when the idea has exactly ONE brief, announced as a fallback; STOP when the idea has more than one — and this change neither removes, widens, nor otherwise alters that rule
+
+### Requirement: The server rejects ad content saved without a brief, and never infers one
+
+**Server-side requirement (BrandOS MCP), not implementable in this repo.** For `ad` content, `save_post_content` SHALL **reject** a call that omits `brief_id` — an `invalid_input`-class refusal — and it MUST write nothing on that call. It MUST NOT infer, guess, or otherwise bind a brief for `ad` content. For `post` content the existing behaviour is unchanged: the idea's single brief SHALL still be resolved server-side when `brief_id` is omitted, and an explicit value SHALL still win on any channel.
+
+Inference is defensible for `post` content, where the idea's single brief resolves unambiguously, and indefensible for `ad` content, where the idea carries N approved angles and the inferred brief is a pick out of several — a stamped angle the caller never chose, indistinguishable from a chosen one, and undetectable downstream. The caller always knows the angle it wrote from (`ssc-ads-writer` takes `brief_id` as a required input), so a server guess adds no information and can only ever be wrong. Refusing converts an invisible wrong answer into a visible error at the only moment a caller can still fix it.
+
+#### Scenario: An ad content save without brief_id is refused and writes nothing
+
+- **WHEN** `save_post_content` is called with `channel='ad'` and no `brief_id`
+- **THEN** the call is refused with an `invalid_input`-class error, no `content` row is created or updated, and no brief is inferred or stamped
+
+#### Scenario: A post content save without brief_id still resolves server-side
+
+- **WHEN** `save_post_content` is called with `channel='post'` and no `brief_id`
+- **THEN** the server resolves the idea's single brief as it does today — the rejection applies to `ad` content only, and an explicit `brief_id` continues to win on any channel
+
+#### Scenario: An explicit brief_id is still honoured on ad content
+
+- **WHEN** `ssc-ads-writer` calls `save_post_content` with `channel='ad'` and the `brief_id` it wrote the section from
+- **THEN** the call succeeds and the row is stamped with exactly that `brief_id` — the plugin fix needs no server change and does not wait on this requirement
+
+### Requirement: Content rows with a NULL brief_id are purged
+
+**Server-side requirement (BrandOS MCP), not implementable in this repo.** Existing `content` rows whose `brief_id` **IS NULL** SHALL be **deleted**. Such a row cannot be attributed to any angle, MUST NOT be consumed by any downstream step, and cannot be repaired by the plugin — which has no record of which angle each historical row was written from. It is exactly the row that makes `/ssc.image` STOP rather than risk grounding a visual in the wrong angle's story. These rows are unusable, not merely untidy.
+
+The purge SHALL be a **one-time** cleanup, because a NULL `brief_id` on ad content becomes unreachable once two changes land: this capability's rejection requirement closes the write path (no ad content row can be created without a `brief_id`), and the sibling change `ads-angle-set-curation` closes the other path by replacing `content.brief_id ON DELETE SET NULL` with a cascade that hard-deletes an angle's copy along with the angle. The purge SHOULD therefore be run after both, or it will have to be run again.
+
+#### Scenario: Lineage-less content rows are deleted
+
+- **WHEN** the server sweeps `content` rows and finds rows whose `brief_id` IS NULL
+- **THEN** those rows are deleted, because a content row with no angle can never be safely consumed and cannot be repaired by the plugin
+
+#### Scenario: A NULL brief_id on ad content is unreachable after both changes
+
+- **WHEN** both the ad-content rejection requirement and `ads-angle-set-curation`'s delete cascade have landed
+- **THEN** no ad `content` row can acquire a NULL `brief_id` from any direction — a save without one is refused, and deleting a brief hard-deletes its content instead of unbinding it — which is what makes the purge a one-time cleanup rather than a recurring chore
+
+#### Scenario: The purge does not touch wrongly-stamped rows
+
+- **WHEN** an ad content row carries a **wrong** (server-inferred) `brief_id` — populated, but not the angle it was written from
+- **THEN** the purge leaves it untouched, since it is not null and is indistinguishable from a correct row; whether such rows get audited remains an open question (see design.md), for which the row's Vietnamese `comment` — which usually names the brief it was written from — is the cheapest available signal

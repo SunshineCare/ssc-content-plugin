@@ -21,10 +21,10 @@ The hazard is not a missing value; it is a **silently wrong** one. `/ssc.image` 
 
 **Non-Goals:**
 
-- Repairing ad content rows written before this change. They carry a server-inferred `brief_id` that may name the wrong angle, and the plugin cannot distinguish an inferred stamp from an explicit one — it has no record of which angle each historical row was written from. Whether the server should audit or re-stamp them is an open question below.
+- Repairing ad content rows that carry a **wrong** server-inferred `brief_id`. The plugin cannot distinguish an inferred stamp from an explicit one — it has no record of which angle each historical row was written from. See Open Questions.
 - Changing `/ssc.image`'s three-way copy-scope rule (brief scope normal; single-brief idea-scope fallback, announced; multi-brief no-lineage → STOP). That rule is already shipped and already correct.
 - Any change to `ssc-post-produce` / post content, which the server binds correctly (and which `ssc-post-produce` does not even save — `ssc-post-authority` does).
-- Any server change. None is needed for the plugin fix; the server already honours an explicit `brief_id` on any channel.
+- **Implementing** the server requirements below. They live in the BrandOS MCP server, not in this repo; nothing in `plugins/` can satisfy them, and the plugin fix does not wait on them — the server already honours an explicit `brief_id` on any channel, so passing it works today.
 
 ## Decisions
 
@@ -40,9 +40,21 @@ A `brief_id` the caller passes and a `brief_id` the server infers are indistingu
 **Leave `/ssc.image`'s narrowed fallback alone.**
 `/ssc.image` now applies brief scope as the normal path, falls back to idea scope **only** when no approved copy row carries a `brief_id` at all **and** the idea has exactly one brief (checked at runtime via `list_briefs`, and announced), and **STOPs** when lineage-less rows meet a multi-brief idea. That rule is correct and self-limiting: it needs no edit when this change lands, and it degrades to a STOP rather than a guess in the one case it cannot resolve. *Alternative considered:* have this change also tighten `/ssc.image`. Rejected — it is already tight, and this change explicitly does not touch that skill.
 
+## Server Requirements
+
+Two server-side requirements are **decided** (owner, 2026-07-14). They live in the BrandOS MCP server, are a handoff contract rather than work this change performs, and can ship in any order relative to the plugin fix — which does not depend on them.
+
+**A. For `ad` content, `save_post_content` MUST REJECT an omitted `brief_id` — never infer one.**
+A call that omits `brief_id` on `ad` content is refused (`invalid_input` class) and writes nothing. The distinction is not stylistic: inference is *defensible* for `post` content, where the idea's single brief resolves unambiguously and the server's guess is the only possible answer; it is *indefensible* for `ad` content, where the idea carries N approved angles and the guess is a pick out of several. The caller always knows the angle it wrote from — `ssc-ads-writer` takes `brief_id` as a required input — so a server guess adds no information and can only ever be wrong. A wrong guess is silent: the stamped angle is indistinguishable from a chosen one and undetectable downstream. Refusing is strictly better than guessing, because it converts an invisible wrong answer into a visible error at the only moment a caller can still fix it.
+
+**B. Existing `content` rows with `brief_id IS NULL` MUST be DELETED.**
+A content row with no angle cannot be attributed to any brief. It can never be safely consumed — it is exactly the row that makes `/ssc.image` STOP rather than risk grounding a visual in the wrong angle's story — and it cannot be repaired by the plugin, which has no record of which angle each historical row was written from. These rows are unusable, not merely untidy; the owner's decision is to purge them.
+
+**The two interact — after both, a NULL `brief_id` on ad content is an impossible state.** Requirement A closes the *write* path: an ad content row can no longer be created without a `brief_id`. The sibling change `ads-angle-set-curation` closes the *other* path: it replaces `content.brief_id ON DELETE SET NULL` with a cascade that hard-deletes an angle's copy along with the angle, so deleting a brief no longer strands its rows with a null. With both landed, nothing produces a NULL `brief_id` on ad content from any direction — which is precisely what makes requirement B a **one-time cleanup** rather than a recurring chore. Ordering note: run the purge *after* A and the cascade land, or it will simply have to be run again.
+
 ## Risks / Trade-offs
 
-[Existing ad content rows carry a server-inferred `brief_id` that may name the wrong angle, and no consumer — including `/ssc.image` — can detect it] → This change stops the bleeding for new rows but cannot heal old ones. The shipped `ssc-image` skill carries a standing caution: a `brief_id` on an older row may have been inferred rather than supplied, the lineage is good enough to gate on (strictly better than guessing) but is not infallible, and **if a visual comes back telling the wrong angle's story, the row's `brief_id` lineage is the first thing to check**. A server-side audit or re-stamp is the only real remedy — see Open Questions.
+[Existing ad content rows carry a server-inferred `brief_id` that may name the wrong angle, and no consumer — including `/ssc.image` — can detect it] → This change stops the bleeding for new rows but cannot heal old ones, and requirement B does not reach them either: the purge takes only the **null** rows, while a wrong stamp is a *populated* field that looks exactly like a correct one. The shipped `ssc-image` skill therefore keeps its standing caution: a `brief_id` on an older row may have been inferred rather than supplied, the lineage is good enough to gate on (strictly better than guessing) but is not infallible, and **if a visual comes back telling the wrong angle's story, the row's `brief_id` lineage is the first thing to check**. A server-side audit is the only real remedy — and one cheap signal for it now exists (see Open Questions).
 
 [An explicit `brief_id` and an inferred one are indistinguishable in the stored row, so the regression from dropping the argument would be invisible] → The reason is stated in the skill itself, in the save step, in the frontmatter description, and in the Governance section — three places a future editor would have to override on purpose. There is no data-shape check that could catch it, so prose is the whole defence, and it is written to be unambiguous.
 
@@ -58,8 +70,9 @@ Local iteration follows the plugin cache rules in CLAUDE.md: a same-version cont
 
 ## Open Questions
 
-- **The server's inference rule is unknown and unaudited — which brief does it pick, and on what basis?** Live data shows all 20 ad content rows on a five-brief idea stamped with the *same* `brief_id` (`IeZb6HjExf2PtUJD`), but nothing documents the rule (first approved? most recent? lowest id?), and nothing says it is the angle any of those rows was actually written from. So an unknown number of existing rows may carry a **wrong angle** that no consumer can detect. **Does the server need an audit — or a re-stamp — of ad content rows written before this change?** The plugin cannot answer this: it has no record of which angle each historical row came from. This is a server/BrandOS decision, recorded here because the rows it affects are the ones `/ssc.image` will grind through first.
-- **Should the server stop inferring `brief_id` for `ad` content altogether** (leaving it null when not supplied), so that a missing lineage is at least *visible* rather than silently fabricated? That would make a future regression detectable instead of invisible. Also a server decision; not blocking this change.
+One question remains open. (The two that stood here before — whether the server should stop inferring, and what to do about lineage-less rows — are **resolved**: see Server Requirements A and B.)
+
+- **Do the rows carrying a WRONG (server-inferred) `brief_id` get audited?** Requirement B's purge does not touch them: they are not null, they are simply not *chosen*, and they look exactly like correct rows. Live data shows all 20 ad content rows on the five-brief idea `BGerzuw4JrrSz3Qd` stamped with the *same* `brief_id` (`IeZb6HjExf2PtUJD`), and nothing documents the rule that produced it (first approved? most recent? lowest id?) or says it is the angle any of those rows was actually written from. **One cheap audit signal was found live:** each content row's `comment` is a Vietnamese rationale that usually **names the brief it was written from** — e.g. *"Hiện thực đúng hook_direction của brief (tủ đồ mùa hè…)"* — so attribution is often recoverable by comparing the row's `comment` against the stamped brief's `angle_label`, far cheaper than re-deriving the angle from the body. Whether to run that audit is the owner's call. The plugin cannot make it: it has no record of which angle each historical row came from.
 
 ## Drift Log
 

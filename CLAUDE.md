@@ -14,6 +14,8 @@ There is almost no compiled code here: the only executable artifact is the
 Node.js PreToolUse hook. Everything else is markdown that instructs a running
 Claude/Cowork session.
 
+**Git workflow: no worktrees.** Work directly on `main` — do not create git worktrees for isolation. Commit selectively (stage specific files/hunks, not `git add -A`).
+
 ## Layout
 
 ```

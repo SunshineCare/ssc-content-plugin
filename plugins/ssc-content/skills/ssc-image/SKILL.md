@@ -37,6 +37,10 @@ You are propose-only: every saved creative is a DRAFT for a human to review / ap
 
 > **Single MCP surface (hard rule).** `generate_background`, `generate_model`, `compose_ad_visual`, and `list_creatives` are BrandOS server-side tools on the `ssc` surface. You call the image engines **only** through them (provider keys stay server-side); you **never** curl a provider API directly. Runtime generation behaviour (which fal model, exact prompt assembly) is the server's; you pass the anchor + hints.
 
+> **The three GENERATION tools need a server role beyond `edit` — surface `insufficient role`, never work around it.** `list_creatives` is satisfied by the same `edit` capability the writer tools use, but `generate_background` / `generate_model` / `compose_ad_visual` are additionally gated server-side: an operator whose token carries `edit` (every save/delete succeeds, `list_creatives` succeeds) can still get `{"error":"internal_error","message":"insufficient role"}` from a generate call. Observed live 2026-07-13. This is a **server-side permission**, not a bad argument and not an unmet precondition — do NOT retry the call with different arguments, do NOT fall back to any third-party image API, and do NOT silently skip the layer. STOP and tell the operator (Vietnamese):
+>
+> > Tài khoản BrandOS của bạn chưa có quyền tạo ảnh (server trả về `insufficient role`) — các tool dựng hình cần một role cao hơn capability `edit`. Hãy nhờ quản trị BrandOS cấp quyền, rồi chạy lại lệnh. Concept và các layer đã duyệt không bị ảnh hưởng; chưa có gì được ghi.
+
 ## Inputs
 
 Required:
@@ -243,4 +247,4 @@ End with the correct NEXT action (Vietnamese):
 - **Single MCP surface (hard rule).** Only BrandOS MCP tools on the `ssc` surface (`mcp__ssc__…`); never a third-party image-provider API.
 - **Operator-facing prose Vietnamese; image-model prompts free-form.**
 - **One concept/variant at a time.** Re-invoke per variant.
-- Requires the `edit` capability (plus `view` for the resolve reads); approving a saved draft later requires `approve` on the dashboard page.
+- Requires the `edit` capability (plus `view` for the resolve reads); approving a saved draft later requires `approve` on the dashboard page. **`edit` is necessary but NOT sufficient for the three generation tools** — `generate_background` / `generate_model` / `compose_ad_visual` are gated on an additional server-side role, so a caller holding `edit` can still be refused with `insufficient role`. Report that refusal plainly and STOP (see the callout above); never retry around it or reach for a provider API.

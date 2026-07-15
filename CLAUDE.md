@@ -1,6 +1,20 @@
- so# CLAUDE.md
+# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Codebase Access — use codebase-memory-mcp FIRST
+
+**The codebase knowledge graph is the primary tool for any code exploration or navigation in this repo — reach for it before Grep/Glob/Read.** Reinforced by global codebase-memory-mcp hooks (SessionStart + SubagentStart reminders, and a PreToolUse discovery gate that augments search calls). (This repo is mostly prose skills/agents/commands — most work routes to Grep/Read; the graph still helps for the executable hook + any code.)
+
+1. **Structural code queries → codebase-memory-mcp tools first** (or the `/codebase-memory` skill):
+   - `search_graph(name_pattern|label|qn_pattern)` — find functions / classes / routes
+   - `trace_path(function_name, mode=calls|data_flow|cross_service)` — call chains, impact analysis
+   - `get_code_snippet(qualified_name)` — exact symbol source (precise line ranges)
+   - `query_graph(query)` — complex Cypher patterns
+   - `get_architecture(aspects)` — project structure
+   - `search_code(pattern)` — graph-augmented text search
+2. **Grep / Glob / Read** — for text, configs, docs, and non-code files; always Read a file before editing it.
+3. **Project not indexed yet?** Run `index_repository` FIRST (use `index_status` / `detect_changes` to keep it fresh).
 
 ## What this repo is
 

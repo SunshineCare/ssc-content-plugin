@@ -61,7 +61,7 @@ const MUST_MATCH = [
 const MUST_NOT_MATCH = [
   'mcp__ssc__edit', // every non-promotion mutation, incl. demotion (server-gated, not hook-gated)
   'mcp__ssc__delete',
-  'mcp__ssc__save_post_content',
+  'mcp__ssc__save_content',
   'mcp__ssc__get_idea',
   'mcp__ssc__approval_status', // near-miss: "approval", not "approve"
   'mcp__ssc__approved_thing', // near-miss: "approved" — the `(_|$)` tail must reject this

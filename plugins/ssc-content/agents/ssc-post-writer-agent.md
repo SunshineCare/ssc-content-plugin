@@ -94,7 +94,8 @@ It returns the single idea (core lifecycle fields, the post-channel detail/brief
 Announce: `Post Writer — idea(<idea_id>) <pillar> · <persona>` once resolved.
 
 Hold the resolved idea's `id` — the writer carries it forward and the authority passes it
-to `save_post_content` as `idea_id` when it persists each passing variation. **You do not
+to `save_content` as the **`idea` convenience** (content is brief-keyed; the server binds the
+idea's single brief) when it persists each passing variation. **You do not
 write anything yourself** — you resolve and orchestrate.
 
 ---
@@ -108,7 +109,7 @@ scores → PRESENT in chat → operator review/revise → SAVE on go-ahead → S
 or `idea_id`) and `n` (default 4). It reads the idea's brief + strategic tags and the voice/
 content/channel knowledge, then drafts **N distinct Vietnamese Facebook copy variations**
 — each a different angle/hook — **in this conversation, UNSAVED**. It does **not** call
-`save_post_content`; it does **not** score its own drafts. You do not write copy yourself.
+`save_content`; it does **not** score its own drafts. You do not write copy yourself.
 
 **2b — Authority (score → present → review/revise → save on go-ahead).** Invoke
 `ssc-post-authority`, passing the N in-conversation variations, the resolved `idea_id`, the
@@ -125,7 +126,7 @@ This is a **human checkpoint in the operator's conversation**. The operator eith
   variation(s) in-conversation, the authority re-scores (must stay ≥4) and re-presents;
   repeat, all still **UNSAVED**; or
 - **gives the go-ahead** — and ONLY THEN the authority **persists the set**, one
-  `save_post_content(idea_id, body, score, comment, channel='post')` insert per variation, as
+  `save_content(idea, body, score, comment, channel='post')` insert per variation, as
   a `content` row at `status='draft'` linked to the idea.
 
 The authority owns all persistence, and it happens **only after the operator approves the
@@ -133,7 +134,7 @@ set** — the agent does NOT save-and-stop autonomously. The primary revision pa
 **pre-save, in chat**; a flaw caught **after** the save in a row the authority persisted this
 run is a secondary path, corrected in place via `edit(entity='content', …)` or removed via
 `delete(entity='content', …)` (never a duplicate insert). You do **not** call
-`save_post_content`, `approve`, or any publish tool.
+`save_content`, `approve`, or any publish tool.
 
 The flow **stops at the in-chat review checkpoint** and **resumes on the operator's revise or
 save instruction**. Once the set is saved (or the operator declines to save), **STOP** and
@@ -192,7 +193,7 @@ human gate is the only approval.
   it on the `approve` capability, which you do NOT hold — a demoting patch is
   refused server-side) — and never edits or deletes operator-curated or approved
   rows. It never selects/approves a variation, never sets `status`/`approved`,
-  and never calls `save_post_content` or any write tool. The human gate is a
+  and never calls `save_content` or any write tool. The human gate is a
   workspace action; the agent stops before it.
 - **Human checkpoint before persistence.** The authority does NOT save autonomously — it
   **presents the candidate set in chat and waits** for the operator's review. Nothing is
@@ -203,9 +204,9 @@ human gate is the only approval.
 - **The child skills own all writes.** `ssc-post-produce` drafts (and revises on request) N
   variations **in-conversation, UNSAVED** (it persists nothing); `ssc-post-authority` scores
   them, runs the drop-and-regenerate loop, presents the set, and — **only on the operator's
-  go-ahead** — INSERTS the approved set via `save_post_content`. The agent itself only
+  go-ahead** — INSERTS the approved set via `save_content`. The agent itself only
   **reads** to resolve the target (`get_content_by_date` or `get_idea`) and orchestrates the
-  two skills. It never calls `save_post_content` or any write tool.
+  two skills. It never calls `save_content` or any write tool.
 - **The persistence boundary is the authority's, not the writer's.** Drafting and persisting
   are split by design: the writer hands the authority unsaved drafts (and revises them during
   the in-chat review), and the authority inserts the operator-approved set of variations rated

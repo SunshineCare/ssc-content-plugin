@@ -1,6 +1,6 @@
 ---
 name: ssc-image-prompt-background
-description: Stage 1 (Background / Nền) of the PROPOSE-ONLY, ZERO-CREDIT ImageStudio prompt-authoring pipeline — the still-image sibling of ssc-image, but it NEVER generates and spends NO credits. Its sole input is a REQUIRED approved angle brief_id, resolved via get_brief → { brief, idea } (no separate idea_id), gated on idea.channel='ad' + idea.status='approved' + brief.status='approved' (else a Vietnamese STOP, nothing written). As the FIRST stage it has no prior-candidate precondition; it AUTHORS the full fresh empty-scene body prompt — reserving, IN THE POSITIVE, BOTH the text zone AND the open subject zone the later stages fill — grounded in the five sources in this order of authority (chosen brief angle → persona detail doc brand/persona-<slug> → approved copy read for MEANING ONLY, never its words → brand/visual + compliance KB → the concept), obeying the ssc-image prompt rules (never negate; reserve space positively; never name a copy/headline string; no baked-in text), then PERSISTS it via save_creative_prompt(brief_id, layer:'background', body, generation_config:{ model:'fal-ai/flux/schnell' }) — a text-to-image profile, so generation_config sets only model (the operator may pick fal-ai/flux/dev or fal-ai/flux-2-pro) — and STOPS, telling the operator (Vietnamese) to click Generate + select a background candidate in the ImageStudio, then re-invoke for the next stage (subject). revise: <note> rewrites this layer's saved prompt (passing expected_version from the list_creative_prompts row for optimistic concurrency) and re-saves — never generating. A server rejection of the layer/config STOPs cleanly in Vietnamese and writes nothing (no retry loop). PROPOSE-ONLY, ZERO-CREDIT: tools are reads + save_creative_prompt ONLY — never a generate_* / compose_ad_visual / generate_text_layer, approve/unapprove, upload_creative/confirm_creative_upload/select_gallery_creative, set_cover, reorder_gallery, publish, or update_budget; saving a prompt is NOT approving and spends NO credits — the human clicks Generate. Operator-facing prose is Vietnamese; the image prompt body is free-form.
+description: Stage 1 (Background / Nền) of the PROPOSE-ONLY, ZERO-CREDIT ImageStudio prompt-authoring pipeline — the still-image sibling of ssc-image, but it NEVER generates and spends NO credits. Its sole input is a REQUIRED approved angle brief_id, resolved via get_brief → { brief, idea } (no separate idea_id), gated on idea.channel='ad' + idea.status='approved' + brief.status='approved' (else a Vietnamese STOP, nothing written). As the FIRST stage it has no prior-candidate precondition; it AUTHORS the full fresh empty-scene body prompt — reserving, IN THE POSITIVE, BOTH the text zone AND the open subject zone the later stages fill — grounded in the five sources in this order of authority (chosen brief angle → persona detail doc brand/persona-<slug> → approved copy read for MEANING ONLY, never its words → brand/visual + compliance KB → the concept), obeying the ssc-image prompt rules (never negate; reserve space positively; never name a copy/headline string; no baked-in text), then PERSISTS it via save_creative_prompt(brief_id, layer:'background', body, generation_config:{ model:'fal-ai/flux-2/klein/9b' }) — a text-to-image (FLUX.2) profile, so generation_config sets only model (the operator may step up the FLUX.2 ladder: fal-ai/flux-2 Dev, fal-ai/flux-2-pro Pro, fal-ai/flux-2-max Max) — and STOPS, telling the operator (Vietnamese) to click Generate + select a background candidate in the ImageStudio, then re-invoke for the next stage (subject). revise: <note> rewrites this layer's saved prompt (passing expected_version from the list_creative_prompts row for optimistic concurrency) and re-saves — never generating. A server rejection of the layer/config STOPs cleanly in Vietnamese and writes nothing (no retry loop). PROPOSE-ONLY, ZERO-CREDIT: tools are reads + save_creative_prompt ONLY — never a generate_* / compose_ad_visual / generate_text_layer, approve/unapprove, upload_creative/confirm_creative_upload/select_gallery_creative, set_cover, reorder_gallery, publish, or update_budget; saving a prompt is NOT approving and spends NO credits — the human clicks Generate. Operator-facing prose is Vietnamese; the image prompt body is free-form.
 metadata:
   type: skill
   stage: produce
@@ -31,7 +31,7 @@ Required:
 Optional:
 
 - `revise` — a free-text correction for **this** (`background`) layer's saved prompt. It is **never dropped**: when a background prompt is already saved, it **rewrites** that prompt (Step 5, case R); when none is saved yet, it is **folded into the fresh prompt** you author. It never generates.
-- `model` — a text-to-image fal model id for `generation_config.model`. The **default is `fal-ai/flux/schnell`**; the operator may instead pick `fal-ai/flux/dev` or `fal-ai/flux-2-pro`. All three are plain **text-to-image** profiles, so `generation_config` carries **only `model`** (never `controlType` / `identityRef` / other control fields — those belong to later layers). An id outside the text-to-image FLUX family → STOP (Vietnamese), report it, write nothing; never guess a substitute.
+- `model` — a text-to-image fal model id for `generation_config.model`. The **default is `fal-ai/flux-2/klein/9b`** (FLUX.2 Klein 9B — fast drafts); the operator may step up the **FLUX.2 ladder**: `fal-ai/flux-2` (Dev — open-weight fidelity), `fal-ai/flux-2-pro` (Pro — production base), or `fal-ai/flux-2-max` (Max — maximum fidelity). All are plain **text-to-image (FLUX.2)** profiles, so `generation_config` carries **only `model`** (never `controlType` / `identityRef` / other control fields — those belong to later layers). An id outside the text-to-image FLUX family → STOP (Vietnamese), report it, write nothing; never guess a substitute.
 
 ## Procedure
 
@@ -143,9 +143,20 @@ Prompt language is **free-form** (English is usually best for the engines) — t
 
 > *Early-morning Vietnamese apartment kitchen, warm daylight through a sheer curtain. The upper third of the frame is a smooth, evenly-lit cream plaster wall, unbroken. Below it, across the lower two-thirds: the right half holds a pale wooden counter with a single ceramic mug and a folded cloth, softly lit, while the left third of that lower band is an open, sunlit stretch of clean countertop and wall — calm and inviting. Gentle, natural light; muted warm palette; 50mm, eye level, shallow depth of field. Quiet, hopeful, unhurried.*
 
+### Step 4b: Optimize the prompt for FLUX.2 (the text-to-image engine)
+
+The background now generates on the **FLUX.2 ladder** (Klein 9B → Dev → Pro → Max). FLUX.2 follows a prompt far more literally than FLUX.1 and reads long, ordered descriptions well, so author *for* it:
+
+- **Be complete and ordered** — flow **setting → layout/zones → surfaces & props → light → lens/camera → mood**. FLUX.2 renders what you specify and omits what you don't, so leave nothing load-bearing implicit; a fuller, well-structured paragraph beats a terse one.
+- **Give the reserved zones exact geometry** — name each zone's **position AND proportion** (*"the upper third"*, *"the left third of the lower band"*). FLUX.2 honours explicit placement, so precise zones come back cleaner and emptier for the later layers.
+- **Be photographically specific** — lens (e.g. *50mm*), camera height/angle, light **direction + quality + colour temperature**, depth of field, palette, and the **material** of each surface. FLUX.2 reproduces these faithfully.
+- **The Rule 1–4 discipline matters MORE, not less** — stronger adherence means a **named or negated** copy string is *even more* likely to be drawn. Positive-only, word-free description is non-negotiable.
+
+The Step 4 example already embodies this ordered, zone-explicit, photographic style — **extend** that depth, don't shrink it.
+
 ### Step 5: Persist the prompt via `save_creative_prompt` — then STOP
 
-Build `generation_config = { model: <the model input, or 'fal-ai/flux/schnell'> }` — **only `model`** (text-to-image profile).
+Build `generation_config = { model: <the model input, or 'fal-ai/flux-2/klein/9b'> }` — **only `model`** (text-to-image profile).
 
 **Case N — no saved background prompt (rule 4):** create the prompt row.
 
@@ -154,7 +165,7 @@ Call: save_creative_prompt
   brief_id:          <brief_id>
   layer:             background
   body:              <the FULL background scene prompt (Step 4)>
-  generation_config: { model: <'fal-ai/flux/schnell' | the model input> }
+  generation_config: { model: <'fal-ai/flux-2/klein/9b' | the model input> }
 ```
 
 **Case R — a saved background prompt exists and `revise` was supplied (rule 2):** rewrite it, carrying the operator's note (still obeying every Step 4 rule), and re-save with the existing row's `version` as `expected_version` for optimistic concurrency. **Never re-save an unchanged body** — the new `body` MUST differ by the operator's correction.
@@ -164,7 +175,7 @@ Call: save_creative_prompt
   brief_id:          <brief_id>
   layer:             background
   body:              <the REWRITTEN background scene prompt, note applied>
-  generation_config: { model: <'fal-ai/flux/schnell' | the model input> }
+  generation_config: { model: <'fal-ai/flux-2/klein/9b' | the model input> }
   expected_version:  <the version held from the list_creative_prompts background row>
 ```
 
@@ -206,7 +217,7 @@ Then end with the next action (Vietnamese):
 - **Propose-only, zero-credit (hard rule).** Never call any tool that generates, approves, uploads, selects, sets a cover, reorders, publishes, or spends budget — never `generate_*` / `compose_ad_visual` / `generate_text_layer`, never `approve` / `unapprove` (the approval hook denies `approve_*` to agents), never `upload_creative` / `confirm_creative_upload` / `select_gallery_creative`, never `set_cover` / `reorder_gallery`, never publish, never `update_budget`. Save the `background` prompt and STOP. **Saving is not approving and spends no credits** — Generate is the human's studio click. None of the forbidden tools appears in this skill's `tools:` list.
 - **First stage, no prior-candidate precondition.** `background` opens the pipeline; it needs no earlier layer. Its only gates are the three brief/idea gates in Step 1. Approved `copy` is a **grounding source used when present**, never a hard gate — with none, ground in the brief + persona and note the softer scene.
 - **Layer is `background`, always.** Every `save_creative_prompt` call from this skill passes `layer:'background'`. This skill never saves any other layer, and never `layer:'product'` (product is an upload-only input to a later stage, not a prompt layer).
-- **Text-to-image `generation_config`.** `generation_config` carries **only `model`** (default `fal-ai/flux/schnell`; `fal-ai/flux/dev` / `fal-ai/flux-2-pro` selectable) — never a control/identity field; those belong to later layers.
+- **Text-to-image `generation_config`.** `generation_config` carries **only `model`** (default `fal-ai/flux-2/klein/9b`; the FLUX.2 ladder `fal-ai/flux-2` / `fal-ai/flux-2-pro` / `fal-ai/flux-2-max` selectable) — never a control/identity field; those belong to later layers.
 - **Verbatim, positive-only prompt (hard rule).** You author the COMPLETE scene prompt; it reaches the engine unmodified. (1) Never name the ad copy — not quoted, paraphrased, or negated. (2) Never negate — everything named gets drawn. (3) Reserve the text zone AND the open subject zone **geometrically, in the positive**, per the standing composition rule from the visual KB. (4) No baked-in text, ever, achieved through (1)–(3), never by asking for text's absence.
 - **Grounding (hard rule).** Before authoring: the chosen brief (`angle_label` + five narrative fields) → the persona detail doc (`brand/persona-<slug>`, mechanically derived; absent tag → structural tags only, never an invented path) → the approved `copy` (**a meaning source — its words are never named**) → the visual + compliance KB (`brand/visual-identity`, `ad/visual-direction-ref`, `ad/creative-guidelines`, `rules/compliance`, `rules/food-placeholder`) → the concept.
 - **Revise is prompt-level, never generation, note never dropped.** `revise: <note>` rewrites **this** layer's saved prompt (with `expected_version` from the `list_creative_prompts` row) when one exists, or is folded into the fresh prompt when none does; it never generates and never changes which layer is active.

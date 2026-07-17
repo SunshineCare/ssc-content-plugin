@@ -172,6 +172,8 @@ Call: save_creative_prompt
   generation_config: <the object from Step 7>
 ```
 
+**Staleness (warn, never block).** If this composite already has a selected candidate **and** the text stage also has one, first tell the operator (Vietnamese) — *đổi ảnh composite ở bước này sẽ khiến bước chữ (đã dựng trên ảnh hiện tại) bị lỗi thời, cần dựng lại* — then proceed. Editing the recipe does not change the already-selected composite image; it never blocks the work.
+
 **`revise: <note>` path.** Read `list_creative_prompts(brief_id)` for the **composite** row and its `version`. Rewrite that row's `body` applying the operator's note (still obeying every Step 5 rule — never name the copy, never negate, reserve the text zone in the positive), keep/adjust `generation_config`, and re-save with **`expected_version`** = that version for optimistic concurrency:
 
 ```

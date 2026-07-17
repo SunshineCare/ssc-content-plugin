@@ -144,6 +144,8 @@ Call: save_creative_prompt
 
 **`revise:` path.** With a `revise: <note>`, rewrite **this same layer's** saved prompt (base it on the current `layer:'model'` prompt row from `list_creative_prompts(brief_id)`), applying the note while still obeying every Step 4 rule, and re-save with `expected_version` set to that row's `version` (optimistic concurrency; a mismatch returns `stale_version` → STOP and tell the operator to re-run, writing nothing further). A `revise` note **never generates** and never changes which stage is active. Without a `revise` note, if this layer already has a saved prompt and no new candidate, simply STOP (the operator Generates in the studio).
 
+**Staleness (warn, never block).** If this Scene already has a selected candidate **and** a later stage (composite/text) also has one, first tell the operator (Vietnamese) — *đổi ảnh Scene ở bước này sẽ khiến các bước sau (đã dựng trên ảnh hiện tại) bị lỗi thời, cần dựng lại* — then proceed. Editing the recipe does not change the already-selected Scene image; it never blocks the work.
+
 **Deployment-dependency safe STOP.** If `save_creative_prompt` is rejected because the deployed server does not support the layer, **STOP** (Vietnamese) and write nothing — do **not** retry in a loop: *Server BrandOS chưa hỗ trợ layer này — hãy báo quản trị deploy bản mới rồi chạy lại. **Chưa ghi gì.***
 
 ### Step 6: STOP with the next action (Vietnamese)

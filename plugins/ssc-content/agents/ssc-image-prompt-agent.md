@@ -148,6 +148,21 @@ output. Resolve the active stage, then branch:
 
 **One stage per invocation. Never fan out** — never author two stages in one run.
 
+**Upstream staleness (warn, never block).** Editing a stage's prompt after its image
+is selected does **not** change that image — the selected image's prompt is frozen in
+its `media.provenance`; a re-authored `creative_prompts` row is only the recipe for a
+*future* Generate. So there is nothing to block, and **you never block**. But when the
+operator reopens or revises a stage that **already has a selected candidate** *and* a
+**later** stage also has a selected candidate (built on this stage's image), **surface
+a warning** (Vietnamese) before proceeding, then continue:
+
+> Sửa/đổi ảnh ở bước này **không** đổi ảnh đã chọn (ảnh đã cố định) — chỉ tạo công thức
+> cho lần Generate mới. Nếu bạn discard rồi chọn **ảnh khác** ở bước này, các bước sau
+> (đã dựng trên ảnh hiện tại) sẽ **bị lỗi thời và cần dựng lại**.
+
+The warning **informs**; it never stops the work. Detect it from the `list_creatives`
+state you already read — a selected candidate at the active stage AND at any later stage.
+
 **Per-stage preconditions** (strict order satisfies the *prior-selected* ones; the
 extras below are enforced by the stage's own skill or by you where noted):
 

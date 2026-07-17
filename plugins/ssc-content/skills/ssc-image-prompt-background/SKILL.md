@@ -75,7 +75,7 @@ Apply the **FIRST** matching rule:
 
 | # | Condition | Action |
 |---|---|---|
-| 1 | `selected_background` | **STOP** — the background is already selected; this stage is done. A `revise` note has **no effect** here (to redo, discard the selected background in the studio first). Route the operator to the next stage: chạy `/ssc.image-prompt <brief_id>` để dựng prompt bước **Người mẫu (subject)**. |
+| 1 | `selected_background` | **STOP** — the background is already selected; this stage is done. A `revise` note has **no effect** here (to redo, discard the selected background in the studio first). Route the operator to the next stage: chạy `/ssc.image-prompt <brief_id>` để dựng prompt bước **Người mẫu (subject)**. **Staleness (warn, never block):** if any later stage (subject/scene/composite/text) already has a selected candidate, add — *đổi ảnh nền ở bước này sẽ khiến các bước sau (đã dựng trên nền hiện tại) bị lỗi thời, cần dựng lại.* |
 | 2 | `saved_bg_prompt` **and** `revise` supplied | Author the **rewrite** → **Step 3 + 4**, then **Step 5 case R** (re-save with `expected_version`). |
 | 3 | `saved_bg_prompt` **and no** `revise` | **STOP** — the background prompt is already saved but no candidate is selected yet. Do **not** re-author or overwrite. Tell the operator (Vietnamese) to **Generate + select** a background candidate in the ImageStudio (or re-run with `revise: <ghi chú>` to correct the prompt), then re-invoke. |
 | 4 | no `saved_bg_prompt` | Author **fresh** → **Step 3 + 4**, then **Step 5 case N** (create). If `revise` was supplied, fold its correction into this fresh prompt. |

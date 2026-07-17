@@ -120,6 +120,8 @@ Then **STOP** (Vietnamese): prompt tầng chữ đã lưu — hãy **Generate** 
 
 A `revise` note is an operator correction to **this** stage's saved prompt (e.g. *"đưa tiêu đề xuống 1/3 dưới, chữ trắng"*). It **never generates** and is **never dropped**.
 
+**Staleness (warn, never block).** Text is the final stage — nothing downstream depends on it. But if this stage already has a selected candidate, note to the operator (Vietnamese) that *sửa prompt không đổi ảnh chữ đã chọn (ảnh đã cố định) — nó chỉ là công thức cho lần Generate mới* — then proceed. Never block.
+
 1. Read `list_creative_prompts(brief_id)`, take the `text`-layer row's current `body` + `version`.
 2. Rewrite that `body` applying the note — still carrying the **exact** approved Vietnamese lines verbatim (a placement note never edits the string; to change the words, the operator re-runs `/ssc.ads-produce <brief_id> image_content` and re-approves).
 3. Re-save with the optimistic-concurrency guard:

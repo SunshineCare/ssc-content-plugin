@@ -64,11 +64,11 @@ Call: list_creatives
   brief_id: <brief_id>
 ```
 
-It returns `creatives[]` (`id`, `layer`, `status`, media ref / `resolved_url`, `generation_prompt`, lineage fields). Find a **`model`**-layer creative with `status='approved'` (i.e. **selected-for-next** — the composed Scene the operator picked).
+It returns `creatives[]`, each with `id`, `layer`, `status`, and its joined **`media`** pool item — `media.resolved_url` and **`media.provenance`** (`{ prompt, model, control?, idWeight?, derived_from }`, the frozen record of how the image was made). *(There is no `generation_prompt` column on the creative — the prompt lives on `media.provenance.prompt`.)* Find a **`model`**-layer creative with `status='approved'` (i.e. **selected-for-next** — the composed Scene the operator picked).
 
 - **No selected `model` creative** → **STOP** (Vietnamese), write nothing: *Chưa có cảnh (Scene) nào được chọn cho brief này — hãy dựng và chọn một candidate ở bước Scene trước (`/ssc.image-prompt <brief_id>` sẽ dừng ở bước đó), rồi chạy lại để ghép sản phẩm vào cảnh đã chọn.*
 
-Hold the selected Scene creative's **`id`** (its `resolved_url` + `generation_prompt` describe the scene you place the product into — its light, perspective, palette, and the reserved clean text zone you must keep intact).
+Hold the selected Scene creative's **`id`** (its `media.resolved_url` + `media.provenance.prompt` describe the scene you place the product into — its light, perspective, palette, and the reserved clean text zone you must keep intact).
 
 ### Step 3: Precondition (b) — a real PRODUCT PACKSHOT is in the pool (upload-only)
 
@@ -99,7 +99,7 @@ Resolve the set of **approved product packshots** for the brief (`product`-layer
 
 ### Step 4: Ground the composite — five sources, in this order of authority
 
-Resolve all five **before authoring the prompt**: (1) the chosen **angle brief** — `angle_label` + the five narrative fields (the visual expresses this angle, its `core_message` + `story_moment`); (2) the **persona detail doc** (`brand/persona-<slug>`, Step 1); (3) the approved **`copy`** — a **meaning** source only, never its words (read via `list_content(brief: <brief_id>)`, `section='copy'`, `status='approved'` — content is brief-keyed, like every sibling stage); (4) **brand/visual KB + compliance**; (5) the **concept** (`idea.title`, `ad_notes`, tags) — **plus the selected Scene's own `generation_prompt`** (Step 2), which tells you the exact light, perspective, palette, and reserved text zone the product must sit inside.
+Resolve all five **before authoring the prompt**: (1) the chosen **angle brief** — `angle_label` + the five narrative fields (the visual expresses this angle, its `core_message` + `story_moment`); (2) the **persona detail doc** (`brand/persona-<slug>`, Step 1); (3) the approved **`copy`** — a **meaning** source only, never its words (read via `list_content(brief: <brief_id>)`, `section='copy'`, `status='approved'` — content is brief-keyed, like every sibling stage); (4) **brand/visual KB + compliance**; (5) the **concept** (`idea.title`, `ad_notes`, tags) — **plus the selected Scene's own `media.provenance.prompt`** (Step 2), which tells you the exact light, perspective, palette, and reserved text zone the product must sit inside.
 
 Load the KB in one call:
 
@@ -131,7 +131,7 @@ The prompt `body` is **free-form** (English is usually best for the engines); on
 Write one complete scene prompt that **places the real product into the selected Scene**:
 
 - the product package rests on a plausible surface in the Scene at **natural, correct scale**, **grounded by a soft contact shadow**;
-- the light on the product matches the Scene's **direction, softness, and colour temperature** (read them from the selected Scene's `generation_prompt`);
+- the light on the product matches the Scene's **direction, softness, and colour temperature** (read them from the selected Scene's `media.provenance.prompt`);
 - **the product's own perspective and label read true** — same camera angle / lens as the Scene, the packaging face legible and undistorted;
 - the palette matches the Scene throughout;
 - the **reserved clean text zone stays intact, stated in the positive**.

@@ -55,7 +55,7 @@ Find a **`composite`** creative with `status === 'approved'` (selected-for-next 
 
 - **No selected composite** → **STOP** (Vietnamese), write nothing: *Chưa có ảnh composite được duyệt cho brief này — tầng chữ phải đặt lên một ảnh đã hoàn tất. Hãy hoàn tất và duyệt tầng Sản phẩm (composite) trong ImageStudio (chạy lại `/ssc.image-prompt <brief_id>` để dựng prompt composite nếu chưa có), rồi chạy lại tầng chữ.*
 
-Hold the selected composite (its `generation_prompt` / caption) — you read it to know **where the reserved clean text zone sits** in that finished scene.
+Hold the selected composite (its `media.provenance.prompt` / `media.caption`) — you read it to know **where the reserved clean text zone sits** in that finished scene.
 
 ### Step 3 — Precondition (b): the EXACT approved on-image text
 

@@ -1,6 +1,6 @@
 ---
 name: ssc-image-prompt-text
-description: Stage 5 (the final stage) of the propose-only, zero-credit ImageStudio prompt pipeline for Cambridge Diet Vietnam ads — the TEXT / Tiêu đề layer, sibling of ssc-image-prompt-background/-subject/-scene/-composite. Anchored to ONE approved angle brief (brief_id, resolved via get_brief → { brief, idea }); gates the idea to channel='ad' + status='approved' and the brief to status='approved'. Requires TWO preconditions read from the studio: a SELECTED (approved / selected-for-next) composite creative for the brief (via list_creatives), and an APPROVED image_content row for the brief (via list_content) — the on-image overlay text produced by /ssc.ads-produce. Authors a text-placement body that renders the EXACT approved Vietnamese headline verbatim into the reserved text zone of the selected composite, and saves it via save_creative_prompt(brief_id, layer:'text', body, generation_config) — default generation_config { model:'fal-ai/ideogram/v3' } for legible in-image text, OR { model:'overlay' } (the deterministic, diacritic-safe exact-text overlay pseudo-model) when Vietnamese diacritics must be guaranteed. THIS IS THE ONE STAGE WHERE COPY IS NAMED — stages 1–4 never name a copy string, but a text-render layer's whole job is rendering the exact string, so the approved Vietnamese headline appears verbatim in the body. Propose-only, zero credit: it holds only reads + save_creative_prompt, never any generate tool (incl. generate_text_layer), never approve/unapprove, upload/confirm/select, set_cover, reorder_gallery, publish, or update_budget — saving a prompt is not approving, and the human Generates (Ideogram) or applies the overlay, then approves in the studio. A revise: <note> rewrites this layer's saved prompt (with expected_version) and re-saves, never generates. Deployment-dependency safe: a rejected layer STOPs cleanly in Vietnamese, writes nothing, and does not retry. Operator-facing prose is Vietnamese; the rendered string is the exact Vietnamese headline (this body carries Vietnamese verbatim).
+description: Step 4 (the final step) of the propose-only, zero-credit ImageStudio prompt-authoring pipeline for Cambridge Diet Vietnam ads — the TEXT / Tiêu đề layer, sibling of ssc-image-prompt-subject/-background/-composite. Anchored to ONE approved angle brief (brief_id, resolved via get_brief → { brief, idea }); gates the idea to channel='ad' + status='approved' and the brief to status='approved'. It parents on the CHAIN TIP — the latest approved composite Edit creative, else the approved background Full-image creative (Edit is OPTIONAL and skip-transparent, so a Full image alone is a valid parent — the text layer never requires an Edit) — read via list_creatives, plus an APPROVED image_content row for the brief (via list_content) — the on-image overlay text produced by /ssc.ads-produce. Authors a text-placement body that renders the EXACT approved Vietnamese headline verbatim onto a naturally clean area of the finished chain-tip image, and saves it via save_creative_prompt(brief_id, layer:'text', body, generation_config) — default generation_config { model:'fal-ai/ideogram/v3' } for legible in-image text, OR { model:'overlay' } (the deterministic, diacritic-safe exact-text overlay pseudo-model) when Vietnamese diacritics must be guaranteed. THIS IS THE ONE STEP WHERE COPY IS NAMED — steps 1–3 (subject / full image / edit) never name a copy string, but a text-render layer's whole job is rendering the exact string, so the approved Vietnamese headline appears verbatim in the body. Propose-only, zero credit: it holds only reads + save_creative_prompt, never any generate tool (incl. generate_text_layer), never approve/unapprove, upload/confirm/select, set_cover, reorder_gallery, publish, or update_budget — saving a prompt is not approving, and the human Generates (Ideogram) or applies the overlay, then approves in the studio. A revise: <note> rewrites this layer's saved prompt (with expected_version) and re-saves, never generates. Deployment-dependency safe: a rejected layer STOPs cleanly in Vietnamese, writes nothing, and does not retry. Operator-facing prose is Vietnamese; the rendered string is the exact Vietnamese headline (this body carries Vietnamese verbatim).
 metadata:
   type: skill
   stage: produce
@@ -12,9 +12,11 @@ metadata:
 
 # Ads ImageStudio prompt — Text stage (`ssc-image-prompt-text`)
 
-You are **stage 5 — the final stage — of the propose-only ImageStudio prompt pipeline** for Cambridge Diet Vietnam ads: the **Text / *Tiêu đề*** layer. You author the **text-placement prompt** (`body`) plus its `generation_config`, persist it via **`save_creative_prompt(layer:'text')`**, and **STOP**. You never generate, never approve, never spend a credit — the operator **Generates** the text render (Ideogram) or applies the deterministic **overlay** in the ImageStudio, then approves it there.
+You are **Step 4 — the final step — of the propose-only ImageStudio prompt-authoring pipeline** for Cambridge Diet Vietnam ads: the **Text / *Tiêu đề*** layer. You author the **text-placement prompt** (`body`) plus its `generation_config`, persist it via **`save_creative_prompt(layer:'text')`**, and **STOP**. You never generate, never approve, never spend a credit — the operator **Generates** the text render (Ideogram) or applies the deterministic **overlay** in the ImageStudio, then approves it there.
 
-**This is the ONE stage where the copy IS named — the deliberate, bounded exception.** Stages 1–4 (`background` / `subject` / `scene` / `composite`) obey the hard rule *never name a copy or headline string in any form* — naming a string makes the model draw it in the wrong place. **This stage is the opposite by design:** a text-render layer's entire job is to render the **exact approved Vietnamese headline** into the reserved zone, so that string MUST appear **verbatim** in the `body`. The exception is **bounded to this stage only** — it is not a licence to paraphrase copy anywhere else, and it applies to nothing but the one approved on-image string resolved below.
+The chain: **Subject (Step 1, optional) → Full image (Step 2, required) → Edit (Step 3, optional, repeatable) → Text (you — Step 4).** You **parent on the CHAIN TIP** — the latest approved **Edit** (`composite`), else the approved **Full image** (`background`). Edit is optional and skip-transparent, so a Full image alone is enough; you never require an Edit. The old **Scene** step (`model` layer) is retired.
+
+**This is the ONE step where the copy IS named — the deliberate, bounded exception.** Steps 1–3 (`subject` / `background` (Full image) / `composite` (Edit)) obey the hard rule *never name a copy or headline string in any form* — naming a string makes the model draw it in the wrong place. **This step is the opposite by design:** a text-render layer's entire job is to render the **exact approved Vietnamese headline** onto the finished image, so that string MUST appear **verbatim** in the `body`. The exception is **bounded to this step only** — it is not a licence to paraphrase copy anywhere else, and it applies to nothing but the one approved on-image string resolved below.
 
 > **Propose-only, zero-credit (hard invariant, three layers: the server `approve` capability, the `approval-gate.mjs` hook, and this prose).** Your `tools:` are **reads + `save_creative_prompt` only**. You **NEVER** call any generate tool — **`generate_text_layer`**, `generate_*`, `compose_ad_visual` — nor `approve` / `unapprove`, `upload_creative` / `confirm_creative_upload` / `select_gallery_creative`, `set_cover`, `reorder_gallery`, any publish tool, or `update_budget`. **Saving a prompt is not approving and spends no credits.** None of those tools appears in this skill's `tools:` list.
 
@@ -44,18 +46,23 @@ Returns `{ brief, idea }`. `{ brief: null }` → STOP (Vietnamese): không tìm 
 
 Hold the brief's `angle_label` + five narrative fields. Call **`get_idea`** only as a follow-up if you need fuller concept detail (`ad_notes`, persona tag) for register — it is **not** a command input.
 
-### Step 2 — Precondition (a): a SELECTED composite for this brief
+### Step 2 — Precondition (a): the CHAIN TIP for this brief (a finished Full image, or a later Edit)
 
 ```
 Call: list_creatives
   brief_id: <brief_id>
 ```
 
-Find a **`composite`** creative with `status === 'approved'` (selected-for-next — the finished visual this headline sits on). Ignore `discarded` rows.
+Resolve the **chain tip** — the finished visual this headline sits on. Ignore `discarded` rows.
 
-- **No selected composite** → **STOP** (Vietnamese), write nothing: *Chưa có ảnh composite được duyệt cho brief này — tầng chữ phải đặt lên một ảnh đã hoàn tất. Hãy hoàn tất và duyệt tầng Sản phẩm (composite) trong ImageStudio (chạy lại `/ssc.image-prompt <brief_id>` để dựng prompt composite nếu chưa có), rồi chạy lại tầng chữ.*
+- the **latest approved `composite`** creative (a selected **Edit**, `status === 'approved'`) if any exists — Edit is optional and repeatable, so when edits exist the tip is the most-recent selected one;
+- **else** the approved **`background`** creative (`status === 'approved'` — the selected **Full image**).
 
-Hold the selected composite (its `media.provenance.prompt` / `media.caption`) — you read it to know **where the reserved clean text zone sits** in that finished scene.
+Edit is optional and **skip-transparent**, so a Full image alone is a valid parent — the text layer does **not** require an Edit.
+
+- **No chain tip at all** (no approved `background` and no approved `composite`) → **STOP** (Vietnamese), write nothing: *Chưa có ảnh nền hoàn tất cho brief này — tầng chữ phải đặt lên một ảnh đã hoàn tất. Hãy hoàn tất và duyệt bước **Full image (Ảnh toàn cảnh)** trong ImageStudio (chạy lại `/ssc.image-prompt <brief_id>` để dựng prompt Full image nếu chưa có; bước **Edit** là tùy chọn), rồi chạy lại tầng chữ.*
+
+Hold the chain tip (its `media.provenance.prompt` / `media.caption`) — you read it to know **where a naturally clean, quiet area sits** in that finished scene for the text (there is no pre-reserved text plane — the overlay renders onto the finished image).
 
 ### Step 3 — Precondition (b): the EXACT approved on-image text
 
@@ -64,7 +71,7 @@ Call: list_content
   brief: <brief_id>
 ```
 
-Filter to `section === 'image_content'` AND `status === 'approved'` for this brief — the **on-image overlay copy** produced by `/ssc.ads-produce`. Its `body` is a structured Vietnamese block (`HEADLINE:` / `SUBHEADLINE:` / `BULLETS:`). This is the **EXACT string source** — its `HEADLINE:` line is the headline placed into the reserved zone; the `SUBHEADLINE:` and bullets are the supporting on-image lines.
+Filter to `section === 'image_content'` AND `status === 'approved'` for this brief — the **on-image overlay copy** produced by `/ssc.ads-produce`. Its `body` is a structured Vietnamese block (`HEADLINE:` / `SUBHEADLINE:` / `BULLETS:`). This is the **EXACT string source** — its `HEADLINE:` line is the headline placed onto the finished image (its naturally clean area); the `SUBHEADLINE:` and bullets are the supporting on-image lines.
 
 - **No approved `image_content` row** → **STOP** (Vietnamese), write nothing: *Chưa có nội dung on-image (`image_content`) được duyệt cho angle này. Hãy chạy `/ssc.ads-produce <brief_id> image_content`, duyệt một bản trong dashboard, rồi chạy lại tầng chữ.*
 
@@ -79,18 +86,18 @@ Call: get_knowledge
   paths: ["brand/visual-identity", "ad/visual-direction-ref", "ad/creative-guidelines"]
 ```
 
-- `brand/visual-identity` — palette, type register, the standing **reserved clean zone** convention.
+- `brand/visual-identity` — palette, type register, and how on-image type sits in the house style.
 - `ad/visual-direction-ref` / `ad/creative-guidelines` — on-image text placement + legibility for a converting ad.
 
 The brief `angle_label` + `core_message` inform the emotional register the headline carries — but the **words are fixed** (they came approved from Step 3); grounding tunes only placement, weight, and colour, never the string.
 
 ### Step 5 — Author the text-placement `body`
 
-Author a **positive, placement-only** prompt that renders the exact Vietnamese lines into the reserved text zone of the selected composite. Obey the prompt discipline carried from `ssc-image` — with the **one exception** that the exact string appears:
+Author a **positive, placement-only** prompt that renders the exact Vietnamese lines onto a naturally clean, quiet area of the finished chain-tip image. Obey the prompt discipline carried from `ssc-image` — with the **one exception** that the exact string appears:
 
 1. **The exact Vietnamese string appears VERBATIM** — quote each approved line in the `body` exactly as Step 3 held it (this is the sanctioned exception; a text-render layer must be given the literal string to render).
-2. **Never negate** — describe the placement as what *is* there ("the headline sits in the upper third, over the smooth cream plaster zone"), never "no other text", "without clutter".
-3. **Reserve/target the zone positively** — point the text at the composite's already-clean zone (read from the composite's own prompt), described as the positive surface it is, at a legible size and a colour that reads cleanly against that surface.
+2. **Never negate** — describe the placement as what *is* there ("the headline sits in the upper third, over the smooth cream plaster area"), never "no other text", "without clutter".
+3. **Target a naturally clean area positively** — point the text at a quiet, uncluttered part of the finished image (read from the chain tip's own `media.provenance.prompt`), described as the positive surface it is, at a legible size and a colour that reads cleanly against that surface. There is **no pre-reserved text plane** — the overlay renders onto whatever the finished scene shows.
 4. **Placement, weight, colour, alignment only** — you set where the lines go, their hierarchy (HEADLINE dominant; SUBHEADLINE + bullets secondary), and their treatment; you do not restyle the scene.
 
 `body` is free-form English **except** the quoted Vietnamese lines, which are exact. Example shape (illustrative — use the real approved lines):
@@ -102,7 +109,7 @@ Author a **positive, placement-only** prompt that renders the exact Vietnamese l
 Choose the model:
 
 - **Default — `{ model: 'fal-ai/ideogram/v3' }`** — a text-render model that draws legible, visually-integrated in-image text. Prefer it when the headline is short/simple, or when you want the type stylistically embedded in the scene and minor imperfections are tolerable.
-- **`{ model: 'overlay' }`** — the deterministic, diacritic-safe **exact-text overlay pseudo-model**: it composites the exact string onto the reserved zone pixel-for-pixel, with **no model hallucination**. **Prefer `overlay` whenever exact Vietnamese diacritics must be guaranteed** — Vietnamese headlines are dense with diacritics (ế, ữ, ị, ẩ, ọ, …) that generative text-render models frequently mangle, so for most real Vietnamese on-image copy `overlay` is the safe choice; reserve Ideogram for cases where stylistic integration outweighs perfect diacritic fidelity. State which you chose and why in the operator summary.
+- **`{ model: 'overlay' }`** — the deterministic, diacritic-safe **exact-text overlay pseudo-model**: it composites the exact string onto the finished image (the target clean area) pixel-for-pixel, with **no model hallucination**. **Prefer `overlay` whenever exact Vietnamese diacritics must be guaranteed** — Vietnamese headlines are dense with diacritics (ế, ữ, ị, ẩ, ọ, …) that generative text-render models frequently mangle, so for most real Vietnamese on-image copy `overlay` is the safe choice; reserve Ideogram for cases where stylistic integration outweighs perfect diacritic fidelity. State which you chose and why in the operator summary.
 
 `generation_config.model` is required; this stage sets **only** `model` (a text-render/overlay layer takes no `controlType` / `identityRef` / `conditioningScales`).
 
@@ -120,7 +127,7 @@ Then **STOP** (Vietnamese): prompt tầng chữ đã lưu — hãy **Generate** 
 
 A `revise` note is an operator correction to **this** stage's saved prompt (e.g. *"đưa tiêu đề xuống 1/3 dưới, chữ trắng"*). It **never generates** and is **never dropped**.
 
-**Staleness (warn, never block).** Text is the final stage — nothing downstream depends on it. But if this stage already has a selected candidate, note to the operator (Vietnamese) that *sửa prompt không đổi ảnh chữ đã chọn (ảnh đã cố định) — nó chỉ là công thức cho lần Generate mới* — then proceed. Never block.
+**Staleness (warn, never block).** Text is the final step — nothing downstream depends on it. But if this step already has a selected candidate, note to the operator (Vietnamese) that *sửa prompt không đổi ảnh chữ đã chọn (ảnh đã cố định) — nó chỉ là công thức cho lần Generate mới* — then proceed. Never block.
 
 1. Read `list_creative_prompts(brief_id)`, take the `text`-layer row's current `body` + `version`.
 2. Rewrite that `body` applying the note — still carrying the **exact** approved Vietnamese lines verbatim (a placement note never edits the string; to change the words, the operator re-runs `/ssc.ads-produce <brief_id> image_content` and re-approves).
@@ -144,13 +151,13 @@ If the deployed BrandOS server **rejects `layer:'text'`** on `save_creative_prom
 ## Governance (hard invariants)
 
 - **Propose-only, zero-credit.** `tools:` = reads + `save_creative_prompt` only. Never any generate tool (**incl. `generate_text_layer`**), `approve`/`unapprove`, upload/confirm/select, `set_cover`, `reorder_gallery`, publish, or `update_budget`. Saving ≠ approving; the human Generates/overlays and approves in the studio.
-- **The named-copy exception is bounded to THIS stage.** Stages 1–4 never name a copy string; stage 5 renders the **exact approved Vietnamese headline** verbatim because that is a text-render layer's job. The exact string appearing in this `body` is **correct**; it must not be paraphrased, and no other stage may name copy.
+- **The named-copy exception is bounded to THIS step.** Steps 1–3 never name a copy string; Step 4 (Text) renders the **exact approved Vietnamese headline** verbatim because that is a text-render layer's job. The exact string appearing in this `body` is **correct**; it must not be paraphrased, and no other step may name copy.
 - **The string is fixed and Vietnamese.** The `image_content` body from Step 3 is copied character-for-character (diacritics intact). Operator-facing chat is Vietnamese; the prompt `body` is free-form English **except** the verbatim Vietnamese lines.
-- **Every tool named exists on the BrandOS `ssc` surface**, and this stage saves **`layer:'text'`** — never `layer:'product'` (upload-only; the server rejects it).
-- **One stage per invocation, gated in order.** This stage runs only with a **selected composite** and an **approved `image_content`**; either missing → STOP with the exact next action, write nothing, spend nothing.
+- **Every tool named exists on the BrandOS `ssc` surface**, and this step saves **`layer:'text'`** — never `layer:'product'` (upload-only; the server rejects it), never `layer:'model'` (the retired Scene step).
+- **One step per invocation, gated in order.** This step runs only with a **chain tip** (the latest approved Edit `composite`, else the approved Full-image `background`) and an **approved `image_content`**; either missing → STOP with the exact next action, write nothing, spend nothing. Edit is optional/skip-transparent — a Full image alone satisfies the chain-tip precondition.
 
 ## Output
 
 - **Saved, not generated.** One `save_creative_prompt(layer:'text')` upsert carrying the placement `body` (with the exact Vietnamese lines) + `generation_config` — then STOP.
-- Report: the brief (`brief_id` + `angle_label`), the selected composite id the text sits on, the model chosen (`fal-ai/ideogram/v3` or `overlay`) **and why**, and the exact next action — Generate (Ideogram) / apply overlay, then approve in the ImageStudio.
+- Report: the brief (`brief_id` + `angle_label`), the chain-tip id the text sits on (the latest Edit `composite`, else the Full-image `background`), the model chosen (`fal-ai/ideogram/v3` or `overlay`) **and why**, and the exact next action — Generate (Ideogram) / apply overlay, then approve in the ImageStudio.
 - No image generated, no candidate approved, no gate flipped, no credit spent.

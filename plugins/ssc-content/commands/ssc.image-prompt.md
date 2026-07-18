@@ -1,5 +1,5 @@
 ---
-description: Author the ImageStudio per-stage PROMPTS + generation settings for ONE approved ad concept's chosen angle — a propose-only, ZERO-CREDIT, state-driven stepper anchored to a brief. The zero-credit sibling of /ssc.image (which generates images directly and spends fal credits); this command NEVER generates. Dispatches ssc-image-prompt-agent with a required brief_id (the owning ad concept is resolved from the brief via get_brief — no idea_id). The ImageStudio builds a visual through FIVE stages — background (Nền) → subject (Người mẫu, the person generated ALONE with face + pose locked, styled to suit the selected background) → scene (Ghép người, composes the subject into the background; persists layer 'model') → composite (Sản phẩm, places the real product) → text (Tiêu đề, renders the exact approved headline). On each invocation the agent resolves studio state (list_creatives / list_creative_prompts / list_content), works the SINGLE next-open stage by dispatching that stage's skill — which authors the full scene prompt + generation_config (model + capability-matched control/identity settings) and SAVES it via save_creative_prompt — then STOPS. The operator then clicks Generate and selects a candidate in the ImageStudio; re-invoking advances to the next stage. Prompt discipline: never negate, reserve space in the positive, never name a copy string in stages 1–4 (stage 5/text is the sole exception — it carries the exact approved Vietnamese headline). `stage: <name>` targets a specific stage; `revise: <note>` rewrites the active stage's saved prompt. PHASE 1 wires only the ad channel (a non-ad idea stops cleanly). Propose-only; the agent saves prompts, never generates, never approves, never uploads, never spends credits.
+description: Author the ImageStudio per-step PROMPTS + generation settings for ONE approved ad concept's chosen angle — a propose-only, ZERO-CREDIT, state-driven stepper anchored to a brief. The zero-credit sibling of /ssc.image (which generates images directly and spends fal credits); this command NEVER generates. Dispatches ssc-image-prompt-agent with a required brief_id (the owning ad concept is resolved from the brief via get_brief — no idea_id). The ImageStudio builds a visual through FOUR steps — subject (Người mẫu, OPTIONAL — the person generated ALONE with face + pose locked, the anchor the scene is built around) → full image (Ảnh toàn cảnh, REQUIRED — the situation-aware full scene: compose-with-refs around the subject/product, else from-scratch text-to-image; backend layer 'background') → edit (Chỉnh sửa, OPTIONAL and REPEATABLE — a generic "what to change" prompt-to-edit over the chain tip; backend layer 'composite') → text (Tiêu đề, renders the exact approved headline over the chain tip). On each invocation the agent resolves studio state (list_creatives / list_creative_prompts / list_content), works the SINGLE next-open step by dispatching that step's skill — which authors the full scene prompt + generation_config (model + capability-matched control/identity settings) and SAVES it via save_creative_prompt — then STOPS. The operator then clicks Generate and selects a candidate in the ImageStudio; re-invoking advances to the next step. Prompt discipline: never negate, reserve nothing, never name a copy string in steps 1–3 (step 4/text is the sole exception — it carries the exact approved Vietnamese headline). The old Scene step (layer 'model', composing subject into background) is RETIRED — compositing folds into the Full-image step. `stage: <name>` targets a specific step; `revise: <note>` rewrites the active step's saved prompt. PHASE 1 wires only the ad channel (a non-ad idea stops cleanly). Propose-only; the agent saves prompts, never generates, never approves, never uploads, never spends credits.
 metadata:
   brand: cambridge-diet-vn
   section: ads
@@ -20,15 +20,26 @@ Consider the user input above before proceeding (if not empty). Expected input:
 
 Optional (passed through unchanged):
 
-- **Stage** (`stage: <name>`) — one of `background`, `subject`, `scene`,
-  `composite`, `text` to target a specific stage. Omit it and the agent works the
-  **next open stage** (the first stage with no selected-for-next candidate).
+- **Step** (`stage: <name>`) — one of `subject`, `full` (the Full-image step,
+  backend layer `background`; alias `background`), `edit` (the Edit step, backend
+  layer `composite`; alias `composite`), or `text` to target a specific step. Omit
+  it and the agent works the **next open step** (the first required step with no
+  selected-for-next candidate — Subject and Edit are optional, so they run only
+  when reached or explicitly targeted). The retired **Scene** step (`scene` /
+  `model`) is no longer valid — its work folds into the Full-image step.
+- **Change** (`change: <what to change>`) — **Edit step only** — the operator's
+  "what to change" instruction that drives a generic Kontext edit over the chain
+  tip (e.g. *"đặt sản phẩm lên bàn bên trái"*, *"chỉnh ánh sáng ấm hơn"*). The Edit
+  step is optional and repeatable; without a `change` (and no pending edit) it
+  stops and asks what to change, or routes you on to Text.
 - **Revision note** (`revise: <note>`) — a free-text correction for the **active
-  stage's** saved prompt. The active stage's skill **rewrites** that prompt (with
+  step's** saved prompt. The active step's skill **rewrites** that prompt (with
   optimistic-concurrency versioning) and re-saves it. It never generates.
-- **Product** (`product: <creative_id>`) — **composite stage only** — which approved
-  brief-level product packshot the composite should use, when the brief has more than
-  one (with several and no selector, the composite skill **stops and asks** which).
+- **Product** (`product: <creative_id>`) — **Edit step only** — which approved
+  brief-level product packshot a product edit should reference, when the brief has
+  more than one (with several and no selector, the Edit skill **stops and asks**
+  which). Product enters primarily as a Full-image reference; further product
+  tweaks go through a Step-3 edit.
 
 If `brief_id` is missing, ask the operator for it (one question) before
 dispatching — **do not invent one**. There is no `date` selector: a `brief_id` is
@@ -45,26 +56,27 @@ The two coexist and are cleanly delineated:
   generation settings only** and **spends no credits**. The human clicks
   **Generate** and selects a candidate in the ImageStudio.
 
-Pick deliberately: use `/ssc.image-prompt` to draft and refine the per-stage
+Pick deliberately: use `/ssc.image-prompt` to draft and refine the per-step
 prompts + model/control settings the studio Generate button will consume.
 
 ## What to do
 
 This command is a **thin entry point — it holds no orchestration logic.** It
 dispatches the single orchestrator **`ssc-image-prompt-agent`** (`brief_id`, plus
-optional `stage` / `revise:` passthrough) and stops. It does **not** resolve the
-concept, pick a stage, or choose models itself — that is the agent's and skills'
-job.
+optional `stage` / `change:` / `revise:` / `product:` passthrough) and stops. It
+does **not** resolve the concept, pick a step, or choose models itself — that is
+the agent's and skills' job.
 
-`ssc-image-prompt-agent` is a **state-driven, next-open-stage stepper**: on each
+`ssc-image-prompt-agent` is a **state-driven, next-open-step stepper**: on each
 invocation it resolves `get_brief(brief_id) → { brief, idea }`, gates (the idea is
 an approved ad concept; the brief is an approved angle), reads the brief's studio
-state, works the **single next-open stage** across
-**`background` → `subject` → `scene` (persists `model`) → `composite` → `text`** by
-dispatching that stage's skill — which authors the full scene prompt +
-`generation_config` and **saves it via `save_creative_prompt`** — then **STOPS** at
-the human Generate/select gate. Re-invoke to advance; re-invoke with `revise:` to
-correct the active stage's prompt.
+state, works the **single next-open step** across the four-step chain —
+**`subject` (optional anchor) → `full` (background, situation-aware) → `edit`
+(composite, optional + repeatable) → `text`** — by dispatching that step's skill,
+which authors the full scene prompt + `generation_config` and **saves it via
+`save_creative_prompt`** — then **STOPS** at the human Generate/select gate.
+Re-invoke to advance; re-invoke with `revise:` to correct the active step's prompt,
+or with `change:` to author another Edit.
 
 **Propose-only:** the agent and its skills **never** generate an image, approve,
 upload, select a candidate, set a cover, publish, or spend credits. Generation and

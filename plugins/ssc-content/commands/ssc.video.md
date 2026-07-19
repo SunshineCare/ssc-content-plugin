@@ -1,5 +1,6 @@
 ---
-description: Launch the reusable Brand OS video-production workflow (011-video-production) for ONE approved idea + channel (post/ad/youtube) — Brief → Script → Storyboard → Scene Assets → Assemble → Package → Voice. Thin entry point that dispatches ssc-video-agent, which is state-driven — it reads the production's current step state and works the single next open step it can actually produce (currently: Script, then Storyboard — both Cowork-native text steps), stopping at that step's human gate. Scene Assets/Assemble/Package/Voice need backend AI-generation MCP tools (US3/US6) not yet built; the agent reports this plainly rather than working around it. Propose-only; nothing auto-approves.
+description: >-
+  Launch the reusable Brand OS video-production workflow (011-video-production) for ONE approved idea + channel (post/ad/youtube) — Brief → Script → Storyboard → Scene Assets → Assemble → Package → Voice. Thin entry point that dispatches ssc-video-agent, which is state-driven — it reads the production's current step state and works the single next open step it can actually produce (currently: Script, then Storyboard — both Cowork-native text steps), stopping at that step's human gate. Scene Assets/Assemble/Package/Voice need backend AI-generation MCP tools (US3/US6) not yet built; the agent reports this plainly rather than working around it. Propose-only; nothing auto-approves.
 metadata:
   brand: cambridge-diet-vn
   section: video

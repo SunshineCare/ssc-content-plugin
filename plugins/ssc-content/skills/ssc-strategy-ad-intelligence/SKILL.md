@@ -1,6 +1,7 @@
 ---
 name: ssc-strategy-ad-intelligence
-description: Diagnoses the Vietnamese meal-replacement / weight-loss ad market (awareness stage + sophistication) and assesses Cambridge Diet VN's own paid angles — grounded in our ACTUAL ingested ad-set performance (get_ad_performance: spend, CTR, cost-per-result) alongside the angle KB and a competitor scan. Flags fatigued/inefficient angles and winning ones. Saves findings via save_strategy_finding (dimension=ad_market).
+description: >-
+  Diagnoses the Vietnamese meal-replacement / weight-loss ad market (awareness stage + sophistication) and assesses Cambridge Diet VN's own paid angles — grounded in our ACTUAL ingested ad-set performance (get_ad_performance: spend, CTR, cost-per-result) alongside the angle KB and a competitor scan. Flags fatigued/inefficient angles and winning ones. Saves findings via save_strategy_finding (dimension=ad_market).
 metadata:
   type: skill
   stage: strategy

@@ -1,6 +1,7 @@
 ---
 name: ssc-ads-agent
-description: Runs the standalone Cambridge Diet Vietnam Ads pipeline — Focus → Approaches → Blueprint → Ideate → Measure — keyed on its own ad channel_plan, with no /ssc.plan dependency. State-driven: on each invocation it runs the next open step and stops at the next human gate. Propose-only; the agent never flips a gate.
+description: >-
+  Runs the standalone Cambridge Diet Vietnam Ads pipeline — Focus → Approaches → Blueprint → Ideate → Measure — keyed on its own ad channel_plan, with no /ssc.plan dependency. State-driven: on each invocation it runs the next open step and stops at the next human gate. Propose-only; the agent never flips a gate.
 metadata:
   type: agent
   stage: ads-pipeline

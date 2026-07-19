@@ -1,6 +1,7 @@
 ---
 name: ssc-post-focus
-description: Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Posts pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's retrospective into the month's post tactics: which quarterly angles to push, the priority-pillar bets, and the tactical themes. Writes the tactics onto the post channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
+description: >-
+  Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Posts pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's retrospective into the month's post tactics: which quarterly angles to push, the priority-pillar bets, and the tactical themes. Writes the tactics onto the post channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
 metadata:
   type: skill
   stage: post-pipeline

@@ -1,6 +1,7 @@
 ---
 name: ssc-ads-focus
-description: Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Ads pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's ad retrospective into the month's ad tactics: which quarterly angles to push in paid, the priority-pillar bets, and the tactical themes. Writes the tactics onto the ad channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
+description: >-
+  Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Ads pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's ad retrospective into the month's ad tactics: which quarterly angles to push in paid, the priority-pillar bets, and the tactical themes. Writes the tactics onto the ad channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
 metadata:
   type: skill
   stage: ads-pipeline

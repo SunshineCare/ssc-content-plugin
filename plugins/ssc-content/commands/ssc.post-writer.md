@@ -1,5 +1,6 @@
 ---
-description: Launch the standalone Cambridge Diet Vietnam post-writer production loop — resolve a scheduled post (by date or idea id) → produce N Vietnamese copy variations → self-score + drop/regenerate to brand → PRESENT the set in chat for the operator's review (revise loop) → save as idea-linked drafts only on the operator's go-ahead. Interactive: waits for the operator's review before saving; does not save autonomously. Runs after the planning pipeline's Schedule. Propose-only; no /ssc.plan or /ssc.post-plan dependency.
+description: >-
+  Launch the standalone Cambridge Diet Vietnam post-writer production loop — resolve a scheduled post (by date or idea id) → produce N Vietnamese copy variations → self-score + drop/regenerate to brand → PRESENT the set in chat for the operator's review (revise loop) → save as idea-linked drafts only on the operator's go-ahead. Interactive: waits for the operator's review before saving; does not save autonomously. Runs after the planning pipeline's Schedule. Propose-only; no /ssc.plan or /ssc.post-plan dependency.
 metadata:
   brand: cambridge-diet-vn
   section: post

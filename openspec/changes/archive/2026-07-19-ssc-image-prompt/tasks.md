@@ -1,5 +1,14 @@
 # Tasks — ssc-image-prompt
 
+> **Historical note.** These tasks record the work as originally scaffolded. The
+> pipeline was restructured during implementation and the skills were subsequently
+> renamed, so the paths and layer keys below are the *original* ones. Final shipped
+> names (skill == studio label == `layer` key):
+> `ssc-image-prompt-scene` (`scene`) → `-subject` (`subject`) →
+> `-composition` (`composition`) → `-edit` (`edit`) → `-text` (`text`).
+> The reserved text/subject zones referenced in task 1.1 were **deleted**. See
+> `design.md` and `specs/ads-image-prompt-authoring/spec.md` for the shipped behaviour.
+
 All tasks are **prose** (markdown skills / agent / command) — non-code, no TDD gate.
 Each new skill's directory name MUST equal its frontmatter `name`. Every `tools:`
 list carries reads + `save_creative_prompt` ONLY. Load-bearing rule: the `-scene`

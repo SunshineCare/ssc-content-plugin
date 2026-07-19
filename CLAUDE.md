@@ -37,10 +37,9 @@ Claude/Cowork session.
 ## Layout
 
 ```
-.claude-plugin/marketplace.json   # marketplace manifest → points at plugins/ssc-content
-plugins/ssc-content/
-  .claude-plugin/plugin.json      # plugin manifest (version, MCP server config)
-  .mcp.json                       # duplicate MCP config (must stay in sync with plugin.json)
+.claude-plugin/marketplace.json   # marketplace manifest → points at plugins/ssc
+plugins/ssc/
+  .claude-plugin/plugin.json      # plugin manifest (version, MCP server config) — the ONLY MCP config
   commands/  (7 × ssc.*.md)       # thin slash-command entry points
   agents/    (6 × ssc-*-agent.md) # pipeline orchestrators
   skills/    (33 × <name>/SKILL.md)# the actual work units
@@ -49,8 +48,8 @@ plugins/ssc-content/
 docs/superpowers/specs/           # design specs for in-flight work
 ```
 
-Only `plugins/ssc-content/` ships when installed — the marketplace `source` is
-`./plugins/ssc-content`. Repo-root files (README, docs, any future test
+Only `plugins/ssc/` ships when installed — the marketplace `source` is
+`./plugins/ssc`. Repo-root files (README, docs, any future test
 scaffolding) never install.
 
 ## Architecture: the three-layer dispatch model
@@ -112,13 +111,23 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
 - **Persisted prose is Vietnamese.** All content written to BrandOS (copy,
   rating comments, KB revisions) is Vietnamese. Operator-facing chat / system
   text (including hook reasons) may be the operator's language.
-- **`plugin.json` and `.mcp.json` carry the same MCP config** (BrandOS at
-  `https://ssc.sunshinecare.vn/bos/mcp`, OAuth `clientId: ssc-content-plugin` +
-  `scopes: bos:access`). The `clientId` is **required** — it must match the
+- **The MCP config lives in `plugin.json` ONLY — never add a `.mcp.json`.**
+  The BrandOS server (`https://ssc.sunshinecare.vn/bos/mcp`, OAuth
+  `clientId: ssc-content-plugin` + `scopes: bos:access`) is declared once, in
+  `plugin.json`'s `mcpServers`. The `clientId` is **required** — it must match the
   client the BrandOS auth server (`content.sunshinecare.vn`) has registered;
   omitting it makes Claude Code fall back to a generic
   `claude.ai/oauth/claude-code-client-metadata` client_id, which the server
-  rejects with `invalid_request`. Edit both together — they must not drift.
+  rejects with `invalid_request`.
+
+  > **Why the duplicate was removed (2026-07-19).** This repo used to carry the
+  > same MCP block in **both** `plugin.json` and `.mcp.json`, "kept in sync".
+  > That duplication is exactly what made **Cowork** fail every marketplace sync
+  > with `REMOTE_SYNC_FAILED` ("Marketplace sync failed. Check the repository URL")
+  > — Cowork rejects a plugin that declares the same MCP server twice, while
+  > Claude Code silently tolerated it. Proven by bisect: a test plugin with
+  > **either** file alone syncs fine; with **both** it always fails, `oauth`
+  > present or not. **Do not reintroduce `.mcp.json`.**
 - **Every MCP tool a skill references must exist on the BrandOS surface.** Tool
   names look like `save_content`, `get_idea`, `save_channel_plan` (verbs:
   save/get/list/approve/unapprove/update/delete/edit/check/propose/upload).
@@ -140,9 +149,9 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   on stdin and emits a decision):
   ```bash
   echo '{"tool_name":"mcp__ssc__approve_idea","agent_id":"ssc-post-agent"}' \
-    | node plugins/ssc-content/hooks/approval-gate.mjs   # → deny (subagent)
+    | node plugins/ssc/hooks/approval-gate.mjs   # → deny (subagent)
   echo '{"tool_name":"mcp__ssc__approve_idea"}' \
-    | node plugins/ssc-content/hooks/approval-gate.mjs   # → ask (main conversation)
+    | node plugins/ssc/hooks/approval-gate.mjs   # → ask (main conversation)
   ```
 - There is **no automated test suite yet**; a design for a local test + lint
   harness is at `docs/superpowers/specs/2026-07-03-plugin-test-lint-harness-design.md`.
@@ -157,11 +166,11 @@ needs the **qualified `plugin@marketplace` id** (plain `ssc-content` reports
 ```bash
 # Install: add the marketplace once, then install by name
 claude plugin marketplace add github.com/SunshineCare/ssc-content-plugin.git
-claude plugin install ssc-content@ssc-content-plugin
+claude plugin install ssc@ssc-content-plugin
 
 # Update: refresh the marketplace from git, then update the plugin (restart to apply)
 claude plugin marketplace update ssc-content-plugin
-claude plugin update ssc-content@ssc-content-plugin
+claude plugin update ssc@ssc-content-plugin
 ```
 
 First use prompts an OAuth login to the BrandOS server via the SSC portal.
@@ -186,9 +195,9 @@ picked up by an update. Force a fresh copy of the working tree with
 uninstall + reinstall:
 
 ```bash
-# after editing plugins/ssc-content/**:
-claude plugin uninstall ssc-content@ssc-content-plugin
-claude plugin install  ssc-content@ssc-content-plugin
+# after editing plugins/ssc/**:
+claude plugin uninstall ssc@ssc-content-plugin
+claude plugin install  ssc@ssc-content-plugin
 # then restart Claude Code to load the new copy
 ```
 

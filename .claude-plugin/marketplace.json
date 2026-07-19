@@ -7,12 +7,12 @@
   },
   "plugins": [
     {
-      "name": "ssc-content",
+      "name": "ssc",
       "description": "Cambridge Diet Vietnam — ads, posts, YouTube, KB and strategy workflows for Cowork operators",
       "author": {
         "name": "SunshineCare"
       },
-      "source": "./plugins/ssc-content"
+      "source": "./plugins/ssc"
     }
   ]
 }

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Reporting Style
+
+Extreme concision. Sacrifice grammar for brevity — drop articles, pronouns, filler verbs. Telegraphic fragments over full sentences. No preamble, no recap, no "I've now…". Report facts + file refs only. Applies to all summaries/status/answers back to the user (not to code, comments, spec docs, or Vietnamese operator-facing skill output).
+
 ## Codebase Access — use codebase-memory-mcp FIRST
 
 **The codebase knowledge graph is the primary tool for any code exploration or navigation in this repo — reach for it before Grep/Glob/Read.** Reinforced by global codebase-memory-mcp hooks (SessionStart + SubagentStart reminders, and a PreToolUse discovery gate that augments search calls). (This repo is mostly prose skills/agents/commands — most work routes to Grep/Read; the graph still helps for the executable hook + any code.)

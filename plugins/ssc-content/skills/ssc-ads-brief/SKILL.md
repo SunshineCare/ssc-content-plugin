@@ -41,7 +41,7 @@ Discarding an angle is **not** how you get new angles — re-invoking this skill
 
 So: discarding an angle is an **operator decision with real consequences**, taken deliberately in the dashboard with the blast radius in view. It is not a reset button, and it is never a step you instruct as part of getting more angles. **You never perform a delete** — you only describe it.
 
-This is the **first step** of the ad flow — it runs right after the concept is approved (`ssc-ads-agent`'s Ideate), to give the operator a set of synthesized angle options to pick from before production. It is also what the **whole downstream ad surface hangs off**: an approved angle `brief_id` is the anchor `ssc-ads-writer` writes copy against and the anchor `ssc-image` builds its creative chain against (`background → model → product → composite`), and the ad `content` rows carry that `brief_id` as their angle lineage. The briefs you write here are the durable spine of the concept's production — not a throwaway handoff note.
+This is the **first step** of the ad flow — it runs right after the concept is approved (`ssc-ads-agent`'s Ideate), to give the operator a set of synthesized angle options to pick from before production. It is also what the **whole downstream ad surface hangs off**: an approved angle `brief_id` is the anchor `ssc-ads-writer` writes copy against and the anchor `ssc-image` builds its creative chain against (`scene → subject → composition → edit → text`), and the ad `content` rows carry that `brief_id` as their angle lineage. The briefs you write here are the durable spine of the concept's production — not a throwaway handoff note.
 
 ## Inputs
 

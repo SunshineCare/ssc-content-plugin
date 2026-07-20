@@ -136,9 +136,11 @@ Call: get_knowledge
   ]
 ```
 
-1. **The chosen angle brief** — `angle_label` + the five narrative fields; the person must express **this** angle's `core_message` + `story_moment`.
-2. **The persona detail doc** (`brand/persona-<slug>`) — her **age, life stage, home, and emotional register**; this gives the woman her face and bearing.
-3. **ALL APPROVED CONTENTS of the brief** (Step 3, D4) — meaning + tone only; her expression resolves the moment the approved copy / headline / description / image_content imply.
+> **Two authorities, not one.** The brief is the **ANGLE** authority (which angle this person belongs to — always, non-negotiably). The **approved contents are the MOMENT + register authority** whenever any exist; the brief's `story_moment` is the **fallback**, not the preferred source. Approved copy is what the operator signed off and what runs beside this image, and it may have been edited away from the brief's original direction.
+
+1. **The chosen angle brief** — `angle_label` + the five narrative fields; the person must express **this** angle. It fixes WHICH ANGLE; approved contents, where they exist, fix which MOMENT within it.
+2. **ALL APPROVED CONTENTS of the brief** (Step 3, D4) — the **moment + register** her expression resolves, **in preference to the brief's `story_moment`**. Where the two disagree, follow the approved contents and note it in the summary. Meaning + tone **only** — **never their words**: grounding closer to the copy makes naming it more tempting, and naming it is how the string gets drawn into the picture (Prompt Rule 1).
+3. **The persona detail doc** (`brand/persona-<slug>`) — her **age, life stage, home, and emotional register**; this gives the woman her face and bearing.
 4. **Brand / visual KB + compliance** — `brand/visual-identity` (palette, light, register), `ad/visual-direction-ref`, `ad/creative-guidelines`, and `rules/compliance` + `rules/food-placeholder` as visual constraints (no medical/clinical staging, no before/after body comparison, nothing implying a promised result). **Load the same paths on both channels** — the two `ad/` docs are the brand's only visual-direction references, so read them as the visual standard for a `post` visual too; the KB has no post-channel visual doc, so never invent one and never skip them on a post.
 5. **The concept** — `idea.title`, `idea.ad_notes`, the structural tags.
 

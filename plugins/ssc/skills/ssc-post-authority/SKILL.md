@@ -119,6 +119,8 @@ For the **`copy`** section the writer already handed you N unsaved variations �
 
 **Ground them in the LIVE APPROVED copies.** From the Step 0 `list_content` result take every row with `section === 'copy'` AND `status === 'approved'` and read their **current** `body` values — the operator may have edited an approved copy in the dashboard, so use the live rows, never a cached or prior-run body. **Anchor each version to ONE approved copy** and distil **that copy's HOOK** (its opening / sharpest line) into the on-image headline: you are leveraging the copy the operator actually picked, not inventing a new angle. Honour the same brief the copy honours (`core_message`, pillar, persona, `why_now`).
 
+**When the approved copy and the brief DIVERGE, the approved copy wins — say so, never resolve it silently.** An operator can edit an approved copy in the dashboard until it no longer says quite what the brief directed. The **live approved copy is the content authority** here — it is what the operator signed off and what will actually run — while the brief remains the **angle** authority. So distil the copy as it now reads, not as the brief once described it, and **flag the divergence when you present the set** (Step 4) so the operator can re-approve the copy or re-brief the angle deliberately. An `image_content` version that quietly splits the difference between the two is the one outcome to avoid. (Same rule `ssc-ads-writer` applies on the ad side, and the ImageStudio prompt steps apply to the visual.)
+
 **The markers are a fixed contract; the PAYLOAD is not.** Emit this structure:
 
 ```

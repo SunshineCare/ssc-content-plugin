@@ -146,7 +146,7 @@ tra được dấu tiếng Việt — hãy soi lại trong ImageStudio.*
 
 ### Step 5 — Author the text-placement `body`
 
-Author a **positive, placement-only** prompt that renders the exact Vietnamese lines onto a naturally clean, quiet area of the finished chain-tip image. Obey the prompt discipline carried from `ssc-image` — with the **one exception** that the exact string appears:
+Author a **positive, placement-only** prompt that renders the exact Vietnamese lines onto a naturally clean, quiet area of the finished chain-tip image. Obey the prompt discipline — with the **one exception** that the exact string appears:
 
 1. **The exact Vietnamese string appears VERBATIM** — quote each approved line in the `body` exactly as Step 3 held it (this is the sanctioned exception; a text-render layer must be given the literal string to render).
 2. **Never negate** — describe the placement as what *is* there ("the headline sits in the upper third, over the smooth cream plaster area"), never "no other text", "without clutter".

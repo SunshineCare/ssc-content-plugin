@@ -52,7 +52,7 @@ angle briefs.
 ### Modified Capabilities
 
 <!-- none — there is no existing ads-brief capability spec. The existing specs
-     (ads-image-visual, persona-context-grounding) are unrelated; their
+     (ads-image-prompt-authoring, persona-context-grounding) are unrelated; their
      requirements do not change. -->
 
 ## Impact

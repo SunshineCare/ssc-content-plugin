@@ -28,24 +28,24 @@ The skill MUST NOT omit the argument on the assumption that the server will leav
 
 ### Requirement: Downstream consumers resolve copy by angle
 
-With ad content rows carrying an explicitly-passed `brief_id`, a consumer that needs "the approved copy for *this* angle" SHALL be able to resolve it by filtering `list_post_content` rows on `brief_id`, and the stamp it filters on SHALL be the angle the row was written from. `/ssc.image`'s approved-copy gate SHALL take its brief-scoped path — the normal path — for such rows.
+With ad content rows carrying an explicitly-passed `brief_id`, a consumer that needs "the approved copy for *this* angle" SHALL be able to resolve it by filtering `list_post_content` rows on `brief_id`, and the stamp it filters on SHALL be the angle the row was written from. `/ssc.image-prompt`'s approved-copy gate SHALL take its brief-scoped path — the normal path — for such rows.
 
 A stamp the server inferred is indistinguishable from one the writer supplied, so the lineage SHALL be treated as trustworthy only for rows written after this change. It MUST NOT be assumed correct for older rows, and a consumer MUST NOT rely on any downstream check to catch a wrong one — there is none.
 
 #### Scenario: The image skill's copy gate matches at brief scope
 
-- **WHEN** `/ssc.image` runs for idea `I` + brief `B` and the approved `copy` rows for `I` carry a `brief_id`
+- **WHEN** `/ssc.image-prompt` runs for idea `I` + brief `B` and the approved `copy` rows for `I` carry a `brief_id`
 - **THEN** its gate matches only rows with `brief_id = B`, and its output summary declares that copy was matched at **brief scope** — the normal path
 
 #### Scenario: A mis-inferred stamp is undetectable downstream
 
 - **WHEN** an ad `copy` row was saved without an explicit `brief_id` and the server inferred a brief other than the one the copy was written from
-- **THEN** `/ssc.image`'s brief-scoped filter still matches that row, no error is raised and no result looks empty, and the visual is grounded in another angle's story at generation-credit cost — the silent failure this change exists to prevent
+- **THEN** `/ssc.image-prompt`'s brief-scoped filter still matches that row, no error is raised and no result looks empty, and the visual is grounded in another angle's story at generation-credit cost — the silent failure this change exists to prevent
 
 #### Scenario: Rows with no lineage at all remain the fallback's business
 
 - **WHEN** an idea's approved `copy` rows carry no `brief_id` at all (a legacy row written before the lineage was recorded)
-- **THEN** `/ssc.image` applies its own narrowed fallback — idea scope only when the idea has exactly ONE brief, announced as a fallback; STOP when the idea has more than one — and this change neither removes, widens, nor otherwise alters that rule
+- **THEN** `/ssc.image-prompt` applies its own narrowed fallback — idea scope only when the idea has exactly ONE brief, announced as a fallback; STOP when the idea has more than one — and this change neither removes, widens, nor otherwise alters that rule
 
 ### Requirement: The server rejects ad content saved without a brief, and never infers one
 
@@ -70,7 +70,7 @@ Inference is defensible for `post` content, where the idea's single brief resolv
 
 ### Requirement: Content rows with a NULL brief_id are purged
 
-**Server-side requirement (BrandOS MCP), not implementable in this repo.** Existing `content` rows whose `brief_id` **IS NULL** SHALL be **deleted**. Such a row cannot be attributed to any angle, MUST NOT be consumed by any downstream step, and cannot be repaired by the plugin — which has no record of which angle each historical row was written from. It is exactly the row that makes `/ssc.image` STOP rather than risk grounding a visual in the wrong angle's story. These rows are unusable, not merely untidy.
+**Server-side requirement (BrandOS MCP), not implementable in this repo.** Existing `content` rows whose `brief_id` **IS NULL** SHALL be **deleted**. Such a row cannot be attributed to any angle, MUST NOT be consumed by any downstream step, and cannot be repaired by the plugin — which has no record of which angle each historical row was written from. It is exactly the row that makes `/ssc.image-prompt` STOP rather than risk grounding a visual in the wrong angle's story. These rows are unusable, not merely untidy.
 
 The purge SHALL be a **one-time** cleanup, because a NULL `brief_id` on ad content becomes unreachable once two changes land: this capability's rejection requirement closes the write path (no ad content row can be created without a `brief_id`), and the sibling change `ads-angle-set-curation` closes the other path by replacing `content.brief_id ON DELETE SET NULL` with a cascade that hard-deletes an angle's copy along with the angle. The purge SHOULD therefore be run after both, or it will have to be run again.
 

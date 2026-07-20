@@ -40,9 +40,9 @@ Claude/Cowork session.
 .claude-plugin/marketplace.json   # marketplace manifest → points at plugins/ssc
 plugins/ssc/
   .claude-plugin/plugin.json      # plugin manifest (version, MCP server config) — the ONLY MCP config
-  commands/  (7 × ssc.*.md)       # thin slash-command entry points
-  agents/    (6 × ssc-*-agent.md) # pipeline orchestrators
-  skills/    (33 × <name>/SKILL.md)# the actual work units
+  commands/  (10 × ssc.*.md)      # thin slash-command entry points
+  agents/    (8 × ssc-*-agent.md) # pipeline orchestrators
+  skills/    (41 × <name>/SKILL.md)# the actual work units
   hooks/approval-gate.mjs         # PreToolUse governance hook (the only real code)
   hooks/hooks.json                # wires the hook to mcp__ssc__(approve|unapprove)_*
 docs/superpowers/specs/           # design specs for in-flight work
@@ -59,9 +59,8 @@ its agent, and a skill together:
 
 1. **Commands** (`/ssc.*`) are **thin entry points that hold no orchestration
    logic.** They parse operator input and dispatch a single agent. Exception:
-   `/ssc.ads-produce`, `/ssc.ads-brief`, and `/ssc.image` dispatch their production
-   skills (`ssc-ads-writer`, `ssc-ads-brief`, and `ssc-image`) directly rather than
-   through an agent.
+   `/ssc.ads-produce` and `/ssc.ads-brief` dispatch their production skills
+   (`ssc-ads-writer`, `ssc-ads-brief`) directly rather than through an agent.
 2. **Agents** (`ssc-*-agent`) are **orchestrators.** Frontmatter declares
    `orchestrates: [skills…]`, the read-only `tools:` they use to resolve state,
    a `capability` (`view`/`edit`), and `approval-gates: human`. Agents are
@@ -80,7 +79,7 @@ its agent, and a skill together:
 | Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Blueprint → Ideate → Measure |
 | Ads (brief) | `/ssc.ads-brief` | *(direct → ads-brief)* | Brief-first FIRST step — produces 4-5 rated DRAFT angle briefs via `save_brief` from concept + persona + build_spec (no copy needed; produce-once; operator approves ONE angle) |
 | Ads (produce) | `/ssc.ads-produce <briefId> [section]` | *(direct → ads-writer)* | Anchored to the chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy); saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
-| Ads (image) | `/ssc.image <ideaId> <briefId>` | *(direct → ssc-image)* | Visual half — anchored to the chosen approved angle brief (needs ≥1 approved copy for it; `image_content` is never read — it is the dashboard's later on-image overlay). Steps the creative chain background → model → product → composite, one layer per run, stopping for human approval at each; the skill authors the full scene prompt and it reaches the image engine verbatim, grounded in the brief + approved copy + persona doc + brand KB. Product is upload-only. Ad channel only (phase 1); propose-only. |
+| Image (prompt) | `/ssc.image-prompt <briefId> [step]` | `ssc-image-prompt-agent` | Scene → Subject → Composition → Edit → Text (all optional) — the **only** image path, and it is **zero-credit**: it authors each step's prompt + `generation_config` and saves via `save_creative_prompt`, then stops. **Cowork never generates** — the operator clicks Generate and selects a candidate in the ImageStudio dashboard, which is what spends fal credits. Anchored to ONE approved `briefId`; the owning idea **and the channel** resolve from the brief (`ad` and `post` both run; any other channel stops). Prompts are grounded in the brief + that channel's approved contents + persona doc + brand KB and reach the engine verbatim. Product is upload-only. |
 | YouTube | `/ssc.youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
 | Knowledge base | `/ssc.kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
 | Strategy (quarterly) | `/ssc.strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |

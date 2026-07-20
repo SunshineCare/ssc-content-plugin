@@ -42,13 +42,13 @@ Meanwhile the server's `delete(entity='brief')` semantics have not caught up wit
 
 ### Modified Capabilities
 
-None. `ads-image-visual` is not touched: its brief-scoped copy gate, its single-brief announced fallback, and its multi-brief-no-lineage STOP all keep working unchanged — and the server cascade only makes them *more* reliable by removing the orphaned-row case rather than stranding it.
+None. `ads-image-prompt-authoring` is not touched: its brief-scoped copy gate, its single-brief announced fallback, and its multi-brief-no-lineage STOP all keep working unchanged — and the server cascade only makes them *more* reliable by removing the orphaned-row case rather than stranding it.
 
 ## Impact
 
 - **Modified (plugin):** `plugins/ssc-content/skills/ssc-ads-brief/SKILL.md` — the produce-once guard (Step 2) becomes a taken-set read; Step 3's distinctiveness rule extends across existing briefs; the frontmatter `description`, Output, and Governance sections drop "produce-once" and gain "append-only, never mutates an existing brief"; the "discard all to regenerate" remediation is replaced with an accurate statement of what deletion costs.
 - **Modified (plugin):** `plugins/ssc-content/commands/ssc.ads-brief.md` — the command's description and "After it runs" section restate the append semantics and drop the discard-to-regenerate instruction.
-- **Not modified:** `ssc-ads-writer`, `ssc-image`, and every other skill. Nothing downstream changes shape: the writer still takes ONE `brief_id`, the image skill still anchors on ONE `brief_id`.
+- **Not modified:** `ssc-ads-writer`, the `ssc-image-prompt-*` skills, and every other skill. Nothing downstream changes shape: the writer still takes ONE `brief_id`, the image skill still anchors on ONE `brief_id`.
 - **Requires a server change (BrandOS, out of this repo):** the `delete(entity='brief')` cascade + capability escalation + schedule refusal + preflight. Until it ships, the plugin's new prose describes the *current* server behaviour honestly; the delta spec's server requirements are the handoff contract.
 - **Governance invariant preserved:** the skill remains propose-only. It gains no destructive tool — appending is the *only* way it changes an idea's angle set, and the operator remains the sole actor who can approve or destroy one.
 - **No automated tests** exist in this repo; verification is by review plus a live `list_briefs` read before/after an append confirming the existing rows are untouched and the new rows are distinct.

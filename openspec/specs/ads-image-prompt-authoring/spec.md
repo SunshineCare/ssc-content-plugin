@@ -258,14 +258,19 @@ the downstream steps stale.
 - **WHEN** an operator revises a step whose downstream steps already have selected candidates
 - **THEN** the warning is surfaced and the revision still proceeds
 
-### Requirement: Coexistence with the existing ssc.image command
-This pipeline SHALL be added alongside the existing `/ssc.image` command and SHALL NOT
-remove it. The command's frontmatter description SHALL state that it is the
-propose-only, zero-credit sibling so operators can pick deliberately.
+### Requirement: The sole image path, and it never generates
+This pipeline SHALL be the only image path the plugin provides. No command, agent, or
+skill SHALL call an image-generation tool or spend fal credits: generating a candidate
+and selecting one are operator actions in the ImageStudio dashboard. The command's
+frontmatter description SHALL state that it authors prompts only and never generates.
 
-#### Scenario: Existing command untouched
-- **WHEN** this change is applied
-- **THEN** `/ssc.image` remains available and the new command declares itself the propose-only sibling
+#### Scenario: No credit-spending path exists
+- **WHEN** an operator looks for a way to generate an image from Cowork
+- **THEN** only `/ssc.image-prompt` exists, it saves a prompt via `save_creative_prompt` and stops, and the operator generates in the dashboard
+
+#### Scenario: A step appears to require generating
+- **WHEN** a step cannot proceed without a generated candidate that does not exist yet
+- **THEN** the pipeline STOPS and reports the missing candidate, and never improvises a generate call
 
 ### Requirement: Deployment-dependency safe stop
 The skill SHALL STOP cleanly with a Vietnamese message and write nothing when the

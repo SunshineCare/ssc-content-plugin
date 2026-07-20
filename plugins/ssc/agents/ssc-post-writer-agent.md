@@ -1,6 +1,6 @@
 ---
 name: ssc-post-writer-agent
-description: Runs the standalone Cambridge Diet Vietnam post-writer PRODUCTION loop — resolve a scheduled post (by date or idea id) → work ONE section (`copy`, the mandatory cold start, or `image_content`, the structured on-image copy the ImageStudio's Text layer renders, GATED on an approved copy; named by an optional section argument, else the next open one) → ssc-post-produce drafts N Vietnamese copy variations in-conversation (copy section) or ssc-post-authority drafts the on-image versions itself (image_content) → ssc-post-authority scores each 1–5 + Vietnamese comment, drops + regenerates any ≤3 until N are ≥4, then PRESENTS the set to the operator in chat and waits for review — the operator requests revisions (regenerate, re-score, re-present) or gives the go-ahead, and ONLY THEN the authority saves the set as drafts, stamping the target section and the post's brief_id on every row. This is an INTERACTIVE production loop that runs in the operator's conversation and waits for the operator's review before saving — it does NOT save-and-stop autonomously. Runs AFTER the planning pipeline's Schedule. State-driven; stops at the in-chat review checkpoint and resumes on the operator's revise/save instruction. Propose-only; the agent never approves, publishes, or flips a gate.
+description: Runs the standalone Cambridge Diet Vietnam post-writer PRODUCTION loop — resolve a scheduled post (by brief id, or by date) → work ONE section (`copy`, the mandatory cold start, or `image_content`, the structured on-image copy the ImageStudio's Text layer renders, GATED on an approved copy; named by an optional section argument, else the next open one) → ssc-post-produce drafts N Vietnamese copy variations in-conversation (copy section) or ssc-post-authority drafts the on-image versions itself (image_content) → ssc-post-authority scores each 1–5 + Vietnamese comment, drops + regenerates any ≤3 until N are ≥4, then PRESENTS the set to the operator in chat and waits for review — the operator requests revisions (regenerate, re-score, re-present) or gives the go-ahead, and ONLY THEN the authority saves the set as drafts, stamping the target section and the post's brief_id on every row. This is an INTERACTIVE production loop that runs in the operator's conversation and waits for the operator's review before saving — it does NOT save-and-stop autonomously. Runs AFTER the planning pipeline's Schedule. State-driven; stops at the in-chat review checkpoint and resumes on the operator's revise/save instruction. Propose-only; the agent never approves, publishes, or flips a gate.
 metadata:
   type: agent
   stage: post-production
@@ -8,7 +8,7 @@ metadata:
   section: post
   capability: edit
   orchestrates: [ssc-post-produce, ssc-post-authority]
-  tools: [get_content_by_date, get_idea]
+  tools: [get_brief, list_briefs, get_content_by_date, get_idea]
   approval-gates: human
 ---
 
@@ -28,7 +28,7 @@ autonomously. The flow stops at the in-chat review checkpoint and resumes on the
 This loop is the **production half** of the Posts pipeline. It runs **after** the planning
 pipeline's **Schedule** step — a post idea is only worked once it has been ideated,
 curated/approved, and placed on the calendar. You operate **per post idea**, never on a
-whole plan: you resolve a single scheduled post (by `date` or by `idea_id`), produce its
+whole plan: you resolve a single scheduled post (by `brief_id`, or by `date`), produce its
 variations end-to-end, then stop. You read no `channel_plan`, no gate flags, and no
 `ads`/`youtube` state.
 
@@ -53,7 +53,9 @@ orchestrate and stop.
 The operator provides **one of**:
 - `date` — a calendar day, format `YYYY-MM-DD` (e.g. `2026-07-14`). Resolved to the
   scheduled post idea(s) for that day.
-- `idea_id` — a specific idea id, targeting that idea directly.
+- `brief_id` — the post brief's id, targeting it directly. **The primary key** (and what the
+  dashboard's Cowork button emits): `get_brief` returns the brief AND its owning idea in one
+  call, and content is brief-keyed, so this is the id every downstream read and write uses.
 
 Optional:
 - `section` — **`copy` or `image_content`**. Names the target section this invocation, and
@@ -66,7 +68,7 @@ Optional:
 - `n` — the number of variations to produce. **Default 4.** Passed through to the writer
   and authority unchanged.
 
-Ask once if neither `date` nor `idea_id` is present; never invent one.
+Ask once if neither `brief_id` nor `date` is present; never invent one.
 
 A post carries exactly **two** produced text sections — `copy` and `image_content`. There
 is no `headline` and no `description` (those are ad-only). `image_content` is **gated on
@@ -95,21 +97,35 @@ It returns `{ date, channel, count, posts[], note }`. Each `posts[]` entry carri
   the remaining posts for that date still need their own pass. The operator re-invokes you
   per post. **Never batch-produce across ideas in a single run.**
 
-**If given an `idea_id`:** call `get_idea`:
+**If given a `brief_id`:** call `get_brief`:
 ```
-Call: get_idea
-  id: <idea_id>
+Call: get_brief
+  id: <brief_id>
 ```
-It returns the single idea (core lifecycle fields, the post-channel detail/brief, and
-`tags[]`). If it does not resolve, STOP and tell the operator the idea id was not found.
+It returns `{ brief, idea }` — the brief's five narrative fields **and its owning post
+idea** — so one call resolves both. If it returns `{ brief: null }`, STOP and tell the
+operator the brief id was not found. This is the direct path and the one the dashboard's
+Cowork button emits.
 
-Announce: `Post Writer — idea(<idea_id>) <pillar> · <persona>` once resolved.
+**If given a bare idea id** (the operator typed one instead of a brief id): call
+`list_briefs(idea_id)` and take the post's single brief, then continue as above. Do not
+refuse — a post idea has exactly one brief, so this resolves unambiguously.
 
-Hold the resolved idea's `id` — the writer carries it forward and the authority keys every
-read and write on it. Content is **brief-keyed**: the authority reads the post's single
-`brief_id` from its own `content` rows and passes it on each save (falling back to the
-**`idea` convenience** only on a true cold start, where the server binds the same single
-brief). **You do not write anything yourself** — you resolve and orchestrate.
+**Resolving a `date` to the brief:** `get_content_by_date` gives you the idea; take its
+single brief the same way (`list_briefs`), so every path below holds a `brief_id`.
+
+Announce: `Post Writer — brief(<brief_id>) · idea(<idea_id>) <pillar> · <persona>` once
+resolved.
+
+Hold the resolved **`brief_id`** — it is the key the writer carries forward and the
+authority keys every read and write on. Content is **brief-keyed** (`brief_id` is a saved
+row's sole lineage — there is no `idea_id` column), so passing the brief down means the
+authority reads `list_content(brief=<brief_id>)` and saves against that same id with
+nothing to re-derive: the old cold-start hole — no rows yet, therefore no `brief_id` to
+read, therefore fall back to the **`idea` convenience** — cannot arise, because the brief
+is in hand before the first read. Hold the owning idea's `id` too (from `get_brief`) for
+the announce line and the `/post/[month]/[id]` pointers. **You do not write anything
+yourself** — you resolve and orchestrate.
 
 ---
 
@@ -120,7 +136,7 @@ scores → PRESENT in chat → operator review/revise → SAVE on go-ahead → S
 
 **2a — Produce (writer) — the `copy` section only.** When the target section is `copy` (no
 `section` argument and no approved copy yet), invoke `ssc-post-produce`, passing the resolved
-post (the `date` or `idea_id`) and `n` (default 4). It reads the idea's brief + strategic tags
+post (its `brief_id`) and `n` (default 4). It reads the idea's brief + strategic tags
 and the voice/content/channel knowledge, then drafts **N distinct Vietnamese Facebook copy
 variations** — each a different angle/hook — **in this conversation, UNSAVED**. It does **not**
 call `save_content`; it does **not** score its own drafts. You do not write copy yourself.
@@ -129,11 +145,11 @@ When the target section is **`image_content`**, there is **no writer step** — 
 straight to 2b: the authority drafts the on-image versions itself, grounded in the post's
 **live approved copies**. If you cannot tell which section applies (the operator passed no
 `section` and you do not know whether a copy is approved), dispatch the authority anyway —
-its Step 0 reads `list_content(idea)`, resolves the section, and enforces the gate.
+its Step 0 reads `list_content(brief=<brief_id>)`, resolves the section, and enforces the gate.
 
 **2b — Authority (resolve section → draft image_content if that's the target → score →
 present → review/revise → save on go-ahead).** Invoke `ssc-post-authority`, passing the
-resolved `idea_id`, the `section` (if the operator gave one), the N in-conversation variations
+resolved `brief_id`, the `section` (if the operator gave one), the N in-conversation variations
 (when 2a ran), the idea's brief/tags, and `n`. It **scores each variation 1–5** with a Vietnamese rationale
 `comment` judged against `rules/{banned-words,compliance,food-placeholder,review-standards}`
 + `voice/*` + `content/quick-checklist`, runs the **drop-and-regenerate quality loop** (any
@@ -175,7 +191,7 @@ emit:
 ```
 ## Post Writer — <idea title or topic>
 
-Target idea: <idea_id> (<pillar> · <persona>)
+Target brief: <brief_id> · idea <idea_id> (<pillar> · <persona>)
 Section produced: <copy | image_content>
 Variations saved: <count> of <n> target (channel='post', section='<target>', status='draft', brief-bound) — saved on the operator's go-ahead
 
@@ -195,7 +211,7 @@ here is approved, scheduled, or published.
 ```
 
 - After **`copy`** is approved, the `image_content` section is freed — tell the operator to
-  re-invoke with `/ssc.post-writer <idea_id> image_content`.
+  re-invoke with `/ssc.post-writer <brief_id> image_content`.
 - After **`image_content`** is approved, the Images stage's **Text** layer renders it; the
   studio prompts are authored by the separate zero-credit `/ssc.image-prompt <brief_id>`.
 - If the authority STOPPED at the `image_content` gate (no approved copy), report that
@@ -238,7 +254,7 @@ human gate is the only approval.
   variations **in-conversation, UNSAVED** (it persists nothing); `ssc-post-authority` scores
   them, runs the drop-and-regenerate loop, presents the set, and — **only on the operator's
   go-ahead** — INSERTS the approved set via `save_content`. The agent itself only
-  **reads** to resolve the target (`get_content_by_date` or `get_idea`) and orchestrates the
+  **reads** to resolve the target (`get_brief`, or `get_content_by_date` + `list_briefs`) and orchestrates the
   two skills. It never calls `save_content` or any write tool.
 - **The persistence boundary is the authority's, not the writer's.** Drafting and persisting
   are split by design: the writer hands the authority unsaved drafts (and revises them during
@@ -267,5 +283,5 @@ human gate is the only approval.
 - Zero auto-applied changes is the success criterion — the only writes are DRAFT `content`
   rows awaiting the human approve gate.
 - Requires `edit` capability (same as both child skills, plus `view` for the
-  `get_content_by_date` / `get_idea` reads). Approving a variation later requires `approve`
+  `get_brief` / `list_briefs` / `get_content_by_date` reads). Approving a variation later requires `approve`
   in the workspace.

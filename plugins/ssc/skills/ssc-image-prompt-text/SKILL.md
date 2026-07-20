@@ -79,7 +79,7 @@ Call: list_content
 
 Filter to `section === 'image_content'` AND `status === 'approved'` for this brief — the **on-image overlay copy**, produced by `/ssc.ads-produce` on an **ad** brief and by `/ssc.post-writer` on a **post** brief. **Both channels carry an `image_content` section**, so this precondition is identical on either — both producers write a density menu you select from; only the producing command differs. Its `body` is a structured Vietnamese block (`HEADLINE:` / `SUBHEADLINE:` / `BULLETS:`). This is the **EXACT string source** — its `HEADLINE:` line is the headline placed onto the finished image (its naturally clean area); the `SUBHEADLINE:` and bullets are the supporting on-image lines.
 
-- **No approved `image_content` row** → **STOP** (Vietnamese), write nothing, routing to the **channel's** content command: *Chưa có nội dung on-image (`image_content`) được duyệt cho brief này. Hãy chạy `/ssc.ads-produce <brief_id> image_content` (concept quảng cáo) hoặc `/ssc.post-writer <idea.id> image_content` (bài viết), duyệt một bản trong dashboard, rồi chạy lại tầng chữ.*
+- **No approved `image_content` row** → **STOP** (Vietnamese), write nothing, routing to the **channel's** content command: *Chưa có nội dung on-image (`image_content`) được duyệt cho brief này. Hãy chạy `/ssc.ads-produce <brief_id> image_content` (concept quảng cáo) hoặc `/ssc.post-writer <brief_id> image_content` (bài viết), duyệt một bản trong dashboard, rồi chạy lại tầng chữ.*
 
 **SEVERAL approved rows is the NORMAL case — and choosing between them is YOUR job.** Both producers — `ssc-ads-writer` on an `ad` brief, `ssc-post-authority` on a `post` brief — deliberately write a **density menu**: some versions carry only a `HEADLINE:`, others add a `SUBHEADLINE:` and up to three bullets, spanning at least two densities across the set. They are written in the text stage, **before any visual exists**, so they *cannot* know what they will sit on. **You can** — you resolve the chain tip. Pick the approved row whose density actually fits that image:
 
@@ -93,7 +93,7 @@ Filter to `section === 'image_content'` AND `status === 'approved'` for this bri
 
 State in the Output report **which approved row you chose (its content id) and what drove it** (e.g. *"chọn bản Minimal — chain tip là chân dung cận mặt theo prompt subject, không có vùng trống cho bullet"*). If two rows fit equally, prefer the **shorter** one: on-image, unread text is worse than absent text.
 
-**You select a row; you never assemble one.** Take one approved row **whole** — never merge lines from two rows, never drop its subheadline or a bullet to "make it fit," never promote a bullet. Trimming an approved body is an edit, and editing approved copy is not yours to do. If every approved row is too heavy for the tip, say so plainly rather than silently shortening, and route the operator to approve a lighter row from the batch — or to re-run the channel's producing command (`/ssc.ads-produce <brief_id> image_content` or `/ssc.post-writer <idea_id> image_content`) for a fresh set, which spans densities and so will offer a lighter option.
+**You select a row; you never assemble one.** Take one approved row **whole** — never merge lines from two rows, never drop its subheadline or a bullet to "make it fit," never promote a bullet. Trimming an approved body is an edit, and editing approved copy is not yours to do. If every approved row is too heavy for the tip, say so plainly rather than silently shortening, and route the operator to approve a lighter row from the batch — or to re-run the channel's producing command (`/ssc.ads-produce <brief_id> image_content` or `/ssc.post-writer <brief_id> image_content`) for a fresh set, which spans densities and so will offer a lighter option.
 
 Hold the chosen `image_content` body **verbatim** — every Vietnamese line, with its diacritics, exactly as approved. You copy it into the prompt character-for-character; you never re-type, paraphrase, translate, or "tidy" it.
 
@@ -197,7 +197,7 @@ A `revise` note is an operator correction to **this** stage's saved prompt (e.g.
 **Staleness (warn, never block).** Text is the final step — nothing downstream depends on it. But if this step already has a selected candidate, note to the operator (Vietnamese) that *sửa prompt không đổi ảnh chữ đã chọn (ảnh đã cố định) — nó chỉ là công thức cho lần Generate mới* — then proceed. Never block.
 
 1. Read `list_creative_prompts(brief_id)`, take the `text`-layer row's current `body` + `version`.
-2. Rewrite that `body` applying the note — still carrying the **exact** approved Vietnamese lines verbatim (a placement note never edits the string; to change the words, the operator re-runs the channel's content command — `/ssc.ads-produce <brief_id> image_content` for an ad, `/ssc.post-writer <idea.id> image_content` for a post — and re-approves).
+2. Rewrite that `body` applying the note — still carrying the **exact** approved Vietnamese lines verbatim (a placement note never edits the string; to change the words, the operator re-runs the channel's content command — `/ssc.ads-produce <brief_id> image_content` for an ad, `/ssc.post-writer <brief_id> image_content` for a post — and re-approves).
 3. Re-save with the optimistic-concurrency guard:
 
 ```

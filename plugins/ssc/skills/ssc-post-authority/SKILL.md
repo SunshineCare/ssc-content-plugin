@@ -24,7 +24,8 @@ Cowork-native: you (Claude) score and judge the copy directly. There are **no ap
 
 ## Inputs
 
-- The resolved idea's **`idea_id`** — the key for every read and write this run.
+- The resolved post's **`brief_id`** — the key for every read and write this run. Content is **brief-keyed** (`brief_id` is a saved row's sole lineage; there is no `idea_id` column), so the brief id you are handed is the id you read by and save with, unchanged. The agent resolves it via `get_brief` before dispatching you, so you never derive it.
+- The owning idea's **`idea_id`** — informational only (the summary line and the `/post/[month]/[id]` pointer). Never a read or write key.
 - `section` (optional) — **`copy` or `image_content`**. Names the target section, and an explicit name **always wins over the auto-pick** (naming `copy` targets `copy` even when one is already approved, yielding a fresh batch); **omit to auto-pick the next open one** (Step 0).
 - The **N draft copy variations** the writer (`ssc-post-produce`) just produced in this conversation — each a full Vietnamese Facebook post body, with a one-line angle/hook note. These are **unsaved**; they live in the conversation. **`copy` section only** — for `image_content` there is no writer hand-off; you draft the candidates yourself (Step 1b).
 - The idea's **brief + strategic tags** (pillar, persona, `core_message`, `why_now`) as the writer surfaced them — the strategic frame each candidate must honour.
@@ -34,16 +35,16 @@ If the target section is `copy` and the writer's variations are not present in t
 
 ## Procedure
 
-### Step 0: Resolve the target section, its gate, and the post's `brief_id`
+### Step 0: Resolve the target section and its gate
 
 A post carries exactly **two** produced text sections — `copy` and `image_content`. There is **no** `headline` and **no** `description` (those are ad-only). Read what already exists for this post:
 
 ```
 Call: list_content
-  idea: <the resolved idea id>
+  brief: <the resolved brief_id>
 ```
 
-Content is brief-keyed, so the `idea` filter joins content → briefs → idea. It returns `variations[]`, each with `section`, `status` (`draft`|`approved`), `score`, `comment`, `body`, and **`brief_id`**. Compute `approved(copy)` = at least one row with `section === 'copy'` AND `status === 'approved'`. Ignore rows in any other section (e.g. a `storyboard` row from the video pipeline) — always match **positively** on the exact section, never "not copy".
+Filter by **`brief`**, not by idea: content is brief-keyed, so this returns exactly this post's rows with no join to unwind. It returns `variations[]`, each with `section`, `status` (`draft`|`approved`), `score`, `comment`, and `body`. Compute `approved(copy)` = at least one row with `section === 'copy'` AND `status === 'approved'`. Ignore rows in any other section (e.g. a `storyboard` row from the video pipeline) — always match **positively** on the exact section, never "not copy".
 
 Apply the **FIRST** matching rule:
 
@@ -59,11 +60,11 @@ Apply the **FIRST** matching rule:
 
 Only an **unrecognized** `section` value (a typo — anything that is neither `copy` nor `image_content`) is treated as omitted: it falls through to the auto-pick, never to undefined behavior.
 
-**Hold the post's `brief_id`.** Take it from the `variations[]` rows (every row of this idea carries the same one — a post idea has a **single** brief, which is what the `idea` convenience resolves to server-side). You pass it explicitly on every save (Step 6): the ImageStudio's **Text layer reads the approved `image_content` by BRIEF** — `list_content(brief=…)`, not by idea — so a row that is not bound to the post's brief is invisible to it.
+**The post's `brief_id` is an INPUT, not something you derive.** It was handed to you by the agent (resolved via `get_brief`) and is the same id you just read by. You pass it explicitly on every save (Step 6): the ImageStudio's **Text layer reads the approved `image_content` by BRIEF** — `list_content(brief=…)`, not by idea — so a row that is not bound to the post's brief is invisible to it.
 
-- On a **cold start** (no `content` rows at all, so no `brief_id` to read), the target section is `copy` and you may fall back to the **`idea` convenience** on the save (the server resolves and binds the idea's single brief). `image_content` can never be in this state — it is gated on an approved copy, so at least one row exists.
-- If the idea has **no** resolvable brief, `save_content` refuses the write with `brief_id_required` and nothing is written — surface that plainly (a post idea auto-gets a brief at creation, so this is an integrity edge, not a normal path).
-- If rows disagree on `brief_id` (should be impossible for a post), STOP and report it rather than guessing.
+This is why the brief is the command's key. **A cold start is no longer a special case**: when the post has no `content` rows at all, there is nothing to read a `brief_id` out of — the previous design fell back to the **`idea` convenience** on the save and let the server bind the idea's single brief. Holding the brief from the start removes that fallback and its failure mode entirely. Never substitute an `idea` argument for the `brief_id` you were given, and never guess one.
+
+- If the `brief_id` does not resolve, `save_content` refuses the write with `brief_id_required` and nothing is written — surface that plainly (a post idea auto-gets a brief at creation, so this is an integrity edge, not a normal path).
 
 ### Step 1: Load the judging knowledge base
 
@@ -257,7 +258,7 @@ Call: save_content
   channel:  post
 ```
 
-- `brief_id` — **the post's brief, held from Step 0** — passed explicitly on **every** row, in **both** sections. Content is brief-keyed (there is no `idea_id` column on a `content` row), and `brief_id` is what links the rows to the post so the workspace can list them together. Pass it explicitly rather than relying on inference: the ImageStudio's **Text layer resolves the approved `image_content` by BRIEF** — `list_content(brief=…)`, never by idea — so an unbound row is invisible to it. **Cold-start exception:** if the post has no `content` rows yet there is no `brief_id` to read, so the target section is `copy` and you may instead pass `idea: <the resolved idea id>` — the **`idea` convenience**, which resolves the idea's single brief server-side and binds it identically. Never pass a `brief_id` you did not read from this post's own rows. (If the idea has no brief at all the write is refused with `brief_id_required` and nothing is written — a post idea auto-gets one at creation, so this is only an integrity edge; surface it if it happens.)
+- `brief_id` — **the post's brief, the id you were invoked with** — passed explicitly on **every** row, in **both** sections. Content is brief-keyed (there is no `idea_id` column on a `content` row), and `brief_id` is what links the rows to the post so the workspace can list them together. Pass it explicitly rather than relying on inference: the ImageStudio's **Text layer resolves the approved `image_content` by BRIEF** — `list_content(brief=…)`, never by idea — so an unbound row is invisible to it. **There is no cold-start exception**: the brief is an input, so it is in hand before the first read and a post with zero `content` rows saves exactly like any other. Never substitute the `idea` argument for it, and never pass a `brief_id` you were not given. (If the brief does not resolve, the write is refused with `brief_id_required` and nothing is written — a post idea auto-gets one at creation, so this is only an integrity edge; surface it if it happens.)
 - `section` — **the target section from Step 0, on EVERY row: `'copy'` or `'image_content'`.** Never omit it and never invent another value. The workspace's Copy stage filters strictly on `section === 'copy'` and its Image Content stage on `section === 'image_content'` — an unstamped row appears in **neither**, so the operator can never see or approve it.
 - `body` — **the Vietnamese body** (the persisted prose; MUST be Vietnamese, never English). For `copy`, the post caption; for `image_content`, the structured `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` block exactly as presented.
 - `score` — the integer rating you assigned (≥4 for every persisted candidate).
@@ -276,7 +277,7 @@ After persisting the approved set, output:
 ```
 ## Post Authority — <idea title> — <TARGET SECTION> saved
 
-**Target idea:** <idea_id> (<pillar> · <persona>)
+**Target brief:** <brief_id> · idea <idea_id> (<pillar> · <persona>)
 **Section produced:** <copy | image_content>
 **Built on approved input:** <"— (copy is the first section)" | "<N> approved copy(ies)">
 **Variations persisted:** <count> of <N> target (channel='post', section='<target>', brief_id='<brief_id>', status=draft) — saved on the operator's go-ahead
@@ -294,7 +295,7 @@ After persisting the approved set, output:
 - If a slot hit its 2-attempt bound and could not reach ≥4, note which slot, the best score reached, and that it was NOT presented/persisted (the operator is short one variation).
 - If **Step 0 stopped** (an `image_content` request with no approved copy), emit that stop message plainly instead — name the gate and the exact next action (approve ≥1 copy in `/post/[month]/[id]` → Copy, then re-invoke) — and confirm nothing was written.
 - End with the next action for the section just saved:
-  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc.post-writer <idea_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
+  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc.post-writer <brief_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
   - after **`image_content`**: `Next: a human selects + approves ONE row in /post/<month>/<id> → Image Content (draft → approved). The Images stage's Text layer then renders it. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
 
 ## Output
@@ -311,9 +312,9 @@ After persisting the approved set, output:
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. **The operator's "save" go-ahead persists drafts — it never flips a gate.**
 - **Human checkpoint before persistence.** You **present the candidate set in chat and wait** — you do NOT save autonomously. Persistence happens only after the operator approves the set (Step 4 choice **b**). The primary revision path is pre-save, in chat (Step 5). "Save" persists DRAFTS to curate; it is NOT a gate approval — the operator still selects + approves ONE variation in the workspace.
 - **Authority persists; the writer does not.** The writer hands you unsaved drafts (and revises them on request) and YOU insert the approved set — one `save_content` insert per variation, on the operator's go-ahead. Never ask the writer to save. A **post-save** flaw in a row you persisted **in this run** is fixed with one `edit(entity='content', …)` call (or removed with `delete(entity='content', …)`), never by duplicating or regenerating; rows the operator has curated or approved are untouchable.
-- **One section per invocation, `image_content` gated on an approved copy (hard rule).** Step 0 reads `list_content(idea=<idea_id>)` and resolves ONE target section. **An explicit `section` input always wins over the auto-pick** — both `copy` and `image_content` are valid explicit values, and either produces a fresh batch whether or not that section already has an approved row (non-destructive: Step 6 only INSERTS drafts). With **no** `section` input the auto-pick applies: `copy` while no copy is approved, `image_content` once one is. An `image_content` request with **no approved copy STOPS** — it produces nothing and writes nothing. Posts have exactly two sections; never produce a `headline` or a `description` (ad-only).
+- **One section per invocation, `image_content` gated on an approved copy (hard rule).** Step 0 reads `list_content(brief=<brief_id>)` and resolves ONE target section. **An explicit `section` input always wins over the auto-pick** — both `copy` and `image_content` are valid explicit values, and either produces a fresh batch whether or not that section already has an approved row (non-destructive: Step 6 only INSERTS drafts). With **no** `section` input the auto-pick applies: `copy` while no copy is approved, `image_content` once one is. An `image_content` request with **no approved copy STOPS** — it produces nothing and writes nothing. Posts have exactly two sections; never produce a `headline` or a `description` (ad-only).
 - **Section is the contract (hard rule).** Every saved row carries `section` — `'copy'` or `'image_content'` — exactly. The workspace filters **strictly and positively** on each (post content also carries `storyboard` from the video pipeline, so "not copy" is never a valid test). An unstamped or mis-stamped row is invisible in every stage and can never be approved.
-- **Brief lineage is persisted (hard rule).** Every save passes the post's `brief_id`, read from the post's own `content` rows in Step 0 — in both sections. The ImageStudio's Text layer resolves the approved `image_content` by **brief** (`list_content(brief=…)`), not by idea, so an unbound row never reaches it. Only on a true cold start (no rows at all, therefore section `copy`) may the `idea` convenience stand in — the server binds the idea's single brief identically. Never guess or substitute a brief id.
+- **Brief lineage is persisted (hard rule).** Every save passes the post's `brief_id` — the id you were invoked with — in both sections. The ImageStudio's Text layer resolves the approved `image_content` by **brief** (`list_content(brief=…)`), not by idea, so an unbound row never reaches it. There is no cold-start exception and no `idea` convenience fallback: the brief is an input, held before the first read. Never guess or substitute a brief id.
 - **`image_content` is TEXT, and you draft it yourself.** It renders no picture and carries no image url — it is the on-image copy in the `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` markers, carrying whatever its **density profile** emits (HEADLINE always; SUBHEADLINE and 0–3 bullets per profile, spanning ≥2 profiles across the set), with its headline written to a named `ad/headline-formulas` formula off a LIVE APPROVED copy's hook and every element under its hard word cap. There is no writer hand-off for this section: you draft, score, present, and (on the go-ahead) save. Saving it is still **not** approving it, and you never hand it to the image engine — the operator approves it in the Image Content stage and generation is a human action in the studio.
 - **Quality gate is hard.** Every persisted (and every presented) candidate is rated ≥4. Any banned-word / compliance / food-placeholder violation — or carrying <3 distinct Cambridge proof points, or off-voice (not written AS Kiều My per `voice/founder-voice`), or a fabricated real-person story (verify founder specifics against `programme/kieu-my-story`) — caps a variation at ≤3 → it is dropped + regenerated, never presented or saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` — the post copy, **and** every line of an `image_content` block (headline, and whatever subheadline/bullets its density profile carries; only the `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` markers are ASCII) — AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning/analysis and the in-chat review dialogue may stay the operator's language; nothing written to the row may.

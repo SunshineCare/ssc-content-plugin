@@ -1,13 +1,13 @@
 ---
 name: ssc-post-produce
-description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by date via get_content_by_date, or by idea id via get_idea), reads the idea's brief + strategic tags, and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in voice/*, content/*, and channels/facebook. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Propose-only; never approves, publishes, or flips a gate.
+description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by brief id via get_brief, or by date via get_content_by_date), reads the idea's brief + strategic tags, and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in voice/*, content/*, and channels/facebook. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Propose-only; never approves, publishes, or flips a gate.
 metadata:
   type: skill
   stage: post-production
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_content_by_date, get_idea, get_knowledge, list_knowledge]
+  tools: [get_brief, list_briefs, get_content_by_date, get_idea, get_knowledge, list_knowledge]
 ---
 
 # Post Produce (`ssc-post-produce`)
@@ -27,7 +27,7 @@ Cowork-native: you (Claude) write the copy directly. There are **no app/provider
 One of:
 
 - `date` — a calendar day, e.g. `2026-07-14` (YYYY-MM-DD). Resolved to the scheduled idea(s) for that day.
-- `idea_id` — a specific idea id, targeting that idea directly.
+- `brief_id` — the post brief's id, targeting it directly. **The primary key** — `get_brief` returns the brief AND its owning post idea in one call, and content is brief-keyed, so this is the id the authority reads and saves by.
 
 Optional:
 
@@ -51,14 +51,16 @@ The result is `{ date, channel, count, posts[], note }`. Each `posts[]` entry ca
 - If `count === 1`, take that single `posts[0].idea`.
 - If `count > 1` (several posts scheduled that day), **work ONE post at a time**: take the first idea, produce its variations end-to-end (Steps 2–4), then announce in the Step 5 summary that the remaining posts for that date still need a pass (the operator re-invokes per post). Do NOT attempt to produce for multiple ideas in a single run.
 
-**If given an `idea_id`:** call `get_idea`:
+**If given a `brief_id`:** call `get_brief`:
 
 ```
-Call: get_idea
-  id: <idea_id>
+Call: get_brief
+  id: <brief_id>
 ```
 
-The result is the single idea: its core lifecycle fields, the post-channel detail (brief), and its `tags[]`. If the idea does not resolve, STOP and tell the operator the idea id was not found.
+It returns `{ brief, idea }` — the brief's five narrative fields **and** the owning post idea (core lifecycle fields, post-channel detail, `tags[]`) — so one call gives you both the strategic frame and the idea context. If it returns `{ brief: null }`, STOP and tell the operator the brief id was not found.
+
+**If resolved from a `date` instead**, take the idea's single brief (`list_briefs`) so you carry a `brief_id` forward either way.
 
 Hold the resolved idea's `id` and report it to the authority — the authority passes it to `save_content` as the **`idea` convenience** (content is brief-keyed; the server binds the idea's single brief) when it persists each passing variation. You do not save; you only carry the id forward.
 
@@ -169,7 +171,7 @@ For each variation, while drafting, self-respect the brand bar from Step 3 (natu
 
 - the **full Vietnamese post body** (the finished caption a reader would see) — verbatim, ready to be scored and persisted;
 - a **one-line angle/hook label** so the authority and the operator can tell the variations apart;
-- the resolved **`idea_id`** (held from Step 1) restated once, so the authority knows which idea every variation links to.
+- the resolved **`brief_id`** (held from Step 1) restated once, so the authority knows which brief every variation links to — it is the authority's read and write key, and a saved row's sole lineage.
 
 Keep the bodies intact and Vietnamese — the authority persists each passing body verbatim via `save_content`. You hold no content ids (nothing is saved yet); the authority captures those when it inserts the passers.
 
@@ -180,7 +182,7 @@ After drafting all N variations, present them for the authority to judge:
 ```
 ## Post Produce — <idea title>
 
-**Target idea:** <idea_id> (<pillar> · <persona>)
+**Target brief:** <brief_id> · idea <idea_id> (<pillar> · <persona>)
 **Variations drafted:** <N> (in-conversation, UNSAVED — handed to ssc-post-authority to score + present)
 
 **Brief honoured:** core_message, pillar, persona, why_now held fixed across all variations; angle/hook varied.
@@ -201,7 +203,7 @@ If the date had more than one scheduled post (Step 1, `count > 1`), add a line n
 
 ## Output
 
-- N (default 4) DISTINCT Vietnamese Facebook post-copy variations drafted **in the conversation** and presented for the authority to score + present — each a full Vietnamese body with a one-line angle/hook label, all tied to the resolved idea's `idea_id`
+- N (default 4) DISTINCT Vietnamese Facebook post-copy variations drafted **in the conversation** and presented for the authority to score + present — each a full Vietnamese body with a one-line angle/hook label, all tied to the resolved post's `brief_id`
 - Any **revised** variations regenerated in-conversation on request (from the authority's quality loop or the operator's in-chat review) — still unsaved
 - **Nothing persisted.** No `save_content` call; no `content` row written; no `score`/`comment` set — the authority step (`ssc-post-authority`) scores the variations, presents them, and saves the set only on the operator's go-ahead
 - No gate flipped — variations await scoring + in-chat review (authority) then human selection/approval (workspace)

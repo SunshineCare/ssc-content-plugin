@@ -332,7 +332,7 @@ rejection stops it.
   `image_content` / headline. You hold `list_content`, so **check the `image_content`
   yourself**: if no approved `image_content` row exists, **STOP** (Vietnamese) routing
   the operator to the **channel's** content command — `ad` → `/ssc.ads-produce
-  <brief_id> image_content`, `post` → `/ssc.post-writer <idea.id> image_content` — do
+  <brief_id> image_content`, `post` → `/ssc.post-writer <brief_id> image_content` — do
   not dispatch the Text skill. Otherwise dispatch it (it also re-checks the chain tip +
   image_content, defense in depth). Both channels carry an `image_content` section, so
   this precondition is identical on either; only the producing command differs.

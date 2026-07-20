@@ -85,6 +85,7 @@ Call: get_knowledge
     "voice/founder-voice",
     "programme/kieu-my-story",
     "content/quick-checklist",
+    "content/pillars",
     "ad/headline-formulas",
     "ad/platform-constraints"
   ]
@@ -150,6 +151,13 @@ The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are **fixed structural mark
 | **Standard** | HEADLINE + SUBHEADLINE + 2–3 bullets | has room for a short proof stack |
 | **Text-dominant** | HEADLINE + SUBHEADLINE + up to 3 bullets | is plain/high-contrast — text *is* the creative |
 
+**The post's PILLAR and its anchor copy steer DENSITY — never hook strength.** Ads take this steer from the ad set's `build_spec`/layer; a post has none, so use the two signals you already hold: the idea's **`pillar`** tag (handed over with the brief — read what that pillar is *for* from the live `content/pillars`, never from a remembered mapping) and the **nature of the anchor copy** each version is built on.
+
+- A **story / empathy / founder-led** pillar, or a story-led anchor copy (a lived moment, a confession), leans **Minimal** — the moment carries it, and stacking bullets over a human photograph kills exactly the recognition that earns the comment.
+- An **education / science / tools** pillar, or a mechanism-led anchor copy, can carry **Standard** — informational content genuinely has something worth listing, and a saved post is an engagement win.
+
+**Density is not weaker engagement.** A Minimal version carries fewer elements, not a softer hook: its single headline works *harder*, because it is doing the whole job alone. Never let a pillar's density lean become an excuse for a vague line.
+
 **Span at least two profiles across the N versions, always including ≥1 Minimal.** You are writing **before any visual exists** — the ImageStudio chain runs later, and only its Text step resolves the finished visual. So your job is not to pick the one right payload but to give that step a genuine choice; a uniform set forces a bad fit. Keeping the block light also keeps it under the ~20% image-area guidance in `ad/platform-constraints` (a paid-delivery consideration, and a reason to stay minimal — not itself a word limit).
 
 **POSTS ARE OPTIMIZED FOR ENGAGEMENT — never for conversion.** This is the channel's objective, not a soft default: `ssc-post-measure` grades this page by **engagement** (reactions, comments, shares, saves, read-through), so a post that "sells" well but earns no conversation has failed at what it is measured on. **Ads convert; posts earn conversation.** That distinction governs every `image_content` version here.
@@ -183,7 +191,9 @@ For **each** of the N candidates — the writer's variations when the target sec
 
 - The banned-word / compliance / food-placeholder caps and the fabricated-real-person-story cap apply **unchanged** (each forces ≤3).
 - **Structure + hard word caps:** the body must use the exact `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` markers for whatever elements its **density profile** emits (HEADLINE always; SUBHEADLINE and 0–3 BULLETS per profile, marker omitted when empty), **and every element must be at or under its cap. Count the words; do not eyeball it:** HEADLINE ≤6 words / ≤40 chars (prefer ≤27), SUBHEADLINE ≤8 words, each BULLET ≤5 words. **A single element over cap caps the whole version at ≤3** — same weight as a banned word, not negotiable by "it reads fine". Sentences, sub-clauses, or a HEADLINE that would wrap past 2 lines are automatic failures. The caps are a *rendering* constraint: over-cap text is set smaller, and smaller on-image text is skipped.
-- **Hook-strength cap:** the HEADLINE must be written **to a named formula** in `ad/headline-formulas` (read it live — the formula craft and the competitor test apply to organic too; only the *objective* differs), not be a `Brand: feature` tagline, and **pass that doc's competitor test**. A HEADLINE that is merely the anchor copy's opening sentence shortened — no formula, no hook — **caps at ≤3**, however well it fits the word cap. Name the formula used in the `comment`.
+- **Hook-strength cap:** the HEADLINE must be written **to a named formula** in `ad/headline-formulas`, not be a `Brand: feature` tagline, and **pass that doc's competitor test**.
+
+  > **Borrow that doc's CRAFT, not its OBJECTIVE.** `ad/headline-formulas` is an **ad-channel** document: its rule that the headline is *"động lực CHUYỂN ĐỔI chính — mọi tầng, không ngoại lệ"* is scoped to the **ad layers** (Lớp 1/2/3) and does **not** apply here. Take from it the 8 formulas, the ≤40 / ≤27-character limits, the competitor test, the no-tagline rule, and the pronoun guidance — all of which serve organic equally well. Leave its conversion objective, and leave the *CTA mời gọi* formula (an ad formula for warm/Lớp 3). **This channel's objective is engagement**, per the cap below. A HEADLINE that is merely the anchor copy's opening sentence shortened — no formula, no hook — **caps at ≤3**, however well it fits the word cap. Name the formula used in the `comment`.
 - **Engagement cap (organic register):** a version written as an ad — offer framing, urgency, a Messenger/CTA push, or a hard proof-stack pitch — **caps at ≤3** however sharp it is. Posts are graded on engagement; ad register suppresses organic reach. Prefer the formulas that open a conversation (*Câu hỏi nỗi đau*, *Tình huống cụ thể*, *Khoảnh khắc thật*, *Câu hỏi khoa học*) over the closing ones (*CTA mời gọi* is an **ad** formula for warm audiences — not for organic posts).
 - **Proof (sized to format, and it YIELDS to brevity):** carry as many distinct Cambridge proof points as fit **inside the word caps** — typically the bullets, where the bullets ARE the proof list (the one place a proof list is the intended format, not a bare-list failure). The **≥3-distinct requirement is satisfied across the SET**, never crammed into one version, and there is **no per-version proof cap** for `image_content`. **Never pad a version with a proof point to reach a count, and never breach a word cap to fit one** — on-image, an unread third proof is worth less than a headline that lands.
 - **Anchor cap:** a version whose headline does not trace to an approved copy's hook — a new angle invented on the spot — caps at ≤3.

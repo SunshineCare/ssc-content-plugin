@@ -110,8 +110,12 @@ out — the scene that ended up cluttered, the light that landed from the wrong 
 left for the Text step to sit on. The rewrite then corrects the **real** gap instead of
 restating the same recipe in different words.
 
-`view_image({ creative_id })` — or `view_image({ ref })` for a pool item; **EXACTLY ONE**
-of the two, both or neither is `invalid_input` — returns the image as a block you can
+`view_image({ creative_id })` — **always by `creative_id`, and only ever THIS layer's own
+`scene` candidate.** The tool also accepts a `{ ref }` form for a shared media-pool item,
+but that form has no use here and you must not reach for it: Scene is pure text-to-image,
+holds no `list_gallery_media`, and so has no way to obtain a pool ref in the first place —
+pool items are **Composition's** input (see the rule above). Pass **EXACTLY ONE**
+identifier; both or neither is `invalid_input` — it returns the image as a block you can
 **see**. It is a **read**: it selects nothing, approves nothing, uploads nothing, generates
 nothing. **~1.4k tokens a look** (1024px long edge; `max_edge` clamped at 2048) — so
 **one** candidate, never a sweep of every draft. A look that fails (`no_media`,

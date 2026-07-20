@@ -79,7 +79,7 @@ before running the skill.
 
    **Tier 2 — search for challenge-specific docs:**
    After loading Tier 1, call `search_knowledge` with the challenge's core topic
-   (e.g. "consultant credentials" for a proof-point challenge, "Chị Lan
+   (e.g. "consultant credentials" for a proof-point challenge, "<persona>
    conversion" for an audience pathway challenge). Load any returned docs not
    already covered by Tier 1 that contain directly relevant evidence or guidance.
 

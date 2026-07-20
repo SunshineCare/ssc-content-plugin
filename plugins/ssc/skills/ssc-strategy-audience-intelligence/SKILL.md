@@ -33,11 +33,13 @@ Call `get_knowledge` for:
 
 ### Step 2: Research current audience signals
 
-For each of the personas currently listed in `brand/personas`, use these persona keywords in searches:
-- **Chị Hương (Tiền mãn kinh, 45–55 — ưu tiên cao nhất)** — `giảm cân tiền mãn kinh`, `tăng cân tuổi 45 50`, `giảm cân khoa học`, `nội tiết tố tăng cân`
-- **Chị Mai (Tìm lại bản thân, 50–60)** — `giảm cân an toàn tuổi 50`, `giảm cân phòng tiểu đường`, `sức khỏe phụ nữ sau 50`, `năng lượng tuổi trung niên`
-- **Chị Lan (Mẹ bận rộn, 35–45)** — `lấy lại vóc dáng sau sinh`, `giảm cân cho mẹ bận rộn`, `giảm cân không cần nấu`, `chăm sóc bản thân sau sinh`
-- **Chị Thảo (Mẹ trở lại công sở, 30–40)** — `lấy lại vóc dáng sau sinh đi làm`, `giảm mỡ bụng sau sinh`, `quay lại công sở sau nghỉ thai sản`, `giảm cân sau cai sữa`
+**Derive each persona's search keywords from her own detail doc — never from a list written here.** For each persona currently listed in `brand/personas`, build a small keyword set (≈4) from the docs loaded in Step 1:
+
+- Her **`Từ vựng thật`** section — the real Vietnamese words she actually uses. This is the primary source: these are search terms her cohort genuinely types, which is the whole point of grounding keywords in the doc rather than inventing them. Respect the paired **`Né / thay thế`** list — do not search on a phrase the doc says to avoid.
+- Her **`Điểm kích hoạt`** (ranked trigger points) — the entry moments, phrased as someone mid-problem would search them.
+- Her **life-stage and age band** from `brand/personas`, to keep queries in the right cohort.
+
+Writing the keyword sets here would hard-code KB content into this skill: the persona docs are revised (and personas can be added or retired) without this file changing, so a baked-in list silently goes stale and quietly overrides the live vocabulary it was supposed to reflect. Derive them fresh each run, and state the derived set per persona in the Step 5 summary so the operator can see what was actually searched.
 
 Then, for each persona:
 1. Search for recent Vietnamese weight-loss and health-product discourse on Facebook groups, TikTok comment patterns (indicative), and YouTube comments using `WebSearch`:
@@ -79,18 +81,16 @@ Emit a plain-text summary:
 ```
 ## Audience Intelligence — <period>
 
-### Chị Hương (Tiền mãn kinh, 45–55)
+### <persona label + life stage + age band, as listed in brand/personas>
+- Keywords searched: [the set derived in Step 2]
 - [finding 1]
 - [finding 2]
 
-### Chị Mai (Tìm lại bản thân, 50–60)
+### <next persona>
+- Keywords searched: [...]
 - [finding 1]
 
-### Chị Lan (Mẹ bận rộn, 35–45)
-- [finding 1]
-
-### Chị Thảo (Mẹ trở lại công sở, 30–40)
-- [finding 1]
+[one section per persona currently listed in brand/personas — however many that is]
 
 FB vs YouTube engagement shift:
 - [any notable channel behaviour change]

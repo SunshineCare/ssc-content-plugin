@@ -112,7 +112,7 @@ save_idea(
 **Field guidance:**
 
 - `score` — **self-rate every idea on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how strongly the idea serves the month's approved tactics and its series/stage slot, the freshness of its hook, and brand-voice fit. Rate honestly and use the full range — do not give everything 5.
-- `comment` — a **one-line rationale for the `score`, written in natural Vietnamese** (never English): the single biggest reason the idea is strong or weak — e.g. "Hook mở đầu mạnh, khớp giai đoạn Do dự của Chị Hương" or "Góc hơi chung, thiếu khoảnh khắc cụ thể".
+- `comment` — a **one-line rationale for the `score`, written in natural Vietnamese** (never English): the single biggest reason the idea is strong or weak — e.g. "Hook mở đầu mạnh, khớp giai đoạn Do dự của <persona>" or "Góc hơi chung, thiếu khoảnh khắc cụ thể".
 - `title` — natural Vietnamese, search-intent aware. Use keywords from the SEO priority list in `channels/youtube` where relevant. Follow the title-length guidance in `channels/youtube` for long-form vs Shorts.
 - `detail.hookDirection` — the YouTube hook must earn the first 15 seconds: a specific question, a surprising claim, or a confession line. Must vary across the batch — avoid repeating the same hook type on consecutive ideas.
 - `terms` youtube_series — the exact series term from the `youtube_series` taxonomy matching a `plan.targets` series row. Do not invent series.

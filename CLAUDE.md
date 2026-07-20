@@ -136,6 +136,24 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   `ssc.ads` are **retired/renamed** and appear only in "no … dependency"
   negations — do not treat them as live commands or add new refs to them
   (dangling-ref hot-fixes: commits `14a60be`, `32014c1`).
+- **Never hard-code KB content into a skill — reference the doc and read it
+  live.** Skills must name the KB doc (and its section) they draw on, not
+  restate its contents. This covers persona docs (trigger points, vocabulary,
+  the per-persona `Tránh` prohibitions, search keywords), `ad/awareness-framework`
+  (the awareness/sophistication ladders, Cambridge's stated position, the
+  emotion cluster), `brand/angles`, `ad/cta-catalog` — all of it. Two reasons:
+  the KB is revised on its own cadence (persona docs and the framework are
+  reviewed quarterly), so a baked-in copy goes stale silently *and* overrides
+  the live doc it was meant to reflect; and rosters are open — a persona added
+  or retired must need **no** change to any skill. Concretely: no persona names
+  in closed enums (`persona: "<A|B|C>"` → `"<label from brand/personas>"`), no
+  per-persona keyword/section blocks, no quoted persona hooks or prohibitions,
+  no "today: X / Y / Z" rosters. **Section names are fine** — they're structural
+  and shared across docs; it's the *contents* that must stay in the KB. Say
+  "read the live doc; never substitute a remembered version." Swept
+  2026-07-20 across `ssc-ads-brief`, `ssc-strategy-audience-intelligence`,
+  `ssc-strategy-kol-discovery`, `ssc-strategy-territory-explorer`, and the
+  `comment` examples in the ideate/authority skills.
 - Adding a skill: create `skills/<name>/SKILL.md` where the directory name
   **matches** the frontmatter `name`; then register it in the owning agent's
   `orchestrates:` list.

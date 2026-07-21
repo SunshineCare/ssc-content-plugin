@@ -70,15 +70,38 @@ its agent, and a skill together:
    step each. Frontmatter carries `metadata.section` (strategy/post/ads/youtube/kb),
    `stage`, `capability`, and the `tools:` (BrandOS MCP tools) it calls.
 
+### Ads: the persona-late creative hierarchy
+
+The Ads creative pipeline is three levels, each fanning out on an axis none of
+the others own:
+
+- **Idea = SUBJECT.** Persona-free, tier-free — one tension / insight / myth /
+  proof-territory, written once at plan level (`ssc-ads-ideate`). Carries no
+  persona, no route, no media-layer tag.
+- **Angle/Brief = PERSONA × ROUTE.** `ssc-ads-brief` judges which personas
+  (from the live persona roster) a subject genuinely fits, then fans it into
+  one angle per fitting persona × persuasion route — each angle tags its own
+  declared media home (`awareness_stage` + `target_layer_term_id`). One
+  subject can carry several angles, across several personas.
+- **Copy = EXECUTION.** `ssc-ads-writer` tunes hook / structure / register /
+  proof-phrasing to the one angle it's anchored to (that angle's declared
+  persona/route/awareness_stage) — never to an ad-set steering spec.
+
+The ad set / media buy is a **dashboard/ops concern outside the creative
+pipeline** — no skill plans, tags, or references an ad set's budget / audience
+/ placement setup; deployment (`create_ad`) is a human dashboard action.
+`ssc-ads-blueprint` is retired — there is no media/ad-set step in the creative
+pipeline.
+
 ### Pipelines (which skills each agent orchestrates)
 
 | Pipeline | Command | Agent | Stages (skills) |
 |---|---|---|---|
 | Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Focus → Research → Ideate → Schedule → Measure |
 | Posts (produce) | `/ssc.post-writer` | `ssc-post-writer-agent` | produce ⇄ authority loop |
-| Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Blueprint → Ideate → Measure |
-| Ads (brief) | `/ssc.ads-brief` | *(direct → ads-brief)* | Brief-first FIRST step — produces 4-5 rated DRAFT angle briefs via `save_brief` from concept + persona + build_spec (no copy needed; produce-once; operator approves ONE angle) |
-| Ads (produce) | `/ssc.ads-produce <briefId> [section]` | *(direct → ads-writer)* | Anchored to the chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy); saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
+| Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Ideate → Measure |
+| Ads (brief) | `/ssc.ads-brief <ideaId\|date>` | *(direct → ads-brief)* | Persona enters here — judges which personas (from the live persona roster) the persona-free concept fits, then fans it into distinct persona × route angle briefs via `save_brief`, each tagging its own declared media home (`awareness_stage` + `target_layer_term_id`). Append-only: re-running adds whichever distinct angles still remain (per persona) — no produce-once stop, no discard-and-regenerate. Operator approves each angle worth producing; every approved angle anchors its own independent production run |
+| Ads (produce) | `/ssc.ads-produce <briefId> [section]` | *(direct → ads-writer)* | Anchored to the operator's chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`, no `idea_id`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy) tuned to the angle's declared persona/route/awareness_stage — never an ad-set steering spec; saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
 | Image (prompt) | `/ssc.image-prompt <briefId> [step]` | `ssc-image-prompt-agent` | Scene → Subject → Composition → Edit → Text (all optional) — the **only** image path, and it is **zero-credit**: it authors each step's prompt + `generation_config` and saves via `save_creative_prompt`, then stops. **Cowork never generates** — the operator clicks Generate and selects a candidate in the ImageStudio dashboard, which is what spends fal credits. Anchored to ONE approved `briefId`; the owning idea **and the channel** resolve from the brief (`ad` and `post` both run; any other channel stops). Prompts are grounded in the brief + that channel's approved contents + persona doc + brand KB and reach the engine verbatim. Product is upload-only. |
 | YouTube | `/ssc.youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
 | Knowledge base | `/ssc.kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |

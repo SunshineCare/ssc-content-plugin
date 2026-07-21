@@ -1,25 +1,25 @@
 ---
 name: ssc-ads-measure
-description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Synthesises a retrospective (tier grades + winning vs fatigued angles — and, where the winning/losing ad-sets' content is identifiable via get_idea + list_content, winning vs fatigued proof points, copy lengths, and formats), writes it to channel_plans.retrospective via save_channel_plan, AND persists the paid-ads section (ad_campaign_health) plus its block of the shared per-period digest via save_performance_analysis, so the digest every later phase reads is no longer empty. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus reads this retrospective to carry winning angles forward and drop fatigued ones; the ad-production writer (ssc-ads-writer) reads it to lean on the proven proof points / lengths / formats and avoid fatigued ones.
+description: Runs the Measure step of the standalone Cambridge Diet Vietnam Ads pipeline. Reads this plan's ACTUAL ingested ad performance (get_ad_performance) and grades each ad-set/campaign group BY TIER on its locked KPI — cost-per-purchase for the conversion tiers L1 (cold) + L3 (warm/retarget), and reach/CPM/frequency for L2 omnipresence (never cost-per-purchase) — reading the live per-tier thresholds from ad/strategy + ad/campaign-architecture. Tier is the angle's declared `target_layer` (tagged once by the Brief step) — read authoritatively via get_brief when the group resolves to a specific brief, or off the ad-set/campaign's deployment-time name otherwise; there is no `ad_plan_slots` link (the ad-set/media buy left the creative pipeline — it's a dashboard/ops concern now). Synthesises a retrospective organized by ANGLE (persona × route) — tier grades + winning vs fatigued angles, and, where a group resolves to a specific brief, winning vs fatigued proof points, copy lengths, and formats via get_idea + list_content — writes it to channel_plans.retrospective via save_channel_plan, AND persists the paid-ads section (ad_campaign_health) plus its block of the shared per-period digest via save_performance_analysis, so the digest every later phase reads is no longer empty. Records "no prior ad performance this cycle" gracefully when none has been ingested. Propose-only; no gate. Next month's Focus is this retrospective's sole reader — it carries winning persona × route angles forward into the coverage target and drops fatigued ones (the writer no longer reads it directly; its influence flows through Focus).
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan, save_performance_analysis, get_idea, list_content]
+  tools: [get_ad_performance, get_performance_analysis, get_knowledge, get_channel_plan, save_channel_plan, save_performance_analysis, get_idea, get_brief, list_content]
 ---
 
 # Ads Measure (`ssc-ads-measure`)
 
-You run the **Measure** step of the standalone Cambridge Diet Vietnam Ads pipeline. You read the **actual ingested ad performance** from `get_ad_performance`, **grade each ad-set by its TIER on the tier's correct KPI** (a hard rule — see below), translate that into paid-angle learnings (which angles are winning vs fatiguing), and write a **retrospective** onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, retrospective=…)`. The retrospective is markdown prose — which angles worked (carry forward), which fatigued or ran inefficiently (drop or refresh), and what to try next. You then persist the same findings into the **shared per-period digest** (`performance_analyses`) via `save_performance_analysis` — you own its `ad_campaign_health` section, and one named block of its `summary` — which is what `ssc-post-research`, `ssc-strategy-directions` and `ssc-strategy-performance-retrospective` actually read. You only read performance and write those two artifacts; you NEVER hand-author RAW performance rows, trigger ingestion (`pull_*`), call `approve` (any entity), use `edit` to demote/unapprove a row, or produce new content.
+You run the **Measure** step of the standalone Cambridge Diet Vietnam Ads pipeline. You read the **actual ingested ad performance** from `get_ad_performance`, **grade each ad-set/campaign group by its TIER on the tier's correct KPI** (a hard rule — see below), then translate that into learnings organized by **ANGLE — persona × route** (the unit the Brief step now fans out on), and write a **retrospective** onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, retrospective=…)`. The retrospective is markdown prose — which angles worked (carry forward), which fatigued or ran inefficiently (drop or refresh), and what to try next. There is no `ad_plan_slots` link anymore: the ad-set / media buy left the creative pipeline entirely (it's a dashboard/ops concern), so **tier comes from the angle's declared `target_layer`** — read authoritatively off the brief (`get_brief`) when a group resolves to one, or off the group's own deployment-time name otherwise. You then persist the same findings into the **shared per-period digest** (`performance_analyses`) via `save_performance_analysis` — you own its `ad_campaign_health` section, and one named block of its `summary` — which is what `ssc-post-research`, `ssc-strategy-directions` and `ssc-strategy-performance-retrospective` actually read. **Next month's `ssc-ads-focus` is the retrospective's sole reader** — `ssc-ads-writer` does not read it directly; its influence flows through Focus's next coverage target (`creative_target`). You only read performance and write those two artifacts; you NEVER hand-author RAW performance rows, trigger ingestion (`pull_*`), call `approve` (any entity), use `edit` to demote/unapprove a row, or produce new content.
 
 **KPI is TIER-SPECIFIC — never grade every ad-set on the same metric (hard rule, sourced from `ad/strategy` §"Hệ Thống KPI" + `ad/campaign-architecture`):**
 
 - **Cost-per-Purchase (spend ÷ purchases) is the #1 business KPI — but it applies ONLY to the conversion tiers, L1 (cold) and L3 (warm/retarget).** Cost-per-message is an intermediate operational metric, NOT the verdict.
 - **L2 (Awareness / Omnipresence) is graded on reach / CPM / ThruPlay + contribution to the warm pool — NEVER on cost-per-purchase.** L2 sets producing large reach and ~0 purchases is the CORRECT role; grading L2 on cost-per-purchase "phạt oan" (wrongly penalises) and kills the funnel-nurture tier. This is the single most important rule of this step.
 
-This is step 5 — the final step — of the Ads pipeline (**Focus → Approaches → Blueprint → Ideate → Measure**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`. **There is no gate** — the retrospective is propose-state output. It closes the loop: **next month's Focus reads this `retrospective`** to carry winning angles forward and drop fatigued ones.
+This is step 4 — the final step — of the Ads pipeline (**Focus → Approaches → Ideate → Measure**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`. **There is no gate** — the retrospective is propose-state output. It closes the loop: **next month's Focus reads this `retrospective`** to carry winning persona × route angles forward and drop fatigued ones. This is the retrospective's *only* consumer — `ssc-ads-writer` does not read it directly (by design): its influence flows through Focus's next `creative_target`, not a direct read.
 
 ## Inputs
 
@@ -37,7 +37,7 @@ Call: get_ad_performance
   window_days: 30
 ```
 
-Returns aggregated paid performance grouped at the requested level (default `campaign`; use `adset` to read per-ad-set winners/losers, which map most directly to the L1/L2/L3 slots). Each group returns: `spend`, `impressions`, `reach`, `clicks`, `ctr`, `conversions`, `purchases`, **`cost_per_purchase`** (server-computed = spend ÷ purchases — the locked KPI for L1/L3), `messaging_conversations`, `cost_per_message` (operational only). **Derive the L2 omnipresence signals the tool doesn't name directly: `CPM = spend ÷ impressions × 1000` and `frequency = impressions ÷ reach`** (both `impressions` and `reach` are returned). The tool reflects what has been **ingested** into Brand OS — it does NOT fetch live, and you never trigger ingestion (`pull_all_ad_performance`).
+Returns aggregated paid performance grouped at the requested level (default `campaign`; use `adset` to read per-ad-set winners/losers, which map most directly to the L1/L2/L3 tiers — the angle's declared `target_layer`). Each group returns: `id` + `name` (the Brand OS ad-set/campaign/ad — a real Facebook object, not an `ad_plan_slots` row), `spend`, `impressions`, `reach`, `clicks`, `ctr`, `conversions`, `purchases`, **`cost_per_purchase`** (server-computed = spend ÷ purchases — the locked KPI for L1/L3), `messaging_conversations`, `cost_per_message` (operational only). The group's `name` is Step 2's tier/angle-attribution signal when no brief resolves directly — hold it. **Derive the L2 omnipresence signals the tool doesn't name directly: `CPM = spend ÷ impressions × 1000` and `frequency = impressions ÷ reach`** (both `impressions` and `reach` are returned). The tool reflects what has been **ingested** into Brand OS — it does NOT fetch live, and you never trigger ingestion (`pull_all_ad_performance`).
 
 **If it returns no rows / empty groups** (no ad performance ingested — commonly no connected ad account, or none yet ingested for this cycle): this is the no-data case. Skip to Step 4 and write the graceful "no prior ad performance this cycle" retrospective.
 
@@ -65,9 +65,16 @@ Call: get_knowledge
 
 From these, hold the per-tier grading inputs: the **cost-per-purchase** bands for L1 (cold, expected ~1.8–2× warm) and L3 (warm/retarget, the money tier), and the **L2 omnipresence** thresholds (frequency caps — e.g. 1.5–2.5 good, >3.5 refresh; person-led reach CPM <10k as the winner bar). The KB documents win over any number written inline here. A failed read is non-fatal — fall back to the inline rubric in Step 2.
 
+These are the same three tiers the Brief step tags on each angle as `target_layer_term_id` (L1/L2/L3) when it approves a brief. Measure never reads `ad_plan_slots` for this (retired) — it reads which tier a specific ad-set/campaign/ad ran either off the brief itself (`get_brief`, Step 2, when the group resolves to one) or off the group's own name (fallback).
+
 ### Step 2: Grade each ad-set BY TIER (the locked-KPI rubric)
 
-First map each ad-set to its tier (L1 cold / L2 awareness / L3 warm) via `detail.slotId` on the approved concepts (or the ad-set name / layer where the slot is unknown). Then grade EACH ad-set 🔴/🟡/🟢 on **its tier's KPI** — never a single cross-tier metric:
+First map each ad-set/campaign/ad group to its tier (L1 cold / L2 awareness / L3 warm). There is no `ad_plan_slots` link anymore — the ad-set/media buy left the creative pipeline entirely — so resolve tier from whichever of these is available, in order:
+
+1. **The brief, when the group resolves to one.** If the group is identifiable as a specific angle's deployment — its name echoes a known subject/idea title or a brief's `angle_label`, or the operator names it directly — resolve the underlying brief: `get_idea(id)` for the subject + `list_content(idea=…)` for its content (each row carries `brief_id`) when only the idea is identifiable, or straight to `list_content(brief=…)` when the `angle_label` itself is what's recognizable; either way, `get_brief(id=<brief_id>)` reads the angle authoritatively. The brief's `target_layer_label` is the tier (tagged once at Brief time, never re-homed); its `persona_label` + `route_label` + `angle_label` name the angle.
+2. **The group's own name, otherwise.** Deployment realizes the angle's declared `target_layer` into the ad set it places the ad in, so a descriptively-named ad-set/campaign usually still signals its tier even when the exact brief can't be resolved. Read it as a judgment call, not a guess dressed as fact.
+
+Where neither signal is available, leave the group **ungraded** rather than forcing a tier. Then grade EACH group 🔴/🟡/🟢 on **its tier's KPI** — never a single cross-tier metric:
 
 | Tier | KPI (locked) | 🟢 Green (carry / scale) | 🟡 Yellow (hold) | 🔴 Red (cut / refresh) |
 |------|--------------|--------------------------|------------------|------------------------|
@@ -82,14 +89,14 @@ First map each ad-set to its tier (L1 cold / L2 awareness / L3 warm) via `detail
 - **Do NOT fast-kill L1** as "fatigue" — it is the funnel intake; cold runs above warm cost by the KB's expected multiple, and that is expected. Let L3 carry conversion.
 - **Lead-form is a LOSER, not a tier** — `0` purchases + very high cost/conversion → retire it, never re-propose (per `losers/index`).
 
-Now extract the angle learnings from the grades:
+Now extract the angle learnings from the grades — organized by **ANGLE (persona × route)**, not by ad-set/layer:
 
-- **Winning angles** (🟢) — map each back to its layer/slot and the angle it carried (value / against / frame); cite the tier's KPI number (cost-per-purchase for L1/L3; reach/CPM/frequency for L2). These carry forward.
-- **Fatigued / inefficient angles** (🔴) — map each back to its layer/slot/angle and name the tier-specific fatigue signal. These drop or refresh.
+- **Winning angles** (🟢) — for each 🟢 group resolved to a specific brief (path 1 above), name it **`<persona_label> × <route_label>`** (cite `angle_label` too when it adds clarity) plus its tier, and cite the tier's KPI number (cost-per-purchase for L1/L3; reach/CPM/frequency for L2). For a 🟢 group graded on its name alone (path 2), report the grade at the **tier level only**, honestly labelled as such — never invent a persona/route it didn't earn. These carry forward.
+- **Fatigued / inefficient angles** (🔴) — same resolution discipline; name the tier-specific fatigue signal (rising cost-per-purchase for L1/L3, frequency >3.5 for L2). These drop or refresh.
 - **Cross-channel** — fold in any digest signal from Step 1b (`adCampaignHealth`, conversion gaps) only if present.
-- **Winning vs fatigued proof points, copy lengths, and formats** — for the clearest 🟢 winners and 🔴 losers, map the ad-set → its slot → its concept(s) (via `detail.slotId`), then read those concepts' content with `get_idea` + `list_content` and note which **proof points** the converting copy leaned on, which **copy-length** band performed, and which **format** won vs fatigued. This is a *directional* signal — an ad-set can carry several creatives, so do not over-attribute; where the content isn't identifiable, stay at the angle level and say so. (This is what the ad-production writer, `ssc-ads-writer`, reads back from `retrospective` to lean on proven proof-points/lengths/formats and drop fatigued ones.)
+- **Winning vs fatigued proof points, copy lengths, and formats** — for the clearest 🟢/🔴 groups you resolved to a specific brief, read that brief's content (already fetched via `list_content` above) and note which **proof points** the converting copy leaned on, which **copy-length** band performed, and which **format** won vs fatigued. This is a *directional* signal — an ad-set can carry several creatives, so do not over-attribute; where a group didn't resolve to a specific brief, there is no content-level read to make — say so and stay at the tier level.
 
-Ground every grade in an actual ingested metric from `get_ad_performance` — do not fabricate numbers. Where you cannot map an ad set back to a known slot/angle, say so and lean on the layer-level read.
+Ground every grade in an actual ingested metric from `get_ad_performance` — do not fabricate numbers. Where a group can't be resolved to a specific persona × route, report the tier-level grade honestly rather than inventing an angle to fill the gap.
 
 ### Step 3: Synthesise the retrospective
 
@@ -104,12 +111,12 @@ Write a tight markdown retrospective (under ~400 words), structured so next mont
 - **L2 awareness** (reach/CPM/frequency) — <grade + reach/CPM/freq; ~0 purchase is correct, do NOT score on cost-per-purchase>
 
 ### Winning angles (carry forward)
-- <winning slot/layer/angle> — <tier KPI evidence: cost-per-purchase for L1/L3; reach/CPM/freq for L2>
+- <persona> × <route> (<tier>) — <tier KPI evidence: cost-per-purchase for L1/L3; reach/CPM/freq for L2>, or "<tier> — <evidence>, góc cụ thể chưa xác định được kỳ này" when the group didn't resolve to a specific brief
 
 ### Fatigued / inefficient angles (drop or refresh)
-- <fatigued slot/layer/angle> — <named fatigue signal: rising cost-per-purchase (L1/L3) or frequency >3.5 (L2)>
+- <persona> × <route> (<tier>) — <named fatigue signal: rising cost-per-purchase (L1/L3) or frequency >3.5 (L2)>, or the tier-level equivalent when the angle isn't identifiable
 
-### Winning proof points · lengths · formats (carry forward — the writer reads these)
+### Winning proof points · lengths · formats (carry forward — Focus reads these into next month's bets)
 - <e.g. "proof '60 năm + chuẩn EU / 26 vi chất' converted on L3"; "copy dài kể-chuyện thắng ở L2"; "format carousel thắng cold L1"> — or "no content-level signal this cycle"
 
 ### Fatigued proof points · lengths · formats (drop / refresh)
@@ -176,7 +183,10 @@ Call: save_performance_analysis
 
 Include a tier only if you actually graded it; set `ltv_cac: null` rather than
 estimating one. Keep the KPI tier-locked exactly as in Step 3 — L2 is **never**
-graded on cost-per-purchase, in the digest as in the retrospective.
+graded on cost-per-purchase, in the digest as in the retrospective. Phrase each
+`winning_angles`/`fatigued_angles` entry the same way Step 3 does — `"<persona> ×
+<route> (<tier>)"` when a group resolved to a specific brief, or the tier alone when
+it didn't — never a slot/layer label (`ad_plan_slots` is retired).
 
 **The `summary` is SHARED — read-modify-write it, never clobber it.**
 `save_performance_analysis` UPSERTS on `period` and applies **only the fields you
@@ -265,8 +275,10 @@ Retrospective written to the ad channel_plan (propose-state, no gate). Next mont
 - Reads the **ingested** ad performance via `get_ad_performance`; never triggers ingestion (`pull_*`) and never fabricates metrics. The `get_performance_analysis` digest is optional cross-channel context on the READ side — a null there is NOT a no-data condition — and, on the WRITE side, the row you are contributing `ad_campaign_health` + your summary block to.
 - Records "no prior ad performance this cycle" gracefully only when `get_ad_performance` returns no rows — never invents spend/CTR/cost-per-result.
 - Every "winning"/"fatigued" claim is grounded in an actual ingested metric from `get_ad_performance`.
-- **KPI is tier-locked.** Cost-per-purchase grades ONLY the conversion tiers (L1, L3); L2 omnipresence is graded on reach/CPM/ThruPlay/frequency and warm-pool contribution — NEVER on cost-per-purchase (grading L2 on cost-per-purchase mis-kills the funnel-nurture tier). Per-tier thresholds are read live from `ad/strategy` + `ad/campaign-architecture` (KB wins over any inline number).
+- **KPI is tier-locked.** Cost-per-purchase grades ONLY the conversion tiers (L1, L3); L2 omnipresence is graded on reach/CPM/ThruPlay/frequency and warm-pool contribution — NEVER on cost-per-purchase (grading L2 on cost-per-purchase mis-kills the funnel-nurture tier). Per-tier thresholds are read live from `ad/strategy` + `ad/campaign-architecture` (KB wins over any inline number). **Tier itself is the angle's declared `target_layer`** — read authoritatively via `get_brief` when a group resolves to one, or off the group's own name otherwise; there is no `ad_plan_slots` link (retired — the ad-set/media buy is a dashboard/ops concern outside the creative pipeline). A group whose tier can't be read either way is left ungraded, never guessed.
+- **Measured by ANGLE (persona × route), never by ad-set/layer/slot.** `ad_plan_slots`, `detail.slotId`, `build_spec`, and per-ad-set `creative_count` are retired — Measure never reads or references them. Winning/fatigued learnings name the angle as `<persona> × <route>` (from the brief, via `get_brief`) plus its tier; where a group can't be resolved to a specific brief, the learning stays at the tier level and says so.
 - **NEVER writes `monthly_plans`, `targets.ads`, or `phase_status`** — those belonged to the retired shared-head model. Output goes only to the ad `channel_plan`'s `retrospective`.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state, and never writes to a different period's plan.
-- Reads winning/losing ad-sets' content via `get_idea` + `list_content` **only to name the proof points / lengths / formats they used** — read-only, no content writes, and a directional signal (an ad-set may carry several creatives; do not over-attribute).
-- Requires `edit` capability (for `save_channel_plan` and `save_performance_analysis`), plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` / `get_idea` / `list_content` reads.
+- Reads winning/losing ad-sets' content via `get_idea` + `get_brief` + `list_content` **only to name the angle (persona × route) and the proof points / lengths / formats it used** — read-only, no content writes, and a directional signal (an ad-set may carry several creatives; do not over-attribute). Resolution is name/convention-based (there is no ads→brief lookup tool) — never a guaranteed join.
+- **The retrospective's sole reader is next month's `ssc-ads-focus`.** `ssc-ads-writer` does not read it directly — its influence flows through Focus's next `creative_target`, not a retrospective read.
+- Requires `edit` capability (for `save_channel_plan` and `save_performance_analysis`), plus `view` for the `get_ad_performance` / `get_performance_analysis` / `get_channel_plan` / `get_idea` / `get_brief` / `list_content` reads.

@@ -125,8 +125,10 @@ awareness-stage.
 ## Before → after, per skill
 
 - **`ssc-ads-blueprint` → dissolved.** The step leaves the creative pipeline entirely. Its creative
-  steering (`primary_persona`/`value`/`frame`/`tonal_register`/`against`/`peak_window`/`format_pref`)
-  and per-ad-set `creative_count` are gone; the media buy (ad-set structure, budgets, audiences) moves
+  steering — the `ad_plan_slots` columns `layer_term_id`/`primary_persona_term_id`/`value_term_id`/
+  `frame_term_id`/`tonal_register_term_id`/`peak_window`/`format_pref` (note: `against` is an idea
+  *tag*, never a slot column) — and per-ad-set `creative_count` are gone; the media buy (ad-set
+  structure, budgets, audiences) moves
   to a **separate ops concern outside the plan**. The plan-level creative **volume/coverage target**
   moves to the creative-strategy side (Focus). No creative step passes through a media plan.
 - **`ssc-ads-ideate` → persona-free subject generation.** Produces a plan-level pool of distinct
@@ -178,20 +180,33 @@ awareness-stage.
 
 ## Open reconciliation points (settle in the implementation plan)
 
-1. **Coverage-target shape + home.** What the plan-level creative volume/coverage target looks like
-   (subjects × personas × routes × counts), how it splits across `Focus` (the bets) and `Approaches`
-   (the creative *how*) now that the media plan is gone, and how Ideate/Brief read it.
-2. **How the Brief references an ad set.** Whether ad sets **pre-exist** (defined on the media side)
-   for the Brief to pick a `layer + ad_set` from, or the Brief declares an abstract `layer + audience
-   intent` that the media side later realizes as a concrete ad set. Affects the schema of the angle's
-   media-home tag and the deployment `create_ad` step. (For the L2 omnipresence model, where an ad set
-   often carries a single creative, an angle may map ~1:1 to an ad set; for stable L1/L3 broad ad sets,
-   many angles share one — the tag must express both.)
+> Points 1–2 and 4 were **locked during planning (2026-07-21)** — see the `[LOCKED]` markers. Points
+> 3 and 5 remain open.
+
+1. **[LOCKED 2026-07-21] Coverage-target shape + home.** `Focus` sets the plan-level creative target
+   as structured rows on the channel_plan — `creative_target: [{ persona, route/awareness_stage,
+   count }]`; `Approaches` adds the differentiation *how* (per-route/persona guidance). Ideate reads it
+   for subject volume; Brief reads it for which persona×route angles to spend. One small plan field —
+   not a media plan.
+2. **[LOCKED 2026-07-21] The Brief declares a media-home INTENT, not a concrete ad set.** Each angle
+   carries `target_layer` + `audience_intent` (+ the derived `awareness_stage`) — a *declared* media
+   home, not an `ad_set` id. Deployment realizes it: an existing broad L1/L3 ad set, or a newly-created
+   L2 omnipresence ad set. The creative pipeline never reads the media buy. (This softens the earlier
+   "name the ad set" to "name the layer + ad-set intent".)
 3. **Broad-vs-persona targeting reconciliation.** The current KB (`ad/campaign-architecture`,
    `ad/strategy`) assumes some persona-based ad-set audiences; a persona-late, broad/Advantage+
    creative-led model may require KB revisions. Flag as a KB proposal, not a silent skill change.
-4. **Migration.** How existing welded ideas/briefs/content (with `ad_slot_id`) coexist with the new
-   plan-level ideas during rollout; whether a one-time backfill or a clean cutover.
+4. **[LOCKED 2026-07-21] Migration = backfill (deterministic + content-driven), not grandfathered.**
+   Existing briefs are migrated into the new model. Two parts. **(a) Deterministic SQL:**
+   `persona_term_id` ← the owning idea's single `persona` idea_term; `target_layer_term_id` ← idea →
+   `ad_idea_details.slot_id` → `ad_plan_slots.layer_term_id`. **(b) Content-driven classification:** for
+   each brief, **read its `content` rows individually** (the finished copy/headline/description/
+   image_content) and fill the three net-new fields from what the copy actually is — `route_term_id`
+   (Problem/Solution/Comparison/Proof/Curiosity per `ad/awareness-framework` §4), `awareness_stage`,
+   and `audience_intent` (a short Vietnamese phrase for who the copy speaks to). This is an LLM
+   judgment per brief, run by a one-time backfill **script** writing directly (so it can set
+   `awareness_stage`, which is not agent-editable via the `edit` tool). Runs in the Migrate step —
+   after consumers write the new fields, before the Contract phase drops `slot_id`; orphan-guard first.
 5. **Coverage measurement (deferred).** Whether a later phase adds an explicit, persisted coverage
    view over `subjects × personas × routes`. Deliberately **not** in this design (the orthogonal-axis
    hierarchy is expected to solve the reported problem without it); revisit only if it proves

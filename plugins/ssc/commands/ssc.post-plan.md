@@ -14,15 +14,16 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-07`). Required. This is the key the post `channel_plan` is stored under.
+- **Stage** (`stage`, optional — one of `focus`, `research`, `ideate`, `schedule`, `measure`) — names which pipeline step to work this invocation. The dashboard's per-stage Cowork button emits it **positionally after the period** (`/ssc.post-plan <period> <stage>`), so an operator standing on a given stage copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
 - **Plan ID** (`plan_id`, optional) — pass when resuming an in-flight plan. The plan is canonically resolved by `(channel='post', period)`, so this is informational only.
 
-If no period is given, ask the operator for it (one question) before dispatching. Do not invent one.
+If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `stage`.
 
 This command is the **standalone entry point** for the Posts pipeline. It runs entirely on its own `channel_plan(channel='post', period)` — there is **no precondition** and no `/ssc.plan` dependency. The post plan carries its own tactics, context, targets, ideas, calendar, and retrospective, and runs independently of the Ads and YouTube channels.
 
 ## What to do
 
-This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-post-agent`**, passing the `period` (and `plan_id` if provided). The agent is **state-driven**: it reads the post plan's current gate flags and runs whichever of the five steps is next, then stops at the next open human gate:
+This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-post-agent`**, passing the `period` (and `plan_id` / `stage` if provided). The agent is **state-driven**: it reads the post plan's current gate flags and runs whichever of the five steps is next, then stops at the next open human gate. When a `stage` is given, the agent instead works **that** step — still obeying the gate machine: it will not skip an unapproved upstream nor overwrite approved work (it reports what to approve first, or that the step is already approved), so the stage targets a step without ever walking a gate backward.
 
 | Step | The agent does | Then the operator… |
 |---|---|---|

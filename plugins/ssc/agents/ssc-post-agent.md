@@ -51,6 +51,10 @@ orchestrate and stop.
 The operator provides:
 - `period` — the plan month, format `YYYY-MM` (e.g. `2026-07`). **Required.**
   Ask once if absent; never invent it.
+- `stage` (optional) — a single step token (`focus | research | ideate |
+  schedule | measure`) naming which step to work this invocation. The dashboard's
+  per-stage Cowork button emits it (`/ssc.post-plan <period> <stage>`). Absent →
+  run the next open step. See **Stage-targeted invocation**.
 - `plan_id` (optional) — to resume an in-flight plan. The plan is canonically
   resolved by `(channel='post', period)`, so `plan_id` is informational only.
 
@@ -93,8 +97,10 @@ the matching step.
 
 ## State detection
 
-Evaluate on every invocation after Step 1, using the post plan's gate flags. Run
-the **first** branch that matches (top to bottom), then STOP at its gate:
+**If the operator passed a `stage`, apply Stage-targeted invocation (below) first
+— it decides the step.** Otherwise evaluate on every invocation after Step 1,
+using the post plan's gate flags. Run the **first** branch that matches (top to
+bottom), then STOP at its gate:
 
 - **No plan** OR **`tactics_approved` is not `true`** → **Focus**. Run Step 2
   (`ssc-post-focus`), then STOP at the **Focus gate**.
@@ -133,6 +139,35 @@ the count of matching rows is 0, the Ideas gate is still open → run Ideate. If
 **Channel independence.** Never read or branch on `ads`/`youtube` state, never
 call `get_channel_plan` for another channel, and never check any cross-channel
 flag. The post pipeline runs entirely on its own `channel_plan`.
+
+### Stage-targeted invocation (optional `stage`)
+
+When the operator passes a `stage` (`focus | research | ideate | schedule |
+measure` — the dashboard's per-stage Cowork button emits `/ssc.post-plan <period>
+<stage>`), it names which step to work THIS invocation instead of the plain
+next-open pick. You still obey the gate machine — a `stage` *targets* a step, it
+never lets you skip a gate or overwrite approved work. Resolve it against the SAME
+gate flags the branches above read:
+
+1. Normalize `stage` to a known token. Empty / unrecognized → ignore it and run
+   ordinary state detection above.
+2. **Upstream not yet approved** — the step's upstream gate is not satisfied
+   (Research needs `tactics_approved`; Ideate needs `approved`; Schedule needs ≥1
+   approved idea; Measure needs `schedule_approved`) → do NOT run the step. Report
+   which upstream approval is missing (name the dashboard action) and tell the
+   operator to clear it first, then STOP.
+3. **Already approved, content-field step** — the target is `focus`, `research`,
+   or `schedule` and its own gate (`tactics_approved` / `approved` /
+   `schedule_approved`) is already `true` → do NOT re-run it; re-drafting would
+   overwrite approved content. Tell the operator it is already approved and, to
+   redo it, un-approve it in the dashboard first (which reopens the gate), then
+   re-invoke with the same stage. STOP.
+4. **`ideate`** is additive — it only proposes new DRAFT ideas (never touches
+   approved ones) — so run it whenever `approved` is `true`, even after ≥1 idea is
+   already approved (it proposes more). **`measure`** is ungated — run it whenever
+   `schedule_approved` is `true`.
+5. Otherwise (upstream satisfied, own gate open) → run the named step exactly as
+   its Step section describes, then STOP at its gate.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: ssc-ads-focus
 description: >-
-  Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Ads pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's ad retrospective into the month's ad tactics: which quarterly angles to push in paid, the priority-pillar bets, and the tactical themes. Writes the tactics onto the ad channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
+  Drafts the month's Focus — the tactical plan — for the standalone Cambridge Diet Vietnam Ads pipeline. Turns the quarter's already-defined strategy (marked findings + approved directions, passed in by the agent) plus the prior period's ad retrospective into the month's ad tactics: which quarterly angles to push in paid, the priority-pillar bets, and the tactical themes — plus a concrete coverage/volume target (which persona × route combinations to cover this month and how many creatives each). Writes the tactics and the coverage target onto the ad channel_plan via save_channel_plan for a human to review, edit, and approve. Propose-only; ends at the Focus gate; never sets tactics_approved.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -13,11 +13,11 @@ metadata:
 
 # Ads Focus (`ssc-ads-focus`)
 
-You draft the **Focus** — the month's *bets* — for the standalone Cambridge Diet Vietnam Ads pipeline, translating the quarter's already-defined strategy into concrete monthly priorities for the paid (Ads) channel. The agent passes the strategy in — you never fetch it yourself. You read the **prior period's ad retrospective** off the previous month's ad plan to carry winning angles forward and drop fatigued ones. You write the draft onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, tactics=…)` and hand off to a human for review, edit, and approval. You **never approve** — flipping `tactics_approved` is a dashboard-only action.
+You draft the **Focus** — the month's *bets* — for the standalone Cambridge Diet Vietnam Ads pipeline, translating the quarter's already-defined strategy into concrete monthly priorities for the paid (Ads) channel, plus a concrete **coverage/volume target**: which persona × route combinations to cover this month and how many creatives each. The agent passes the strategy in — you never fetch it yourself. You read the **prior period's ad retrospective** off the previous month's ad plan to carry winning angles forward and drop fatigued ones. You write the draft onto the ad `channel_plan` via `save_channel_plan(channel='ad', period, tactics=…, creative_target=…)` and hand off to a human for review, edit, and approval. You **never approve** — flipping `tactics_approved` is a dashboard-only action.
 
-The Focus is **the bets only** — which pillars/angles/themes to push in paid this month and why. It is NOT the creative "how" (which themes to attack each layer with, persona triggers, differentiation moves) — that is the **Approaches** step, which runs after Focus is approved. Keep this doc at the level of strategic intent; do not describe the creative realization.
+The Focus is **the bets, plus how much to make of them** — which pillars/angles/themes to push in paid this month and why, sized into a persona × route coverage target. It is NOT the creative "how" (which themes to attack each route with, persona triggers, differentiation moves) — that is the **Approaches** step, which runs after Focus is approved. Keep the tactics doc at the level of strategic intent; do not describe the creative realization.
 
-This is step 1 of the five-step Ads pipeline (**Focus → Approaches → Blueprint → Ideate → Measure**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`. There is no `/ssc.plan` dependency — the ad plan is self-contained.
+This is step 1 of the four-step Ads pipeline (**Focus → Approaches → Ideate → Measure**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`. There is no `/ssc.plan` dependency — the ad plan is self-contained.
 
 ## Inputs (provided by the ads-pipeline agent)
 
@@ -49,6 +49,17 @@ This read is read-only and degrades gracefully — a missing prior plan or empty
 
 ### Step 2: Read the strategy
 
+First, regardless of which branch below you take, load the persona and route rosters the coverage target (Step 3) needs — read them live, never from memory or a hardcoded list:
+
+```
+Call: get_knowledge
+  path: brand/personas
+```
+```
+Call: get_knowledge
+  path: ad/awareness-framework
+```
+
 **If `strategy` is non-null** — it is the primary driver. Use it directly:
 - `directions.themes` — the approved strategic priorities for the quarter
 - `findings` (marked findings only) — signals the operator kept; the concrete angles and insights to act on. Prefer findings carrying an `ad_market` dimension when present — those are the paid-angle signals most directly relevant to the Ads channel.
@@ -60,38 +71,45 @@ This read is read-only and degrades gracefully — a missing prior plan or empty
 Call: get_knowledge
   path: content/pillars
 ```
-```
-Call: get_knowledge
-  path: brand/personas
-```
 
 Use the pillar strategy and persona context as the fallback frame for the tactical draft.
 
 ### Step 3: Draft the month tactics
 
-Write a tight, **editable** plan of the month's bets in markdown — NOT the creative how, and NOT the execution numbers. The Approaches step (which runs after Focus is approved) turns the bets into concrete creative approaches per layer; the Blueprint step (after Approaches) derives the budget split, layer %, creative counts, and the full ad-set build map. Keep the Focus at the level of *which bets and why*. The tactics doc covers:
+Write a tight, **editable** plan of the month's bets in markdown — NOT the creative how. The Approaches step (which runs after Focus is approved) turns the bets into concrete creative approaches per route. The ad set / media buy (budget split, placements, audiences) is a dashboard/ops concern the creative pipeline never touches. Keep the tactics doc at the level of *which bets and why*; it covers:
 
 1. **Tactical themes for [period]** — which of the quarter's strategic themes land *this* month in paid. A quarter's strategy spreads across 3 months; pick the 1-3 themes that fit this month's position in the quarter (early = build awareness, mid = push consideration, late = consolidate/re-convert).
 
-2. **Angles to activate this month** — from the marked findings in the strategy, select which specific paid angles to push now. For each: one sentence on the angle, one sentence on why *this* month. Where the prior ad retrospective named a winning angle, prefer carrying it forward; where it named a fatigued/inefficient angle, explicitly drop or refresh it — but **honour the tier each grade came from** (Step 1): protect/lean into L3 cost-per-purchase winners, keep proven L1 intake angles even at ~2× warm cost, and carry winning L2 omnipresence angles on their reach/CPM merit (never drop them for low purchases). Name the angle as a *bet* (the strategic direction to push) — the creative realization (per-layer attack, persona triggers, frames, slot instantiation) is the Approaches and Blueprint steps' job, not the Focus's.
+2. **Angles to activate this month** — from the marked findings in the strategy, select which specific paid angles to push now. For each: one sentence on the angle, one sentence on why *this* month. Where the prior ad retrospective named a winning angle, prefer carrying it forward; where it named a fatigued/inefficient angle, explicitly drop or refresh it — but **honour the tier each grade came from** (Step 1): protect/lean into L3 cost-per-purchase winners, keep proven L1 intake angles even at ~2× warm cost, and carry winning L2 omnipresence angles on their reach/CPM merit (never drop them for low purchases). Name the angle as a *bet* (the strategic direction to push) — the creative realization (per-route attack, persona triggers, frames) is the Approaches step's job, not the Focus's.
 
 3. **Priority-pillar bets** — which content pillars to emphasise in paid this month and why (audience demand, strategic gap, seasonal fit, or a retrospective signal).
 
-4. **Monthly emphasis** — a 2-3 sentence statement of how the quarter strategy translates into this month's specific bets for Ads. Concrete enough that the Approaches step can build creative approaches on it and the Blueprint step can size the budget and derive the ad-set build map.
+4. **Monthly emphasis** — a 2-3 sentence statement of how the quarter strategy translates into this month's specific bets for Ads. Concrete enough that the Approaches step can build creative approaches on it.
 
 Keep the doc under ~400 words. Use `##` headings for each section. **Write the entire tactics doc in Vietnamese — including the section headings.** It is a persisted artifact the Vietnamese operator reviews, edits, and approves in the dashboard, so the prose must be Vietnamese (your chat-side reasoning can stay English). Use a direct, operational voice — this is a working plan, not a memo. **Never use the acronym "RCT" — write "nghiên cứu lâm sàng độc lập".**
 
-### Step 4: Write the tactics onto the ad plan
+#### Coverage/volume target (`creative_target`)
+
+Alongside the tactics doc, set the month's **coverage/volume target** — a small structured list, not prose, naming which persona × route combinations to cover this month and how many creatives each. This is the single source of "how much to make" for the plan; it replaces what used to be a per-ad-set creative count.
+
+- **Personas** — use the labels from the `brand/personas` roster loaded in Step 2, exactly as written there. Never enumerate persona names from memory — the roster is open (personas are added/retired on their own cadence) and this skill must need no change when it does.
+- **Routes** — use the persuasion-route names from `ad/awareness-framework` loaded in Step 2, exactly as written there. Never restate the route list here.
+- For each `{persona, route}` pair worth a bet this month — grounded in the angles and pillars you selected above, not a mechanical full matrix — set a `count`: how many creatives to produce for it this month. Weight counts toward the angles/pillars you're pushing hardest; leave out pairs not in play this month rather than setting them to zero. Keep the list short — a handful of pairs, not exhaustive coverage of every persona × route combination.
+
+Build this as an array of `{ persona, route, count }` objects — this becomes the `creative_target` argument to `save_channel_plan` in Step 4.
+
+### Step 4: Write the tactics and coverage target onto the ad plan
 
 ```
 Call: save_channel_plan
   channel: ad
   period: <period>
   tactics: <the markdown tactics doc from Step 3>
+  creative_target: <the [{ persona, route, count }] array from Step 3>
   strategy_brief_id: <strategy_brief_id from the passed strategy, or omit when none>
 ```
 
-`save_channel_plan` upserts by `(channel='ad', period)` — calling it creates the ad plan for the month if it does not exist yet, or updates the `tactics` field if it does (unset fields are preserved). It writes **propose-state only** — it never flips a gate. Do NOT pass any approval field.
+`save_channel_plan` upserts by `(channel='ad', period)` — calling it creates the ad plan for the month if it does not exist yet, or updates the `tactics`/`creative_target` fields if it does (unset fields are preserved). It writes **propose-state only** — it never flips a gate. Do NOT pass any approval field.
 
 ### Step 5: Output summary
 
@@ -117,10 +135,15 @@ Prior ad retrospective: <"loaded from <prior period>" or "none — quarterly str
 - Carry: [winning angle + its tier, e.g. "safety-EU (L3 cost-per-purchase winner)", or "none"]
 - Drop/refresh: [fatigued angle + tier signal, e.g. "X (L2 frequency >3.5)", or "none"]
 
+### Coverage target (creative_target)
+- [persona] × [route] — [count]
+- [persona] × [route] — [count]
+- …
+
 ### Monthly emphasis
 [2-3 sentence statement]
 
-Tactics written to the ad channel_plan (propose-state).
+Tactics and coverage target written to the ad channel_plan (propose-state).
 
 Next step: review, edit, and approve the Focus in the dashboard (flips `tactics_approved`), then re-invoke the agent to begin Approaches.
 ```
@@ -128,6 +151,7 @@ Next step: review, edit, and approve the Focus in the dashboard (flips `tactics_
 ## Output
 
 - `tactics` written to the ad `channel_plan` (markdown)
+- `creative_target` written to the ad `channel_plan` (array of `{ persona, route, count }` — the month's coverage/volume target)
 - The ad plan upserted for `(channel='ad', period)` if it did not exist
 - No gate flipped
 
@@ -138,8 +162,9 @@ Next step: review, edit, and approve the Focus in the dashboard (flips `tactics_
 - Does not call `get_strategy_brief` — the agent resolves the strategy and passes it in.
 - The prior-period read (Step 1) is read-only and never blocks: a missing prior plan or empty `retrospective` is normal.
 - **Tier-correct carry-forward.** When the retrospective carries tier grades, honour each grade's tier: cost-per-purchase judges only L1/L3 (protect/scale L3, keep L1 at funnel-intake); L2 omnipresence is judged on reach/CPM/frequency and is never dropped for low purchases.
-- KB fallback uses only `content/pillars` and `brand/personas` — no other knowledge reads are needed; the passed strategy is the primary driver.
+- `brand/personas` and `ad/awareness-framework` are read every run (they ground the coverage target, Step 2); `content/pillars` is read only in the KB-fallback branch (no strategy brief); no other knowledge reads are needed — the passed strategy is the primary driver.
+- **Never hard-code KB content.** Persona names and route names in `creative_target` come from the live `brand/personas` / `ad/awareness-framework` reads (Step 2) each run — never a remembered or hardcoded list. Both rosters are open; a persona or route added or retired needs no change to this skill.
 - No `approve` verb (the ONLY gated promotion), no `edit` used to demote/unapprove a row, no `edit_knowledge`, no `publish_strategy_knowledge`.
-- Does NOT write the creative "how" (per-layer approaches, persona triggers, differentiation) — that is the Approaches step's output (`context`). Does NOT write budget split, layer %, the ad-set build map, or creative counts — those are the Blueprint step's outputs. Focus carries only the bets / tactical intent (`tactics`).
+- Does NOT write the creative "how" (per-route approaches, persona triggers, differentiation) — that is the Approaches step's output (`context`). Does NOT write budget split, placements, audiences, or the ad-set build map — those are dashboard/media-ops concerns, not any creative-pipeline step's job. Focus carries the bets / tactical intent (`tactics`) and the coverage/volume target (`creative_target`).
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires `edit` capability (plus `view` for the `get_channel_plan` and `get_knowledge` reads).

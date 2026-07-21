@@ -1,5 +1,5 @@
 ---
-description: Plan the Cambridge Diet Vietnam Ads channel — Focus → Approaches → Blueprint → Ideate → Measure — keyed on its own ad channel_plan. State-driven across four human-gated steps.
+description: Plan the Cambridge Diet Vietnam Ads channel — Focus → Approaches → Ideate → Measure — keyed on its own ad channel_plan. State-driven across three human-gated steps.
 metadata:
   brand: cambridge-diet-vn
   section: ads
@@ -18,27 +18,26 @@ Consider the user input above before proceeding (if not empty). Expected inputs:
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one.
 
-This command is the **standalone entry point** for the Ads pipeline. It runs entirely on its own `channel_plan(channel='ad', period)` — there is **no precondition** and no `/ssc.plan` dependency. The ad plan carries its own tactics, approaches, budget split, layer %, the full ad-set build map, concepts, and retrospective, and runs independently of the Posts and YouTube channels.
+This command is the **standalone entry point** for the Ads pipeline. It runs entirely on its own `channel_plan(channel='ad', period)` — there is **no precondition** and no `/ssc.plan` dependency. The ad plan carries its own tactics, its persona × route coverage/volume target, the approaches, the subject pool (DRAFT ad concepts), and the retrospective, and runs independently of the Posts and YouTube channels. The ad set / media buy has left the creative pipeline entirely — it is a dashboard/ops concern this pipeline never touches.
 
 ## What to do
 
-This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-ads-agent`**, passing the `period` (and `plan_id` if provided). The agent is **state-driven**: it reads the ad plan's current gate flags and runs whichever of the five steps is next, then stops at the next open human gate:
+This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-ads-agent`**, passing the `period` (and `plan_id` if provided). The agent is **state-driven**: it reads the ad plan's current gate flags and runs whichever of the four steps is next, then stops at the next open human gate:
 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
-| **Focus** | `tactics_approved` | Resolves the quarter strategy + prior period's ad retrospective → drafts the month's bets (quarterly angles to push in paid, priority-pillar bets, tactical themes) | Reviews + **approves** the Focus in the dashboard (flips `tactics_approved`), then re-runs this command |
-| **Approaches** | `approaches_approved` | Light WebSearch month pass + KB synthesis → drafts the creative *how* (per-layer L1/L2/L3/YouTube approaches, audience triggers, differentiation, experiments) to `context` | Reviews + **approves** the Approaches in the dashboard (flips `approaches_approved`), then re-runs this command |
-| **Blueprint** | ≥1 approved ad set | Derives the full ad-set build map across all four layers → `ad_plan_slots`, **each ad set RATED 1–5 and proposed** (carrying its build_spec + creative count; per-ad-set budget lives in `build_spec.budgetShare`) | Reviews the ad sets and **approves the ones to build, individually** in the dashboard (each goes `proposed` → `approved`). Approving ≥1 ad set opens Ideate (which fills only the approved ad sets); then re-runs this command |
-| **Ideate** | ≥1 approved concept | Generates one DRAFT structural concept per planned creative in the **approved ad sets only** via `save_idea(channel='ad', slot_id)`, tagged to the plan, across all layers they span | **Curates** the concepts — accepts or removes — in the dashboard → Ideas. Approving ≥1 concept opens the Ideas gate; then re-runs this command |
+| **Focus** | `tactics_approved` | Resolves the quarter strategy + prior period's ad retrospective → drafts the month's bets (quarterly angles to push in paid, priority-pillar bets, tactical themes) plus the month's persona × route coverage/volume target (`creative_target`) | Reviews + **approves** the Focus in the dashboard (flips `tactics_approved`), then re-runs this command |
+| **Approaches** | `approaches_approved` | Light WebSearch month pass + KB synthesis → drafts the creative *how* (per-route/persona approaches, audience triggers, differentiation, experiments) to `context` | Reviews + **approves** the Approaches in the dashboard (flips `approaches_approved`), then re-runs this command |
+| **Ideate** | ≥1 approved concept | Sizes the month's subject pool to the Focus's `creative_target` total and generates one DRAFT, persona-free, tier-free subject per planned creative via `save_idea(channel='ad', plan_id)` — no ad-set/slot link, no persona/layer tag | **Curates** the subjects — accepts or removes — in the dashboard → Ideas. Approving ≥1 subject opens the Ideas gate; then re-runs this command |
 | **Measure** | ungated | Reads this plan's ingested ad performance → writes the `retrospective` (carried into next month's Focus) | — (ungated; closes the loop) |
 
-The four human gates are **Focus** (`tactics_approved`) → **Approaches** (`approaches_approved`) → **Blueprint** (≥1 approved ad set) → **Ideas** (≥1 approved concept). **Measure** is ungated. Blueprint and Ideas are both per-item curation gates — the operator approves individual ad sets / concepts in the dashboard, not a plan-level flag.
+The three human gates are **Focus** (`tactics_approved`) → **Approaches** (`approaches_approved`) → **Ideas** (≥1 approved concept). **Measure** is ungated. Ideas is a per-item curation gate — the operator approves individual subjects/concepts in the dashboard, not a plan-level flag.
 
 Re-run this command (same `period` / `plan_id`) after each gate to advance to the next step.
 
 ## Governance
 
-Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Running steps requires `edit`; approving the Focus, the Approaches, individual ad sets, and individual concepts requires `approve`.
+Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**. Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Running steps requires `edit`; approving the Focus, the Approaches, and individual concepts requires `approve`.
 
 ## After it runs
 

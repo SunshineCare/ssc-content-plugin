@@ -152,7 +152,7 @@ The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are **fixed structural mark
 | **Standard** | HEADLINE + SUBHEADLINE + 2–3 bullets | has room for a short proof stack |
 | **Text-dominant** | HEADLINE + SUBHEADLINE + up to 3 bullets | is plain/high-contrast — text *is* the creative |
 
-**The post's PILLAR and its anchor copy steer DENSITY — never hook strength.** Ads take this steer from the ad set's `build_spec`/layer; a post has none, so use the two signals you already hold: the idea's **`pillar`** tag (handed over with the brief — read what that pillar is *for* from the live `content/pillars`, never from a remembered mapping) and the **nature of the anchor copy** each version is built on.
+**The post's PILLAR and its anchor copy steer DENSITY — never hook strength.** Ads take this steer from the angle brief's `awareness_stage`/route; a post has none, so use the two signals you already hold: the idea's **`pillar`** tag (handed over with the brief — read what that pillar is *for* from the live `content/pillars`, never from a remembered mapping) and the **nature of the anchor copy** each version is built on.
 
 - A **story / empathy / founder-led** pillar, or a story-led anchor copy (a lived moment, a confession), leans **Minimal** — the moment carries it, and stacking bullets over a human photograph kills exactly the recognition that earns the comment.
 - An **education / science / tools** pillar, or a mechanism-led anchor copy, can carry **Standard** — informational content genuinely has something worth listing, and a saved post is an engagement win.

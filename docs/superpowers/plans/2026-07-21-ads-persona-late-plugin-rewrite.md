@@ -6,15 +6,17 @@
 
 **Goal:** Rewrite the Cowork ads pipeline skills to the persona-late 3-level model so operators stop getting same-y output — Idea = persona-free subject, Angle/Brief = persona × route (fanned across the personas a subject fits), Copy = execution; the ad set/media-buy leaves the creative pipeline.
 
-**Architecture:** Delete `ssc-ads-blueprint`; the creative pipeline becomes **Focus → Approaches → Ideate → Brief → Writer** (planning agent runs Focus → Approaches → Ideate → Measure; Brief + Writer are the separate production flows). Focus carries the plan-level coverage target; Ideate emits persona-free subjects; Brief chooses persona × route per subject and declares the media home (`target_layer` + `audience_intent` + `awareness_stage`); the server contract for all of this is already **live** (Deferred 0, `master-aa46e24`).
+**Architecture:** Delete `ssc-ads-blueprint`; the creative pipeline becomes **Focus → Approaches → Ideate → Brief → Writer** (planning agent runs Focus → Approaches → Ideate → Measure; Brief + Writer are the separate production flows). Focus carries the plan-level coverage target; Ideate emits persona-free subjects; Brief chooses persona × route per subject and declares the media home (`target_layer` + `awareness_stage`); the server contract for all of this is already **live** (Deferred 0, `master-aa46e24`).
 
-**Tech Stack:** Markdown skills (`plugins/ssc/skills/<name>/SKILL.md`), agent (`agents/`), commands (`commands/`), the BrandOS MCP tool surface (already extended: `save_brief` accepts persona/route/target_layer/audience_intent/awareness_stage + kind-validated; `save_channel_plan` accepts `creative_target`; briefs read back the labels).
+> **[AMENDED 2026-07-21] `audience_intent` is NOT written.** The shipped `save_brief` accepts it, but no skill sets it and no skill reads it — it had no consumer, pinned a stale copy of persona-doc content onto a row, and implied a targeting knob that broad/Advantage+ buying does not have. The column stays dormant and is dropped in the server Contract phase. See design spec OP2 amendment.
+
+**Tech Stack:** Markdown skills (`plugins/ssc/skills/<name>/SKILL.md`), agent (`agents/`), commands (`commands/`), the BrandOS MCP tool surface (already extended: `save_brief` accepts persona/route/target_layer/awareness_stage + kind-validated (it also accepts `audience_intent` — dormant, never write it); `save_channel_plan` accepts `creative_target`; briefs read back the labels).
 
 ## Global Constraints (bind every task)
 
 - **Propose-only (hard rule).** No skill/agent may reference `approve`, publish/schedule, `update_budget`, `create_*`, or use `edit` to demote/unapprove. Never flip a gate. (Preserve exactly as today.)
 - **Never hard-code KB content.** Reference the live KB doc + section and read it live (personas, `ad/awareness-framework`, `brand/angles`, routes). No persona names in closed enums, no baked persona hooks/prohibitions, no route lists restated. (See root CLAUDE.md "Never hard-code KB content".)
-- **Every referenced MCP tool must exist** on the BrandOS surface. New/changed tool fields this rewrite relies on (all shipped): `save_brief(persona_term_id, route_term_id, target_layer_term_id, audience_intent, awareness_stage)`, `save_channel_plan(creative_target)`, `save_idea` (persona-free ad ideas now allowed — `frame` no longer required for ad). Do NOT reference `save_ad_plan_slots` from any creative skill (media buy left the pipeline).
+- **Every referenced MCP tool must exist** on the BrandOS surface. New/changed tool fields this rewrite relies on (all shipped): `save_brief(persona_term_id, route_term_id, target_layer_term_id, awareness_stage)` — **never** `audience_intent` (cut, dormant), `save_channel_plan(creative_target)`, `save_idea` (persona-free ad ideas now allowed — `frame` no longer required for ad). Do NOT reference `save_ad_plan_slots` from any creative skill (media buy left the pipeline).
 - **`/ssc.*` cross-refs must resolve to a real command.** Update pipeline tables; don't leave dangling `ssc.ads-plan`/blueprint refs.
 - **Persisted prose is Vietnamese** (copy, angle_label, comments); operator-facing chat/system text may be the operator's language.
 - **Persona-late invariants:** Idea names no persona/route/layer/framing. Brief chooses persona × route + declares layer/ad-set intent + awareness_stage. One persona-free subject fans into angles across the personas it fits. The ad set/media-buy is a dashboard/ops concern — no creative skill plans or references ad sets/`build_spec`/`ad_plan_slots`.
@@ -27,7 +29,7 @@
 | `skills/ssc-ads-approaches/SKILL.md` | reframe off "per ad set" → per-route/persona differentiation | 2 |
 | `skills/ssc-ads-blueprint/SKILL.md` | **DELETE** the directory | 3 |
 | `skills/ssc-ads-ideate/SKILL.md` | rewrite → persona-free, tier-free subjects; drop archetype/value/frame/against/slot machinery | 4 |
-| `skills/ssc-ads-brief/SKILL.md` | rewrite → persona × route fan-out; declare target_layer/audience_intent/awareness_stage | 5 |
+| `skills/ssc-ads-brief/SKILL.md` | rewrite → persona × route fan-out; declare target_layer/awareness_stage | 5 |
 | `skills/ssc-ads-writer/SKILL.md` | light — tune to the angle's persona/route/awareness-stage, drop ad-set `build_spec` reads | 6 |
 | `skills/ssc-ads-measure/SKILL.md` | scrub ad-set/Blueprint references; measure by angle (persona × route) | 7 |
 | `agents/ssc-ads-agent.md` | drop Blueprint from `orchestrates` + the state machine; pipeline Focus → Approaches → Ideate → Measure | 8 |
@@ -107,14 +109,15 @@
 
 **What changes (the L1=Lan lock-breaker):**
 - For ONE persona-free subject (an approved ad idea), the Brief now **chooses the personas the subject fits** (from the live `brand/personas` roster) and, per persona, a **route** (problem/solution/comparison/proof/curiosity from `ad/awareness-framework`) — fanning into DISTINCT briefs across `persona × route`. One subject → many persona-angles (Lan AND Hương AND Thảo).
-- Each brief now sets, via `save_brief`: `persona_term_id`, `route_term_id`, plus the five narrative fields + `angle_label` + score/comment, AND declares the media home — `target_layer_term_id` (derived from the route's awareness-stage → tier) + `audience_intent` (a short Vietnamese phrase for who this angle speaks to) + `awareness_stage`. Resolve persona/route/layer codes → term ids via `list_taxonomies` (kinds `persona`, `route`, `campaign_layer`); the server kind-validates them.
+- Each brief now sets, via `save_brief`: `persona_term_id`, `route_term_id`, plus the five narrative fields + `angle_label` + score/comment, AND declares the media home — `awareness_stage` + `target_layer_term_id` (the tier that stage implies). Resolve persona/route/layer codes → term ids via `list_taxonomies` (kinds `persona`, `route`, `campaign_layer`); the server kind-validates them. **Never set `audience_intent`** (cut — dormant column).
+- **`awareness_stage` is a JUDGMENT, not a lookup.** Derive it per angle from the **live** `ad/awareness-framework` ladder + the chosen persona's anchors in `brand/persona-<slug>` — never from a route→stage table baked into this skill. The same route serves different stages depending on the persona's anchor; a baked table collapses stage into a mechanical function of route (and goes stale when the framework is revised quarterly). `target_layer_term_id` follows from the stage via the same live doc, and is pinned at save so a later framework revision cannot re-home approved briefs.
 - The idea no longer carries a persona tag, so the Brief READS no persona off the idea — it CHOOSES persona(s). Anchor each angle on the chosen persona's detail doc (`brand/persona-<slug>`, read live) + the awareness framework, exactly as today, but persona is now a Brief choice, not an inherited idea tag.
 - Distinctiveness widens: the "taken set" compares across ALL of the idea's briefs (all persona × route), and — per the design — ideally across the plan's angles. Preserve the never-pad rule, the `Tránh` per-persona gate, the quality loop, and propose-only (`save_brief` mints drafts only).
 - Fix pipeline/cross-refs.
 
 - [ ] Read current skill + design "before/after: ssc-ads-brief" + the shipped `save_brief` field list.
-- [ ] Rewrite: persona-selection (from live roster) × route fan-out; set the new `save_brief` fields incl. target_layer/audience_intent/awareness_stage; resolve ids via `list_taxonomies`; widen the taken-set to persona × route.
-- [ ] Self-check: no persona read off the idea (it's chosen); `save_brief` carries the five new fields; ids resolved (never a code); `Tránh` gate + never-pad + propose-only intact; personas/routes read live.
+- [ ] Rewrite: persona-selection (from live roster) × route fan-out; set the new `save_brief` fields incl. target_layer/awareness_stage; resolve ids via `list_taxonomies`; widen the taken-set to persona × route.
+- [ ] Self-check: no persona read off the idea (it's chosen); `save_brief` carries the four new fields (persona/route/target_layer/awareness_stage) and NOT `audience_intent`; awareness_stage derived from the live ladder + persona anchors, no baked route→stage table; ids resolved (never a code); `Tránh` gate + never-pad + propose-only intact; personas/routes read live.
 - [ ] Commit `feat(ads-brief): choose persona × route, fan across the personas a subject fits`.
 
 ---
@@ -180,7 +183,7 @@
 1. **Grep sweep:** `grep -rn 'ssc-ads-blueprint\|ad_plan_slots\|save_ad_plan_slots\|build_spec\|slotId\|creative_count' plugins/ssc` → every remaining hit must be an intentional negation (e.g. "no ad-set dependency"), not a live reference.
 2. **Governance:** `echo '{"tool_name":"mcp__ssc__approve_idea","agent_id":"ssc-ads-agent"}' | node plugins/ssc/hooks/approval-gate.mjs` → still `deny`. No skill references `approve`/`create_*`/publish/`update_budget`.
 3. **KB not hard-coded:** no persona names in enums, no route lists restated, no baked persona hooks/prohibitions — all read live.
-4. **Tool fields:** `save_brief` calls carry persona/route/target_layer/audience_intent/awareness_stage; `save_channel_plan` carries `creative_target`; no creative skill calls `save_ad_plan_slots`.
+4. **Tool fields:** `save_brief` calls carry persona/route/target_layer/awareness_stage and never `audience_intent` (`grep -rn 'audience_intent' plugins/ssc` → no hits); `save_channel_plan` carries `creative_target`; no creative skill calls `save_ad_plan_slots`.
 5. **Cross-refs:** every `/ssc.*` and pipeline table resolves; no dangling Blueprint step.
 
 ## Deployment / rollout note

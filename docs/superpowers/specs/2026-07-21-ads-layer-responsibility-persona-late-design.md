@@ -165,9 +165,10 @@ awareness-stage.
 
 - **Cut the idea↔ad-set weld.** Remove `ad_slot_id` (and the ad-set-derived creative fields) from
   the idea. Ideas become plan-level, persona-free **and layer-free**.
-- **Angle/brief carries persona + route + awareness-stage + target layer + target ad set** as
+- **Angle/brief carries persona + route + awareness-stage + target layer** as
   first-class fields. Persona moves from the idea onto the brief; awareness-stage becomes an intrinsic
-  angle field (not an ad-set read); the **layer + ad-set tag** is the angle's declared media home.
+  angle field (not an ad-set read); the **layer tag** is the angle's declared media home. No free-text
+  audience field — see the amendment on open point 2 (`audience_intent` cut).
 - **The media buy leaves the plan.** Ad-set definitions (audiences/budgets/tiers/placements) are owned
   by the media/ops side, not by any creative artifact. The angle's ad-set tag is a **reference** to
   one of those ad sets; whether ad sets pre-exist for the Brief to pick or the Brief declares an
@@ -189,10 +190,28 @@ awareness-stage.
    for subject volume; Brief reads it for which persona×route angles to spend. One small plan field —
    not a media plan.
 2. **[LOCKED 2026-07-21] The Brief declares a media-home INTENT, not a concrete ad set.** Each angle
-   carries `target_layer` + `audience_intent` (+ the derived `awareness_stage`) — a *declared* media
-   home, not an `ad_set` id. Deployment realizes it: an existing broad L1/L3 ad set, or a newly-created
+   carries `target_layer` + `awareness_stage` — a *declared* media home, not an `ad_set` id.
+   Deployment realizes it: an existing broad L1/L3 ad set, or a newly-created
    L2 omnipresence ad set. The creative pipeline never reads the media buy. (This softens the earlier
    "name the ad set" to "name the layer + ad-set intent".)
+
+   > **[AMENDED 2026-07-21] `audience_intent` is CUT.** The lock originally carried a third field —
+   > a short Vietnamese phrase for who the angle speaks to. Removed on review: it had **no consumer**
+   > (the Writer tunes to persona/route/awareness_stage; deployment picks the ad set from
+   > `target_layer`; Measure groups by angle + layer), it **pinned a stale copy of KB content**
+   > (the phrase is a persona-doc trigger snapshotted onto a row — the same staleness failure mode the
+   > "never hard-code KB content" rule exists to prevent), and it **implied a targeting knob that does
+   > not exist** (audience is broad/Advantage+ per `ad/campaign-architecture.md:52`; persona is a
+   > creative allocation over that broad audience per `ad/strategy.md:52`) — the last residue of the
+   > retired `build_spec.audience`. Sub-persona specificity already lives in the angle's
+   > `hook_direction`/`core_message`/`angle_label`. The shipped `briefs.audience_intent` column stays
+   > **dormant** (never written) and is dropped in the Contract phase.
+   >
+   > `awareness_stage` and `target_layer` both **stay**. `awareness_stage` is an angle *judgment*, not
+   > a lookup — route→stage is not 1:1 (the same route serves unaware vs problem-aware depending on the
+   > persona's anchor) — and it has a live consumer (Writer register/length; Measure). `target_layer` is
+   > the one thing deployment acts on, and is pinned at save so a quarterly `ad/awareness-framework`
+   > revision cannot silently re-home already-approved briefs.
 3. **Broad-vs-persona targeting reconciliation.** The current KB (`ad/campaign-architecture`,
    `ad/strategy`) assumes some persona-based ad-set audiences; a persona-late, broad/Advantage+
    creative-led model may require KB revisions. Flag as a KB proposal, not a silent skill change.
@@ -201,9 +220,10 @@ awareness-stage.
    `persona_term_id` ← the owning idea's single `persona` idea_term; `target_layer_term_id` ← idea →
    `ad_idea_details.slot_id` → `ad_plan_slots.layer_term_id`. **(b) Content-driven classification:** for
    each brief, **read its `content` rows individually** (the finished copy/headline/description/
-   image_content) and fill the three net-new fields from what the copy actually is — `route_term_id`
-   (Problem/Solution/Comparison/Proof/Curiosity per `ad/awareness-framework` §4), `awareness_stage`,
-   and `audience_intent` (a short Vietnamese phrase for who the copy speaks to). This is an LLM
+   image_content) and fill the **two** net-new fields from what the copy actually is — `route_term_id`
+   (Problem/Solution/Comparison/Proof/Curiosity per `ad/awareness-framework` §4) and `awareness_stage`.
+   (`audience_intent` was the third; **cut** — see the amendment on point 2. It is never backfilled.)
+   This is an LLM
    judgment per brief, run by a one-time backfill **script** writing directly (so it can set
    `awareness_stage`, which is not agent-editable via the `edit` tool). Runs in the Migrate step —
    after consumers write the new fields, before the Contract phase drops `slot_id`; orphan-guard first.

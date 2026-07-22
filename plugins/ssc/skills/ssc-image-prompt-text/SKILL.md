@@ -103,11 +103,11 @@ Read the brand type/legibility conventions so the placement matches the house st
 
 ```
 Call: get_knowledge
-  paths: ["brand/visual-identity", "ad/visual-direction-ref", "ad/creative-guidelines"]
+  paths: ["visual/identity", "visual/direction-ref", "ad/creative-guidelines"]
 ```
 
-- `brand/visual-identity` — palette, type register, and how on-image type sits in the house style.
-- `ad/visual-direction-ref` / `ad/creative-guidelines` — on-image text placement + legibility. **Load these on both channels** — they are the brand's only on-image type references, so read them as the standard for a `post` visual too; the KB has no post-channel visual doc, so never invent one and never skip them on a post.
+- `visual/identity` — palette, type register, and how on-image type sits in the house style.
+- `visual/direction-ref` / `ad/creative-guidelines` — on-image text placement + legibility. **Load these on both channels** — `visual/*` is the brand's single visual-guidance category (channel-agnostic by design) and `ad/creative-guidelines` is the brand's only on-image type reference otherwise, so read both as the standard for a `post` visual too; the KB has no post-channel visual doc, so never invent one and never skip them on a post.
 
 **Ground the placement register in ALL APPROVED CONTENTS (D4).** From the `list_content` result (Step 3), you MAY read the resolved channel's other approved sections for **register + tone only**, to tune how the on-image type feels (its weight, warmth, hierarchy) — `ad`: `copy`, `headline`, `description`; `post`: `copy` (a post workspace has no `headline` and no `description` section, so those are simply **absent**, never missing data and never an error). The brief `angle_label` + `core_message` inform that same emotional register. But the **rendered words are fixed** (they came approved from Step 3 `image_content`); grounding tunes only placement, weight, and colour, never the string.
 

@@ -149,8 +149,9 @@ Load 2 and 4 in one call:
 ```
 Call: get_knowledge
   paths: [
-    "brand/visual-identity",
-    "ad/visual-direction-ref",
+    "visual/identity",
+    "visual/direction-ref",
+    "visual/ai-image-composition",
     "ad/creative-guidelines",
     "rules/compliance",
     "rules/food-placeholder",
@@ -158,14 +159,15 @@ Call: get_knowledge
   ]
 ```
 
-- `brand/visual-identity` — palette, light, and register.
-- `ad/visual-direction-ref` — the visual direction reference for ads.
+- `visual/identity` — the canonical colour palette (§1) and photographic register.
+- `visual/direction-ref` — hero-mix + AI person/subject prompt rules (age compensation, emotional read, diversity, do-nots) and what may be AI-generated.
+- `visual/ai-image-composition` — composition + lighting rules for the AI-generated plate: text space as defocused depth (never a near plane), soft even light with no window/hard source behind the text zone, a clean minimal background, and the standing prompt rules (never negate, reserve nothing).
 - `ad/creative-guidelines` — what a converting Cambridge ad visual looks like.
 - `rules/compliance` — NĐ-15/2018 + brand compliance as a **visual constraint** (no medical/clinical staging, no before/after body comparison, nothing implying a promised result).
 - `rules/food-placeholder` — the food-placeholder / imagery rules the scene must respect.
 - `brand/persona-<slug>` — the persona detail doc.
 
-**Load the same paths on both channels.** `ad/visual-direction-ref` and `ad/creative-guidelines` live under `ad/` but are the brand's **only** visual-direction references — read them as the visual standard for a `post` visual too. The KB has no post-channel visual doc; do not invent one, and do not skip these on a post.
+**Load the same paths on both channels.** `visual/*` is the brand's single visual-guidance category and is channel-agnostic by design (no separate `ad`/`post` split) — read it as the visual standard for a `post` visual too. The KB has no post-channel visual doc; do not invent one, and do not skip these on a post.
 
 Do not call `get_knowledge` for unrelated paths.
 
@@ -279,7 +281,7 @@ Then end with the next action (Vietnamese):
 - **Layer is `scene`, always.** Every `save_creative_prompt` call from this skill passes `layer:'scene'` (studio label "Scene" / *Bối cảnh*). This skill never saves any other layer.
 - **`generation_config` carries only `model`.** The default is the FLUX.2 text-to-image ladder (default `fal-ai/flux-2/klein/9b`; steppable `fal-ai/flux-2` / `fal-ai/flux-2-pro` / `fal-ai/flux-2-max`) — **never Kontext**, never a control/identity field, and never a pool id (Scene has no references). A `model` override outside the FLUX.2 family → STOP (Vietnamese), write nothing.
 - **Verbatim, positive-only prompt (hard rule).** You author the COMPLETE scene prompt; it reaches the engine unmodified. (1) Never name the approved contents — copy / headline / description / image_content, not quoted, paraphrased, or negated. (2) Never negate — everything named gets drawn. (3) No baked-in text, ever, achieved through (1)–(2) (positive clean-surface description), never by asking for text's absence. The scene is filled — no reserved voids.
-- **Grounding (hard rule, D4).** Before authoring: the chosen brief (`angle_label` + five narrative fields) → the persona detail doc (`brand/persona-<slug>`, mechanically derived; absent tag → structural tags only, never an invented path) → **ALL APPROVED CONTENTS of the brief for the RESOLVED CHANNEL (ad: copy AND headline AND description AND image_content; post: copy AND image_content — a post has no headline/description section, so those are absent, not missing; a meaning + tone source whose words are never named)** → the visual + compliance KB (`brand/visual-identity`, `ad/visual-direction-ref`, `ad/creative-guidelines`, `rules/compliance`, `rules/food-placeholder`) → the concept.
+- **Grounding (hard rule, D4).** Before authoring: the chosen brief (`angle_label` + five narrative fields) → the persona detail doc (`brand/persona-<slug>`, mechanically derived; absent tag → structural tags only, never an invented path) → **ALL APPROVED CONTENTS of the brief for the RESOLVED CHANNEL (ad: copy AND headline AND description AND image_content; post: copy AND image_content — a post has no headline/description section, so those are absent, not missing; a meaning + tone source whose words are never named)** → the visual + compliance KB (`visual/identity`, `visual/direction-ref`, `visual/ai-image-composition`, `ad/creative-guidelines`, `rules/compliance`, `rules/food-placeholder`) → the concept.
 - **Revise is prompt-level, never generation, note never dropped — and never *required*.** `revise: <note>` rewrites **this** layer's saved prompt (with `expected_version` from the `list_creative_prompts` row) when one exists, or is folded into the fresh prompt when none does; it never generates and never changes which layer is active. It is a **steering input, not a permission slip** — without it an invocation still re-authors the saved prompt from the current sources.
 - **Chain: Scene (here, opt) → Subject (opt) → Composition → Edit → Text.** The next step after a selected Scene is **Subject** (optional) or **Composition** (`/ssc.image-prompt <brief_id>`) — the `composition` layer is the **live anchor-gated compose step** (authored by `ssc-image-prompt-composition`, generated by `generate_composition`).
 - **Deployment-dependency safe STOP.** A server rejection of the layer / `generation_config` STOPs cleanly in Vietnamese, writes nothing, and does not retry in a loop.

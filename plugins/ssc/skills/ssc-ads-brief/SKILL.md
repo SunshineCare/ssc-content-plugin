@@ -381,6 +381,7 @@ If the `date` resolved more than one approved subject (Step 1), note which one y
 - **No copy precondition.**
 - **Every saved angle declares its persona, route, awareness stage, and target layer** as first-class fields — not just narrative prose. `target_layer_term_id` is pinned at save; a later framework revision does not re-home it.
 - No angle rated ≤3 persisted. No gate flipped, no idea `status` touched, no brief approved/demoted/deleted. No `content` row created.
+- **`idea.hero` may be written once via `update_idea` (Step 1a)** — the sole write this skill makes outside the angle set, and only when the idea has no hero yet or the operator explicitly asked to revise it; see Governance.
 - No ad-set/media-buy row created or referenced — the media buy is realized later, by a human, from the angle's declared `target_layer_term_id`.
 - Summary of saved angles (persona, route, stage, layer, label, score, Vietnamese comment) plus the grounding context and next step.
 

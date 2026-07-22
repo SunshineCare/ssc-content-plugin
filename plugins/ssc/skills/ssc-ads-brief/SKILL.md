@@ -101,12 +101,12 @@ essentially about. Resolve it BEFORE Step 1b, from the idea object already held 
   (`expected_version` is the idea's own `version`, held from Step 1). Hold both the OLD hero text
   (what `idea.hero` was before this call) and the NEW one for the Step 7 summary.
 - **`idea.hero` is empty and no revise was given.** Treat "empty" as EITHER a `null` value OR an
-  empty/whitespace-only string — never test for `null` alone. `update_idea` can only clear
-  `hero` back to `""`, never write a true database `NULL`, so an idea whose hero was never set and
-  one whose hero was explicitly cleared are indistinguishable — both come back as `""`, not
-  `null` — and both mean "not yet set." Derive one now, the same way (distilled from `idea.title`
-  alone), and `update_idea(...)` to persist it BEFORE any angle is created in Step 3. Hold it for
-  Step 7.
+  empty/whitespace-only string — never test for `null` alone. An idea whose hero was **never set**
+  reads back as `null` (the column's default); one whose hero was explicitly cleared reads back as
+  `""` — `update_idea` itself can only ever produce `""`, never write a true database `NULL`. The
+  two differ in representation but mean the same thing, "not yet set," so treat `null`, `""`, and
+  whitespace-only alike. Derive one now, the same way (distilled from `idea.title` alone), and
+  `update_idea(...)` to persist it BEFORE any angle is created in Step 3. Hold it for Step 7.
 - **`idea.hero` is already set and no revise was given.** Read-only — hold the existing value,
   make no write. ("Set" means a non-null, non-empty, non-whitespace-only string — see the
   empty-check rule above.)

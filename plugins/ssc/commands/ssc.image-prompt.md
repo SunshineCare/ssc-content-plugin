@@ -1,6 +1,6 @@
 ---
 description: >-
-  Author the ImageStudio per-step PROMPTS + generation settings for ONE approved concept's brief — a propose-only, ZERO-CREDIT, state-driven stepper anchored to a brief. The ONLY image path Cowork has, and it NEVER generates: the operator clicks Generate in the ImageStudio dashboard, which is what spends fal credits. Dispatches ssc-image-prompt-agent with a required brief_id (the owning concept AND the channel are resolved from the brief via get_brief — no idea_id, no channel argument; `ad` and `post` are both accepted, any other channel stops cleanly). The ImageStudio builds a visual through FIVE steps, ALL OPTIONAL — scene (Bối cảnh, backend layer 'scene' — a text-to-image full image that may FREELY include a GENERIC subject and/or product, NO real references, NO reserved zones) → subject (Người mẫu, backend layer 'subject' — the person generated ALONE with face + pose locked, an anchor candidate) → composition (Ghép, backend layer 'composition' — the anchor-gated compose-with-references step: needs ≥1 selected subject OR approved product; composes the anchor(s) onto a selected Scene, else builds around them; control-source defaults to the product) → edit (Chỉnh sửa, backend layer 'edit' — a generic, REPEATABLE "what to change" prompt-to-edit over the chain tip) → text (Tiêu đề, backend layer 'text' — renders the exact approved headline over the chain tip). On each invocation the agent resolves studio state (list_creatives / list_creative_prompts / list_content), works the SINGLE next-open step by dispatching that step's skill — which authors the full scene prompt + generation_config (model + capability-matched control/identity settings) and SAVES it via save_creative_prompt — then STOPS. The operator then clicks Generate and selects a candidate in the ImageStudio; re-invoking advances to the next step. Design decision D4 — every step grounds its prompt in ALL APPROVED CONTENTS of the brief FOR THE RESOLVED CHANNEL (ad: approved copy / headline / description / image_content; post: approved copy / image_content — a post has no headline and no description section, and an absent section is simply absent, never an error). Prompt discipline: never negate, reserve nothing, never name a content string in the Scene/Subject/Composition/Edit steps (text is the sole exception — it carries the exact approved Vietnamese headline). The Composition step (layer 'composition', generate_composition) is the anchor-gated compose-with-references step — its logic lives here, not folded into any other step. A step is targeted either POSITIONALLY (`/ssc.image-prompt <brief_id> <step>` — the form the dashboard's copy button emits on both workspaces, where `<step>` is `scene | subject | compose | composition | edit | text` and `compose` is an exact alias of `composition`) or as `stage: <name>`; a bare trailing `rewrite` marker rewrites that step's saved prompt, and `revise: <note>` does the same carrying a correction note. The channel is resolved from the brief and both `ad` and `post` run the full five-step chain; any other channel (e.g. `youtube`, or a brief with no channel) stops cleanly, writing nothing. Propose-only; the agent saves prompts, never generates, never approves, never uploads, never spends credits.
+  Author the ImageStudio per-step PROMPTS + generation settings for ONE approved concept's brief — a propose-only, ZERO-CREDIT, state-driven stepper anchored to a brief. The ONLY image path Cowork has, and it NEVER generates: the operator clicks Generate in the ImageStudio dashboard, which is what spends fal credits. Dispatches ssc-image-prompt-agent with a required brief_id (the owning concept AND the channel are resolved from the brief via get_brief — no idea_id, no channel argument; `ad` and `post` are both accepted, any other channel stops cleanly). The ImageStudio builds a visual through FIVE steps, ALL OPTIONAL — scene (Bối cảnh, backend layer 'scene' — a text-to-image full image that may FREELY include a GENERIC subject and/or product, NO real references, NO reserved zones; it ASKS BEFORE IT WRITES — grounded first on the idea's HERO and ALL APPROVED COPY, it proposes FIVE scene setups (a short Vietnamese title + exactly one sentence each) and WAITS for the operator to pick one, saving nothing until they do; answer in chat or re-invoke with `setup: <số | tiêu đề | mô tả>`, and a revise:/rewrite instead keeps the saved prompt's own setup) → subject (Người mẫu, backend layer 'subject' — the person generated ALONE with face + pose locked, an anchor candidate) → composition (Ghép, backend layer 'composition' — the anchor-gated compose-with-references step: needs ≥1 selected subject OR approved product; composes the anchor(s) onto a selected Scene, else builds around them; control-source defaults to the product) → edit (Chỉnh sửa, backend layer 'edit' — a generic, REPEATABLE "what to change" prompt-to-edit over the chain tip) → text (Tiêu đề, backend layer 'text' — renders the exact approved headline over the chain tip). On each invocation the agent resolves studio state (list_creatives / list_creative_prompts / list_content), works the SINGLE next-open step by dispatching that step's skill — which authors the full scene prompt + generation_config (model + capability-matched control/identity settings) and SAVES it via save_creative_prompt — then STOPS. The operator then clicks Generate and selects a candidate in the ImageStudio; re-invoking advances to the next step. Design decision D4 — every step grounds its prompt in ALL APPROVED CONTENTS of the brief FOR THE RESOLVED CHANNEL (ad: approved copy / headline / description / image_content; post: approved copy / image_content — a post has no headline and no description section, and an absent section is simply absent, never an error). Prompt discipline: never negate, reserve nothing, never name a content string in the Scene/Subject/Composition/Edit steps (text is the sole exception — it carries the exact approved Vietnamese headline). The Composition step (layer 'composition', generate_composition) is the anchor-gated compose-with-references step — its logic lives here, not folded into any other step. A step is targeted either POSITIONALLY (`/ssc.image-prompt <brief_id> <step>` — the form the dashboard's copy button emits on both workspaces, where `<step>` is `scene | subject | compose | composition | edit | text` and `compose` is an exact alias of `composition`) or as `stage: <name>`; a bare trailing `rewrite` marker rewrites that step's saved prompt, and `revise: <note>` does the same carrying a correction note. The channel is resolved from the brief and both `ad` and `post` run the full five-step chain; any other channel (e.g. `youtube`, or a brief with no channel) stops cleanly, writing nothing. Propose-only; the agent saves prompts, never generates, never approves, never uploads, never spends credits.
 metadata:
   brand: cambridge-diet-vn
   section: ads
@@ -57,6 +57,11 @@ Optional (passed through unchanged):
   (with several and no selector, the step **stops and asks** which). Product enters
   primarily as a **Composition** reference (Composition defaults its control-source
   to the product); further product tweaks go through a **Step-4 Edit**.
+- **Setup** (`setup: <số | tiêu đề | mô tả>`) — **Scene step only** — the operator's
+  answer to the Scene step's **five-setup menu**: a number (`setup: 3`), a setup
+  title, or their own free-text scene direction. Supplied → Scene is the active step
+  and it **skips the menu**, authoring that setup. Omit it and Scene proposes five
+  setups and waits for the pick.
 
 If `brief_id` is missing, ask the operator for it (one question) before
 dispatching — **do not invent one**. There is no `date` selector and no `channel`
@@ -68,7 +73,7 @@ token that follows it is a **step** when it matches a step token (`scene` |
 `subject` | `compose` | `composition` | `edit` | `text`) and the **rewrite
 marker** when it is `rewrite`; so the dashboard's `<brief_id> <step> rewrite`
 parses as step + rewrite. Everything else arrives as a `key: value` pair
-(`stage:` / `change:` / `revise:` / `product:`). Normalise `compose` →
+(`stage:` / `change:` / `revise:` / `product:` / `setup:`). Normalise `compose` →
 `composition` before dispatching, and pass a bare `rewrite` through as the
 note-less rewrite instruction. If a bare token is neither a step token nor
 `rewrite`, **ask** rather than guessing — never silently drop it.
@@ -110,7 +115,18 @@ step's skill, which authors the full scene prompt + `generation_config` and **sa
 it via `save_creative_prompt`** — then **STOPS** at the human Generate/select gate.
 Re-invoke to advance; re-invoke with a bare `rewrite` (or `revise: <note>` to carry
 a correction) to rewrite the active step's prompt, or with `change:` to author
-another Edit. Every step is optional: skip Scene →
+another Edit.
+
+**Scene asks before it writes.** The Scene step reads the concept's **hero** (the
+idea-wide north-star sentence) and **all approved copy**, then proposes **five
+different scene setups** — a short Vietnamese title plus one sentence each — and
+**waits for you to pick one**; only the chosen setup becomes a prompt, and **nothing
+is saved until you choose**. Answer in chat, or re-invoke with `setup: <số | tiêu đề
+| mô tả của bạn>`. Your own free-text setup is always a valid answer. A `revise:` /
+`rewrite` on Scene rewrites the saved prompt while **keeping its setup** (no menu);
+a plain `/ssc.image-prompt <brief_id> scene` proposes a fresh five.
+
+Every step is optional: skip Scene →
 Composition builds around the anchors from scratch; skip Subject and Composition →
 an Edit or Text hangs off the Scene.
 

@@ -60,7 +60,7 @@ codebase's convention (existing migrations under `db/migrations/` don't carry on
 exercised indirectly by Tasks 2–4's DB-bound tests, which is why the migration must be applied to
 the local dev DB before those tasks' tests can pass.
 
-- [ ] **Step 1: Add the column to the Drizzle schema**
+- [x] **Step 1: Add the column to the Drizzle schema**
 
 In `db/schema/creative.ts`, inside `export const ideas = pgTable('ideas', { ... })`, add `hero`
 right after `comment`:
@@ -80,7 +80,7 @@ right after `comment`:
   source: text('source'), // ai | manual
 ```
 
-- [ ] **Step 2: Write the migration file**
+- [x] **Step 2: Write the migration file**
 
 Create `db/migrations/2026-07-23-idea-hero.sql`:
 
@@ -88,7 +88,7 @@ Create `db/migrations/2026-07-23-idea-hero.sql`:
 ALTER TABLE ideas ADD COLUMN hero text;
 ```
 
-- [ ] **Step 3: Apply the migration to the local dev DB**
+- [x] **Step 3: Apply the migration to the local dev DB**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -98,7 +98,7 @@ psql 'postgres://app:app@localhost:5432/brand_os' -f db/migrations/2026-07-23-id
 Expected: `ALTER TABLE`. If this fails to connect, STOP and confirm the operator's local
 `brand_os` Postgres connection details rather than guessing.
 
-- [ ] **Step 4: Type-check**
+- [x] **Step 4: Type-check**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -108,7 +108,7 @@ pnpm type-check
 Expected: no new errors (the `hero` field is additive and optional everywhere it's used so far —
 nothing else references it yet).
 
-- [ ] **Step 5: Stage (do NOT commit)**
+- [x] **Step 5: Stage (do NOT commit)**
 
 ```bash
 cd /Users/thang/dev/ssc/content
@@ -130,7 +130,7 @@ git status
 - Produces: `update_idea({ id, expected_version, hero })` — patches `ideas.hero`, leaves every
   other field untouched, same optimistic-concurrency contract as `title`/`score`/`comment`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `idea_tools.test.ts`, inside the existing `describe('update_idea (cap edit) — generic
 partial-patch', ...)` block (after the `'patches only the field provided (title)...'` test):
@@ -165,7 +165,7 @@ partial-patch', ...)` block (after the `'patches only the field provided (title)
   });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -177,7 +177,7 @@ Expected: FAIL — `hero` is stripped by the zod schema (second test) and/or `ro
 `undefined`/unset (first test), since neither `UpdateIdeaFields` nor the tool schema accepts it
 yet.
 
-- [ ] **Step 3: Add `hero` to the repo layer**
+- [x] **Step 3: Add `hero` to the repo layer**
 
 In `repo/idea.ts`, extend `UpdateIdeaFields` and `EDITABLE_IDEA_COLUMNS`:
 
@@ -203,7 +203,7 @@ const EDITABLE_IDEA_COLUMNS = [
 (`updateIdea`'s existing loop over `EDITABLE_IDEA_COLUMNS` picks this up with no further change —
 it already copies any whitelisted key present in `fields` into the patch.)
 
-- [ ] **Step 4: Add `hero` to the `update_idea` tool**
+- [x] **Step 4: Add `hero` to the `update_idea` tool**
 
 In `idea_tools.ts`, extend the `inputSchema`:
 
@@ -232,7 +232,7 @@ and the handler's `fields` construction:
 and update the tool `description` string to add `, \`hero\`` after `` `comment` `` in the "Accepts
 any of" sentence.
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -242,7 +242,7 @@ DATABASE_URL_BRANDOS='postgres://app:app@localhost:5432/brand_os' \
 
 Expected: PASS (all tests in the file, not just the new ones — confirms no regression).
 
-- [ ] **Step 6: Stage (do NOT commit)**
+- [x] **Step 6: Stage (do NOT commit)**
 
 ```bash
 cd /Users/thang/dev/ssc/content
@@ -264,7 +264,7 @@ git add mcp-server/lib/brandos/repo/idea.ts mcp-server/lib/brandos/tools/idea_to
   `getBrief`'s `idea` sub-object (which calls `getIdea` internally — no separate change needed
   there, verified in Task 4).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `idea_tools.test.ts` (a new `describe` block, since no test currently names `get_idea`):
 
@@ -293,7 +293,7 @@ describe('get_idea (cap view) — returns hero', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -303,7 +303,7 @@ DATABASE_URL_BRANDOS='postgres://app:app@localhost:5432/brand_os' \
 
 Expected: FAIL — `structuredContent.hero` is `undefined` (not selected yet).
 
-- [ ] **Step 3: Add `hero` to the read path**
+- [x] **Step 3: Add `hero` to the read path**
 
 In `read/ideas.ts`, extend `IdeaDetailRow`:
 
@@ -330,7 +330,7 @@ and `getIdea`'s `select({...})`:
       source: ideas.source,
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -340,7 +340,7 @@ DATABASE_URL_BRANDOS='postgres://app:app@localhost:5432/brand_os' \
 
 Expected: PASS (whole file).
 
-- [ ] **Step 5: Stage (do NOT commit)**
+- [x] **Step 5: Stage (do NOT commit)**
 
 ```bash
 cd /Users/thang/dev/ssc/content
@@ -363,7 +363,7 @@ a regression test proving that end-to-end, since it's the actual path `ssc-ads-b
 - Consumes: `getIdea` (Task 3).
 - Produces: nothing new — confirms `get_brief`'s `idea.hero` is populated.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `brief_tools.test.ts`, inside `describe('get_brief (cap view) — one brief by id, with its
 idea', ...)`, after the existing `'returns the brief (snake_case) AND its idea...'` test:
@@ -384,7 +384,7 @@ idea', ...)`, after the existing `'returns the brief (snake_case) AND its idea..
 (`ideas` and `eq` must be imported in this file already, given `seedIdea`/`seedBrief` use them —
 confirm the existing imports cover both before adding the test; add them if missing.)
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -396,7 +396,7 @@ Expected: FAIL before Task 3 lands, PASS after — if this task is done after Ta
 it should already PASS on the first run with no production code change. Run it anyway to prove
 the claim rather than assume it.
 
-- [ ] **Step 3: Confirm it passes (no code change expected)**
+- [x] **Step 3: Confirm it passes (no code change expected)**
 
 ```bash
 cd /Users/thang/dev/ssc/content/mcp-server
@@ -408,7 +408,7 @@ Expected: PASS (whole file). If it does NOT pass, `getBrief` does not actually d
 `getIdea` the way Task 1–3 assumed — stop and re-examine `read/ideas.ts:211-221` before
 proceeding; do not patch around it blindly.
 
-- [ ] **Step 4: Stage (do NOT commit)**
+- [x] **Step 4: Stage (do NOT commit)**
 
 ```bash
 cd /Users/thang/dev/ssc/content
@@ -421,7 +421,7 @@ git add mcp-server/lib/brandos/tools/brief_tools.test.ts
 
 **Files:** none (process step only).
 
-- [ ] **Step 1: Show the operator the full staged diff**
+- [x] **Step 1: Show the operator the full staged diff**
 
 ```bash
 cd /Users/thang/dev/ssc/content
@@ -429,7 +429,7 @@ git status
 git diff --stat --cached
 ```
 
-- [ ] **Step 2: STOP. Do not run `git commit` until the operator explicitly says to.**
+- [x] **Step 2: STOP. Do not run `git commit` until the operator explicitly says to.**
 
 This repo auto-pushes `master` on commit — there is no draft/review state after committing.
 Once the operator confirms, commit with a message describing the `hero` column + `update_idea`/
@@ -457,12 +457,12 @@ the same way the layer→CTA revision earlier this session was verified.
 - Produces: every angle brief this skill saves is now bound to `idea.hero` as a fourth anchor,
   alongside persona/route/awareness_stage/layer.
 
-- [ ] **Step 1: Add `update_idea` to the frontmatter `tools:` list**
+- [x] **Step 1: Add `update_idea` to the frontmatter `tools:` list**
 
 `tools: [get_idea, get_channel_plan, get_knowledge, list_taxonomies, list_briefs, save_brief]` →
 add `update_idea`.
 
-- [ ] **Step 2: Add the `revise hero:` input**
+- [x] **Step 2: Add the `revise hero:` input**
 
 In the `## Inputs` section, add a new optional entry:
 
@@ -474,7 +474,7 @@ Optional (hero revision):
   when the operator explicitly wants to change an idea's already-defined hero; absent otherwise.
 ```
 
-- [ ] **Step 3: Hold `idea.version` in Step 1 — Step 1a's `update_idea` call needs it**
+- [x] **Step 3: Hold `idea.version` in Step 1 — Step 1a's `update_idea` call needs it**
 
 Step 1's existing "Hold:" list (`idea.id` / `idea.title` / `idea.plan_id`) does not currently hold
 the idea's `version` — nothing needed it before. Add a new bullet immediately after the existing
@@ -485,7 +485,7 @@ the idea's `version` — nothing needed it before. Add a new bullet immediately 
 - `idea.version` — held for Step 1a's `update_idea` call (optimistic-concurrency `expected_version`). Step 1a calls `update_idea` at most once per run, so this held value is never stale by the time it's used.
 ```
 
-- [ ] **Step 4: Insert new Step 1a, between Step 1 and Step 1b**
+- [x] **Step 4: Insert new Step 1a, between Step 1 and Step 1b**
 
 ```markdown
 ### Step 1a: Resolve or define the idea's hero — the north star
@@ -514,7 +514,7 @@ Hold the resolved `hero` text forward — every angle's narrative fields (Step 4
 variation downstream (`ssc-ads-writer`) must stay faithful to it.
 ```
 
-- [ ] **Step 5: Extend the Step 4 "must strictly follow" paragraph**
+- [x] **Step 5: Extend the Step 4 "must strictly follow" paragraph**
 
 Find the paragraph beginning "**Every field below must strictly follow — never contradict — the
 decisions already made for this angle: its persona (Step 1d), its diagnosed route /
@@ -533,7 +533,7 @@ route or stage.
 (Keep the rest of that paragraph's existing sentences about route/stage/label intact; this only
 adds the `hero` clause.)
 
-- [ ] **Step 6: Extend Step 5's "Decision fidelity" scoring criterion**
+- [x] **Step 6: Extend Step 5's "Decision fidelity" scoring criterion**
 
 Find: `- **Decision fidelity** — do \`hook_direction\` / \`core_message\` / \`why_now\` plainly
 read as the SAME route, stage, and anchor Step 3 diagnosed and Step 4 was supposed to write to —
@@ -547,7 +547,7 @@ and does \`angle_label\` name that same anchor?` and extend it:
   was decided caps low here even if the drift reads well on its own.
 ```
 
-- [ ] **Step 7: Extend the Step 7 summary template**
+- [x] **Step 7: Extend the Step 7 summary template**
 
 In the "otherwise, after appending" summary template, add a line (after the existing "Taken set"
 line) that appears only when Step 1a wrote a hero this run:
@@ -558,7 +558,7 @@ hero text>)" | "already set, unchanged">. <If newly defined or revised:> existin
 idea predating it: <list angle_labels, or "none">.
 ```
 
-- [ ] **Step 8: Extend Governance**
+- [x] **Step 8: Extend Governance**
 
 Add a new hard-rule bullet:
 
@@ -572,7 +572,7 @@ Add a new hard-rule bullet:
   stay faithful to it (Step 5's Decision fidelity criterion).
 ```
 
-- [ ] **Step 9: Re-read the full file for internal consistency**
+- [x] **Step 9: Re-read the full file for internal consistency**
 
 Confirm: `update_idea` appears in both the frontmatter `tools:` list and is actually called
 somewhere in prose (Step 1a); every reference to "the angle's decisions" elsewhere in the file
@@ -581,7 +581,7 @@ terms) or, where it would now read as an incomplete list next to the new Step 4 
 consistent rather than contradictory. Do not mechanically add "hero" to every such list — only
 where the design calls for it (Step 4, Step 5, Governance, Step 7 summary).
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add plugins/ssc/skills/ssc-ads-brief/SKILL.md
@@ -612,7 +612,7 @@ EOF
   Step 1 (Task 4, once deployed) — no new tool call needed.
 - Produces: a new Step 7 hard-cap check gating every `copy` variation on hero fidelity.
 
-- [ ] **Step 1: Hold `idea.hero` in Step 1c ("Confirm the angle anchor")**
+- [x] **Step 1: Hold `idea.hero` in Step 1c ("Confirm the angle anchor")**
 
 Find the paragraph starting "The chosen angle brief — its `id`, `angle_label`, and five narrative
 fields... — is already in hand from `get_brief` (Step 1), gated approved. It is the angle anchor
@@ -630,7 +630,7 @@ across the idea's other briefs. A `null` hero (legacy idea) is not an error — 
 brief's own fields alone and don't fabricate a hero to fill the gap.
 ```
 
-- [ ] **Step 2: Extend the Step 6 `copy` bullet's fidelity clause**
+- [x] **Step 2: Extend the Step 6 `copy` bullet's fidelity clause**
 
 Find the sentence added in the prior revision: "**Every variation's hook must trace to THIS
 brief's own `hook_direction` and core message must trace to its `core_message`** — not a fresh
@@ -648,7 +648,7 @@ If a drafted line would fit a *different* trigger/objection/myth than the one
 names, rewrite it to match the brief and the hero — never the other way round.
 ```
 
-- [ ] **Step 3: Add Step 7 check (a4) — Hero fidelity**
+- [x] **Step 3: Add Step 7 check (a4) — Hero fidelity**
 
 Immediately after the existing **(a3) Layer-compliant CTA check** block, add:
 
@@ -662,7 +662,7 @@ finished-sentence gate here) — a hero-faithful brief does not guarantee hero-f
 drift can enter at the writing step. Name the hero text in the `comment` when you cap one.
 ```
 
-- [ ] **Step 4: Extend the frontmatter description**
+- [x] **Step 4: Extend the frontmatter description**
 
 Find the clause added in the prior revision ("...tuning CTA + overall tone to the angle's
 declared campaign layer per ad/creative-guidelines' Angle≠Layer split...") and add, immediately
@@ -674,7 +674,7 @@ after it:
 returns — never fabricated, never re-derived)
 ```
 
-- [ ] **Step 5: Extend Governance**
+- [x] **Step 5: Extend Governance**
 
 Add a new hard-rule bullet, after the "Layer decides CTA + tone; angle decides hook + body" bullet
 added in the prior revision:
@@ -689,7 +689,7 @@ added in the prior revision:
   `Tránh` list.
 ```
 
-- [ ] **Step 6: Re-read the full file for internal consistency**
+- [x] **Step 6: Re-read the full file for internal consistency**
 
 Confirm the (a3)/(a4) numbering reads correctly in sequence, the frontmatter description clause
 doesn't duplicate the Step 1c prose verbatim (paraphrase is fine, contradiction is not), and no
@@ -698,7 +698,7 @@ without qualification (the "only" framing predates this change — where it appe
 still holds for that specific claim, e.g. brief-vs-approved-copy divergence handling, which is
 unrelated to hero, or it needs the same "and the idea's hero" qualifier added).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add plugins/ssc/skills/ssc-ads-writer/SKILL.md
@@ -728,3 +728,10 @@ EOF
    live run of `/ssc.ads-brief <idea_id>` on an idea with no hero yet, confirming Step 1a's
    summary line appears and a subsequent `/ssc.ads-produce <brief_id>` run's copy references it.
 3. Neither of the above is a task in this plan — both are manual, operator-driven steps.
+
+**Status (verified 2026-07-23):** step 1 is **done and live** — prod `get_idea` returns `hero`
+(`null` on an idea that never set one), prod `get_brief` returns `idea.hero` on its idea
+sub-object, and the deployed `update_idea` tool schema accepts `hero: string` and names it in its
+description. `save_idea` and `edit(entity='idea')` do **not** expose it, as designed (D9). Step 2
+is still **open** — no live `/ssc.ads-brief` run has written a hero yet; that first write is the
+operator's, on an idea they actually want briefed.

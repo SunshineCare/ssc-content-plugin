@@ -74,7 +74,7 @@ Call: get_idea
 
 The result is FLAT: the single idea's lifecycle core (incl. `id`, `status`, `channel`, `plan_id`, `created_at`) and its `tags[]` (each `{ term_id, kind, code, label }`). If the idea does not resolve (`{ idea: null }`), STOP and tell the operator the idea id was not found.
 
-**If given a `date`:** resolve the day's approved ad subject(s) for `channel='ad'` and take ONE. If several are scheduled that day, work ONE subject at a time — resolve ONE and run Steps 1b–7 for it. Announce in the Step 7 summary which subject you worked and that the rest still need their own passes. Do NOT batch across subjects in a single run.
+**If given a `date`:** resolve the day's approved ad subject(s) for `channel='ad'` and take ONE. If several are scheduled that day, work ONE subject at a time — resolve ONE and run Steps 1a–7 for it (the hero resolution in Step 1a is **not** skippable on this path — a date-resolved subject gets its hero defined exactly like an id-resolved one). Announce in the Step 7 summary which subject you worked and that the rest still need their own passes. Do NOT batch across subjects in a single run.
 
 **Gate-check (subject must be APPROVED):** read the resolved idea's `status`. If `status !== 'approved'`, STOP and tell the operator:
 
@@ -111,10 +111,12 @@ essentially about. Resolve it BEFORE Step 1b, from the idea object already held 
   make no write. ("Set" means a non-null, non-empty, non-whitespace-only string — see the
   empty-check rule above.)
 
-**When this step just wrote a hero** (either branch above), also note which of this idea's
-EXISTING briefs (from the Step 2 `list_briefs` read — reuse it, do not call it again here) were
-created before this write: they were derived under a different (or no) hero. Never edit, re-score,
-or block them — Step 7 just names them so the operator can judge whether to re-brief.
+**When this step just wrote a hero** (either branch above), remember that fact — every brief this
+idea already carries was derived under a different (or no) hero. You cannot list them yet: the
+`list_briefs` read is Step 2, which runs after this step. Do **not** call `list_briefs` here to get
+ahead of it — when you reach Step 2, take its rows as the set that predates the write, and name
+them in the Step 7 summary. Never edit, re-score, or block them — Step 7 only names them so the
+operator can judge whether to re-brief.
 
 Hold the resolved `hero` text forward — every angle's narrative fields (Step 4) and every copy
 variation downstream (`ssc-ads-writer`) must stay faithful to it.
@@ -204,6 +206,8 @@ Call: list_briefs
 ```
 
 It returns **ALL** of the subject's briefs — one row per angle, each with its `id`, `status` (`draft` | `approved`), `angle_label`, the five narrative fields, `score`, `comment`, and (on any brief saved under this model) `persona_term_id`, `route_term_id`, `target_layer_term_id`, `awareness_stage`. On an older brief predating this fan-out model, those four fields may be null — for those, infer the persona/anchor the same way this skill always has, by reading the narrative fields' content, and note the inference in the Step 7 summary rather than treating the row as unclassifiable.
+
+**If Step 1a wrote a hero this run**, every row this call returns predates that write — hold their `angle_label`s for the Step 7 `**Hero:**` line. They are read-only here as everywhere: disclosed, never edited, re-scored, or blocked.
 
 **Group the taken set by persona, then by anchor within her:**
 
@@ -330,6 +334,7 @@ Call: save_brief
 **Taxonomy resolved:** persona / route / campaign_layer maps loaded via list_taxonomies.
 **Personas evaluated:** <every persona currently on the roster whose doc loaded>, of which <N> genuinely fit this subject (<list, or "none">). <Any KB-gap personas named explicitly.>
 **Taken set:** <M> existing brief(s) read across <K> persona(s) (<X> approved, <Y> draft) — all left untouched.
+**Hero:** <the resolved hero text> — <"newly defined this run" | "revised this run (was: <old hero text>)" | "already set, unchanged">. <If newly defined or revised:> existing briefs on this idea predating it: <list angle_labels, or "none">. (Step 1a resolves the hero BEFORE the angle search, so a run that saves nothing may still have written one — disclose it either way.)
 **Result:** 0 new brief(s) — <ONE of:>
   - "the subject connects to no persona currently on the roster — every roster persona's anchor pool was checked and none genuinely resonates. Sharpen the subject or wait for the roster to grow."
   - "every persona this subject fits already has her distinct anchors spent by existing briefs — <N> brief(s) across <K> persona(s) already cover every anchor + on-stage route this subject + those personas' docs support."

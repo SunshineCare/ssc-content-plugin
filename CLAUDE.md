@@ -10,7 +10,7 @@ Extreme concision. Sacrifice grammar for brevity — drop articles, pronouns, fi
 
 **The codebase knowledge graph is the primary tool for any code exploration or navigation in this repo — reach for it before Grep/Glob/Read.** Reinforced by global codebase-memory-mcp hooks (SessionStart + SubagentStart reminders, and a PreToolUse discovery gate that augments search calls). (This repo is mostly prose skills/agents/commands — most work routes to Grep/Read; the graph still helps for the executable hook + any code.)
 
-1. **Structural code queries → codebase-memory-mcp tools first** (or the `/codebase-memory` skill):
+1. **Structural code queries → codebase-memory-mcp tools first** — pass `project=Users-thang-dev-ssc-ssc-content-plugin` explicitly on every call (nothing maps cwd→project for you) — or use the `/codebase-memory` skill:
    - `search_graph(name_pattern|label|qn_pattern)` — find functions / classes / routes
    - `trace_path(function_name, mode=calls|data_flow|cross_service)` — call chains, impact analysis
    - `get_code_snippet(qualified_name)` — exact symbol source (precise line ranges)
@@ -18,7 +18,8 @@ Extreme concision. Sacrifice grammar for brevity — drop articles, pronouns, fi
    - `get_architecture(aspects)` — project structure
    - `search_code(pattern)` — graph-augmented text search
 2. **Grep / Glob / Read** — for text, configs, docs, and non-code files; always Read a file before editing it.
-3. **Project not indexed yet?** Run `index_repository` FIRST (use `index_status` / `detect_changes` to keep it fresh).
+3. **`"project not found or not indexed"` = LRU eviction, not missing.** The server keeps only ~6 graphs resident across 7 indexed sub-repos, so this one gets evicted routinely. **Retry the same query** — the query tools lazy-load on demand. Do NOT run `index_repository` (it no-ops on an unchanged HEAD SHA; `delete_project` first only if you truly need a rebuild), and do NOT trust `list_projects` / `index_status` — they report the *resident* set, not the *indexed* set, and disagree with each other. Only genuinely new, never-indexed code needs `index_repository`.
+4. **Dispatching subagents?** Paste the `project=` name from step 1 into the dispatch prompt along with the eviction rule — a subagent cannot derive it from cwd.
 
 ## What this repo is
 
@@ -195,6 +196,11 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   ```
 - There is **no automated test suite yet**; a design for a local test + lint
   harness is at `docs/superpowers/specs/2026-07-03-plugin-test-lint-harness-design.md`.
+- **The version bump is part of the commit, not a follow-up.** Any change to a
+  skill, agent, command, or hook requires bumping the version in
+  `.claude-plugin/plugin.json` in the **same commit** — operators update by
+  version, so an unbumped change never reaches them. A change is not "committed"
+  until the version moved with it. Do not wait to be asked.
 
 ## Install / update (operators)
 

@@ -309,8 +309,17 @@ the calendar.
 
 Run when `schedule_approved` is `true`.
 
-Invoke `ssc-post-measure`, passing `period`. It refreshes and reads the LIVE page's
-per-post performance (`pull_fb_performance` → `get_post_performance`), synthesises a
+Invoke `ssc-post-measure`, passing `period`. It refreshes the LIVE page
+(`pull_fb_performance` — the one governed sync it owns) then reads the per-post
+performance (`get_post_performance`), where every row carries its organic/paid
+`class`. It does **not** refresh the ad story-id linkage — that is the scheduled
+ingestion job's work, and an unpopulated linkage is reported, never force-fixed. It is the **engagement lens**: it covers `organic_only` + `boosted` only,
+ranks them on engagement **rate** (engagement ÷ post_media_view) rather than absolute
+counts, badges every boosted row because its page numbers include paid delivery, and
+excludes `paid_only` entirely — that is `ssc-ads-measure`'s conversion lens, so a
+boosted post ends up with two independent verdicts, one per lens. When the ad linkage
+is not populated it reports that boost detection was unavailable rather than asserting
+the content was all organic. It synthesises a
 retrospective — what worked, what failed, what to carry forward — writes it to
 `channel_plans.retrospective` via `save_channel_plan`, and ALSO persists its
 `## Bài viết (Posts)` block into the shared per-period digest

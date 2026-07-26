@@ -31,7 +31,7 @@ This command is a thin entry point — it holds **no** orchestration logic. Disp
 | **Research** | Light WebSearch pass + KB synthesis → drafts the month brief, pillar distribution (~30), and format mix | Reviews + **approves** the Research in the dashboard (flips `approved`), then re-runs this command |
 | **Ideate** | Generates ~30 DRAFT post ideas via `save_idea`, tagged to the plan | **Curates** the ideas — accepts or removes — in the dashboard → Ideas. Approving ≥1 idea opens the Ideas gate; then re-runs this command |
 | **Schedule** | Proposes the publish calendar (dates, pillars, cadence, key-date build-up) as `schedule_entries` | Reviews + **approves** the calendar in the dashboard (flips `schedule_approved`), then re-runs this command |
-| **Measure** | Reads this plan's post performance → writes the `retrospective` (carried into next month's Focus) | — (ungated; closes the loop) |
+| **Measure** | The **engagement lens**: reads the live page's per-post performance with each row's organic/paid class, ranks `organic_only` + `boosted` on engagement **rate** (never absolute counts) with boosted rows badged, excludes `paid_only` (that is `/ssc.ads-plan`'s conversion lens) → writes the `retrospective` (carried into next month's Focus) | — (ungated; closes the loop) |
 
 The four human gates are **Focus** (`tactics_approved`) → **Research** (`approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`). **Measure** is ungated.
 

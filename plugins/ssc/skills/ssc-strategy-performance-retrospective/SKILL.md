@@ -85,13 +85,36 @@ note it; **do not** call `pull_fb_performance` (that is ingestion, not this skil
 ### Step 4: Read the ingested PAID-AD metrics
 
 Call `get_ad_performance` (`level: adset`, `window_days: 120`, `limit: 50`) — the
-aggregated spend / impressions / reach / clicks / conversions / purchases /
-messaging_conversations per ad-set already ingested into `ad_performance`, sorted by
+aggregated spend / impressions / **`reach_day_sum`** / clicks / conversions / purchases /
+messaging_conversations per ad-set already ingested into `ad_performance`, plus
+`days_counted` and `date_range` (`{from, to}`, `YYYY-MM-DD` calendar days), sorted by
 spend. (Use `level: 'ad'` to drill into the worst/best ad-sets, `level: 'campaign'`
 for the top view.)
 
-`get_ad_performance` is a **lookback over ingested snapshots** (`window_days: 120`
-spans the prior quarter with margin) — **not** a live fetch. If it returns **no rows**,
+**Each stored row is ONE AD ON ONE DAY and the group figures are a SUM across days.**
+Two consequences bind what you may compute:
+
+- **`reach_day_sum` is NOT `reach`.** It is the sum of each day's unique reach, so a
+  person reached on ten days is counted ten times. Read it as an **upper bound on
+  people reached**, label it that way whenever you cite it ("tổng tiếp cận cộng dồn
+  theo ngày — KHÔNG khử trùng lặp theo người"), and **never divide by it**:
+  `impressions ÷ reach_day_sum` is not a frequency and understates the real one by
+  roughly the number of delivering days. **No frequency is computable from this
+  surface** — say "tần suất không khả dụng" rather than reporting one.
+- **`days_counted` + `date_range` are real coverage**, not staleness. A group
+  delivering on few days inside a long window either ran briefly **or** was never
+  fully ingested, and **this read cannot tell the two apart** — so a short
+  `days_counted` is never on its own evidence that a set was paused or fatigued.
+  **An absent date is never a measured zero.** Say "chưa xác định được" rather than
+  turning a coverage gap into a finding.
+
+`spend` / `impressions` / `clicks` / `conversions` / `purchases` are genuinely
+additive, so cost-per-result and CTR over the window remain sound.
+
+`get_ad_performance` is a **lookback over ingested daily rows** (`window_days: 120`
+spans the prior quarter with margin, counted back from **today** — it cannot be aimed
+at a past quarter, so say so when the review's quarter has already closed) — **not**
+a live fetch. If it returns **no rows**,
 there is no ingested ad data — commonly because **no ad account is connected**
 (`ad_accounts = 0`) so nothing has ever been ingested. In that case note "no ad data
 this cycle" and rely on the digest + organic sources. **Do not** call

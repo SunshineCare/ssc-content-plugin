@@ -309,8 +309,15 @@ Run when **≥1** approved ad concept exists for this plan (per the Ideas check)
 Measure follows the Ideas gate directly — there is no Schedule step in the ad
 flow.
 
-Invoke `ssc-ads-measure`, passing `period`. It reads this plan's ingested ad
-performance (`get_ad_performance` + `get_performance_analysis`), synthesises a
+Invoke `ssc-ads-measure`, passing `period`. It is the **conversion lens**: it reads
+this plan's ingested ad performance (`get_ad_performance` + `get_performance_analysis`)
+plus the boosted page posts (`get_post_performance`), and covers `paid_only` +
+`boosted` only — `organic_only` belongs to `ssc-post-measure`'s engagement lens, so a
+boosted post ends up with two independent verdicts, one per lens. `paid_only` (dark
+post) content is graded on its declared tier's locked KPI — L2 is **never** graded on
+cost-per-purchase — while `boosted` content is graded as its own **boost class** on
+cost-per-result + engagement rate with **no tier assigned** (a boost usually has no
+brief, so defaulting it to L2 would fabricate a declared value). It synthesises a
 retrospective — which angles won, which fatigued, what to carry forward — writes it
 to `channel_plans.retrospective` via `save_channel_plan`, and ALSO persists the
 digest's `ad_campaign_health` section + its `## Quảng cáo (Ads)` summary block via

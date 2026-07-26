@@ -156,10 +156,21 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   save/get/list/approve/unapprove/update/delete/edit/check/propose/upload).
   Referencing a renamed/removed server tool is a recurring shipped-bug class
   (commit `8d4ded8`).
-- **`/ssc.*` cross-references must resolve to a real command.** `ssc.plan` and
-  `ssc.ads` are **retired/renamed** and appear only in "no … dependency"
-  negations — do not treat them as live commands or add new refs to them
-  (dangling-ref hot-fixes: commits `14a60be`, `32014c1`).
+- **`/ssc.*` cross-references must resolve to a real command.** `ssc.ads` is
+  **retired/renamed** and appears only in "no … dependency" negations — do not
+  treat it as a live command or add new refs to it (dangling-ref hot-fixes:
+  commits `14a60be`, `32014c1`).
+
+  > **`/ssc.plan` was un-retired on 2026-07-26** and is a **live command again** —
+  > the monthly-plan HEAD (`month_plans(period)`), not the retired shared-head
+  > model the old name referred to. The two are different things that share a
+  > name: the retired one was a cross-channel head over `monthly_plans` /
+  > `targets.ads` / `phase_status`; the live one is the Plan stage of
+  > `monthly-plan-owns-the-month`. Agent/skill prose still carrying "no
+  > `/ssc.plan` precondition" negations refers to the RETIRED model — those
+  > negations stay true of the channel pipelines' *legacy* independence, but the
+  > channels now DO depend on the head's narrative gate, so re-read any such
+  > line before trusting it.
 - **Never hard-code KB content into a skill — reference the doc and read it
   live.** Skills must name the KB doc (and its section) they draw on, not
   restate its contents. This covers persona docs (trigger points, vocabulary,

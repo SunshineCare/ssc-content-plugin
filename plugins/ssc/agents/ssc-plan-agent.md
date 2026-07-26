@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  orchestrates: [ssc-plan-review, ssc-plan-tactics, ssc-plan-research]
+  orchestrates: [ssc-plan-review, ssc-plan-tactics, ssc-plan-research, ssc-plan-narrative]
   tools: [get_month_plan, get_channel_plan, get_performance_analysis, get_strategy_brief]
   approval-gates: human
 ---
@@ -122,17 +122,10 @@ Dispatch the step's skill, passing `period` and the head's `version`. Work
 | **Review** | `ssc-plan-review` | wired |
 | **Tactics** | `ssc-plan-tactics` | wired |
 | **Research** | `ssc-plan-research` | wired |
-| **Narrative** | `ssc-plan-narrative` | **not built yet** |
+| **Narrative** | `ssc-plan-narrative` | wired |
 
-**When the next open step is one that is not built yet**, say so plainly and stop
-— do not improvise the step yourself, and do not substitute a different step:
-
-```
-The next open step for <period> is <step>, whose skill has not been built yet.
-Nothing was written. Build `ssc-plan-<step>` first, or name a different step.
-```
-
-This is the honest report, not a workaround. Attempting the work inline would put
+All four steps are wired. **Never improvise a step inline** — if a step's skill
+cannot be dispatched for any reason, say so plainly and stop rather than writing
 un-reviewed prose into a persisted head field.
 
 ### Tactics asks the operator — expect an interview, not a silent run
@@ -188,6 +181,21 @@ Lead with any **constraint** the scan found (a platform policy change, a
 competitor move) — it limits what the month can run, not merely what it should.
 Say plainly when the scan was thin; a padded opportunity list is worse than a
 short honest one.
+
+### After Narrative
+
+```
+## Câu chuyện tháng đã sẵn sàng để duyệt — <period>
+
+I've written the month's narrative. Review and approve it at
+/content/plan/<period> — approving it covers the whole month and releases all
+three channels to author their Approaches.
+```
+
+**Lead with any gap the coverage checklist shows.** Approving releases three
+pipelines at once, so an incomplete month must be visible before the click, not
+after. **You never approve it yourself** — the approval hook denies agents
+`approve(entity='month_plan')` on any gate.
 
 Carry into your report any degradation the skill reported — uncovered days,
 provisional conversions, an incomplete side, an empty attribution chain. **Never

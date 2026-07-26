@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  orchestrates: [ssc-plan-review]
+  orchestrates: [ssc-plan-review, ssc-plan-tactics]
   tools: [get_month_plan, get_channel_plan, get_performance_analysis, get_strategy_brief]
   approval-gates: human
 ---
@@ -120,7 +120,7 @@ Dispatch the step's skill, passing `period` and the head's `version`. Work
 | Step | Skill | Status |
 |---|---|---|
 | **Review** | `ssc-plan-review` | wired |
-| **Tactics** | `ssc-plan-tactics` | **not built yet** |
+| **Tactics** | `ssc-plan-tactics` | wired |
 | **Research** | `ssc-plan-research` | **not built yet** |
 | **Narrative** | `ssc-plan-narrative` | **not built yet** |
 
@@ -135,6 +135,18 @@ Nothing was written. Build `ssc-plan-<step>` first, or name a different step.
 This is the honest report, not a workaround. Attempting the work inline would put
 un-reviewed prose into a persisted head field.
 
+### Tactics asks the operator — expect an interview, not a silent run
+
+`ssc-plan-tactics` asks **at most three questions, one at a time**, about what no
+data can answer (business context / events, continuity-vs-correction when the two
+altitudes conflict, carry-over commitments). This is by design: Tactics decides
+what to do, and that judgement is the operator's.
+
+Do **not** answer those questions on the operator's behalf, and do not pre-empt
+them by guessing an event or a budget change. If the operator declines, the skill
+proceeds on the two data altitudes and records that the operator input was not
+supplied.
+
 ### After Review
 
 ```
@@ -146,6 +158,20 @@ carries a scale / maintain / drop disposition you can edit in place.
 
 Next: Tactics crosses the quarterly strategy with this ranking.
 ```
+
+### After Tactics
+
+```
+## Đã chốt định hướng tháng — <period>
+
+I've crossed the <quarter> strategy with last period's Review into the month's
+themes. Check them at /content/plan/<period>.
+
+Next: Research runs one outward signal pass for the month.
+```
+
+Name which themes rest on an operator commitment rather than on data — that
+distinction is the one most easily lost downstream.
 
 Carry into your report any degradation the skill reported — uncovered days,
 provisional conversions, an incomplete side, an empty attribution chain. **Never

@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  orchestrates: [ssc-plan-review, ssc-plan-tactics]
+  orchestrates: [ssc-plan-review, ssc-plan-tactics, ssc-plan-research]
   tools: [get_month_plan, get_channel_plan, get_performance_analysis, get_strategy_brief]
   approval-gates: human
 ---
@@ -77,7 +77,7 @@ Otherwise hold these fields from the head — they are your entire state machine
 |---|---|
 | `performanceReview` | Review |
 | `tactics` | Tactics |
-| `researchId` | Research |
+| `research` | Research |
 | `narrative` | Narrative |
 | `version` | optimistic-concurrency guard for every write |
 | `narrativeApproved` | the month's only gate |
@@ -107,7 +107,7 @@ complete before a later one is authored. Two consequences bind you:
 
 1. `performanceReview` unset → **Review**
 2. else `tactics` unset → **Tactics**
-3. else `researchId` unset → **Research**
+3. else `research` unset → **Research**
 4. else `narrative` unset → **Narrative**
 5. else all four written → report the head is fully authored and awaiting the
    operator's Narrative approval in the dashboard. Stop.
@@ -121,7 +121,7 @@ Dispatch the step's skill, passing `period` and the head's `version`. Work
 |---|---|---|
 | **Review** | `ssc-plan-review` | wired |
 | **Tactics** | `ssc-plan-tactics` | wired |
-| **Research** | `ssc-plan-research` | **not built yet** |
+| **Research** | `ssc-plan-research` | wired |
 | **Narrative** | `ssc-plan-narrative` | **not built yet** |
 
 **When the next open step is one that is not built yet**, say so plainly and stop
@@ -172,6 +172,22 @@ Next: Research runs one outward signal pass for the month.
 
 Name which themes rest on an operator commitment rather than on data — that
 distinction is the one most easily lost downstream.
+
+### After Research
+
+```
+## Đã quét cơ hội tháng — <period>
+
+I've run the month's one outward signal pass, grounded in the <quarter> strategy
+and this month's themes. Check it at /content/plan/<period>.
+
+Next: Narrative is written last and is the month's only gate.
+```
+
+Lead with any **constraint** the scan found (a platform policy change, a
+competitor move) — it limits what the month can run, not merely what it should.
+Say plainly when the scan was thin; a padded opportunity list is worse than a
+short honest one.
 
 Carry into your report any degradation the skill reported — uncovered days,
 provisional conversions, an incomplete side, an empty attribution chain. **Never

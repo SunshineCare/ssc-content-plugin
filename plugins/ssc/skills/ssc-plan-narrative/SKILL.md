@@ -1,6 +1,6 @@
 ---
 name: ssc-plan-narrative
-description: Runs the NARRATIVE step of the Cambridge Diet Vietnam monthly plan head — the LAST of the Plan stage's four steps (Review → Tactics → Research → Narrative) and the artifact carrying the month's ONLY approval. It does not add a fifth analysis; it makes the month APPROVABLE IN ONE READ. Per spec, approving the Narrative covers the WHOLE month — the Review reading, the themes, the research, AND all three channels' quantities — and releases every linked channel to author its Approaches, so this document must show what that approval actually covers. Synthesises the head's own artifacts (performance_review, tactics, research) plus the per-channel allocation state read via get_channel_plan into five short sections: what kind of month this is in one paragraph, the month's bets with each marked as a data-backed BET or an operator COMMITMENT (a commitment running against the evidence is named as such), a COVERAGE CHECKLIST showing which of the six approvable parts are present and which are missing, the risks and thin evidence that could make the plan wrong, and a plain statement of what approving releases. It NEVER blocks on a missing step — ordering is presentational, not a chain of locks — but it reports every gap prominently, because approving an incomplete month would release all three channels onto a half-built plan. Deliberately the SHORTEST of the four steps (300–500 words): this is the read-before-approving document, and a long one turns the gate into a rubber stamp. Asks the operator nothing — the decisions were made in the earlier steps. Writes Vietnamese markdown to month_plans.narrative via save_month_plan. PROPOSE-ONLY AND NEVER APPROVES: it authors the artifact a human approves, and the approval hook denies agents approve(entity='month_plan') on any gate, always.
+description: Runs the NARRATIVE step of the Cambridge Diet Vietnam monthly plan head — the LAST of the Plan stage's four steps (Review → Tactics → Research → Narrative) and the artifact carrying the month's ONLY approval. It does not add a fifth analysis; it makes the month APPROVABLE IN ONE READ. Per spec, approving the Narrative covers the WHOLE month — the Review reading, the themes, the research, AND all three channels' quantities — and releases every linked channel to author its Approaches, so this document must show what that approval actually covers. Synthesises the head's own artifacts (performance_review, tactics, research) plus the per-channel allocation state read via get_channel_plan into five short sections: what kind of month this is in one paragraph, the month's bets with each marked as a data-backed BET or an operator COMMITMENT (a commitment running against the evidence is named as such), a two-part COVERAGE VIEW separating what is ready to approve (Review / Tactics / Research) from what FOLLOWS approval (the three channel allocations, which run AFTER the Narrative and are never called a gap — approving is what releases them), the risks and thin evidence that could make the plan wrong, and a plain statement of what approving releases. It NEVER blocks on a missing step — ordering is presentational, not a chain of locks — but it reports a missing HEAD step (Review / Tactics / Research) prominently, while never mistaking the not-yet-run channel allocations for gaps: those come after, and telling the operator to fill them first inverts the pipeline. Deliberately the SHORTEST of the four steps (300–500 words): this is the read-before-approving document, and a long one turns the gate into a rubber stamp. Asks the operator nothing — the decisions were made in the earlier steps. Writes Vietnamese markdown to month_plans.narrative via save_month_plan. PROPOSE-ONLY AND NEVER APPROVES: it authors the artifact a human approves, and the approval hook denies agents approve(entity='month_plan') on any gate, always.
 metadata:
   type: skill
   stage: monthly-plan
@@ -59,18 +59,29 @@ stages do. You **report** them, because approving covers them.
 Optionally `get_strategy_brief(<quarter>, marked_only=true)` for the quarterly
 frame, when the Narrative needs to place the month inside the quarter.
 
-## Step 2: Never block — but never hide a gap
+## Step 2: Channel allocation comes AFTER you — never call it a gap
 
-**Ordering is presentational, not a chain of locks.** A missing Review, Research
-or allocation does **not** stop you. Write the Narrative anyway.
+**The three channel allocations run after the Narrative is approved, not before.**
+This document is what **prepares and releases** them: approving it unlocks each
+channel to set its quantities, and the spec has an allocation step **mint** its
+`channel_plans` row when none exists. So an empty allocation state before approval
+is the **expected** state, not a defect.
 
-**But an operator approving an incomplete month would release all three channels
-onto a half-built plan.** So every gap goes in §3's checklist, plainly marked.
-Silence here is the failure mode: a Narrative that reads complete over a month
-that is not is worse than no Narrative at all.
+**Never present a missing allocation as a gap to close before approving**, and
+never tell the operator to fill them first — that inverts the pipeline and stalls
+the month on work that cannot correctly happen yet.
 
-If the month is substantially empty — no Review, no Tactics — say so in §1 as the
-first thing the operator reads, not buried in the checklist.
+§3 therefore has **two parts**: what is ready to approve (Review / Tactics /
+Research) and what follows from approval (Post / Ad / YouTube), the latter marked
+as awaiting approval with a word on what each will set.
+
+**A genuinely missing HEAD step is different.** No Review, no Tactics or no
+Research *is* a gap — those precede you and the approval covers them. Mark such a
+step `chưa có`, and when the month is substantially empty say so in §1 as the
+first thing the operator reads.
+
+**Ordering is presentational, not a chain of locks** — a missing head step never
+stops you from writing the Narrative.
 
 ## Step 3: Separate BETS from COMMITMENTS
 
@@ -120,29 +131,39 @@ small" says more than a recap of three documents.
 **bet** or **commitment** with what backs it. Keep the order Tactics set; do not
 re-rank.
 
-**§3 — Toàn cảnh tháng.** The coverage checklist — what this approval covers and
-what state each part is in:
+**§3 — Toàn cảnh tháng.** Two tables, in this order.
+
+**Ready to approve** — the head steps that precede you:
 
 | Phần | Trạng thái |
 |---|---|
 | Soát hiệu quả (Review) | … |
 | Định hướng (Tactics) | … |
 | Nghiên cứu (Research) | … |
-| Phân bổ Post | … |
-| Phân bổ Ad | … |
-| Phân bổ YouTube | … |
 
-Mark a missing part **`chưa có`** — never leave a row blank, and never omit a row
-because it is empty. Six rows, always.
+**Follows from approval** — never called a gap:
+
+| Phần | Trạng thái |
+|---|---|
+| Phân bổ Post | Chờ duyệt — <what it will set> |
+| Phân bổ Ad | Chờ duyệt — <what it will set> |
+| Phân bổ YouTube | Chờ duyệt — <what it will set> |
+
+Mark a missing **head** step `chưa có`; never leave a row blank and never omit a
+row. Say in one line that the allocation steps are the plan's next work, which
+approving this document opens.
 
 **§4 — Rủi ro & điều chưa chắc.** What could make this plan wrong: thin samples,
 provisional data, unattributable volume, a commitment running against evidence, a
 missing step. Brief and specific — an operator should be able to weigh each in a
 sentence.
 
-**§5 — Duyệt là duyệt những gì.** Plain statement: approving releases all three
-channels to author their Approaches, covers everything in §3, and is the month's
-only approval — there is no second gate anywhere.
+**§5 — Duyệt là duyệt những gì.** Plain statement: approving fixes the month's
+DIRECTION (the reading, the themes, the opportunities), releases all three
+channels to set their quantities and then author their Approaches, and is the
+month's only approval — there is no second gate anywhere. Because allocation
+happens inside the direction just approved, approving is also approving in
+advance the quantities that will be set under it.
 
 ### Validate the markdown before saving
 
@@ -170,14 +191,16 @@ re-opens a decision already made.
 Report to the operator in their language:
 
 1. What kind of month this is — §1, in a sentence.
-2. **Which parts are missing**, if any. Lead with this when the month is
-   incomplete; it is the thing that should stop an approval.
+2. **Which HEAD steps are missing**, if any — lead with this when the month is
+   incomplete. Never list the channel allocations here; they follow approval.
 3. Any **commitment running against the evidence**.
 4. Where to approve it: `/content/plan/<period>` — and that approving releases
    all three channels.
 
-**Never imply the month is ready when §3 shows gaps.** Your report is the last
-thing read before a gate that releases three pipelines.
+**Never imply the month is ready when a HEAD step is missing** — your report is
+the last thing read before a gate that releases three pipelines. Equally, never
+imply the month is incomplete merely because allocation has not run: that is the
+next step, not a defect.
 
 ## Governance
 

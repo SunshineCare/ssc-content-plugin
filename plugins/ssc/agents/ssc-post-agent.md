@@ -200,9 +200,15 @@ curated → advance to Schedule.
 round exists to fill. Dispatch Ideate and let it pick its own round.
 
 **Schedule, however, does need the allocation**, because it enforces the allocated
-cadence. Before dispatching **Schedule**, confirm `plan.targets` has at least one
-`term_kind = 'pillar'` row and that `plan.detail` carries a posts-per-week band. If
-not, STOP without dispatching and send the operator back to Ideate round 1.
+cadence. Before dispatching **Schedule**, confirm the pillar `target_value`s **sum
+to more than zero** and that `plan.detail` carries a posts-per-week band. If not,
+STOP without dispatching and send the operator back to Ideate round 1.
+
+**Count the values, not the rows.** The dashboard's allocation panel mints the four
+pillar rows with `target_value` `"0"` as soon as an operator opens it, so "a pillar
+row exists" is true of a completely unset allocation and is not the test. Note also
+that `target_value` comes back as **TEXT** (`"10"`, not `10`) — coerce before
+summing, or `"0" + "0"` quietly satisfies a numeric check.
 
 **Channel independence.** Never read or branch on `ad`/`youtube` channel state.
 The Posts channel shares only the monthly plan upstream.

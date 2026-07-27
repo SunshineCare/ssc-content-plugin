@@ -420,9 +420,12 @@ Ideate, rồi chạy lại lệnh để sang Ideate.
   (`approve(entity='channel_plan', gate='approaches')`).
 - **Always gate-check the release first** (Step 1). Under an unapproved narrative:
   no KB reads, no strategy read, no write.
-- **Never writes the head.** `save_month_plan` and `allocate_channel` are not this
-  skill's tools. The Review, the themes, the research, the narrative and the
-  allocation belong to the monthly plan.
+- **Never writes the head.** `save_month_plan` and `allocate_channel` are not
+  THIS skill's tools — the Review, the themes, the research and the narrative
+  belong to the monthly plan, and you only read them. The allocation is also not
+  yours, but note it is not off-limits to the channel entirely: `ssc-post-ideate`
+  round 1 proposes it via `allocate_channel` (propose-only, flips no gate). You
+  read whatever it has set; you never write it.
 - **Never writes quantities.** No `save_plan_targets`, no `detail` payload on
   `save_channel_plan` — both are refused with `retired_plan_field` from `2026-08`
   onward, and the refusal is correct: the head allocates.

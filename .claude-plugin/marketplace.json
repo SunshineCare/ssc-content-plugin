@@ -4,15 +4,5 @@
   "description": "Cambridge Diet Vietnam Cowork plugins — ads, posts, YouTube, KB and strategy",
   "owner": {
     "name": "SunshineCare"
-  },
-  "plugins": [
-    {
-      "name": "ssc",
-      "description": "Cambridge Diet Vietnam — ads, posts, YouTube, KB and strategy workflows for Cowork operators",
-      "author": {
-        "name": "SunshineCare"
-      },
-      "source": "./plugins/ssc"
-    }
-  ]
+  }
 }

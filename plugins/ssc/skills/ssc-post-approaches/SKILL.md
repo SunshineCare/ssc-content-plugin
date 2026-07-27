@@ -137,10 +137,19 @@ Call: get_strategy_brief
 - `{ brief: null }` → note "no quarterly brief for this quarter" and proceed on
   the head alone. Do not block.
 
+**A mature brief is large** — dozens of marked findings, each with `detail` and
+`evidence`, can exceed the tool-result limit and be spilled to a file instead of
+returned inline. That is normal, not an error. Read the spilled file rather than
+re-calling: list the findings by `dimension` + `title` first, then pull `detail`
+only for the dimensions this channel actually uses (audience, content_gap,
+competitor, performance_retrospective). Do not skip the brief because it is big.
+
 ### Step 4: Read the knowledge base
 
-Read live, one `get_knowledge` call per path. These are the paths this step
-draws on:
+Read live. `get_knowledge` takes a **`paths` array (up to 20 per call)**, so batch
+these into two or three calls rather than one call per path — resolve the persona
+roster from `brand/personas` first, then fetch every persona detail doc together.
+These are the paths this step draws on:
 
 - `channels/facebook` — the organic Facebook channel strategy: what this channel
   is for and how it behaves
@@ -166,8 +175,12 @@ draws on:
   not, and the reverse. This channel is organic; the line matters.
 - `rules/banned-words` — hard-banned Vietnamese words and compounds. Zero
   tolerance, checked against every Vietnamese string you write.
-- `winners/facebook-posts` — proven organic post patterns. Read them as evidence
-  of what has worked on this channel, alongside the head's Review.
+- `winners/facebook-posts` — proven organic post patterns, and a source of the
+  measured examples §1 quotes. **Read its warning block at the top before quoting
+  anything from it.** The doc names specific high-performing posts that are
+  compliance violations (a kg-plus-timeframe claim, a spot-reduction claim, a
+  banned technical term); organic performance is not evidence of safety, and a
+  post can top the engagement table and still be unquotable.
 
 Use `search_knowledge` only when the head's research or Review names something
 these paths do not cover (a specific proof point, a myth, a programme detail) and
@@ -233,6 +246,12 @@ once**; §2 onward reference it rather than restating it. Before you save, re-re
 the draft and ask of every sentence in §2–§5: *is this already true in §1?* If it
 is, delete it there and let §1 carry it. A doc that states its main rule five
 times reads as five rules.
+
+**Number §1's rules (1.1, 1.2, …).** The numbering is what makes the referencing
+work: §4 says "chấm theo mức nền ở mục 1.5" and §5 says "ràng buộc ở mục 1.7"
+instead of repeating the baselines and the compliance line. Without stable numbers
+the later sections have nothing to point at and the repetition comes straight
+back.
 
 **§1 — Điều chung cho mọi bài.** Turn the head's Review findings and the month's
 themes into **concrete writing rules for a post**: what the first two lines do,
@@ -326,10 +345,21 @@ review first. Never resolve a compliance question yourself — name it and route
 `rules/banned-words`. Every banned term is prohibited, including compounds. Never
 use the acronym "RCT" in persisted prose — write "nghiên cứu lâm sàng độc lập".
 
-### Validate the markdown before saving
+### Validate before saving — mechanically, not by eye
 
-The document **is** the column value, so a malformed table ships as the artifact.
+The document **is** the column value, so whatever is wrong with it ships as the
+artifact. Write the draft to a scratch file first and run these as actual checks;
+reading it over is not one of them.
 
+- **Banned words: zero.** Grep the draft against `rules/banned-words` — the legal
+  list, the brand-tone list (`chúng tôi`, `thất bại`, `lười biếng`, `giữ nhịp`,
+  …), and the English technical terms. Include near-misses of medical verbs: a
+  prohibition sentence still ships the word.
+- **Em dashes: zero.** `rules/banned-words` bans the em dash outright in its
+  structure table. Use a short dash or a comma. This one is easy to miss because
+  it is punctuation, not vocabulary, and English-language drafting inserts them
+  by habit.
+- **Length within cap** — `wc -w` on the file, before saving, not after.
 - Every table row has the same cell count as its header.
 - No literal `\n`, `\t` or stray backslash sequences.
 - A blank line before and after every heading and table.
@@ -349,9 +379,8 @@ Report to the operator in their language:
 **Nguồn:** kế hoạch tháng <head id> → chiến lược quý <quarter brief id, or "không có"> → KB (<N> tài liệu, đọc trực tiếp)
 **Phân bổ:** <"đã có — <N> trụ cột" | "chưa có — lấy trọng tâm từ định hướng tháng">
 
-### Cách viết tháng này
+### Điều chung cho mọi bài
 - <rule> — <ràng buộc | hướng thử>
-- …
 
 ### Trụ cột × persona
 - <pillar> × <persona>: <one line — the trigger and the opening>
@@ -366,7 +395,7 @@ Report to the operator in their language:
 ---
 Approaches (`context`) đã lưu vào kế hoạch kênh Bài viết (trạng thái đề xuất).
 Duyệt Approaches tại /content/plan/<period>?tab=post&step=approaches, đồng thời
-đặt phân bổ cho kênh (số bài theo trụ cột, nhịp đăng, tỷ lệ định dạng) ở bước
+đặt phân bổ cho kênh (số bài theo trụ cột, tần suất đăng, tỷ lệ định dạng) ở bước
 Ideate, rồi chạy lại lệnh để sang Ideate.
 ```
 

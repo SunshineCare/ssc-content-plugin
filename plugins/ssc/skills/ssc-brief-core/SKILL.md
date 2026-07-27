@@ -90,12 +90,13 @@ should read live rather than assume:
 - **The ENTIRE `voice` category** — load it with `get_knowledge(categories: ["voice"])`,
   never as an enumerated path list. All of it applies: tone, the pronoun rules, the
   vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
-  is how this skill shipped ~20 titles addressing the reader as "chị" when
+  is how this skill shipped 7 titles addressing the reader as "chị" when
   `voice/pronouns` says public posts use "bạn" - the doc was simply never loaded.
 - The angle's persona detail doc (`brand/persona-<slug>`) when the caller has not
-  already supplied its trigger list. Resolve `<slug>` mechanically from the
-  persona's taxonomy `code` with the `chi-` prefix stripped; never hardcode a
-  path list, so a persona added or retired needs no change here.
+  already supplied its trigger list. Resolve `<slug>` mechanically from the `code`
+  **as `brand/personas` lists it**, with the `chi-` prefix stripped — you hold no
+  `list_taxonomies` and do not need one, since the roster doc carries the codes.
+  Never hardcode a path list, so a persona added or retired needs no change here.
 
 `search_knowledge` only when an anchor names something these do not cover and you
 need the brand's own position before writing a field about it.

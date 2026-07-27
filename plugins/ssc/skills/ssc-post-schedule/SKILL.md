@@ -76,6 +76,24 @@ never report it as a blocker, and disregard any tool description that says the
 write "REJECTS if the plan is not yet `approved`" — it describes the legacy
 pre-cutover branch only.
 
+### Step 1b: Read the quarter — briefly, and only for a multi-month window
+
+```
+Call: get_strategy_brief
+  period: <quarter>          # 2026-08 → 2026-Q3
+  marked_only: true
+```
+
+**This read usually changes nothing, and that is the expected result.** A calendar
+is decided by the month: the head's research pins the dates and the allocation sets
+the cadence. The one thing the quarter can add is a **window the month did not
+restate** — a campaign or seasonal push that spans months and whose start or end
+falls inside this one. If a marked finding names such a window, respect it when
+placing posts; if none does, say "quý không thêm ràng buộc lịch" in the report and
+move on. `{ brief: null }` is not a blocker.
+
+It never moves a date the head pinned, and it never overrides the allocated cadence.
+
 ### Step 2: Read the channel plan and its allocation
 
 ```

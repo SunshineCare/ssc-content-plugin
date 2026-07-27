@@ -160,9 +160,10 @@ These are the paths this step draws on:
 - `brand/persona-<slug>` — one call per persona currently listed in
   `brand/personas`: ranked trigger points with content guidance, objections, real
   vocabulary, myths, the per-persona prohibitions, and tone guidance. Resolve
-  `<slug>` mechanically from that persona's taxonomy `code` with the `chi-`
-  prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the
-  path list, so a persona added or retired needs no change here. Load every
+  `<slug>` mechanically from the `code` **as `brand/personas` lists it**, with the
+  `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — you hold no
+  `list_taxonomies`, and you do not need it: the roster doc carries the codes.
+  Never hardcode the path list, so a persona added or retired needs no change here. Load every
   currently-listed persona's doc, not just the ones you end up featuring: you
   need her **actual** stated trigger to match against the month, not a generic
   one.
@@ -173,7 +174,7 @@ These are the paths this step draws on:
 - **The ENTIRE `voice` category** — load it with `get_knowledge(categories: ["voice"])`,
   never as an enumerated path list. All of it applies: tone, the pronoun rules, the
   vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
-  is how this skill shipped ~20 titles addressing the reader as "chị" when
+  is how this skill shipped 7 titles addressing the reader as "chị" when
   `voice/pronouns` says public posts use "bạn" - the doc was simply never loaded.
 - `rules/organic-vs-paid-firewall` — what organic content may say that paid may
   not, and the reverse. This channel is organic; the line matters.

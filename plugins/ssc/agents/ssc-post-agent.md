@@ -9,6 +9,7 @@ metadata:
   section: post
   capability: edit
   orchestrates: [ssc-post-approaches, ssc-post-ideate, ssc-post-schedule]
+  # ssc-post-ideate itself dispatches the shared ssc-brief-core in its round 3
   tools: [get_month_plan, get_channel_plan, list_ideas]
   approval-gates: human
 ---
@@ -69,10 +70,14 @@ you orchestrate may reach for them:
   `month_plans.research`. No step here runs `WebSearch`.
 - **No channel look-back.** `channel_plans.retrospective` was DROPPED. The only
   look-back is `month_plans.performance_review`.
-- **No channel quantities.** `save_plan_targets` and a `detail` allocation on
+- **No channel-side quantities.** `save_plan_targets` and a `detail` allocation on
   `save_channel_plan` are refused with `retired_plan_field` for any period from
-  `2026-08` onward. Allocation is a head act (`allocate_channel`, driven from the
-  dashboard's Post stage) and this channel only **reads** the result.
+  `2026-08` onward. The quantities live on the head and are reached **only** through
+  `allocate_channel`, which is propose-only and flips no gate. Two callers use it:
+  the operator, in the dashboard's allocation panel, and **`ssc-post-ideate`
+  round 1**, which proposes the split so the operator has real numbers to accept or
+  edit rather than a blank table. Nothing else here writes quantities, and the
+  agent never writes them at all.
 
 ## Cutover check (run first)
 
@@ -165,9 +170,10 @@ bottom, then STOP at its gate:
     advance. Tell the operator to review / edit / approve the Approaches in the
     dashboard, then re-invoke you. STOP.
 - **`approaches_approved` is `true`** AND **no approved post ideas exist for this
-  plan** → **Ideate** (Step 4), then STOP at the **Ideas gate**.
-  (Determine "approved ideas exist" via the **Ideas check** below; check the
-  **Allocation check** first.)
+  plan** → **Ideate** (Step 4), then STOP at whichever checkpoint the round it ran
+  ends on. Ideate is a **three-round** step — Distribution, Titles, Angle — and it
+  selects its own round from the data, so dispatch it without deciding the round
+  yourself. (Determine "approved ideas exist" via the **Ideas check** below.)
 - **`approaches_approved` is `true`** AND **≥1 approved post idea exists** AND
   **`schedule_approved` is not `true`** → **Schedule** (Step 5), then STOP at the
   **Calendar gate**.
@@ -189,22 +195,14 @@ matching `plan_id` on the returned rows (page via `next_cursor` if needed). Zero
 matching rows → the Ideas gate is still open → run Ideate. ≥1 → the operator has
 curated → advance to Schedule.
 
-**Allocation check.** Ideate and Schedule consume the head's Post allocation,
-which is set by the operator in the dashboard. Before dispatching **Ideate**,
-confirm `plan.targets` contains at least one row with `term_kind = 'pillar'`. If
-it does not, STOP without dispatching:
+**Allocation is Ideate's round 1, not a precondition.** Do **not** stop when
+`plan.targets` is empty — an empty allocation is exactly the state Ideate's first
+round exists to fill. Dispatch Ideate and let it pick its own round.
 
-```
-## Allocation not set — <period>
-
-The head has not allocated this channel's quantities yet, so Ideate has no
-pillar counts to generate against. The channel never sets its own numbers.
-
-Open /content/plan/<period>?tab=post&step=ideate → set the pillar counts,
-posts-per-week band, format mix and total, then re-invoke me.
-
-Nothing was written.
-```
+**Schedule, however, does need the allocation**, because it enforces the allocated
+cadence. Before dispatching **Schedule**, confirm `plan.targets` has at least one
+`term_kind = 'pillar'` row and that `plan.detail` carries a posts-per-week band. If
+not, STOP without dispatching and send the operator back to Ideate round 1.
 
 **Channel independence.** Never read or branch on `ad`/`youtube` channel state.
 The Posts channel shares only the monthly plan upstream.
@@ -271,30 +269,27 @@ Do **not** run Ideate in this invocation.
 
 ---
 
-### Step 4 — Ideate
+### Step 4 — Ideate (three rounds)
 
-Run when `approaches_approved` is `true`, the **Allocation check** passes, and no
-approved post idea exists for this plan.
+Run when `approaches_approved` is `true` and no approved post idea exists for this
+plan.
 
 Invoke **`ssc-post-ideate`**, passing `period`. It gate-checks
-`approaches_approved` and the allocation itself, reads the head + the approved
-Approaches, and proposes DRAFT post ideas via
-`save_idea(channel='post', plan_id, source='ai')` up to the allocated counts,
-self-enforcing the brand's diversity, hook-variety and banned-word rules. It does
-**not** approve any idea.
+`approaches_approved` itself and then **selects its own round** by reading the
+head's allocation and the plan's ideas:
 
-Then **STOP** and emit:
+| Round | It produces | Then the operator… |
+|---|---|---|
+| **1 · Distribution** | the pillar split with a post count per pillar, written to the head via `allocate_channel` (propose-only, no gate) | accepts, or edits the numbers in the allocation panel — **or just re-runs the command, which is itself acceptance** |
+| **2 · Titles** | one titled DRAFT idea per planned post, sized to the accepted split | prunes the titles worth keeping |
+| **3 · Angle** | each surviving idea's hero + its ONE angle on its single brief | approves the ideas to schedule |
 
-```
-## Post ideas proposed — Posts channel <period>
+Do not decide the round, do not pass one, and do not re-dispatch to force the next
+one — each invocation works one round and stops. Report which round ran and its
+checkpoint verbatim, then **STOP**.
 
-channel_plan: post / <period>
-
-I've proposed the month's post ideas (DRAFT) for <period>, sized to the head's
-allocation. Open /content/plan/<period>?tab=post&step=ideate → curate / approve
-the ideas you want to schedule. Approving ≥1 idea opens the Ideas gate; then
-re-invoke me (same period) to build the calendar.
-```
+Ideate is the only step that reaches the head's allocation, and only through
+`allocate_channel`, which flips no gate. You still never write it yourself.
 
 Do **not** run Schedule in this invocation.
 
@@ -359,13 +354,17 @@ Next: production runs per scheduled post via /ssc.post-writer.
   `approve(entity='month_plan', gate='narrative')`.
 - All writes are performed by the child skills, not this agent:
   `ssc-post-approaches` writes `context`; `ssc-post-ideate` writes DRAFT ideas;
-  `ssc-post-schedule` writes `schedule_entries`. The agent itself only **reads**
-  (`get_month_plan`, `get_channel_plan`, `list_ideas`). It never calls
-  `save_channel_plan`, `save_idea`, `save_schedule_entries`, `save_month_plan`,
-  or `allocate_channel`.
-- **Never write the head.** The Review, the themes, the research, the narrative
-  and every channel's allocation belong to the monthly plan and to the operator's
-  dashboard. This agent and its skills read them and never write them.
+  `ssc-post-schedule` writes `schedule_entries`. `ssc-post-ideate` round 1 also
+  writes the head's allocation via `allocate_channel` — propose-only, flips no
+  gate — which is the one head field any channel skill touches. The agent itself
+  only **reads** (`get_month_plan`, `get_channel_plan`, `list_ideas`). It never
+  calls `save_channel_plan`, `save_idea`, `save_schedule_entries`,
+  `save_month_plan`, or `allocate_channel`.
+- **Never write the head's authored steps.** The Review, the themes, the research
+  and the narrative belong to the monthly plan and to the operator's dashboard.
+  The one exception is the **allocation**, which `ssc-post-ideate` round 1 proposes
+  through `allocate_channel` (propose-only, no gate, operator-editable in the
+  panel). The agent writes nothing itself either way.
 - **Never write retired channel fields.** `tactics`, `tactics_approved` and
   `retrospective` no longer exist on `channel_plans`; `plan_targets` and the post
   detail row are refused to channel-side writers from `2026-08` onward.

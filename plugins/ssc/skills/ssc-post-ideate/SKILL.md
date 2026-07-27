@@ -1,30 +1,53 @@
 ---
 name: ssc-post-ideate
-description: Generates the month's Facebook post ideas for the standalone Cambridge Diet Vietnam Posts pipeline — reads the approved post channel_plan (pillar distribution + format mix) and the creative knowledge base, and produces ~30 draft ideas via save_idea (channel='post', tagged to the plan), self-enforcing the brand's diversity, hook-variety, and banned-word rules. Gated on the approved Research plan. Propose-only; the ideas are drafts a human curates and approves in the dashboard.
+description: >-
+  Runs the IDEATE step of the Cambridge Diet Vietnam Posts channel in THREE ROUNDS, one per invocation, each ending at an operator checkpoint. Round 1 DISTRIBUTION proposes the month's pillar split with a suggested post count per pillar, writes it to the head via allocate_channel (propose-only, flips no gate, mints the channel row if absent) and STOPS; the operator accepts by saying so, by editing the numbers in the dashboard allocation panel, or simply by running the command again. Round 2 TITLES generates one titled draft idea per planned post via save_idea, sized exactly to the accepted distribution and audited for spread and diversity, then STOPS so the operator can prune before any deeper work is spent. Round 3 ANGLE enriches each surviving idea by dispatching ssc-brief-core for its HERO and its ONE angle — a post has exactly one angle, never a fan-out like ads — writes the hero via update_idea and the five narrative fields onto the idea's single existing brief, then STOPS for approval. State-driven: it reads the head's allocation and the plan's ideas and works whichever round is open, so re-invoking always advances rather than repeating. Gated on approaches_approved. Propose-only; every idea is a draft a human curates and approves, and the skill never flips a gate.
 metadata:
   type: skill
   stage: post-pipeline
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, search_knowledge, get_channel_plan, list_taxonomies, save_idea, delete, update_idea, get_idea]
+  orchestrates: [ssc-brief-core]
+  tools: [get_month_plan, get_channel_plan, get_knowledge, search_knowledge, list_taxonomies, list_ideas, get_idea, list_briefs, allocate_channel, save_idea, update_idea, save_brief, edit, delete]
 ---
 
 # Post Ideate (`ssc-post-ideate`)
 
-You generate ~30 draft Facebook post ideas for the standalone Cambridge Diet Vietnam Posts pipeline. You read the approved post `channel_plan` (the pillar distribution, format mix, and totals derived at the Research step), load the creative knowledge base, generate one idea per topic via `save_idea` (channel=`'post'`, tagged to the plan), and self-enforce diversity and banned-word rules before finalising. You are propose-only: every idea is created as a DRAFT for a human to curate and approve in the dashboard. You NEVER call `approve` (the ONLY gated promotion — for any entity, incl. `idea` and `channel_plan`; the approval hook denies it to agents) or any publish tool, you NEVER use `edit` to demote/unapprove a row, and you NEVER flip a gate.
+You run **Ideate** — step 2 of the Posts channel (**Approaches → Ideate →
+Schedule**) — as **three rounds, one per invocation**, each ending at an operator
+checkpoint:
 
-This is step 3 of the five-step Posts pipeline (**Focus → Research → Ideate → Schedule → Measure**), keyed on `channel_plans(channel='post', period=YYYY-MM)`. There is no `/ssc.plan` dependency — the post plan is self-contained.
+| Round | Produces | Ends at |
+|---|---|---|
+| **1 · Distribution** | the month's pillar split, with a suggested post count per pillar | operator accepts, edits, or re-runs |
+| **2 · Titles** | one titled DRAFT idea per planned post | operator prunes the list |
+| **3 · Angle** | each surviving idea's HERO + its ONE angle, written onto its single brief | operator approves the ideas |
+
+Rounds exist so effort follows commitment: no titles are written against a
+distribution nobody accepted, and no hero or angle work is spent on a title the
+operator was going to delete.
+
+You are propose-only. Every idea is a DRAFT. You NEVER call `approve` (the ONLY
+gated promotion; the approval hook denies it to agents), never publish, never use
+`edit` to demote or unapprove a row, and never flip a gate.
 
 ## Inputs
 
-- `period` — the plan month, e.g. `2026-07` (YYYY-MM)
+- `period` — the plan month, `YYYY-MM` (e.g. `2026-08`).
 
-## Procedure
+## Step 0: Read state and pick the round
 
-### Step 1: Read the plan and gate-check the Research plan
+Three reads, every invocation. Never assume a round from the conversation — a
+fresh session has no memory of the last one, so the data decides.
 
-Call:
+```
+Call: get_month_plan
+  period: <period>
+```
+
+Hold `plan.id` (the head id) and **`plan.version`** — the version is your
+`expected_version` for round 1's write, and a stale one writes nothing.
 
 ```
 Call: get_channel_plan
@@ -32,189 +55,361 @@ Call: get_channel_plan
   period: <period>
 ```
 
-**Gate-check:** From the returned `{ plan }`, if `plan` is null **or** `plan.approved` is not `true`, STOP immediately and tell the operator:
+**Gate-check.** If `plan` is null **or** `plan.approaches_approved` is not
+`true`, STOP and tell the operator:
 
-> The Research plan has not been approved yet. Please review and approve Research in the dashboard before running Ideate.
+> Approaches chưa được duyệt. Mở `/content/plan/<period>?tab=post&step=approaches`
+> để duyệt Approaches trước khi chạy Ideate.
 
-Do not proceed past this gate under any circumstances — do not load the KB or save any idea until the plan is approved.
+Then hold `plan.id` (the channel plan id), `plan.context` (the approved
+Approaches — your primary steering), `plan.targets` and `plan.detail`.
 
-If `plan.approved` is `true`, extract and hold from the aggregate:
+```
+Call: list_ideas
+  channel: post
+  plan: <channel plan id>
+```
 
-- `plan.id` — the plan id, passed to `save_idea` as `plan_id`
-- `plan.targets` — the pillar distribution as a SET of rows, each `{ term_id, term_kind, term_code, term_label, target_value }`. The pillar rows (`term_kind = 'pillar'`) and their `target_value` integers give the **exact topic count per pillar** (summing to ~30). Use `term_label` (or `term_code`) as the pillar name.
-- `plan.detail.format_mix` — the format percentage mix (image, carousel, video, reel) derived at Research
-- `plan.detail.total_target` — the total post target (~30)
-- `plan.tactics` — the approved Focus (markdown), for tonal/strategic weight
-- `plan.context` — the approved month brief (markdown): priority pillars, key dates, seasonal pain points, themes
+**Reading the allocation.** The head exposes it as `allocations[]` — one entry per
+channel, each with `targets[]` (joined to taxonomy labels) and `detail`. The
+per-channel `get_channel_plan` read returns the same `targets` / `detail` for this
+channel alone. Either is fine; take the pillar rows from whichever you read, and
+note that **`target_value` comes back as TEXT** — parse it before arithmetic.
 
-The pillar distribution and format mix come from the plan aggregate (`targets` + `detail`) — there is no separate briefing step. If `plan.targets` has no pillar rows, STOP and tell the operator the Research step has not produced a pillar distribution yet.
+**Round selection**, first match wins:
 
-### Step 2: Load the creative knowledge base
+- **No pillar rows in `targets`** → **Round 1**.
+- Pillar rows exist AND the plan's idea count is **below** the allocated total →
+  **Round 2**.
+- Idea count meets the total AND **≥1 idea lacks its angle** (no
+  `core_message` / `hook_direction` on its brief) → **Round 3**.
+- Every idea has its angle → nothing to do. Tell the operator Ideate is complete
+  and to approve the ideas they want scheduled, then STOP.
 
-Call `get_knowledge` for each of these fourteen verified paths:
+A round is never skipped and never re-run once its output exists. If the operator
+wants a round redone, they remove its output first (delete the drafts, or clear
+the allocation in the panel) and re-invoke.
 
-- `brand/angles` — the 3-tier angle system (dimensions: value, entry, against, experience; frames; diversity rules)
-- `voice/tone` — the brand tone and voice principles
-- `voice/pronouns` — the pronoun system (Mình / Bạn / Chị)
-- `voice/vocabulary` — approved vocabulary and preferred phrasings
-- `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules
-- `brand/personas` — the core audience archetypes and their value priorities (the archetype names, count, and priority tiers live in this document — do not assume them)
-- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas` — read the live roster; do not assume how many) — the per-persona detail docs `brand/personas` points to: ranked trigger points with content guidance, objections, real vocabulary, myths, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a **batch** run spanning every persona, so load every currently-listed persona's detail doc upfront (not just one) — they supply the concrete, month-specific pain points `rules/review-standards` criterion 2 requires, instead of a generic description
-- `brand/journey-stages` — the 7 emotional journey stages and their content implications
-- `content/quick-checklist` — what to avoid and quality requirements
-- `rules/banned-words` — hard-banned words and phrases (zero tolerance)
-- `rules/review-standards` — the 7 mandatory review criteria and diversity thresholds
+---
 
-Read all fourteen documents carefully before generating any ideas. The diversity thresholds in Step 4 are sourced from `rules/review-standards` and `brand/angles` — always defer to those documents as the source of truth.
+## Round 1 — Distribution
 
-### Step 3: Generate ~30 ideas
+Propose **how many posts each pillar gets this month**, write it to the head, and
+stop.
 
-Generate exactly the number of ideas required by the pillar distribution in `plan.targets` (summing to ~30). Produce ideas in pillar-grouped batches to make pillar-count tracking easier.
+### 1a. Ground the split
 
-**Resolve every strategic-dimension code → taxonomy id (do this once, before any `save_idea` write).** The codes you work with from `brand/angles`/`content/pillars` (pillar `P1`–`P4`, and the `value`/`entry`/`against`/`experience`/`frame` angle codes, plus any other strategic dimension) are human codes — `save_idea`'s `terms` must carry the matching `taxonomies.id`, not the code. Call `list_taxonomies` once per needed `kind` (e.g. `list_taxonomies(kind='pillar')`, `list_taxonomies(kind='value')`, `list_taxonomies(kind='frame')`, …), **or** call `list_taxonomies` with no `kind` to get all kinds in one call, and build a `code → id` map per kind from the returned rows. Then pass the resolved **leaf-term `id`s** in `save_idea`'s `terms`. NEVER pass a code (e.g. `P2`, a frame code) as a `term` and NEVER invent an id.
+Read, in this order — the same priority the whole channel runs on:
 
-For each idea, call `save_idea` with the following field mapping (the `terms` carry the resolved taxonomy `id`s from the maps above):
+1. **The approved Approaches** (`plan.context`) — which pillars this month
+   emphasises and why. This is the primary input; the split has to match the
+   guidance the operator already approved.
+2. **The head** — `tactics` for the month's themes and `performance_review` for
+   the ranked terms with their `scale` / `maintain` / `drop` dispositions. A term
+   marked `drop` does not get volume.
+3. **The KB** — `content/pillars` for what each pillar is for, and
+   `channels/facebook` for this channel's standing pillar ratio. The standing
+   ratio is the default; the month's guidance is the reason to depart from it, and
+   a departure gets a stated reason.
+
+### 1b. Resolve the pillar term ids
+
+```
+Call: list_taxonomies
+  kind: pillar
+```
+
+**Pass leaf terms only.** The dimension has a **root row** — the one whose `code`
+is null, carrying the dimension's own name — and it is not a pillar. Passing it is
+a silent data defect: it creates a target against the dimension itself. Use only
+the rows that carry a real `code`, and never hardcode an id.
+
+### 1c. Size the month
+
+Set a total that the cadence can actually carry — posts-per-week band × weeks in
+the month — then distribute it across pillars per 1a. Every pillar the guidance
+names gets a non-zero count; a pillar deliberately at zero is stated as such.
+
+### 1d. Write it to the head
+
+```
+Call: allocate_channel
+  month_plan_id: <head id>
+  channel: post
+  expected_version: <head version from Step 0>
+  targets: [ { term_id: <leaf pillar id>, target_value: <count>, meta: { … } }, … ]
+  detail: { postsPerWeekMin, postsPerWeekMax, totalTarget, formatMix }
+```
+
+Four properties of this call that decide whether it is safe:
+
+- **`targets` is DELETE-then-INSERT.** Send the **complete** set every time. A
+  term you leave out is **gone**, and a `meta` you leave off is **erased** — there
+  is no partial update. Omitting `targets` entirely preserves the stored set;
+  passing `[]` clears it.
+- **`expected_version` guards the HEAD**, not the channel row. A stale value
+  returns `stale_version` and writes nothing — re-read `get_month_plan` and retry
+  once with the current version. The call **bumps the head version**, so if you
+  ever allocate a second channel in one sitting, use the version this call
+  returned.
+- **It is propose-only** — sets no status, flips no gate, ever. Writing the
+  allocation is not accepting it.
+- It **mints** the `(post, period)` channel row as `draft` if absent.
+
+`detail` keys are camelCase and post-specific. Do not send another channel's keys;
+a mismatched payload is rejected whole.
+
+### 1e. Stop for acceptance
+
+```
+## Ideate vòng 1 — Phân bổ trụ cột <period>
+
+| Trụ cột | Số bài | Vì sao |
+|---|---|---|
+| <label> | <n> | <one line, traced to the Approaches or the head> |
+
+**Tổng:** <N> bài · <min> đến <max> bài/tuần · định dạng: <mix>
+
+Đã ghi vào kế hoạch tháng (trạng thái đề xuất, không mở cổng nào).
+
+Ba cách để tiếp tục:
+1. Nói "chấp nhận" rồi chạy lại lệnh.
+2. Sửa số trong bảng phân bổ ở dashboard, rồi chạy lại lệnh.
+3. Chạy lại lệnh luôn — chạy lại chính là chấp nhận.
+```
+
+Do **not** generate any idea in this invocation.
+
+---
+
+## Round 2 — Titles
+
+Generate **one titled draft idea per planned post**, and nothing deeper.
+
+### 2a. Load the creative KB
+
+Read live, batching paths (`get_knowledge` takes a `paths` array of up to 20):
+`content/pillars`, `brand/personas` plus **every** persona detail doc the roster
+currently lists (resolve `<slug>` from each persona's taxonomy `code` with the
+`chi-` prefix stripped — never a hardcoded list), `brand/angles`,
+`brand/journey-stages`, `voice/tone`, `voice/vietnamese-rules`,
+`content/quick-checklist`, `rules/review-standards`, `rules/banned-words`.
+
+### 2b. Generate to the accepted counts, exactly
+
+For each pillar, produce exactly its `target_value` titles. Each idea:
 
 ```
 save_idea(
-  channel       = 'post',
-  plan_id       = <plan.id>,
-  source        = 'ai',
-  status        = 'draft',
-  score         = <your self-rating, 1–5 — see Field guidance>,
-  comment       = <one-line rationale for the score, in Vietnamese — see Field guidance>,
-  title         = <Vietnamese post title — specific, natural, not translated>,
-  hook_direction = <opening hook strategy or first-line direction>,
-  pillar        = <pillar name, matching a plan.targets pillar term exactly>,
-  target_persona = <persona name, chosen from whichever personas brand/personas currently lists>,
-  core_message  = <the strategic direction — one clear sentence>,
-  cta           = <call-to-action direction, soft and authentic>,
-  why_now       = <why this topic is timely for this month>,
-  story_moment  = <concrete scene or moment that anchors the post>,
-  format_decision = {
-    angles: {
-      value:      <value code from brand/angles — required, exactly one>,
-      entry:      <entry code from brand/angles — recommended, may be null>,
-      against:    <against code from brand/angles — optional, may be null>,
-      experience: <experience code from brand/angles — optional, may be null>,
-      frame:      <frame code from brand/angles — required>
-    },
-    journeyStage:    <journey stage name from brand/journey-stages>,
-    tonalRegister:   <tonal register derived from voice/tone>,
-    format:          <'image' | 'carousel' | 'video' | 'reel'>,
-    theme:           <theme this post belongs to, from plan.context>
-  }
+  channel  = 'post',
+  plan_id  = <channel plan id>,
+  source   = 'ai',
+  title    = <natural Vietnamese title, specific to this month>,
+  score    = <1-5, honest>,
+  comment  = <one-line Vietnamese rationale for the score>,
+  terms    = [ <pillar leaf id>, <persona>, <value>, <entry>, <frame>,
+               <journey_stage>, <format> ]
 )
 ```
 
-`save_idea` **INSERTS a new DRAFT idea every call** — there is no `id` argument and no upsert; the server always mints a fresh id. Always pass `channel='post'` and `plan_id=<plan.id>` so the idea is scoped to this post plan. To correct an already-saved draft: for **content/field corrections**, call `delete(entity='idea', id, expected_version)` on the flawed draft and save ONE corrected replacement via `save_idea` (never re-call `save_idea` hoping to "update" — that creates a duplicate). For **score/comment-only corrections**, call `update_idea(id, score, comment?, expected_version)` — it changes only the rating fields, never the lifecycle status. Both are version-guarded: a freshly-saved draft is at version 1, and a `stale_version` error means re-read the row via `get_idea` and retry once with the current version.
+Resolve every code → taxonomy id via `list_taxonomies` **once, up front**, and
+build a `code → id` map per kind. `terms` carries **ids**, never codes. `save_idea`
+always **INSERTS** — there is no upsert and no `id` argument — and always mints a
+`draft`; status is not settable here.
 
-**Field guidance:**
+**Titles only this round.** Do not write `hero`, and do not write the narrative
+fields — those are round 3, after the operator has pruned. A title carries enough
+for the operator to judge whether the topic is worth keeping.
 
-- `score` — **self-rate every idea on a 1–5 scale** (rendered as stars in the dashboard for the operator to curate by strength). Judge how strongly the idea serves the month's approved tactics and its pillar, the freshness/strength of its hook, and brand-voice fit. Rate honestly and **use the full range** — do not give everything 5. 5 = a standout you'd lead the month with; 3 = solid; 1–2 = weak/filler. The rating is yours; nothing auto-approves on it.
-- `comment` — a **one-line rationale for the `score`, written in natural Vietnamese** (shown next to the stars in the dashboard for a Vietnamese operator): the single biggest reason the idea is strong or weak, so they understand the rating at a glance — e.g. "Hook post-Tết mạnh, persona <persona> rõ" or "Góc hơi chung, thiếu khoảnh khắc cụ thể". Always Vietnamese (never English); keep it short and honest; it should justify the number you gave.
-- `title` — must be natural Vietnamese, not a translated phrase. Specific to the month's context (not evergreen), per `rules/review-standards` criterion 4.
-- `hook_direction` — the opening strategy: what question, confession line, or statement opens the post. Must vary across the batch (see hook-opener diversity in Step 4).
-- `pillar` — use the exact pillar name from a `plan.targets` pillar term (`term_label`/`term_code`).
-- `target_persona` — pick from whichever personas `brand/personas` currently lists (do not assume a fixed list). Choose the persona whose primary values align with this idea's `angles.value`. Every idea must clearly address its target persona with specific month-context pain points, drawn from that persona's detail doc (`brand/persona-<slug>`, loaded in Step 2) rather than invented generically — not a generic description (per `rules/review-standards` criterion 2).
-- `core_message` — the strategic direction (not a headline). One sentence stating the argument or transformation this post carries.
-- `cta` — soft, authentic call-to-action. No pushy sales language (per `rules/review-standards` criterion 7).
-- `why_now` — the month-specific context that makes this idea timely. No idea should be purely evergreen (per `rules/review-standards` criterion 4: >20% evergreen = FAIL).
-- `story_moment` — a concrete, sensory scene that grounds the idea (e.g. "7am, blending the chocolate shake before leaving for work").
-- `format_decision.angles.value` — exactly one value code per idea, from `brand/angles` section 1.1. Must match the persona's priority values (per `brand/personas`).
-- `format_decision.angles.entry` — recommended. Entry codes from `brand/angles` section 1.2. Include on ≥28 of 30 ideas (per `brand/angles` diversity guidance — see `rules/review-standards` for thresholds).
-- `format_decision.angles.against` — optional. Against codes from `brand/angles` section 1.3. Use ≥3 distinct codes across the batch; no single against code on >8 ideas.
-- `format_decision.angles.experience` — optional but strongly recommended. Experience codes from `brand/angles` section 1.4. Include on ≥22 of 30 ideas.
-- `format_decision.angles.frame` — required. Frame codes from `brand/angles` section 3. Each frame must not appear more than 5 times across the full batch (≤5× per frame). Select the frame after fixing the angle, following the Frame × Layer guidance in `brand/angles`.
-- `format_decision.journeyStage` — stage names from `brand/journey-stages`. Must match the idea's content (per `rules/review-standards` criterion 3: wrong stage assignment = FAIL).
-- `format_decision.format` — must be one of `image`, `carousel`, `video`, `reel`. Derive from `plan.detail.format_mix` proportions and pillar suitability (per `rules/review-standards` criterion 6).
+> **If `save_idea` rejects a title-only idea on validation**, add the minimum its
+> validator demands and note in your summary which fields you were forced to fill
+> early, so round 3 knows to deepen rather than assume them thin. Report the
+> rejection rather than working around it silently.
 
-### Step 4: Self-check diversity and compliance
+### 2c. Audit spread and diversity
 
-Before finalising (or as you save each batch), audit the full set of ~30 ideas against these constraints. The definitive thresholds live in `rules/review-standards` and `brand/angles` — if those documents conflict with the guidance below, the documents win.
+The thresholds live in `rules/review-standards` and `brand/angles`; those docs
+win over anything inline here.
 
-**Mandatory checks (all must PASS):**
+- **Pillar counts match the allocation exactly.** Any deviation is fixed before
+  finishing.
+- **Persona spread** follows the priority order in `brand/personas` /
+  `brand/journey-stages` — weighted, not evenly split, and no persona the roster
+  lists as selective gets volume it should not.
+- **Frame variety**, **entry / value coverage**, and **journey-stage spread** per
+  `brand/angles` and `rules/review-standards`.
+- **Opening variety** — no single opening shape dominates the batch. The approved
+  Approaches names this month's rule; the batch obeys it without every title
+  reading identically.
+- **Month-specificity** — each title is tied to this month; evergreen filler above
+  the `rules/review-standards` threshold is replaced.
+- **No banned words** in any title. Zero tolerance, checked against
+  `rules/banned-words`.
 
-1. **Pillar count accuracy** (per `rules/review-standards` criterion 1): Count ideas per pillar. Every pillar's count must match the pillar distribution in `plan.targets` exactly. Any deviation = fix before finalising.
+To fix an idea you saved **this run**: `delete(entity='idea', id, expected_version)`
+then save one corrected replacement — never re-call `save_idea` hoping to update,
+which creates a duplicate. Score-only fixes use
+`update_idea(id, score, comment, expected_version)`. A freshly saved draft is at
+version 1. Only ever touch drafts **you** created in this run.
 
-2. **Archetype specificity** (per `rules/review-standards` criterion 2): Spot-check 3 ideas. Each must name month-specific pain points for its target persona — one of the personas currently listed in `brand/personas` — drawn from that persona's detail-doc trigger-point section (Step 2), not generic descriptions. Generic = rewrite.
+### 2d. Quality floor, then stop
 
-3. **Journey stage alignment** (per `rules/review-standards` criterion 3): Spot-check 3 ideas. The `journeyStage` must match the content direction — an idea in stage "Nhận ra" must not already propose a solution; an idea in stage "Tiến triển" must not dwell on initial pain. Misaligned = rewrite.
-
-4. **Month-specificity** (per `rules/review-standards` criterion 4): Count evergreen ideas (those without a month-specific hook, event, or context in `why_now`). If >20% of ~30 ideas are evergreen, add month-specific context or replace the worst offenders.
-
-5. **Frame variety** (per `brand/angles` section 5): No single frame code may appear more than 5 times across all ~30 ideas. Count by frame code and fix violations by substituting appropriate frames from `brand/angles` section 3.
-
-6. **Against diversity** (per `brand/angles` section 5): If `against` is used, at least 3 distinct against codes must appear across the batch. No single against code may appear on more than 8 ideas. Fix by redistributing against assignments.
-
-7. **Experience coverage** (per `brand/angles` section 1.4 and diversity guidance): `experience` must be non-null on at least 22 of the ~30 ideas. If below threshold, add experience codes to ideas that lack them.
-
-8. **Entry coverage** (per `brand/angles` section 1.2 and diversity guidance): `entry` must be non-null on at least 28 of the ~30 ideas. If below threshold, add appropriate entry codes.
-
-9. **Hook-opener variety**: Across all 30 hook directions, no more than 10 may begin with "Mình" (first-person opener). At least 5 hook directions must open with a question. Rewrite violating hooks to add variety.
-
-10. **No banned words** (per `rules/banned-words`, hard ban): Scan every `title`, `hook_direction`, `core_message`, and `cta` for any word or phrase listed in `rules/banned-words`. Any match = rewrite that field. Zero tolerance.
-
-11. **No duplicate value+frame within a pillar** (per `brand/angles` section 2): Within each pillar group, no more than 2 ideas may share the same `value` AND the same `frame`. If a pillar has >2 ideas with identical value+frame, vary the frame or value on the excess ideas.
-
-**If any check fails:** Fix the violations before saving the affected idea. For an idea already saved this run, `save_idea` cannot update it (every call INSERTS a new row) — instead call `delete(entity='idea', id, expected_version)` on the flawed draft and save ONE corrected replacement via `save_idea`. If only the score/comment needs correcting, use `update_idea(id, score, comment?, expected_version)` instead (status unchanged; version 1 for a just-saved draft). Only ever fix drafts YOU created in this run. Do not finalise until all 11 checks pass.
-
-### Step 5: Quality replacement loop — remove weak ideas and replace them
-
-Raise the floor on quality: **no saved idea may remain at 3 stars or below.** Using your own self-ratings from Step 3 (you know each idea's `id` from its `save_idea` result and the `score` you gave it):
-
-1. Identify every saved idea rated **≤ 3** (3★ and below).
-2. For each one:
-   - Call `delete(entity='idea', id, expected_version)` to remove the weak draft — it never reaches the operator (a just-saved draft is at version 1).
-   - Generate a **fresh, stronger replacement for the SAME pillar** (so the `plan.targets` pillar distribution stays exact), honouring every Step 4 rule (diversity, hook variety, banned words) and the format mix. Save it via `save_idea` with an honest new `score`.
-3. Re-rate the replacement. If it is still ≤ 3, repeat — but **bound the loop at 2 replacement attempts per slot**. If after 2 attempts a slot still can't reach ≥ 4★, keep the best attempt and note that pillar slot (and why) in the Step 6 summary.
-4. Continue until **every saved idea for the plan is rated ≥ 4★** (or a slot hits its bound).
-
-Rate **honestly** — never inflate a weak idea to 4 just to exit the loop; the goal is genuinely stronger ideas, not gamed scores. Deleting + replacing keeps the pillar counts constant, so re-run the Step 4 **pillar-count** check afterwards to confirm the distribution still matches `plan.targets`. This loop is propose-only: it removes and replaces YOUR OWN drafts before the human curates — it never touches approved ideas and never flips a gate.
-
-### Step 6: Output summary
-
-After all ~30 ideas have been saved and all self-checks pass, output:
+No saved idea may stay at **≤ 3**. For each, delete it and generate a stronger
+replacement **for the same pillar** so the counts hold; bound at **two attempts
+per slot**, and if a slot still cannot reach 4, keep the best attempt and name it
+in the summary. Never inflate a score to exit the loop.
 
 ```
-## Post Ideate — <period>
+## Ideate vòng 2 — Tiêu đề <period>
 
-**Ideas saved:** <N> drafts (channel='post', propose-only — awaiting human curation)
+**Đã lưu:** <N> ý tưởng nháp, khớp phân bổ
 
-### Pillar Distribution
-| Pillar | Target | Saved | Status |
-|--------|--------|-------|--------|
-| <pillar> | <target count> | <actual count> | PASS / FAIL |
+| Trụ cột | Phân bổ | Đã lưu | Đạt |
+|---|---|---|---|
+| <label> | <n> | <n> | ✓ |
 
-### Diversity Check Results
-| Constraint | Threshold | Actual | Status |
-|------------|-----------|--------|--------|
-| Frame variety (max per frame) | ≤5× | <worst frame count> | PASS / FAIL |
-| Against diversity (distinct codes) | ≥3 | <count> | PASS / FAIL |
-| Against concentration (max per code) | ≤8 | <worst code count> | PASS / FAIL |
-| Experience coverage | ≥22/30 | <count> | PASS / FAIL |
-| Entry coverage | ≥28/30 | <count> | PASS / FAIL |
-| Hook openers starting "Mình" | ≤10 | <count> | PASS / FAIL |
-| Hook questions | ≥5 | <count> | PASS / FAIL |
-| Banned words | 0 | 0 | PASS |
-| Duplicate value+frame per pillar | ≤2 | <worst count> | PASS / FAIL |
+### Đa dạng
+| Tiêu chí | Ngưỡng | Thực tế | Đạt |
+|---|---|---|---|
+
+Xem và loại bớt tiêu đề ở dashboard → Ideate. Xong thì chạy lại lệnh để sang
+vòng 3 (hero và góc tiếp cận cho những tiêu đề còn lại).
+```
+
+Do **not** run round 3 in this invocation — its whole point is to run *after*
+pruning.
 
 ---
-Curate and approve ideas in the dashboard at: Ideas → <period> (filter channel = post). Approving ≥1 idea opens the Ideas gate; then re-invoke the agent to begin Schedule.
+
+## Round 3 — Hero and the one angle
+
+Enrich each surviving idea. **A post has exactly ONE angle.** This is the
+structural difference from ads: an ad subject fans out to one angle per fitting
+persona × route because you run many creatives against it, while a post is one
+post. Its single brief is what production is keyed on
+(`/ssc.post-writer <brief_id>`), so a second brief would mean a second post from
+one topic and would break the distribution round 1 just set.
+
+### 3a. Per idea, dispatch `ssc-brief-core`
+
+Work ideas one at a time. For each, choose the angle first — persona, route, and
+the concrete **anchor** it attacks (a belief, a trigger, an objection, a myth) —
+grounded in the approved Approaches and in that persona's own detail doc, then
+dispatch:
+
+```
+Dispatch: ssc-brief-core
+  idea:        <the idea row, incl. tags and version>
+  angle_count: 1
+  angles:      [ { persona, route, anchor } ]
+  grounding:   <the approved Approaches + the KB docs already read>
+  taken:       <this idea's briefs, plus its siblings' for cross-idea repetition>
+```
+
+It returns the **hero** and one scored field set. It writes nothing — every save
+below is yours.
+
+### 3b. Write the hero
+
+```
+update_idea(id = <idea id>, hero = <hero>, expected_version = <idea version>)
+```
+
+Only when the hero is new or the core reported it changed. **Never overwrite an
+operator's existing hero.** `update_idea` is a partial patch — pass only `hero`,
+and never a status or channel. A `stale_version` means re-read via `get_idea` and
+retry once.
+
+### 3c. Write the angle onto the idea's ONE brief
+
+`save_idea` already created a single brief per post idea. **Patch that brief; do
+not create a second one.**
+
+```
+Call: list_briefs
+  idea_id: <idea id>
+```
+
+- **Exactly one brief (the normal case)** → patch it with the five fields via
+  `edit(entity='brief', id, expected_version, …)`.
+- **No brief** → create one with `save_brief(idea_id, channel='post', …)`.
+- **More than one** → do not add another and do not delete anything. Report it and
+  let the operator resolve which is canonical; multiple briefs on a post idea
+  means multiple production runs, which is the state this round exists to avoid.
+
+Set the five narrative fields plus `persona_term_id` and `route_term_id` from the
+angle. **Leave `angle_label` unset** — it is an ads field and is null for posts.
+Pass a `score` and a Vietnamese `comment`. Never pass a status: promotion is
+`approve`, which you do not hold.
+
+### 3d. Audit across the month, then stop
+
+Before finishing, audit the enriched set as a whole — this is the last point where
+cross-idea repetition is cheap to fix:
+
+- No two ideas share an opening strategy.
+- No two share a `story_moment` shape.
+- `why_now` reasons are genuinely distinct.
+- Persona × route spread matches the Approaches, and no pairing is over-used.
+- Every idea's hero, fields and tags argue the same thing.
+
+Any set the core flagged **below bar** is reported with its reason, never
+presented as passing.
+
+```
+## Ideate vòng 3 — Hero và góc tiếp cận <period>
+
+**Đã làm giàu:** <N> ý tưởng · mỗi ý tưởng một góc
+
+| Tiêu đề | Persona × route | Hero (rút gọn) | Điểm |
+|---|---|---|---|
+
+### Đa dạng toàn tháng
+- <one line per criterion>
+
+### Dưới chuẩn (nếu có)
+- <idea> — <reason>
+
+Duyệt các ý tưởng muốn lên lịch ở dashboard → Ideate. Duyệt ≥1 ý tưởng là mở cổng
+Ideas; sau đó chạy `/ssc.post-plan <period>` để sang Schedule.
 ```
 
 ## Output
 
-- ~30 draft ideas saved via `save_idea(channel='post', plan_id, source='ai', status='draft', …)` — all DRAFT status, tagged to the post plan
-- No gate flipped — ideas are drafts awaiting human curation
-- Summary table showing pillar distribution accuracy and diversity check results
+- **Round 1** — the pillar distribution + post detail written to the head via
+  `allocate_channel` (propose-only); the `(post, period)` row minted if absent
+- **Round 2** — one titled DRAFT idea per planned post, tagged to the plan
+- **Round 3** — a hero per idea and the five narrative fields on each idea's
+  single brief
+- No gate flipped in any round
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
-- **No auto-approval.** The human operator curates and approves ideas in the dashboard (the Ideas gate is per-idea `approve(entity='idea', …)` → `status='approved'`).
-- Always gate-check `approved` first (Step 1). If the Research plan is not approved, STOP — do not load the KB or save any idea.
-- References only the ten knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
-- The diversity thresholds in Step 4 are sourced from `rules/review-standards` and `brand/angles` — those documents are the source of truth; the numeric guidance above is informational only.
-- Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state.
-- Requires `edit` capability (plus `view` for the `get_channel_plan` and `get_knowledge` reads).
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle
+  state in either direction — never call `approve` (the ONLY gated promotion; the
+  approval hook denies it to agents, any entity, any gate), and never publish.
+  Demotion is not a separate `unapprove_*` tool — it is an `edit`, so the ban
+  lives here: never use `edit` to demote, unapprove, discard, or reject a row. The
+  generic `edit` / `delete` verbs may target ONLY draft rows this skill created in
+  the current run, plus the idea's own single brief in round 3.
+- **No auto-approval.** The Ideas gate is per-idea `approve(entity='idea', …)`, a
+  human dashboard action.
+- **Always gate-check `approaches_approved` first.** Unapproved: no KB reads, no
+  allocation write, no idea.
+- **`allocate_channel` is propose-only and writes the head's allocation, not the
+  channel's.** It sets no status and flips no gate. Round 1 uses it because the
+  head is where the numbers live; writing them is not accepting them, and the
+  operator remains free to edit them in the dashboard panel.
+- **Never write `save_plan_targets` or a `detail` payload on `save_channel_plan`**
+  — both are refused with `retired_plan_field` from `2026-08` onward. The
+  allocation is reached through `allocate_channel` only.
+- **A post gets exactly one angle.** Never fan out, never create a second brief on
+  a post idea.
+- **Never hard-code KB content.** Name the doc and its section and read it live —
+  the persona roster and each persona's triggers and prohibitions, the angle
+  vocabulary, the review thresholds, the banned words. No persona names in closed
+  lists, no remembered trigger, no baked-in pillar ratio.
+- **Never pass a dimension root as a term id** — only rows carrying a real `code`.
+- Persisted prose is **Vietnamese**; operator-facing chat may be their language.
+- Operates only on the post channel; never reads or writes `ad` / `youtube` state.
+- Requires `edit` (plus `view` for the reads).

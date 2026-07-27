@@ -28,7 +28,7 @@ The month is decided at the **monthly-plan head** (`/ssc.plan <period>`), which 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
 | **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context` | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
-| **Ideate** | ≥1 approved idea | Generates DRAFT post ideas up to the quantities the **head allocated** for this channel (pillar term counts, format mix, total), self-enforcing the brand's diversity, hook-variety and banned-word rules | **Curates** the ideas — accepts or removes — in the dashboard → Ideate. Approving ≥1 idea opens the Ideas gate; then re-runs this command |
+| **Ideate** | ≥1 approved idea | **Three rounds, one per invocation.** ① *Distribution* — proposes the pillar split with a post count per pillar and writes it to the head (propose-only, no gate). ② *Titles* — one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Angle* — each surviving idea's hero + its **one** angle on its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas to schedule |
 | **Schedule** | `schedule_approved` | Assigns each approved idea a publish date, honouring the **allocated** cadence and the head research's calendar → written as `schedule_entries` | Reviews + **approves** the calendar in the dashboard, then re-runs this command |
 
 The three human gates are **Approaches** (`approaches_approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`), all downstream of the month's single narrative approval.
@@ -40,7 +40,7 @@ Re-run this command (same `period` / `step`) after each gate to advance.
 - **It does not author the month's themes.** Those are the head's Tactics step (`month_plans.tactics`), authored once and applied to every channel. The channel realizes them; it never restates or re-decides them.
 - **It does not run market research.** There is exactly **one** outward signal pass per period — the head's Research step. This channel reads it and never runs its own WebSearch.
 - **It does not look back.** The system's only look-back is the head's Review, which ranks taxonomy terms across every channel. There is no per-channel Measure and no per-channel retrospective.
-- **It does not set its own quantities.** Pillar counts, cadence and format mix are allocated at the head's **Post** stage (dashboard) and stored on this channel's `plan_targets` + post detail row. The channel **reads** them and never writes them — a channel-side write is refused with `retired_plan_field`.
+- **It does not set its own quantities behind the head's back.** Pillar counts, cadence and format mix live on the head, and a channel-side write (`save_plan_targets`, or a `detail` payload on `save_channel_plan`) is refused with `retired_plan_field`. They are reached only through `allocate_channel`, which is propose-only and flips no gate — used by the operator in the dashboard panel and by Ideate round 1, which proposes the split so the operator has numbers to accept rather than an empty table. Approving them is still the operator's act; writing a proposal is not accepting it.
 
 ## Grounding order — head, then quarter, then KB
 

@@ -1,13 +1,13 @@
 ---
 name: ssc-plan-research
-description: Runs the RESEARCH step of the Cambridge Diet Vietnam monthly plan head — the THIRD of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the month's ONE outward signal pass. Exactly one pass exists per period and NO channel authors its own market research; every linked channel consumes this document. It is a TIME-SENSITIVE OPPORTUNITY SCAN, not a strategy pass: the quarterly cycle finds durable truths (8-dimension market intelligence, its own skills), while this finds what is true RIGHT NOW — dated calendar openings, competitor and platform moves of the last few weeks, audience triggers shifting this month, and emergent topics no taxonomy term covers yet. It is GROUNDED in the approved quarterly strategy AND the month's Tactics, so it looks for openings that serve the month's declared themes rather than roaming across interesting trends; an opportunity serving no theme is a distraction and is dropped or explicitly parked. Its fifth lens is the one that makes opportunity actionable: crossing our OWN content gaps (get_content_gaps — which pillars are empty or unmeasured) against an outward opening. Uses WebSearch for genuine outward signal, and every claim carries its source so nothing unsourced survives; each investigation is ALSO saved as its own research-ledger row via save_research (query + raw_results + insights), because those rows are cited as evidence by knowledge revisions. Writes a Vietnamese markdown report to month_plans.research via save_month_plan. Asks the operator NOTHING by default — Tactics already captured the month's business context — and only surfaces a question if the scan hits a genuine fork it cannot resolve. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
+description: Runs the RESEARCH step of the Cambridge Diet Vietnam monthly plan head — the THIRD of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the month's ONE outward signal pass. Exactly one pass exists per period and NO channel authors its own market research; every linked channel consumes this document. It is a TIME-SENSITIVE OPPORTUNITY SCAN, not a strategy pass: the quarterly cycle finds durable truths (8-dimension market intelligence, its own skills), while this finds what is true RIGHT NOW — dated calendar openings, competitor and platform moves of the last few weeks, audience triggers shifting this month, and emergent topics no taxonomy term covers yet. It is GROUNDED in the approved quarterly strategy AND the month's Tactics, so it looks for openings that serve the month's declared themes rather than roaming across interesting trends; an opportunity serving no theme is a distraction and is dropped or explicitly parked. Its fifth lens is the one that makes opportunity actionable: crossing our OWN content gaps (get_content_gaps — which pillars are empty or unmeasured) against an outward opening. Uses WebSearch for genuine outward signal, and every claim carries its source so nothing unsourced survives — there is NO research ledger (the research table, save_research and knowledge_versions.evidence_research_id were all removed when the head moved to a markdown research column), so the report's source section IS the provenance and an unsourced claim is a defect. Writes a Vietnamese markdown report to month_plans.research via save_month_plan. Asks the operator NOTHING by default — Tactics already captured the month's business context — and only surfaces a question if the scan hits a genuine fork it cannot resolve. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  tools: [get_month_plan, get_strategy_brief, get_content_gaps, list_taxonomies, get_knowledge, search_knowledge, list_content, save_research, save_month_plan]
+  tools: [get_month_plan, get_strategy_brief, get_content_gaps, list_taxonomies, get_knowledge, search_knowledge, list_content, save_month_plan]
 ---
 
 # Monthly Plan — Research (`ssc-plan-research`)
@@ -94,24 +94,27 @@ This is the lens that makes opportunity *actionable*, and the one no external
 scan produces on its own: cross `get_content_gaps` against lenses 1–4. An empty
 pillar plus a dated opening is an opportunity the quarterly brief cannot see.
 
-## Step 3: Save each investigation to the ledger
+## Step 3: Carry provenance in the report itself
 
-**Every search is also saved as its own research-ledger row** — these rows are
-cited as evidence by knowledge revisions, so they are provenance, not scratch:
+**There is no research ledger.** The `research` table, the `save_research` tool
+and `knowledge_versions.evidence_research_id` were all removed when the head
+moved to a markdown `research` column — verified against the deployed server.
+**Never call `save_research`.** It does not exist, and referencing a removed
+server tool is a recurring shipped-bug class in this repo.
 
-```
-Call: save_research
-  query: <the actual search query>
-  source: web_search
-  raw_results: { … }
-  insights: { … what this search established … }
-  topic: <short description>
-  category: cultural | competitor | algorithm | audience | nutrition | …
-  used_for: monthly-research
-```
+So **the report is the only record of where a claim came from.** §6 is not a
+courtesy — it is the provenance that used to live in its own table, and it is the
+only thing standing between a sourced finding and an assertion.
 
-One row per investigation, not one per lens. A row that cannot name its query and
-source is not evidence.
+For every search you run, hold:
+
+- the **query** you actually issued,
+- the **source** (publisher/domain, not just "the web"),
+- the **date accessed**,
+- and **what that search established** — one clause.
+
+Carry all of it into §6. A claim in §§1–5 whose source is not in §6 is a defect:
+remove the claim or add the source.
 
 ## Step 4: Judge — an opportunity must earn its place
 
@@ -172,8 +175,24 @@ triggers. Name the persona doc you read; never restate a remembered version.
 
 **§5 — Chủ đề nổi lên.** Noted-only. **No taxonomy term is created here.**
 
-**§6 — Nguồn.** Every claim traceable: query, source, date accessed. An
-unsourced claim in §§1–5 is a defect, not a shortcut.
+**§6 — Nguồn.** **This is the only provenance that exists** — there is no ledger
+behind it. A table, one row per claim group:
+
+| Nội dung | Nguồn | Ngày truy cập |
+|---|---|---|
+
+Name the **publisher or domain**, never just "web search". Where a claim came
+from a Brand OS read rather than the web, say which tool. An unsourced claim in
+§§1–5 is a defect, not a shortcut.
+
+**Close §6 with what the scan did NOT find.** A lens that returned nothing is a
+finding about the month — say "no competitor moves found in the last 30 days"
+rather than omitting the lens, so a reader can tell an empty lens from an unrun
+one.
+
+**Dates and weekdays are claims too.** A festival date or which weekday a
+milestone falls on changes what can be scheduled — verify it rather than
+recalling it, and source it like anything else.
 
 ### Validate the markdown before saving
 
@@ -228,6 +247,16 @@ Report to the operator in their language:
   Tactics artifacts. You read them.
 - **Never auto-mint a taxonomy term.** Emergent topics are noted-only; promotion
   is a human act.
+- **Write through `save_month_plan`, never around it.** The MCP tool is the only
+  supported write path: it carries the capability check, the audit trail and the
+  optimistic-concurrency guard. Never write the column by any other route, even
+  when a tool schema looks stale or a document seems large — a write that skips
+  those guards can look correct and still be unsafe. If the tool genuinely
+  refuses, report that and stop rather than routing around it.
+- **Never call a tool that is not on the live surface.** `save_research` was
+  removed with the research table; referencing a renamed or deleted server tool
+  is a recurring shipped-bug class here. When a tool you expect is missing,
+  verify against the deployed server before assuming it is a transient gap.
 - **Never hard-code KB content.** Name the doc and its section and read it live —
   personas, pillars, routes, the awareness framework. Rosters are open.
 - Persisted prose is **Vietnamese**. Operator-facing chat may be the operator's

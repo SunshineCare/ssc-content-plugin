@@ -666,6 +666,12 @@ document.
   retrospective.
 - **Never trigger ingestion** (`pull_*`) and never hand-author raw performance
   rows.
+- **Write through `save_month_plan`, never around it.** The MCP tool is the only
+  supported write path: it carries the capability check, the audit trail and the
+  optimistic-concurrency guard. Never write the column by any other route, even
+  when a tool schema looks stale or a document seems large — a write that skips
+  those guards can look correct and still be unsafe. If the tool genuinely
+  refuses, report that and stop rather than routing around it.
 - **Never hard-code KB content.** Name the doc and section and read it live —
   personas, pillars, routes, the awareness framework, tier roles. Rosters are
   open: a term added or retired must need no change to this skill.

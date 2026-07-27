@@ -318,6 +318,13 @@ channel and status but not by plan, so scope by matching `plan_id` **and follow
 other 17, so stopping at page one would have left 17 posts with no angle and
 reported the batch complete.
 
+**The cursor parameter is `after`, and it takes an idea id.** Passing it as
+`cursor` is **silently ignored** — the server returns page ONE again, with the
+same `next_cursor`, which reads as a stuck cursor rather than as a rejected
+argument. Hit live on the 2026-08 Schedule run. So **dedupe by `id` before
+counting**: a mis-paged run yields the same page twice and a total that looks
+plausible.
+
 Work ideas one at a time. For each, choose the angle first — persona, route, and
 the concrete **anchor** it attacks (a belief, a trigger, an objection, a myth) —
 grounded in the approved Approaches and in that persona's own detail doc, then

@@ -191,7 +191,10 @@ Call: list_ideas
 ```
 
 `list_ideas` filters by channel + status but not by plan — scope to this plan by
-matching `plan_id` on the returned rows (page via `next_cursor` if needed). Zero
+matching `plan_id` on the returned rows, and page until `next_cursor` is null —
+**the cursor parameter is `after` (an idea id); passing it as `cursor` is silently
+ignored and returns page ONE again with the same `next_cursor`**, so dedupe by
+`id` before counting. Zero
 matching rows → the Ideas gate is still open → run Ideate. ≥1 → the operator has
 curated → advance to Schedule.
 

@@ -74,6 +74,12 @@ calendar, seasonal and weather triggers, school and holiday rhythm, brand
 milestones. **A date is only a finding when it implies an action** — note the
 date *and* what it opens.
 
+**2. Đối thủ & nền tảng — competitor and platform movement.**
+What changed *recently* that we can respond to, or must not ignore? Competitor
+campaigns and offers, platform policy or algorithm changes affecting health and
+weight-loss content, ad-format shifts. Recency is the point: a competitor's
+standing position is quarterly work.
+
 **Search the INTERNATIONAL brand name, not only the local one.** The programme
 trades internationally as **"The 1:1 Diet by Cambridge Weight Plan"**; the local
 "Cambridge Diet" returns almost nothing usable. Searching the international name
@@ -82,12 +88,6 @@ NHS/NICE total-diet-replacement (TDR) reviews — and the published competitor
 comparisons. A scan that reports "no comparison material exists" after searching
 only the local name has found a **naming** gap, not a market one. **Always try
 both names**, and name which one produced each finding.
-
-**2. Đối thủ & nền tảng — competitor and platform movement.**
-What changed *recently* that we can respond to, or must not ignore? Competitor
-campaigns and offers, platform policy or algorithm changes affecting health and
-weight-loss content, ad-format shifts. Recency is the point: a competitor's
-standing position is quarterly work.
 
 **3. Tín hiệu người dùng — audience triggers shifting now.**
 What are women searching for, worrying about, or discussing *this* month, versus

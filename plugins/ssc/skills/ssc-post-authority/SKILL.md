@@ -342,7 +342,7 @@ After persisting the approved set, output:
 - If a slot hit its 2-attempt bound and could not reach ≥4, note which slot, the best score reached, and that it was NOT presented/persisted (the operator is short one variation).
 - If **Step 0 stopped** (an `image_content` request with no approved copy), emit that stop message plainly instead — name the gate and the exact next action (approve ≥1 copy in `/post/[month]/[id]` → Copy, then re-invoke) — and confirm nothing was written.
 - End with the next action for the section just saved:
-  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc.post-writer <brief_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
+  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc.post <brief_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
   - after **`image_content`**: `Next: a human selects + approves ONE row in /post/<month>/<id> → Image Content (draft → approved). The Images stage's Text layer then renders it. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
 
 ## Output

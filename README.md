@@ -74,5 +74,5 @@ via OAuth. On first use, Cowork will prompt you to authenticate via the SSC port
 | `/ssc.ads-produce` | Ads production |
 | `/ssc.kb` | Knowledge base management |
 | `/ssc.strategy` | Quarterly strategy |
-| `/ssc.post-writer` | Post writing (production loop) |
+| `/ssc.post` | Post writing (production loop) |
 | `/ssc.youtube` | YouTube channel |

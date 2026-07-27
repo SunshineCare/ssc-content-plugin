@@ -259,7 +259,7 @@ Bài đã xếp: <N> · nhịp <min>–<max> bài/tuần · <one line on any dri
 
 Then tell the operator plainly: review and approve the calendar at
 `/content/plan/<period>?tab=post&step=schedule`, which flips `schedule_approved`;
-production then runs per post via `/ssc.post-writer <brief_id>`.
+production then runs per post via `/ssc.post <brief_id>`.
 
 Report a FAIL as a FAIL with the reason. A calendar that cannot satisfy every
 constraint at once is a real finding the operator needs — never soften it, and

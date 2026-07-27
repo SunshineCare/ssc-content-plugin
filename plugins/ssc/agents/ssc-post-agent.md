@@ -340,7 +340,7 @@ channel_plan: post / <period>
 
 I've arranged the approved post ideas into a proposed calendar for <period>.
 Open /content/plan/<period>?tab=post&step=schedule → review / approve the
-calendar, then production can begin (/ssc.post-writer <brief_id>).
+calendar, then production can begin (/ssc.post <brief_id>).
 ```
 
 ---
@@ -358,7 +358,7 @@ All three channel gates are approved for <period>. There is no Measure step —
 the month's look-back happens once, at the next month's head Review, which ranks
 taxonomy terms across every channel.
 
-Next: production runs per scheduled post via /ssc.post-writer.
+Next: production runs per scheduled post via /ssc.post.
 ```
 
 ---

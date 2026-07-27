@@ -224,7 +224,7 @@ here is approved, scheduled, or published.
 ```
 
 - After **`copy`** is approved, the `image_content` section is freed — tell the operator to
-  re-invoke with `/ssc.post-writer <brief_id> image_content`.
+  re-invoke with `/ssc.post <brief_id> image_content`.
 - After **`image_content`** is approved, the Images stage's **Text** layer renders it; the
   studio prompts are authored by the separate zero-credit `/ssc.image-prompt <brief_id>`.
 - If the authority STOPPED at the `image_content` gate (no approved copy), report that

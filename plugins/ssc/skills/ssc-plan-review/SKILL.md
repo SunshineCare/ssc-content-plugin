@@ -1,13 +1,13 @@
 ---
 name: ssc-plan-review
-description: Runs the REVIEW step of the Cambridge Diet Vietnam monthly plan head — the system's ONLY look-back, and the first of the Plan stage's four steps (Review → Tactics → Research → Narrative). Review learns WHICH TOPICS LAND, and POSTS are its primary evidence: the organic page is where a topic earns attention on its own merit, so the post lens ranks topic terms (pillar, entry, frame, journey_stage, persona, value, format, against) on ENGAGEMENT RATE, never on absolute counts. It reads THREE SEPARATE LENSES that are never blended into one score — (1) ORGANIC POSTS, the topic verdict; (2) BOOSTED POSTS, read as its own lesson about what money did to a topic's reach and resonance, never merged into the organic rate and never graded on an ad tier; (3) ADS, read BY LAYER first (L1/L2/L3, each on its OWN KPI — L2 on CPM + volume + continuity and NEVER on cost-per-purchase; L1/L3 on cost per PURCHASE, with cost per conversion demoted to diagnostic), then as a secondary signal on the narrow persona/route vocabulary the ad briefs carry. THE PERFORMANCE DATA IS THE AUTHORITY and content mapping only ENRICHES it: every lens is first read across its FULL population — ranking the rows themselves and reading the actual copy of the winners and losers — so a row that maps to no content is evidence without a label, never evidence to discard. It does NOT compare post performance against ad performance — they answer different questions on different denominators, and a blended per-term score is forbidden. Writes a McKinsey-style MARKDOWN report to month_plans.performance_review via save_month_plan — the column is markdown, NOT jsonb, so the report IS the column value with no structured envelope and nothing machine-readable. Answer-first and MECE across eight sections: §1 the conclusion before any evidence, §2 EXACTLY THREE lessons written as claims with confidence inline, §3–§5 the three lenses, §6 a directive handoff table whose consumers are the three PLAN STEPS ONLY (Tactics / Research / Narrative — channel pipelines read what Tactics decided, never this report), §7 coverage, and an appendix table of ranked terms carrying scale | maintain | drop or an explicit em-dash when no post-lens evidence exists. Because nothing is machine-readable, §6 is the ONLY carrier — a lesson not written there reaches no later step — and every number a later step needs must appear in the text. A section that cannot be answered STAYS and states 'không đủ dữ liệu'; it is never dropped and never filled from another lens. Carries every coverage degradation into the artifact rather than smoothing it: an uncovered date is UNKNOWN and never zero, conversions at/after provisional_from are labelled provisional, a boundary-straddling or genesis page segment is reported whole and excluded and never apportioned, and an incomplete lens is marked as not a settled measurement. Attributes performance to terms by MATCHING CONTENT (the content_id FKs are empty in practice) and reads terms from BOTH idea_terms (posts) and the brief's persona/route/layer columns (ads); counts a piece of content ONCE even when both published and boosted; reports what it cannot attribute as noted-only free text that NEVER auto-mints a taxonomy term. Reads the prior period's performance_analyses digest when one exists and treats it as authoritative — but NEVER writes, upserts or replaces it (that stays owned by the quarterly retrospective). Records the absence gracefully when the prior period has no data. Propose-only; sets no gate — the month's only approval is the Narrative, a human dashboard action.
+description: Runs the REVIEW step of the Cambridge Diet Vietnam monthly plan head — the system's ONLY look-back, and the first of the Plan stage's four steps (Review → Tactics → Research → Narrative). Review learns WHICH TOPICS LAND, and POSTS are its primary evidence: the organic page is where a topic earns attention on its own merit, so the post lens ranks topic terms (pillar, entry, frame, journey_stage, persona, value, format, against) on ENGAGEMENT RATE, never on absolute counts. It reads THREE SEPARATE LENSES that are never blended into one score — (1) ORGANIC POSTS, the topic verdict; (2) BOOSTED POSTS, read as its own lesson about what money did to a topic's reach and resonance, never merged into the organic rate and never graded on an ad tier; (3) ADS, read BY LAYER first (L1/L2/L3, each on its OWN KPI — L2 on CPM + volume + continuity and NEVER on cost-per-purchase; L1/L3 on cost per PURCHASE, with cost per conversion demoted to diagnostic), then as a secondary signal on the narrow persona/route vocabulary the ad briefs carry. THE PERFORMANCE DATA IS THE AUTHORITY and content mapping only ENRICHES it: every lens is first read across its FULL population — ranking the rows themselves and reading the actual copy of the winners and losers — so a row that maps to no content is evidence without a label, never evidence to discard. It does NOT compare post performance against ad performance — they answer different questions on different denominators, and a blended per-term score is forbidden. Writes a McKinsey-style MARKDOWN report to month_plans.performance_review via save_month_plan — the column is markdown, NOT jsonb, so the report IS the column value with no structured envelope and nothing machine-readable. Answer-first and MECE across eight sections: §1 the conclusion before any evidence, §2 EXACTLY THREE lessons written as claims with confidence inline, §3–§5 the three lenses, §6 a directive handoff table whose consumers are the three PLAN STEPS ONLY (Tactics / Research / Narrative — channel pipelines read what Tactics decided, never this report), §7 coverage, and an appendix table of ranked terms carrying scale | maintain | drop or an explicit em-dash when no post-lens evidence exists. Because nothing is machine-readable, §6 is the ONLY carrier — a lesson not written there reaches no later step — and every number a later step needs must appear in the text. A section that cannot be answered STAYS and states 'không đủ dữ liệu'; it is never dropped and never filled from another lens. Carries every coverage degradation into the artifact rather than smoothing it: an uncovered date is UNKNOWN and never zero, conversions at/after provisional_from are labelled provisional, a boundary-straddling or genesis page segment is reported whole and excluded and never apportioned, and an incomplete lens is marked as not a settled measurement. Attributes performance to terms by MATCHING CONTENT (the content_id FKs are empty in practice, and the copy corpus's exact-hash bridge reaches only a fraction of what normalised matching does) and reads terms from BOTH idea_terms (posts) and the brief's persona/route/layer columns (ads); consults the server's copy corpus via search_copy for metrics that arrive ALREADY JOINED (ad spend/cpa, post engagement_rate, content brief_id) and NEVER recomputes a figure the rollup already carries, because a second copy of the join rules is how spend starts disagreeing with itself; counts a piece of content ONCE even when both published and boosted; reports what it cannot attribute as noted-only free text that NEVER auto-mints a taxonomy term. Reads the prior period's performance_analyses digest when one exists and treats it as authoritative — but NEVER writes, upserts or replaces it (that stays owned by the quarterly retrospective). Records the absence gracefully when the prior period has no data. Propose-only; sets no gate — the month's only approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  tools: [get_month_plan, get_performance_range, get_ad_performance, get_post_performance, get_performance_analysis, get_content_gaps, list_taxonomies, get_brief, get_idea, list_content, save_month_plan]
+  tools: [get_month_plan, get_performance_range, get_ad_performance, get_post_performance, get_performance_analysis, get_content_gaps, search_copy, list_taxonomies, get_brief, get_idea, list_content, save_month_plan]
 ---
 
 # Monthly Plan — Review (`ssc-plan-review`)
@@ -342,6 +342,44 @@ say which rests on more evidence.
 ranking second. If they disagree, the population-level pattern wins, because it
 rests on more rows.
 
+#### `search_copy` — read the rollups, never recompute them
+
+The server keeps a **copy corpus** (`copy_index`) keyed on the text itself, and
+`search_copy {query, kind?, channel?, since?, min_spend?, limit, full_text}`
+returns each hit with its metrics **already joined**:
+
+| Rollup | Carries |
+|---|---|
+| `ad` | spend, results, **cpa**, impressions, campaigns, first/last run |
+| `post` | views, engagement, **engagement_rate**, permalink |
+| `content` | **brief_id**, channel, section, status |
+
+**Where a hit exists, read these figures rather than deriving your own.** The
+server owns the join rules; a second copy of them is how `spend` starts
+disagreeing with itself between two reports. If a rollup contradicts a figure you
+computed, the rollup wins — and say so rather than quietly preferring yours.
+
+**`min_spend` answers "which copy carried real money"** directly, without
+re-deriving the ad join.
+
+**Use `pending_count` to state coverage.** It reports corpus entries not yet
+embedded — that is your honest denominator, not a number you count yourself.
+
+**It does NOT replace the text matching in Step 4.** The corpus links a piece of
+copy to content by **exact text**, so any whitespace or formatting drift between
+the deployed ad and the authored content breaks the link. Measured on one period:
+the exact-hash bridge reached **12 ads / 1.4M₫**, while normalised prefix matching
+reached **38 ads / 6.3M₫** — 3× more. Keep the matching; use the corpus for its
+metrics and its `brief_id`.
+
+**Payload discipline:** hits return a 400-char `snippet` by default and `limit` is
+capped at 25. Ask for `full_text` only when you genuinely need the whole copy —
+ad bodies run to ~3.5k chars and a routine sweep will flood the report with text
+you will not quote.
+
+**If `search_copy` is unavailable**, proceed on the direct reads and say the
+corpus was not consulted. Never fabricate a rollup.
+
 ### Step 4: Enrich with taxonomy terms (where mapping exists)
 
 **Do NOT assume the `content_id` foreign keys carry the attribution.** Both
@@ -562,7 +600,10 @@ the honest one.
 
 **§7 — Độ tin cậy của số liệu.** Measured span; uncovered dates (**UNKNOWN, never
 zero**); provisional cutoff; excluded page segments **whole** with reason; per-lens
-completeness; attribution method and its coverage share; whether a digest existed.
+completeness; attribution method and its coverage share; whether a digest existed;
+and, when the copy corpus was consulted, its `pending_count` — entries not yet
+embedded are corpus coverage you did not have, and saying so is cheaper than a
+reader assuming the sweep was complete.
 
 **Phụ lục** — one row per ranked term:
 

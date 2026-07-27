@@ -78,4 +78,4 @@ Running steps requires `edit`; approving the Approaches and the individual conce
 
 ## After it runs
 
-Point the operator to the monthly-plan dashboard's Ads workspace for `<period>` and the step that just ran. The Ads channel runs independently of Posts and YouTube — they share only the monthly plan upstream. After the Ideas gate, production continues per approved subject: `/ssc.ads-brief <ideaId>` for its persona × route angles, then `/ssc.ads-produce <briefId>` per approved angle.
+Point the operator to the monthly-plan dashboard's Ads workspace for `<period>` and the step that just ran. The Ads channel runs independently of Posts and YouTube — they share only the monthly plan upstream. After the Ideas gate, production continues per approved subject: `/ssc.ads-brief <ideaId>` for its persona × route angles, then `/ssc.ad <briefId>` per approved angle.

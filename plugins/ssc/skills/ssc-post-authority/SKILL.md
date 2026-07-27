@@ -56,7 +56,7 @@ Apply the **FIRST** matching rule:
 | NOT `approved(copy)` | target section = **`copy`** → Step 1 (the mandatory cold start) |
 | `approved(copy)` | target section = **`image_content`** → Step 1 (the next open section) |
 
-**`copy` and `image_content` are BOTH recognized explicit values, and an explicit name always wins over the auto-pick.** Naming `copy` targets `copy` — **including when a copy is already approved**: that is the only way to get a fresh batch of copy variations after the first approval, and it mirrors how an approved `image_content` can be re-invoked for a fresh revision (the `/ssc.ads-produce` pattern). It is non-destructive — Step 6 only ever INSERTS new draft rows, so the approved copy and every existing draft are untouched, and nothing is promoted or demoted. Never silently redirect an explicit `copy` request to `image_content`.
+**`copy` and `image_content` are BOTH recognized explicit values, and an explicit name always wins over the auto-pick.** Naming `copy` targets `copy` — **including when a copy is already approved**: that is the only way to get a fresh batch of copy variations after the first approval, and it mirrors how an approved `image_content` can be re-invoked for a fresh revision (the `/ssc.ad` pattern). It is non-destructive — Step 6 only ever INSERTS new draft rows, so the approved copy and every existing draft are untouched, and nothing is promoted or demoted. Never silently redirect an explicit `copy` request to `image_content`.
 
 Only an **unrecognized** `section` value (a typo — anything that is neither `copy` nor `image_content`) is treated as omitted: it falls through to the auto-pick, never to undefined behavior.
 

@@ -449,8 +449,8 @@ Call: save_content
 
 - Note any slot that hit its 2-attempt bound (the best score reached, and that it was NOT saved → the operator is short one variation in that section).
 - End with the correct NEXT action for the section you just saved:
-  - after **copy**: `Next: open /ad/<month>/<idea_id> → review/edit/approve ≥1 copy, then re-run /ssc.ads-produce <brief_id> [section] to produce headline/description/image_content in any order.`
-  - after **headline**, **description**, or **image_content**: `Next: review/approve in /ad/<month>/<idea_id>. Run /ssc.ads-produce <brief_id> <section> for either of the other two, or re-run this same section any time for a fresh revision.`
+  - after **copy**: `Next: open /ad/<month>/<idea_id> → review/edit/approve ≥1 copy, then re-run /ssc.ad <brief_id> [section] to produce headline/description/image_content in any order.`
+  - after **headline**, **description**, or **image_content**: `Next: review/approve in /ad/<month>/<idea_id>. Run /ssc.ad <brief_id> <section> for either of the other two, or re-run this same section any time for a fresh revision.`
 
 ## Output
 

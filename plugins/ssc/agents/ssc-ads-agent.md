@@ -310,7 +310,7 @@ subject. There is no Measure step — the month's look-back happens once, at the
 next month's head Review, which reads the ad lens by layer on each layer's own
 KPI.
 
-Next: /ssc.ads-brief <ideaId> per approved subject, then /ssc.ads-produce
+Next: /ssc.ads-brief <ideaId> per approved subject, then /ssc.ad
 <briefId> per approved angle.
 ```
 

@@ -361,7 +361,7 @@ rejection stops it.
   Scene alone is a valid parent — **Text-on-Scene is allowed**) **and** an approved
   `image_content` / headline. You hold `list_content`, so **check the `image_content`
   yourself**: if no approved `image_content` row exists, **STOP** (Vietnamese) routing
-  the operator to the **channel's** content command — `ad` → `/ssc.ads-produce
+  the operator to the **channel's** content command — `ad` → `/ssc.ad
   <brief_id> image_content`, `post` → `/ssc.post <brief_id> image_content` — do
   not dispatch the Text skill. Otherwise dispatch it (it also re-checks the chain tip +
   image_content, defense in depth). Both channels carry an `image_content` section, so
@@ -571,7 +571,7 @@ và export là thao tác của bạn trong ImageStudio.
   the identical five-step chain; the channel only
   decides which approved sections exist to ground on, which workspace path
   (`/ad/[month]/…` vs `/post/[month]/…`) your hand-offs name, and which command produces
-  a missing `image_content` (`/ssc.ads-produce` vs `/ssc.post`). Any other
+  a missing `image_content` (`/ssc.ad` vs `/ssc.post`). Any other
   channel — `youtube`, or none — STOPs cleanly at Step 1, writing nothing.
 - **Operator-facing prose is Vietnamese.** Prompt `body` values authored by the skills
   are free-form; only the Text step's headline string is the exact Vietnamese approved

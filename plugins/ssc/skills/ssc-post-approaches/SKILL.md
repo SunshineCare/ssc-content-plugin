@@ -246,6 +246,23 @@ head's allocation (this doc says HOW, never how many), and a one-line compliance
 statement pointing at §5. Close §1 with the **shared chain** every pillar block
 then fills in, so §2 can be terse.
 
+**Every rule in §1 carries a worked ✅/❌ pair.** A rule stated abstractly is not
+a rule a writer can obey — "open on a belief" and "open on the product" are the
+same sentence to someone staring at a blank page. Show one line that passes and
+one that fails, so the boundary is visible rather than described.
+
+- **Draw both from measured reality, never invent them.** The head's Review names
+  the actual openings that won and lost, `brand/angles`' organic retrospective
+  names the ones that bottomed out, and `winners/*` holds the proven shapes. Quote
+  from those. An invented example teaches your guess, not the channel's evidence.
+- **Attach the number when there is one** — a ❌ carrying its measured result is an
+  argument; a bare ❌ is an opinion.
+- **Label the whole set as reference, once, at the top of §1: these are shapes to
+  RECOGNISE, not lines to reuse.** They are last period's posts. Without that line
+  a writer copies a winning opening verbatim and the month ships a repeat.
+- For a rule with two distinct failure modes, show a ❌ for each — one pair cannot
+  teach a boundary that bends in two directions.
+
 **§2 — Trụ cột × persona. Only what is unique to that pillar.** One short block
 per priority pillar this month (the allocated pillars when `plan.targets` is set;
 otherwise the pillars the head's themes and ranked terms point at). Each block

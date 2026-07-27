@@ -184,6 +184,17 @@ research pass is exactly what the monthly plan exists to eliminate.
 
 ### Step 6: Write the Approaches doc (`context`)
 
+**Re-read the gate immediately before you write.** Call `get_channel_plan` again
+and re-check `approaches_approved` — do NOT rely on the value you read in Step 2.
+Authoring takes a while, and an operator can approve the Approaches in the
+dashboard while you are drafting; a stale `false` from Step 2 then makes you
+overwrite content a human has already signed. If it is now `true`, STOP and tell
+the operator it was approved mid-run, offering the draft in chat so they can
+decide whether to un-approve and re-run. The server does not protect you here —
+`save_channel_plan` gates the `context` write on the head's narrative, not on
+`approaches_approved`, so an approved Approaches is silently overwritable and this
+check is the only thing standing in the way.
+
 ```
 Call: save_channel_plan
   channel: post
@@ -201,61 +212,73 @@ the English section names below. It is a persisted artifact a Vietnamese operato
 reviews, edits and approves in the dashboard. Your chat-side reasoning may stay
 English.
 
-**Length: 500–800 words.** This is working guidance an operator reads before
-approving and a writer reads before drafting. Longer than that and neither reads
-it.
+**Length: about 1000 words.** This is working guidance an operator reads before
+approving and a writer reads before drafting. Much longer and neither reads it;
+much shorter and the reasoning behind each rule is gone, leaving conclusions a
+writer cannot apply to a case the doc did not foresee.
 
 ```markdown
-## 1. Cách viết tháng này        (How to write this month)
-## 2. Trụ cột × persona           (Pillar × persona approaches)
-## 3. Điểm khác biệt              (Differentiation)
-## 4. Cách dùng định dạng         (How to use the formats)
-## 5. Thử nghiệm                  (Experiments)
-## 6. Ranh giới nội dung tự nhiên (The organic content line)
+## 1. Điều chung cho mọi bài tháng này  (What binds every post this month)
+## 2. Trụ cột × persona                  (Pillar × persona — only what is unique)
+## 3. Điểm khác biệt                     (Differentiation)
+## 4. Định dạng và phép thử              (Formats and the month's experiments)
+## 5. Ranh giới nội dung tự nhiên        (The organic content line)
 ```
 
-**§1 — Cách viết tháng này.** The most valuable section. Turn the head's Review
-findings and the month's themes into **concrete writing rules for a post**: what
-the first two lines do, what they must not do, what the body is built around,
-what register fits. Derive — do not restate. "Bài mở đầu bằng niềm tin sai của
-người đọc thắng 8,5×" is the head's finding; your job is the rule that follows
-from it, at the level of a sentence a writer can obey. Mark each rule with the
-confidence it inherits: a HIGH-confidence repeated finding is a **ràng buộc** (a
-constraint); a thin-sample one is a **hướng thử** (a direction to try). 3–6 rules.
+**§1 is the shared section, and it exists to stop the rest of the doc repeating
+itself.** Anything true of every pillar belongs here and is stated **exactly
+once**; §2 onward reference it rather than restating it. Before you save, re-read
+the draft and ask of every sentence in §2–§5: *is this already true in §1?* If it
+is, delete it there and let §1 carry it. A doc that states its main rule five
+times reads as five rules.
 
-**§2 — Trụ cột × persona.** The heart of the doc. One short block per priority
-pillar this month (the allocated pillars when `plan.targets` is set; otherwise the
-pillars the head's themes and ranked terms point at). Each block:
+**§1 — Điều chung cho mọi bài.** Turn the head's Review findings and the month's
+themes into **concrete writing rules for a post**: what the first two lines do,
+what they must not do, what the body is built around, what register fits. Derive
+— do not restate: a Review finding is a measurement, and your job is the rule
+that follows from it, at the level of a sentence a writer can obey. Mark each
+rule with the confidence it inherits: a high-confidence repeated finding is a
+**ràng buộc** (a constraint); a thin-sample one is a **hướng thử** (a direction
+to try). Also park here, once each: the voice/register rule, the measurement
+baselines every experiment in §4 will be scored against, the boundary with the
+head's allocation (this doc says HOW, never how many), and a one-line compliance
+statement pointing at §5. Close §1 with the **shared chain** every pillar block
+then fills in, so §2 can be terse.
+
+**§2 — Trụ cột × persona. Only what is unique to that pillar.** One short block
+per priority pillar this month (the allocated pillars when `plan.targets` is set;
+otherwise the pillars the head's themes and ranked terms point at). Each block
+fills the blanks §1 left and adds nothing else:
 
 - **Persona + her live trigger** — which persona this pillar speaks to this month,
   and the concrete trigger from **her own `brand/persona-<slug>` detail doc's
   ranked trigger list** that the month's research calendar or the season actually
   activates. Match a stated trigger to the month; never invent one, never
   paraphrase from memory.
-- **What the post opens on** — the entry into that trigger, obeying §1's rules,
-  placed at the right `brand/journey-stages` stage.
-- **The differentiation move** — the value / entry / against / experience
-  dimension from `brand/angles` that keeps this block distinct from the others, so
-  two pillars never read as the same post wearing a different label.
+- **The specific thing to unpick, and what unpicks it** — drawn from her detail
+  doc, not from your own reading of her.
+- **Its codes** — value / entry / frame from `brand/angles`, stage from
+  `brand/journey-stages`.
+- **The one differentiating move** that keeps this block distinct from the others,
+  so two pillars never read as the same post wearing a different label.
 
-Do not assign counts, dates, or formats per block — those are the head's
-allocation and the Schedule step's job.
+Do not restate §1's rules inside a block, and do not assign counts, dates, or
+formats per block — those are the head's allocation and the Schedule step's job.
 
 **§3 — Điểm khác biệt.** 2–4 bullets: what Cambridge Diet VN's organic posts
 contrast against this month (the against dimensions in `brand/angles`, plus
 whatever the head's research surfaced), and the creative move that makes each
 contrast land on an organic feed rather than in an ad.
 
-**§4 — Cách dùng định dạng.** For each format the allocation calls for (or, when
-allocation is not set yet, each format the month's themes imply): what that format
-is **for** this month and what makes it work here. How many of each is the head's
-number, never yours — do not restate the counts.
+**§4 — Định dạng và phép thử.** Formats and experiments are one section because
+they overlap: the month's experiments are usually format bets. For each format the
+allocation calls for (or, when allocation is not set yet, each format the month's
+themes imply): what it is **for** this month and what makes it work here — never
+how many, that is the head's number. Then 1–3 deliberately experimental approaches
+worth trying at small scale, each with what a win looks like, **scored against the
+baselines named in §1** rather than repeating the numbers.
 
-**§5 — Thử nghiệm.** 1–3 deliberately experimental approaches worth trying at
-small scale, each with what a win would look like and how next month's head Review
-would see it. Omit the section if there is genuinely nothing to test.
-
-**§6 — Ranh giới nội dung tự nhiên.** Short. The compliance line for THIS month's
+**§5 — Ranh giới nội dung tự nhiên.** Short. The compliance line for THIS month's
 guidance, per `rules/organic-vs-paid-firewall` plus any constraint the head's
 research flagged (a platform rule, a legal change, a claim that needs review
 before use). State what this channel may say and what it must route through

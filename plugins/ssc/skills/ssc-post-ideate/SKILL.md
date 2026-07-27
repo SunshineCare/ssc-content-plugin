@@ -217,6 +217,18 @@ build a `code → id` map per kind. `terms` carries **ids**, never codes. `save_
 always **INSERTS** — there is no upsert and no `id` argument — and always mints a
 `draft`; status is not settable here.
 
+**`track` needs `confidence`.** When you pass `track='experimental'` you must also
+pass `confidence` (e.g. `medium`) — the tool schema does not say so and the write is
+**rejected** without it. Mark the Approaches doc's named experiments experimental;
+everything else is `proven`.
+
+**The strategic dimensions live ONLY in `terms`.** `save_idea` takes no
+`pillar`, `target_persona`, `hook_direction`, `core_message` or `format_decision`
+argument. An earlier version of this skill passed exactly those as top-level fields;
+the schema does not declare them, so they were accepted and **silently discarded**,
+and the ideas persisted with no pillar, persona or format at all. If a dimension is
+not in `terms` as a leaf id, it did not save.
+
 **Titles only this round.** Do not write `hero`, and do not write the narrative
 fields — those are round 3, after the operator has pruned. A title carries enough
 for the operator to judge whether the topic is worth keeping.
@@ -291,6 +303,13 @@ post. Its single brief is what production is keyed on
 one topic and would break the distribution round 1 just set.
 
 ### 3a. Per idea, dispatch `ssc-brief-core`
+
+**First, read the approved set completely — `list_ideas` PAGES.** It filters by
+channel and status but not by plan, so scope by matching `plan_id` **and follow
+`next_cursor` until it is null.** A single page silently under-reports: on the
+2026-08 run page one held 14 of the plan's approved ideas and page two held the
+other 17, so stopping at page one would have left 17 posts with no angle and
+reported the batch complete.
 
 Work ideas one at a time. For each, choose the angle first — persona, route, and
 the concrete **anchor** it attacks (a belief, a trigger, an objection, a myth) —
@@ -373,6 +392,37 @@ presented as passing.
 Duyệt các ý tưởng muốn lên lịch ở dashboard → Ideate. Duyệt ≥1 ý tưởng là mở cổng
 Ideas; sau đó chạy `/ssc.post-plan <period>` để sang Schedule.
 ```
+
+## Facts that bite
+
+Each of these cost a wrong write or a wasted round on the 2026-08 run.
+
+- **The auto-created brief arrives `status: "approved"` with `approved_by: null`** —
+  approved by the repo at idea-creation, not by any human act. So `delete(brief)`
+  **refuses** on it, and `delete(idea)` refuses too (`idea_has_briefs`) because every
+  post idea has one. A post brief can only ever be **patched**, never
+  delete-and-replaced, so do not plan a discard-and-regenerate loop in round 3.
+  Patching narrative fields is neither promotion nor demotion, so plain `edit`
+  capability suffices.
+- **`detail.total_target` can disagree with the sum of the pillar values.** A panel
+  edit moves one pillar without touching the total — seen live at 30 vs 31. The
+  **pillar counts govern**, since they are what ideas are generated against. Report
+  the mismatch; never silently reconcile it.
+- **Score against ENGAGEMENT, not conversion.** This channel is graded on replies,
+  saves and shares. A frame carrying no *paid* evidence can still be right here — an
+  invitation the reader can act on alone is a strong organic shape precisely because
+  replies are the metric. Marking such an idea down for lacking conversion data is a
+  real error made on this run, and it came from reading a note about paid
+  performance as if it bound organic.
+- **Write literal Vietnamese, never `\uXXXX` escapes.** Hand-written escapes shipped
+  two diacritic typos into operator-facing prose (`thứ` for `thử`, `Cẩn thọn` for
+  `Cẩn thận`). A wrong diacritic is usually still a real word, so no banned-word or
+  spell scan catches it.
+- **The reader is `bạn`, never `chị`.** `voice/pronouns` carries a dated 06/2026
+  ruling that public posts and paid ads both use `bạn`, with `chị` reserved for 1:1
+  conversation and quoted testimonial. Its own quick-reference table still says
+  "bạn / chị" for fanpage posts and is **stale** — the ruling wins. Titles written
+  with `chị` as the address form had to be corrected by hand on this run.
 
 ## Output
 

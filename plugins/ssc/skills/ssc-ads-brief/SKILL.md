@@ -90,9 +90,32 @@ Also confirm `channel === 'ad'`; if not, STOP (this skill operates only on the a
 
 ### Step 1a: Resolve or define the idea's hero — the north star
 
-Every angle this run creates must stay recognizably about ONE thing: the idea's **hero** — a
-single Vietnamese sentence naming the concrete product/feature/pain-point this idea is
-essentially about. Resolve it BEFORE Step 1b, from the idea object already held from Step 1:
+Every angle this run creates must stay recognizably about ONE thing: the idea's **hero** — the
+idea's **core concept, stated at full strength in about five Vietnamese words.**
+
+Three tests, and a hero fails if it misses any:
+
+- **It is the core concept**, not a detail, not a scene, not the situation the idea sits in.
+- **It is a STRONGER version of the title, never an explanation of it.** It should read as
+  something that could REPLACE the title and hit harder. The moment it starts describing what
+  the title refers to, or supplying the reasoning behind it, it has become a `core_message` and
+  is wrong.
+- **It is short — around five words.** A sentence long enough to argue is long enough to be an
+  explainer. Cut until only the concept is left.
+
+Worked shape, from the same idea: title *"Vì sao ăn ít lại mà vòng 2 vẫn tăng sau tuổi 45"* →
+hero **"Ăn ít không còn đủ."** Not *"Sau 45, lượng ăn không còn là đòn bẩy chính, khối cơ mới
+quyết định cách cơ thể dùng năng lượng"* (a thesis), and not *"Vòng 2 to lên dù bữa ăn đã ít đi"*
+(the situation restated). Both of those explain; the hero asserts.
+
+**On `stale_version`, RE-READ and RE-DERIVE — never just retry with a bumped version.** The hero is
+derived FROM the title, so the most likely reason the version moved is that an operator edited that
+very title while you were working. Retrying the same hero against the new version writes a hero
+derived from a title that no longer exists. Seen live: a title changed from *"tự ghi sổ khó theo"*
+to *"bạn khó có thể tự làm được"*, and the pending hero rested entirely on the notebook comparison
+the operator had just deleted. Re-read the idea, re-derive from the current title, then write.
+
+Resolve it BEFORE Step 1b, from the idea object already held from Step 1:
 
 - **A `revise hero: <note>` instruction was given.** Derive a NEW hero, informed by the note and
   grounded in `idea.title` alone (never fabricated beyond what the title supports — same rule as

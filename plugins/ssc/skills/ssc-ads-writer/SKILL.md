@@ -145,11 +145,6 @@ Call `get_knowledge` for the voice + angle + ad-copy + rules knowledge that grou
 ```
 Call: get_knowledge
   paths: [
-    "voice/tone",
-    "voice/pronouns",
-    "voice/vietnamese-rules",
-    "voice/vocabulary",
-    "voice/founder-voice",
     "brand/woman-to-woman",
     "brand/positioning",
     "brand/proof-points",
@@ -164,6 +159,8 @@ Call: get_knowledge
     "rules/food-placeholder",
     "programme/kieu-my-story"
   ]
+  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
+                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
 ```
 
 **Then make a SECOND, equally mandatory call** for the two run-resolved docs. They are split out only because `get_knowledge` caps `paths` at 20 and the static list above already holds 18 — not because they are optional. **Do not skip this call: without it you are writing to the persona's name instead of her documented language, and with no awareness/sophistication filter at all.**

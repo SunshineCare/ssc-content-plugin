@@ -77,19 +77,16 @@ Call: get_knowledge
     "rules/compliance",
     "rules/food-placeholder",
     "rules/review-standards",
-    "voice/tone",
-    "voice/pronouns",
     "brand/woman-to-woman",
     "brand/proof-points",
-    "voice/vietnamese-rules",
-    "voice/vocabulary",
-    "voice/founder-voice",
     "programme/kieu-my-story",
     "content/quick-checklist",
     "content/pillars",
     "ad/headline-formulas",
     "ad/platform-constraints"
   ]
+  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
+                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
 ```
 
 These paths are your scoring rubric:

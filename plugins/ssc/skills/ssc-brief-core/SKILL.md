@@ -87,7 +87,11 @@ should read live rather than assume:
 - `brand/proof-points` — what the brand may actually claim, for `core_message`
   and any proof phrasing.
 - `rules/banned-words` — checked against every Vietnamese string you return.
-- `voice/tone` — the register the fields must sit in.
+- **The ENTIRE `voice` category** — load it with `get_knowledge(categories: ["voice"])`,
+  never as an enumerated path list. All of it applies: tone, the pronoun rules, the
+  vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
+  is how this skill shipped ~20 titles addressing the reader as "chị" when
+  `voice/pronouns` says public posts use "bạn" - the doc was simply never loaded.
 - The angle's persona detail doc (`brand/persona-<slug>`) when the caller has not
   already supplied its trigger list. Resolve `<slug>` mechanically from the
   persona's taxonomy `code` with the `chi-` prefix stripped; never hardcode a

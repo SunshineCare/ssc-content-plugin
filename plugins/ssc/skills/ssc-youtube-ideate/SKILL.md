@@ -50,13 +50,10 @@ If `plan.approved` is `true`, extract and hold from the aggregate:
 
 ### Step 2: Load the creative knowledge base
 
-Call `get_knowledge` for each of these twelve verified paths:
+Call `get_knowledge` for these verified paths, plus the whole `voice` category:
 
 - `channels/youtube` — the YouTube channel strategy: content series descriptions, cadence rules, SEO priorities, tone, Shorts approach, and the YouTube → Facebook repurposing workflow
-- `voice/tone` — the brand tone and voice principles
-- `voice/pronouns` — the pronoun system (Bạn + Mình/Chúng mình for YouTube; matches the channel's "Bạn" + "Mình" xưng hô)
-- `voice/vocabulary` — approved vocabulary and preferred phrasings
-- `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules
+- **the ENTIRE `voice` category** — load it as `get_knowledge(categories: ["voice"])`, never as named paths. All of it binds: tone, the pronoun rules (`bạn` + `mình/chúng mình` for public content, with `các chị` permitted in the plural on YouTube), the vocabulary, the Vietnamese-language rules, and the founder voice. Loading by category keeps the set correct as docs are added or retired; an enumerated subset silently omitted `voice/founder-voice` here.
 - `brand/personas` — the core audience archetypes and their value priorities (the archetype names and definitions live in this document — do not assume them)
 - `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections + how to dismantle them, real vocabulary to echo/avoid, and myths to debunk. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a **batch** run spanning ideas across every persona and series in one pass, so load every currently-listed persona's detail doc upfront — not just one — to ground each video's pain points and aspirations in that persona's actual trigger points and vocabulary rather than the summary-only view in `brand/personas`.
 - `brand/journey-stages` — the emotional journey stages and their content implications

@@ -170,7 +170,11 @@ These are the paths this step draws on:
   implications
 - `brand/angles` — value / entry / against / experience dimensions and the frame
   codes. This is the vocabulary §2's differentiation move is expressed in.
-- `voice/tone` — the brand's voice characteristics
+- **The ENTIRE `voice` category** — load it with `get_knowledge(categories: ["voice"])`,
+  never as an enumerated path list. All of it applies: tone, the pronoun rules, the
+  vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
+  is how this skill shipped ~20 titles addressing the reader as "chị" when
+  `voice/pronouns` says public posts use "bạn" - the doc was simply never loaded.
 - `rules/organic-vs-paid-firewall` — what organic content may say that paid may
   not, and the reverse. This channel is organic; the line matters.
 - `rules/banned-words` — hard-banned Vietnamese words and compounds. Zero

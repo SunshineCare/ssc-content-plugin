@@ -82,12 +82,12 @@ Always load this **common** set:
 ```
 Call: get_knowledge
   paths: [
-    "voice/tone", "voice/pronouns", "voice/pronoun-guide", "voice/vietnamese-rules",
-    "voice/vocabulary", "voice/founder-voice",
     "brand/woman-to-woman", "brand/positioning", "brand/proof-points",
     "programme/kieu-my-story",
     "rules/banned-words", "content/quick-checklist"
   ]
+  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
+                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
 ```
 
 Plus `brand/persona-<slug>` — the resolved persona's detail doc from Step 4 (ranked trigger points with content guidance, objections + how to dismantle them, real vocabulary to echo/avoid, myths to debunk, and channel/trust behaviour for that one persona). Load this single detail doc, never all four — this skill resolves one idea with one known persona per run. It loads regardless of target channel — persona grounding is not channel-specific; only the channel-specific set below varies by channel.
@@ -128,7 +128,7 @@ Run this checklist against your draft. Fix any failure by revising the narration
 
 1. **Hook lands in the opening line** — not a throat-clear, not a brand intro first.
 2. **Spoken, not written** — reads naturally out loud in Vietnamese; no translated-English rhythm (`voice/vietnamese-rules`), no hashtags/emoji baked into the narration text.
-3. **Pronoun register correct** for the channel/persona (`voice/pronouns`/`voice/pronoun-guide`).
+3. **Pronoun register correct** for the channel/persona (`voice/pronouns`).
 4. **Proof points woven naturally**, not listed — and no fabricated number (`brand/proof-points`).
 5. **No banned words** (`rules/banned-words`) — zero tolerance.
 6. **Authenticity guardrail honoured** (Step 6) — no fabricated real-person story.

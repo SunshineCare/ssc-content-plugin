@@ -95,21 +95,18 @@ Call `get_knowledge` for the voice + content + channel knowledge that grounds th
 ```
 Call: get_knowledge
   paths: [
-    "voice/tone",
-    "voice/pronouns",
     "brand/woman-to-woman",
     "brand/positioning",
     "brand/proof-points",
-    "voice/vietnamese-rules",
-    "voice/vocabulary",
     "content/pillars",
     "content/formats",
     "content/cta-guidelines",
     "content/quick-checklist",
     "channels/facebook",
-    "programme/kieu-my-story",
-    "voice/founder-voice"
+    "programme/kieu-my-story"
   ]
+  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
+                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
 ```
 
 ... plus `brand/persona-<slug>` — the resolved persona's detail doc (see Step 2). It carries that persona's ranked trigger points with content guidance, her objections and how to dismantle them, real vocabulary to echo/avoid, and myths to debunk — ground the variations' hooks, angles, and lines in this doc rather than writing to the persona name alone.

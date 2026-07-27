@@ -192,8 +192,15 @@ Read live, batching paths (`get_knowledge` takes a `paths` array of up to 20):
 `content/pillars`, `brand/personas` plus **every** persona detail doc the roster
 currently lists (resolve `<slug>` from each persona's taxonomy `code` with the
 `chi-` prefix stripped — never a hardcoded list), `brand/angles`,
-`brand/journey-stages`, `voice/tone`, `voice/vietnamese-rules`,
-`content/quick-checklist`, `rules/review-standards`, `rules/banned-words`.
+`brand/journey-stages`, `content/quick-checklist`, `rules/review-standards`,
+`rules/banned-words` — **plus the ENTIRE `voice` category**, loaded as
+`get_knowledge(categories: ["voice"])` rather than named paths.
+
+Load all of voice, never a subset. This skill previously named only `voice/tone`
+and `voice/vietnamese-rules`, so `voice/pronouns` was never read and the 2026-08
+titles addressed the reader as "chị" where the ruling says public posts use
+"bạn". Loading by category also means a retired doc drops out on its own and a
+new one arrives without touching this list.
 
 ### 2b. Generate to the accepted counts, exactly
 

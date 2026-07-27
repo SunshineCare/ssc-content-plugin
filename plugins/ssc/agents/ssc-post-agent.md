@@ -210,6 +210,22 @@ row exists" is true of a completely unset allocation and is not the test. Note a
 that `target_value` comes back as **TEXT** (`"10"`, not `10`) — coerce before
 summing, or `"0" + "0"` quietly satisfies a numeric check.
 
+**Re-read the allocation at the START of every round, and work the STORED numbers.**
+Editing the panel is one of the two ways an operator accepts a proposed
+distribution, so the numbers most likely to have moved are exactly the ones a later
+round is about to build on. A round that generates against the split it proposed
+itself, rather than the split that is stored, silently ignores the operator's
+decision. Two things this read tells you that a remembered proposal cannot:
+
+- **`meta` can be stale; `target_value` is the truth.** A panel edit changes the
+  number and leaves the `meta.reason` prose untouched, so a rationale written by an
+  earlier round can end up contradicting the value it sits on. Read meta as a note,
+  never as the count.
+- **`detail.total_target` can disagree with the sum of the pillar values**, for the
+  same reason. The pillar counts govern — they are what ideas are generated
+  against, one per planned post. Report the mismatch to the operator rather than
+  silently reconciling it.
+
 **Channel independence.** Never read or branch on `ad`/`youtube` channel state.
 The Posts channel shares only the monthly plan upstream.
 

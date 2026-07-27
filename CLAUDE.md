@@ -41,7 +41,7 @@ Claude/Cowork session.
 .claude-plugin/marketplace.json   # marketplace manifest → points at plugins/ssc
 plugins/ssc/
   .claude-plugin/plugin.json      # plugin manifest (version, MCP server config) — the ONLY MCP config
-  commands/  (10 × ssc.*.md)      # thin slash-command entry points
+  commands/  (11 × ssc-*.md)      # thin slash-command entry points
   agents/    (8 × ssc-*-agent.md) # pipeline orchestrators
   skills/    (41 × <name>/SKILL.md)# the actual work units
   hooks/approval-gate.mjs         # PreToolUse governance hook (the only real code)
@@ -58,9 +58,9 @@ scaffolding) never install.
 The single most important thing to understand — it requires reading a command,
 its agent, and a skill together:
 
-1. **Commands** (`/ssc.*`) are **thin entry points that hold no orchestration
+1. **Commands** (`/ssc-*`) are **thin entry points that hold no orchestration
    logic.** They parse operator input and dispatch a single agent. Exception:
-   `/ssc.ad` and `/ssc.ads-brief` dispatch their production skills
+   `/ssc-ad` and `/ssc-ads-brief` dispatch their production skills
    (`ssc-ads-writer`, `ssc-ads-brief`) directly rather than through an agent.
 2. **Agents** (`ssc-*-agent`) are **orchestrators.** Frontmatter declares
    `orchestrates: [skills…]`, the read-only `tools:` they use to resolve state,
@@ -98,15 +98,15 @@ pipeline.
 
 | Pipeline | Command | Agent | Stages (skills) |
 |---|---|---|---|
-| Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Approaches → Ideate → Schedule — the **channel** steps only, hanging off `month_plans(period)` and released by the head's Narrative approval. The channel authors **no** themes, **no** market research, **no** look-back and **no** quantities: those are the head's Tactics / Research / Review / allocation. Every step grounds in the **monthly plan first, the quarterly strategy second, the KB third**, and says so when they conflict. Channel `tactics` / `retrospective` were dropped server-side and `plan_targets` / detail writes are refused (`retired_plan_field`) from `2026-08` onward — `ssc-post-focus`, `ssc-post-research` and `ssc-post-measure` are **retired** accordingly |
-| Posts (produce) | `/ssc.post` | `ssc-post-writer-agent` | produce ⇄ authority loop |
-| Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Ideate → Measure |
-| Ads (brief) | `/ssc.ads-brief <ideaId\|date>` | *(direct → ads-brief)* | Persona enters here — judges which personas (from the live persona roster) the persona-free concept fits, then fans it into distinct persona × route angle briefs via `save_brief`, each tagging its own declared media home (`awareness_stage` + `target_layer_term_id`). Append-only: re-running adds whichever distinct angles still remain (per persona) — no produce-once stop, no discard-and-regenerate. Operator approves each angle worth producing; every approved angle anchors its own independent production run |
-| Ads (produce) | `/ssc.ad <briefId> [section]` | *(direct → ads-writer)* | Anchored to the operator's chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`, no `idea_id`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy) tuned to the angle's declared persona/route/awareness_stage — never an ad-set steering spec; saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
-| Image (prompt) | `/ssc.image-prompt <briefId> [step]` | `ssc-image-prompt-agent` | Scene → Subject → Composition → Edit → Text (all optional) — the **only** image path, and it is **zero-credit**: it authors each step's prompt + `generation_config` and saves via `save_creative_prompt`, then stops. **Cowork never generates** — the operator clicks Generate and selects a candidate in the ImageStudio dashboard, which is what spends fal credits. Anchored to ONE approved `briefId`; the owning idea **and the channel** resolve from the brief (`ad` and `post` both run; any other channel stops). **Scene asks before it writes**: grounded on the idea's `hero` + all approved copy, it proposes **five scene setups** (Vietnamese title + one sentence each) and waits for the operator's pick (`setup: <n|title|description>`) — nothing is saved until one is chosen. Prompts are grounded in the brief + that channel's approved contents + persona doc + brand KB and reach the engine verbatim. Product is upload-only. |
-| YouTube | `/ssc.youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
-| Knowledge base | `/ssc.kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
-| Strategy (quarterly) | `/ssc.strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |
+| Posts (plan) | `/ssc-post-plan` | `ssc-post-agent` | Approaches → Ideate → Schedule — the **channel** steps only, hanging off `month_plans(period)` and released by the head's Narrative approval. The channel authors **no** themes, **no** market research, **no** look-back and **no** quantities: those are the head's Tactics / Research / Review / allocation. Every step grounds in the **monthly plan first, the quarterly strategy second, the KB third**, and says so when they conflict. Channel `tactics` / `retrospective` were dropped server-side and `plan_targets` / detail writes are refused (`retired_plan_field`) from `2026-08` onward — `ssc-post-focus`, `ssc-post-research` and `ssc-post-measure` are **retired** accordingly |
+| Posts (produce) | `/ssc-post` | `ssc-post-writer-agent` | produce ⇄ authority loop |
+| Ads (plan) | `/ssc-ads-plan` | `ssc-ads-agent` | Focus → Approaches → Ideate → Measure |
+| Ads (brief) | `/ssc-ads-brief <ideaId\|date>` | *(direct → ads-brief)* | Persona enters here — judges which personas (from the live persona roster) the persona-free concept fits, then fans it into distinct persona × route angle briefs via `save_brief`, each tagging its own declared media home (`awareness_stage` + `target_layer_term_id`). Append-only: re-running adds whichever distinct angles still remain (per persona) — no produce-once stop, no discard-and-regenerate. Operator approves each angle worth producing; every approved angle anchors its own independent production run |
+| Ads (produce) | `/ssc-ad <briefId> [section]` | *(direct → ads-writer)* | Anchored to the operator's chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`, no `idea_id`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy) tuned to the angle's declared persona/route/awareness_stage — never an ad-set steering spec; saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
+| Image (prompt) | `/ssc-image-prompt <briefId> [step]` | `ssc-image-prompt-agent` | Scene → Subject → Composition → Edit → Text (all optional) — the **only** image path, and it is **zero-credit**: it authors each step's prompt + `generation_config` and saves via `save_creative_prompt`, then stops. **Cowork never generates** — the operator clicks Generate and selects a candidate in the ImageStudio dashboard, which is what spends fal credits. Anchored to ONE approved `briefId`; the owning idea **and the channel** resolve from the brief (`ad` and `post` both run; any other channel stops). **Scene asks before it writes**: grounded on the idea's `hero` + all approved copy, it proposes **five scene setups** (Vietnamese title + one sentence each) and waits for the operator's pick (`setup: <n|title|description>`) — nothing is saved until one is chosen. Prompts are grounded in the brief + that channel's approved contents + persona doc + brand KB and reach the engine verbatim. Product is upload-only. |
+| YouTube | `/ssc-youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
+| Knowledge base | `/ssc-kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
+| Strategy (quarterly) | `/ssc-strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |
 
 ## Propose-only governance — the core invariant
 
@@ -156,18 +156,21 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   save/get/list/approve/unapprove/update/delete/edit/check/propose/upload).
   Referencing a renamed/removed server tool is a recurring shipped-bug class
   (commit `8d4ded8`).
-- **`/ssc.*` cross-references must resolve to a real command.** `ssc.ads` is
+- **Commands are named `/ssc-<name>` (hyphen, not dot).** The dot form
+  (`/ssc.ad`, `/ssc.post`, …) was renamed repo-wide on 2026-07-27 — file names
+  and every cross-reference. Do not reintroduce a `ssc.` command ref.
+- **`/ssc-*` cross-references must resolve to a real command.** `ssc-ads` is
   **retired/renamed** and appears only in "no … dependency" negations — do not
   treat it as a live command or add new refs to it (dangling-ref hot-fixes:
   commits `14a60be`, `32014c1`).
 
-  > **`/ssc.plan` was un-retired on 2026-07-26** and is a **live command again** —
+  > **`/ssc-plan` was un-retired on 2026-07-26** and is a **live command again** —
   > the monthly-plan HEAD (`month_plans(period)`), not the retired shared-head
   > model the old name referred to. The two are different things that share a
   > name: the retired one was a cross-channel head over `monthly_plans` /
   > `targets.ads` / `phase_status`; the live one is the Plan stage of
   > `monthly-plan-owns-the-month`. Agent/skill prose still carrying "no
-  > `/ssc.plan` precondition" negations refers to the RETIRED model — those
+  > `/ssc-plan` precondition" negations refers to the RETIRED model — those
   > negations stay true of the channel pipelines' *legacy* independence, but the
   > channels now DO depend on the head's narrative gate, so re-read any such
   > line before trusting it.

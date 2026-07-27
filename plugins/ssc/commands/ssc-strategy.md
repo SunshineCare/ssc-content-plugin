@@ -1,4 +1,5 @@
 ---
+argument-hint: '<YYYY-Q#> [brief_id]'
 description: Launch the Cambridge Diet Vietnam quarterly Strategy cycle — the deep, once-a-quarter cycle that gathers 8-dimension market intelligence and then feeds the validated findings back into the knowledge base as propose-only revisions. State-driven across three human-gated phases.
 ---
 

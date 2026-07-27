@@ -1,4 +1,5 @@
 ---
+argument-hint: '<idea_id|production_id> [post|ad|youtube]'
 description: >-
   Launch the reusable Brand OS video-production workflow (011-video-production) for ONE approved idea + channel (post/ad/youtube) — Brief → Script → Storyboard → Scene Assets → Assemble → Package → Voice. Thin entry point that dispatches ssc-video-agent, which is state-driven — it reads the production's current step state and works the single next open step it can actually produce (currently: Script, then Storyboard — both Cowork-native text steps), stopping at that step's human gate. Scene Assets/Assemble/Package/Voice need backend AI-generation MCP tools (US3/US6) not yet built; the agent reports this plainly rather than working around it. Propose-only; nothing auto-approves.
 metadata:
@@ -23,7 +24,7 @@ Optional:
 
 - **Channel** (`channel`) — one of `post` | `ad` | `youtube`. Defaults to the idea's own channel (FR-006). Only pass this to repurpose the idea onto a different channel's production — at most one production per (idea, channel).
 
-This command runs **after** an idea has been approved (via any of the Posts/Ads/YouTube planning pipelines). It operates **per production**, never on a whole plan — there is no `/ssc.plan` or per-channel plan precondition beyond an approved idea.
+This command runs **after** an idea has been approved (via any of the Posts/Ads/YouTube planning pipelines). It operates **per production**, never on a whole plan — there is no `/ssc-plan` or per-channel plan precondition beyond an approved idea.
 
 ## What to do
 
@@ -45,4 +46,4 @@ Nothing auto-approves, auto-applies, or auto-publishes. `ssc-video-agent` and it
 
 ## After it runs
 
-Point the operator to the video-production workspace (`/video/<production_id>`) to review/edit/approve the step the agent just drafted, then re-run `/ssc.video <idea_id or production_id> [channel]` to advance to the next step. Re-invoke per production — it works ONE production at a time.
+Point the operator to the video-production workspace (`/video/<production_id>`) to review/edit/approve the step the agent just drafted, then re-run `/ssc-video <idea_id or production_id> [channel]` to advance to the next step. Re-invoke per production — it works ONE production at a time.

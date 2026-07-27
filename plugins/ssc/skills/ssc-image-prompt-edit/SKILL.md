@@ -49,7 +49,7 @@ Call: get_brief
   id: <brief_id>
 ```
 
-The result is `{ brief, idea }`. If no brief matches (`{ brief: null }`), STOP (Vietnamese): không tìm thấy brief này — với concept quảng cáo hãy chạy `/ssc.ads-brief <idea_id>` rồi duyệt một angle; với bài viết hãy mở `/post/[month]/<idea_id>` để lấy `brief_id`. Rồi chạy lại với đúng `brief_id`.
+The result is `{ brief, idea }`. If no brief matches (`{ brief: null }`), STOP (Vietnamese): không tìm thấy brief này — với concept quảng cáo hãy chạy `/ssc-ads-brief <idea_id>` rồi duyệt một angle; với bài viết hãy mở `/post/[month]/<idea_id>` để lấy `brief_id`. Rồi chạy lại với đúng `brief_id`.
 
 **Resolve the channel from the BRIEF ALONE** — `channel = brief.channel`. **Never fall back to `idea.channel`**: the server gates the whole visual chain on `brief.channel` only (`VISUAL_CHAIN_CHANNELS = ['ad','post']`) and rejects a null one as `invalid_input`, so a fallback would let you author a prompt the studio can never generate. Your gate is the server's gate. It decides which approved content sections exist (Step 4) and which `<workspace>` path you name: `/ad/[month]/<idea.id>` for `ad`, `/post/[month]/<idea.id>` for `post` (never guess a month — write `[month]` literally).
 
@@ -82,7 +82,7 @@ Call: list_creative_prompts
 - **else** the approved **`subject`** creative (a selected **Subject**);
 - **else** the approved **`scene`** creative (a selected **Scene**).
 
-**No chain tip at all** (no approved `edit` / `composition` / `subject` / `scene`) → **STOP** (Vietnamese), write nothing: *Chưa có ảnh nào để chỉnh — bước Edit sửa lên một ảnh đã chọn ở bước trước. Hãy hoàn tất và chọn 1 ứng viên ở một bước phía trước (**Scene / Subject / Composition**) trong ImageStudio (chạy `/ssc.image-prompt <brief_id>`), sau đó quay lại bước Edit.*
+**No chain tip at all** (no approved `edit` / `composition` / `subject` / `scene`) → **STOP** (Vietnamese), write nothing: *Chưa có ảnh nào để chỉnh — bước Edit sửa lên một ảnh đã chọn ở bước trước. Hãy hoàn tất và chọn 1 ứng viên ở một bước phía trước (**Scene / Subject / Composition**) trong ImageStudio (chạy `/ssc-image-prompt <brief_id>`), sau đó quay lại bước Edit.*
 
 Hold the chain tip's **`id`** and its **`media.provenance.prompt`** — it describes the current image (its light direction/temperature, palette, perspective/lens, and what is in frame), so the edit you author stays coherent with everything that must remain unchanged.
 
@@ -96,7 +96,7 @@ Now branch on the inputs (apply the **FIRST** matching rule):
 | 2 | `revise` supplied (no `change`) **and** a saved `edit` row exists | **Rewrite** the current saved edit body applying the note → **Step 8 revise path** (re-save with `expected_version`). |
 | 3 | `revise` supplied (no `change`) **and no** saved `edit` row | Nothing to revise → **STOP** (Vietnamese): chưa có prompt Edit nào để sửa — hãy nêu thay đổi bằng `change: <mô tả>` để dựng một edit. |
 | 4 | neither `change` nor `revise`, **and** a saved `edit` row exists | **STOP** — a pending edit is already authored. Route (Vietnamese): prompt Edit đã lưu — hãy vào ImageStudio **Generate** rồi **chọn** 1 candidate; hoặc chạy lại với `change: <thay đổi khác>` để dựng edit tiếp theo, hoặc `revise: <ghi chú>` để sửa edit hiện tại, hoặc sang bước **Text** nếu không cần chỉnh thêm. |
-| 5 | neither `change` nor `revise`, **and no** saved `edit` row | **STOP** — bước Edit là **tùy chọn**. Ask (Vietnamese): cho biết bạn muốn chỉnh gì trên ảnh (ví dụ: chỉnh ánh sáng / thêm hoặc chỉnh sản phẩm / dọn bớt vật thừa / đổi bố cục) rồi chạy lại với `change: <mô tả>`; hoặc bỏ qua bước này và sang **Text**: `/ssc.image-prompt <brief_id> stage: text`. |
+| 5 | neither `change` nor `revise`, **and no** saved `edit` row | **STOP** — bước Edit là **tùy chọn**. Ask (Vietnamese): cho biết bạn muốn chỉnh gì trên ảnh (ví dụ: chỉnh ánh sáng / thêm hoặc chỉnh sản phẩm / dọn bớt vật thừa / đổi bố cục) rồi chạy lại với `change: <mô tả>`; hoặc bỏ qua bước này và sang **Text**: `/ssc-image-prompt <brief_id> stage: text`. |
 
 ### Step 2b: Look at the chain tip — and, after a Generate, at the edit that landed
 
@@ -280,7 +280,7 @@ A `stale_version` reject → **STOP** (Vietnamese): ai đó vừa sửa prompt n
 **Saved:** layer='edit', propose-only (chưa generate, chưa tốn credit)
 ```
 
-End with the NEXT action (Vietnamese): *Mở ImageStudio của brief này → **Generate** ở bước **Edit** rồi **chọn** một candidate. Bước Edit là **tùy chọn và lặp lại được** — chạy lại `/ssc.image-prompt <brief_id>` với `change: <thay đổi khác>` để dựng edit tiếp theo (edit-on-edit), hoặc sang bước **Text** (tiêu đề): `/ssc.image-prompt <brief_id> stage: text`.* For a product edit with no attached packshot, add: *Nhớ tải lên và gắn ảnh sản phẩm thật làm reference trong studio trước khi Generate.*
+End with the NEXT action (Vietnamese): *Mở ImageStudio của brief này → **Generate** ở bước **Edit** rồi **chọn** một candidate. Bước Edit là **tùy chọn và lặp lại được** — chạy lại `/ssc-image-prompt <brief_id>` với `change: <thay đổi khác>` để dựng edit tiếp theo (edit-on-edit), hoặc sang bước **Text** (tiêu đề): `/ssc-image-prompt <brief_id> stage: text`.* For a product edit with no attached packshot, add: *Nhớ tải lên và gắn ảnh sản phẩm thật làm reference trong studio trước khi Generate.*
 
 ## Governance
 

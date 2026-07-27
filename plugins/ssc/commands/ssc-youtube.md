@@ -1,4 +1,5 @@
 ---
+argument-hint: '<YYYY-MM>'
 description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context/tactics to be approved first (in the content workspace).
 ---
 

@@ -1,4 +1,5 @@
 ---
+argument-hint: '<YYYY-MM> [approaches|ideate|schedule]'
 description: Run the Cambridge Diet Vietnam Posts channel of a monthly plan — Approaches → Ideate → Schedule — on channel_plans(channel='post', period), hanging off that period's monthly-plan head. Released by the head's narrative approval; the channel authors no themes, no research, and no quantities of its own. State-driven across three human gates; propose-only.
 metadata:
   brand: cambridge-diet-vn
@@ -14,7 +15,7 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-08`). Required. This is the key the post `channel_plan` is stored under, and the key of the monthly plan it hangs off.
-- **Step** (`step`, optional — one of `approaches`, `ideate`, `schedule`) — names which of the three steps to work this invocation. The dashboard's per-step Cowork button emits it **positionally after the period** (`/ssc.post-plan <period> <step>`), so an operator standing on a given step copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
+- **Step** (`step`, optional — one of `approaches`, `ideate`, `schedule`) — names which of the three steps to work this invocation. The dashboard's per-step Cowork button emits it **positionally after the period** (`/ssc-post-plan <period> <step>`), so an operator standing on a given step copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
 - **Plan ID** (`plan_id`, optional) — pass when resuming an in-flight plan. The plan is canonically resolved by `(channel='post', period)`, so this is informational only.
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `step`.
@@ -23,7 +24,7 @@ If no period is given, ask the operator for it (one question) before dispatching
 
 This is the **Posts channel** of the monthly plan — the three steps the channel itself owns, and nothing above them.
 
-The month is decided at the **monthly-plan head** (`/ssc.plan <period>`), which authors the Review, the month's themes, the one outward research pass, and every channel's quantities, and carries the month's **single approval**. Approving the head's Narrative is what **releases** this channel. Until then, this command writes nothing.
+The month is decided at the **monthly-plan head** (`/ssc-plan <period>`), which authors the Review, the month's themes, the one outward research pass, and every channel's quantities, and carries the month's **single approval**. Approving the head's Narrative is what **releases** this channel. Until then, this command writes nothing.
 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
@@ -37,7 +38,7 @@ Re-run this command (same `period` / `step`) after each gate to advance.
 
 ## Ideate runs in three rounds
 
-`/ssc.post-plan <period> ideate` runs **one round per invocation** and stops. You type
+`/ssc-post-plan <period> ideate` runs **one round per invocation** and stops. You type
 the same command each time — **which round runs is read from the data, never
 remembered from the last conversation**, so it always advances rather than repeating:
 

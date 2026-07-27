@@ -53,7 +53,7 @@ and stop.
   Ask once if absent; never invent it.
 - `step` (optional) — a single step token (`approaches | ideate | schedule`)
   naming which step to work this invocation. The dashboard's per-step Cowork
-  button emits it (`/ssc.post-plan <period> <step>`). Absent → run the next open
+  button emits it (`/ssc-post-plan <period> <step>`). Absent → run the next open
   step. See **Step-targeted invocation**.
 - `plan_id` (optional) — to resume an in-flight plan. The plan is canonically
   resolved by `(channel='post', period)`, so `plan_id` is informational only.
@@ -125,7 +125,7 @@ The Posts channel is released by the monthly plan's Narrative approval, which is
 the month's only gate. <"No monthly plan exists for <period> yet." | "The
 Narrative for <period> is not approved yet.">
 
-Open /content/plan/<period> → Plan stage → <"run /ssc.plan <period> to author the
+Open /content/plan/<period> → Plan stage → <"run /ssc-plan <period> to author the
 month" | "review and approve the Narrative">, then re-invoke me.
 
 Nothing was written.
@@ -340,7 +340,7 @@ channel_plan: post / <period>
 
 I've arranged the approved post ideas into a proposed calendar for <period>.
 Open /content/plan/<period>?tab=post&step=schedule → review / approve the
-calendar, then production can begin (/ssc.post <brief_id>).
+calendar, then production can begin (/ssc-post <brief_id>).
 ```
 
 ---
@@ -358,7 +358,7 @@ All three channel gates are approved for <period>. There is no Measure step —
 the month's look-back happens once, at the next month's head Review, which ranks
 taxonomy terms across every channel.
 
-Next: production runs per scheduled post via /ssc.post.
+Next: production runs per scheduled post via /ssc-post.
 ```
 
 ---

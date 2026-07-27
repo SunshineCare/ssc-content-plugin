@@ -34,7 +34,7 @@ never do the content work yourself.
   surface — not steps of the Plan stage, and not yours.
 - **You do not run any channel pipeline.** Each channel runs
   **Approaches → Ideate → Schedule** (ad has no Schedule) through
-  `/ssc.post-plan`, `/ssc.ads-plan`, `/ssc.youtube`. Channel **Focus**, channel
+  `/ssc-post-plan`, `/ssc-ads-plan`, `/ssc-youtube`. Channel **Focus**, channel
   **Research** and channel **Measure** no longer exist — this head owns all three.
 - **You do not write the period digest.** `performance_analyses` is owned by the
   quarterly retrospective phase. Review **reads** it and never writes, upserts, or

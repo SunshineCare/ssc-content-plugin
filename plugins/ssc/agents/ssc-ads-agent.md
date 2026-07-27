@@ -73,7 +73,7 @@ or placement.
   Ask once if absent; never invent it.
 - `stage` (optional) — a single step token (`approaches | ideate`) naming which
   step to work this invocation. The dashboard's per-stage Cowork button emits it
-  (`/ssc.ads-plan <period> <stage>`). Absent → run the next open step. See
+  (`/ssc-ads-plan <period> <stage>`). Absent → run the next open step. See
   **Stage-targeted invocation**.
 - `plan_id` (optional) — to resume an in-flight plan. The plan is canonically
   resolved by `(channel='ad', period)`, so `plan_id` is informational only.
@@ -124,7 +124,7 @@ The Ads channel is released by the monthly plan's Narrative approval, which is
 the month's only gate. <"No monthly plan exists for <period> yet." | "The
 Narrative for <period> is not approved yet.">
 
-Open /content/plan/<period> → Plan stage → <"run /ssc.plan <period> to author the
+Open /content/plan/<period> → Plan stage → <"run /ssc-plan <period> to author the
 month" | "review and approve the Narrative">, then re-invoke me.
 
 Nothing was written.
@@ -172,7 +172,7 @@ bottom, then STOP at its gate:
   "approved concepts exist" via the **Ideas check** below.)
 - **≥1 approved ad concept exists** → the channel is complete for the month.
   Report and STOP — production continues per approved subject via
-  `/ssc.ads-brief`, which is a separate command, not a step you run.
+  `/ssc-ads-brief`, which is a separate command, not a step you run.
 
 **Ideas check.** "Approved concepts exist for this plan" is true when
 `list_ideas(channel='ad', status='approved')` returns ≥1 concept whose `plan_id`
@@ -291,7 +291,7 @@ channel_plan: ad / <period>
 I've proposed <N> DRAFT ad subjects for <period>, sized to the head's Ad
 allocation. Open the Ads dashboard → Ideas → curate them (accept or remove).
 Approving at least one subject opens the Ideas gate; each approved subject then
-gets its persona × route angles via /ssc.ads-brief <ideaId>.
+gets its persona × route angles via /ssc-ads-brief <ideaId>.
 ```
 
 ---
@@ -310,7 +310,7 @@ subject. There is no Measure step — the month's look-back happens once, at the
 next month's head Review, which reads the ad lens by layer on each layer's own
 KPI.
 
-Next: /ssc.ads-brief <ideaId> per approved subject, then /ssc.ad
+Next: /ssc-ads-brief <ideaId> per approved subject, then /ssc-ad
 <briefId> per approved angle.
 ```
 

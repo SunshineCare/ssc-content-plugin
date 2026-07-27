@@ -69,10 +69,10 @@ via OAuth. On first use, Cowork will prompt you to authenticate via the SSC port
 
 | Command | Purpose |
 |---------|---------|
-| `/ssc.post-plan` | Posts channel planning |
-| `/ssc.ads-plan` | Ads channel planning |
-| `/ssc.ad` | Ads production |
-| `/ssc.kb` | Knowledge base management |
-| `/ssc.strategy` | Quarterly strategy |
-| `/ssc.post` | Post writing (production loop) |
-| `/ssc.youtube` | YouTube channel |
+| `/ssc-post-plan` | Posts channel planning |
+| `/ssc-ads-plan` | Ads channel planning |
+| `/ssc-ad` | Ads production |
+| `/ssc-kb` | Knowledge base management |
+| `/ssc-strategy` | Quarterly strategy |
+| `/ssc-post` | Post writing (production loop) |
+| `/ssc-youtube` | YouTube channel |

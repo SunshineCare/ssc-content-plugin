@@ -1,4 +1,5 @@
 ---
+argument-hint: '<YYYY-MM> [review|tactics|research|narrative]'
 description: Author the Cambridge Diet Vietnam MONTHLY PLAN HEAD — the cross-channel month that sits above the per-channel plans. Four steps — Review → Tactics → Research → Narrative — keyed on month_plans(period). Review is the system's only look-back and ranks taxonomy terms, not metrics. Narrative is the month's ONLY gate; approving it releases every channel. State-driven; propose-only.
 metadata:
   brand: cambridge-diet-vn
@@ -14,7 +15,7 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-08`). Required. This is the key the `month_plans` head is stored under.
-- **Step** (`step`, optional — one of `review`, `tactics`, `research`, `narrative`) — names which of the Plan stage's four steps to work this invocation. The dashboard's per-step Cowork button emits it **positionally after the period** (`/ssc.plan <period> <step>`), so an operator standing on a given step copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
+- **Step** (`step`, optional — one of `review`, `tactics`, `research`, `narrative`) — names which of the Plan stage's four steps to work this invocation. The dashboard's per-step Cowork button emits it **positionally after the period** (`/ssc-plan <period> <step>`), so an operator standing on a given step copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `step`.
 
@@ -38,7 +39,7 @@ The Plan stage precedes the three channel stages because approving its Narrative
 ## What this command is NOT
 
 - **It does not allocate channel quantities.** The head's **Post / Ad / YouTube** stages set each channel's numbers in that channel's own vocabulary; they are separate stages, not steps of this one.
-- **It is not a channel pipeline.** Each channel runs **Approaches → Ideate → Schedule** (ad has no Schedule) via `/ssc.post-plan`, `/ssc.ads-plan`, `/ssc.youtube`. Channel **Focus**, channel **Research** and channel **Measure** no longer exist — the head owns all three.
+- **It is not a channel pipeline.** Each channel runs **Approaches → Ideate → Schedule** (ad has no Schedule) via `/ssc-post-plan`, `/ssc-ads-plan`, `/ssc-youtube`. Channel **Focus**, channel **Research** and channel **Measure** no longer exist — the head owns all three.
 - **It does not write the period digest.** `performance_analyses` stays owned by the quarterly retrospective. Review **reads** it and never writes it.
 
 ## What to do
@@ -61,4 +62,4 @@ The month's single approval is **`approve(entity='month_plan', gate='narrative')
 
 ## After it runs
 
-Point the operator to the **monthly plan dashboard** at `/content/plan/<period>` for the step that just ran. Once the Narrative is approved, all three channel pipelines are released — `/ssc.post-plan`, `/ssc.ads-plan` and `/ssc.youtube` can each run their Approaches step.
+Point the operator to the **monthly plan dashboard** at `/content/plan/<period>` for the step that just ran. Once the Narrative is approved, all three channel pipelines are released — `/ssc-post-plan`, `/ssc-ads-plan` and `/ssc-youtube` can each run their Approaches step.

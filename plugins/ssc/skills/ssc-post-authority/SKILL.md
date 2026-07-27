@@ -56,7 +56,7 @@ Apply the **FIRST** matching rule:
 | NOT `approved(copy)` | target section = **`copy`** → Step 1 (the mandatory cold start) |
 | `approved(copy)` | target section = **`image_content`** → Step 1 (the next open section) |
 
-**`copy` and `image_content` are BOTH recognized explicit values, and an explicit name always wins over the auto-pick.** Naming `copy` targets `copy` — **including when a copy is already approved**: that is the only way to get a fresh batch of copy variations after the first approval, and it mirrors how an approved `image_content` can be re-invoked for a fresh revision (the `/ssc.ad` pattern). It is non-destructive — Step 6 only ever INSERTS new draft rows, so the approved copy and every existing draft are untouched, and nothing is promoted or demoted. Never silently redirect an explicit `copy` request to `image_content`.
+**`copy` and `image_content` are BOTH recognized explicit values, and an explicit name always wins over the auto-pick.** Naming `copy` targets `copy` — **including when a copy is already approved**: that is the only way to get a fresh batch of copy variations after the first approval, and it mirrors how an approved `image_content` can be re-invoked for a fresh revision (the `/ssc-ad` pattern). It is non-destructive — Step 6 only ever INSERTS new draft rows, so the approved copy and every existing draft are untouched, and nothing is promoted or demoted. Never silently redirect an explicit `copy` request to `image_content`.
 
 Only an **unrecognized** `section` value (a typo — anything that is neither `copy` nor `image_content`) is treated as omitted: it falls through to the auto-pick, never to undefined behavior.
 
@@ -342,7 +342,7 @@ After persisting the approved set, output:
 - If a slot hit its 2-attempt bound and could not reach ≥4, note which slot, the best score reached, and that it was NOT presented/persisted (the operator is short one variation).
 - If **Step 0 stopped** (an `image_content` request with no approved copy), emit that stop message plainly instead — name the gate and the exact next action (approve ≥1 copy in `/post/[month]/[id]` → Copy, then re-invoke) — and confirm nothing was written.
 - End with the next action for the section just saved:
-  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc.post <brief_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
+  - after **`copy`**: `Next: a human selects + approves ONE variation in /post/<month>/<id> → Copy (draft → approved). That frees the image_content section — run /ssc-post <brief_id> image_content. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
   - after **`image_content`**: `Next: a human selects + approves ONE row in /post/<month>/<id> → Image Content (draft → approved). The Images stage's Text layer then renders it. Saving here persisted DRAFTS to curate — nothing was approved, published, or scheduled.`
 
 ## Output

@@ -1,4 +1,5 @@
 ---
+argument-hint: '<YYYY-MM> [approaches|ideate]'
 description: Run the Cambridge Diet Vietnam Ads channel of a monthly plan — Approaches → Ideate — on channel_plans(channel='ad', period), hanging off that period's monthly-plan head. Released by the head's narrative approval; the channel authors no bets, no research, no look-back, and no quantities. State-driven across two human gates; propose-only.
 metadata:
   brand: cambridge-diet-vn
@@ -14,7 +15,7 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-08`). Required. This is the key the ad `channel_plan` is stored under, and the key of the monthly plan it hangs off.
-- **Stage** (`stage`, optional — one of `approaches`, `ideate`) — names which of the two steps to work this invocation. The dashboard's per-stage Cowork button emits it **positionally after the period** (`/ssc.ads-plan <period> <stage>`), so an operator standing on a given stage copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
+- **Stage** (`stage`, optional — one of `approaches`, `ideate`) — names which of the two steps to work this invocation. The dashboard's per-stage Cowork button emits it **positionally after the period** (`/ssc-ads-plan <period> <stage>`), so an operator standing on a given stage copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
 - **Plan ID** (`plan_id`, optional) — pass when resuming an in-flight plan. The plan is canonically resolved by `(channel='ad', period)`, so this is informational only.
 
 If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `stage`.
@@ -23,7 +24,7 @@ If no period is given, ask the operator for it (one question) before dispatching
 
 This is the **Ads channel** of the monthly plan — the two steps the channel itself owns, and nothing above them.
 
-The month is decided at the **monthly-plan head** (`/ssc.plan <period>`), which authors the Review, the month's bets, the one outward research pass, and every channel's quantities, and carries the month's **single approval**. Approving the head's Narrative is what **releases** this channel. Until then, this command writes nothing.
+The month is decided at the **monthly-plan head** (`/ssc-plan <period>`), which authors the Review, the month's bets, the one outward research pass, and every channel's quantities, and carries the month's **single approval**. Approving the head's Narrative is what **releases** this channel. Until then, this command writes nothing.
 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
@@ -50,7 +51,7 @@ A `focus` or `measure` stage token from an old dashboard button is reported as r
 - **It does not look back.** See *Measure* above.
 - **It does not set its own quantities.** Creative counts live on the head, and a channel-side write (`save_plan_targets`, or a `detail` payload on `save_channel_plan`) is refused with `retired_plan_field`. They are reached only through `allocate_channel`, used by the operator in the dashboard's allocation panel.
 - **It does not touch the media buy.** The ad set / campaign / budget sits **outside** the creative pipeline entirely — a dashboard/ops concern. No step here plans, tags, or references an ad set's budget, audience, or placement, and `update_budget` (real Facebook spend) / `create_campaign` / `create_adset` / `create_ad` are never agent-callable.
-- **It does not assign personas.** Subjects are persona-free by design. Persona enters at the Brief step (`/ssc.ads-brief <ideaId>`), which fans one subject into one angle per fitting persona × route.
+- **It does not assign personas.** Subjects are persona-free by design. Persona enters at the Brief step (`/ssc-ads-brief <ideaId>`), which fans one subject into one angle per fitting persona × route.
 
 ## Grounding order — head, then quarter, then KB
 
@@ -78,4 +79,4 @@ Running steps requires `edit`; approving the Approaches and the individual conce
 
 ## After it runs
 
-Point the operator to the monthly-plan dashboard's Ads workspace for `<period>` and the step that just ran. The Ads channel runs independently of Posts and YouTube — they share only the monthly plan upstream. After the Ideas gate, production continues per approved subject: `/ssc.ads-brief <ideaId>` for its persona × route angles, then `/ssc.ad <briefId>` per approved angle.
+Point the operator to the monthly-plan dashboard's Ads workspace for `<period>` and the step that just ran. The Ads channel runs independently of Posts and YouTube — they share only the monthly plan upstream. After the Ideas gate, production continues per approved subject: `/ssc-ads-brief <ideaId>` for its persona × route angles, then `/ssc-ad <briefId>` per approved angle.

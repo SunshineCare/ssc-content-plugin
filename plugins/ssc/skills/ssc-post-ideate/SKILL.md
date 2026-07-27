@@ -306,7 +306,7 @@ Enrich each surviving idea. **A post has exactly ONE angle.** This is the
 structural difference from ads: an ad subject fans out to one angle per fitting
 persona × route because you run many creatives against it, while a post is one
 post. Its single brief is what production is keyed on
-(`/ssc.post <brief_id>`), so a second brief would mean a second post from
+(`/ssc-post <brief_id>`), so a second brief would mean a second post from
 one topic and would break the distribution round 1 just set.
 
 ### 3a. Per idea, dispatch `ssc-brief-core`
@@ -404,7 +404,7 @@ presented as passing.
 - <idea> — <reason>
 
 Duyệt các ý tưởng muốn lên lịch ở dashboard → Ideate. Duyệt ≥1 ý tưởng là mở cổng
-Ideas; sau đó chạy `/ssc.post-plan <period>` để sang Schedule.
+Ideas; sau đó chạy `/ssc-post-plan <period>` để sang Schedule.
 ```
 
 ## Facts that bite

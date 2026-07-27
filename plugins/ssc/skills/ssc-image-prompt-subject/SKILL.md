@@ -47,7 +47,7 @@ Call: get_brief
   id: <brief_id>
 ```
 
-The result is `{ brief, idea }`. If `{ brief: null }` → STOP (Vietnamese): không tìm thấy brief này — với concept quảng cáo hãy chạy `/ssc.ads-brief <idea_id>` và duyệt một angle; với bài viết hãy mở `/post/[month]/<idea_id>` để lấy `brief_id`.
+The result is `{ brief, idea }`. If `{ brief: null }` → STOP (Vietnamese): không tìm thấy brief này — với concept quảng cáo hãy chạy `/ssc-ads-brief <idea_id>` và duyệt một angle; với bài viết hãy mở `/post/[month]/<idea_id>` để lấy `brief_id`.
 
 **Resolve the channel from the BRIEF ALONE** — `channel = brief.channel`. **Never fall back to `idea.channel`**: the server gates the whole visual chain on `brief.channel` only (`VISUAL_CHAIN_CHANNELS = ['ad','post']`) and rejects a null one as `invalid_input`, so a fallback would let you author a prompt the studio can never generate. Your gate is the server's gate. It decides which approved content sections exist (Step 3) and which `<workspace>` path you name: `/ad/[month]/<idea.id>` for `ad`, `/post/[month]/<idea.id>` for `post` (never guess a month — write `[month]` literally).
 
@@ -239,9 +239,9 @@ On a `save_creative_prompt` rejection: an unrecognised-layer / not-deployed erro
 
 End with the NEXT action (Vietnamese):
 
-> Next: mở ImageStudio → **Generate** rồi **chọn 1 ứng viên subject** (khoá gương mặt + tư thế). Sau đó chạy lại `/ssc.image-prompt <brief_id>` để sang bước **Composition (Ghép)** — bước đó sẽ dựng cả khung cảnh **quanh người mẫu đã chọn** (có thể dựng thêm một ảnh **Scene (Bối cảnh)** trước để ghép lên). Muốn sửa prompt này: chạy lại với `revise: <ghi chú>`.
+> Next: mở ImageStudio → **Generate** rồi **chọn 1 ứng viên subject** (khoá gương mặt + tư thế). Sau đó chạy lại `/ssc-image-prompt <brief_id>` để sang bước **Composition (Ghép)** — bước đó sẽ dựng cả khung cảnh **quanh người mẫu đã chọn** (có thể dựng thêm một ảnh **Scene (Bối cảnh)** trước để ghép lên). Muốn sửa prompt này: chạy lại với `revise: <ghi chú>`.
 
-(Subject là bước **tùy chọn** — nếu không cần khoá một gương mặt cụ thể, bạn có thể bỏ qua và sang bước **Composition (Ghép)** bằng `/ssc.image-prompt <brief_id> stage: composition` (hoặc dựng một ảnh **Scene (Bối cảnh)** trước bằng `stage: scene`). When no identity ref resolved, add: *gắn ảnh người mẫu thật trong studio nếu muốn khoá đúng gương mặt.*)
+(Subject là bước **tùy chọn** — nếu không cần khoá một gương mặt cụ thể, bạn có thể bỏ qua và sang bước **Composition (Ghép)** bằng `/ssc-image-prompt <brief_id> stage: composition` (hoặc dựng một ảnh **Scene (Bối cảnh)** trước bằng `stage: scene`). When no identity ref resolved, add: *gắn ảnh người mẫu thật trong studio nếu muốn khoá đúng gương mặt.*)
 
 ## Governance
 

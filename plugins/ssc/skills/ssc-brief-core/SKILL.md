@@ -35,6 +35,28 @@ serving neither channel:
   not choose it.
 - **Where any of it is stored**, and whether anything is approved.
 
+### The diversity boundary — who owns which half
+
+Diversity has two halves and they live in different places. Getting this wrong
+means either nobody checks or both do:
+
+| | Owner | Scope |
+|---|---|---|
+| **Route / angle COVERAGE** | the **caller** | across the whole batch of ideas |
+| **Field-level repetition** | **you** | within the sets you return for THIS idea |
+
+**Coverage is structurally not yours.** Whether a month's thirty posts spread
+across the persuasion routes is a property of the batch, and you only ever see one
+idea. The caller keeps the running tally and passes each route in already decided.
+
+What you DO owe on the angle you were handed is a **fit check**: the route must
+suit this idea's own frame and journey stage. A `stage-0` idea whose reader does
+not yet admit the problem cannot carry a `comparison` route; a founder-story idea
+is `proof` far more naturally than `problem`. **If the route does not fit, say so
+and return it as below bar** — do not quietly write fields for an angle that
+cannot work. That is the one angle judgement you make, and it is about fit, never
+about spread.
+
 ## Inputs (from the caller)
 
 - `idea` — the idea row: at minimum `id`, `title`, `channel`, `version`, and its
@@ -44,10 +66,14 @@ serving neither channel:
   `anchor` is the concrete thing this angle attacks (a belief, a trigger, an
   objection, a myth) named by the caller.
 - `grounding` — the caller's already-loaded context: the month's guidance (a
-  channel Approaches doc or equivalent), plus which KB docs it read. You re-read
-  only what you additionally need.
-- `taken` — the briefs that already exist for this idea (and, when the caller
-  cares about cross-idea repetition, for its siblings). See **The taken set**.
+  channel Approaches doc or equivalent), plus which KB docs it read. **This is an
+  optimisation, not a substitute:** Step 1's list is read live regardless of what
+  the caller says it already has, because a caller that read a doc for a different
+  purpose may not have held the part you need. `grounding` only lets you skip
+  re-reading the month's guidance itself.
+- `taken` — the briefs that already exist for this idea. Empty by construction on a
+  single-angle channel; see **Step 3**. Cross-idea repetition is NOT passed here and
+  is not yours — see the diversity boundary.
 
 ## Procedure
 
@@ -72,20 +98,35 @@ need the brand's own position before writing a field about it.
 
 ### Step 2: Resolve the HERO — once per idea, before any field
 
-The hero is the idea's **north star**: one sentence naming what this piece of
-content is fundamentally *for*, which every field then has to serve. It is per
-**idea**, not per angle — several angles on one idea share one hero.
+The hero is the idea's **core concept, stated at full strength in about five
+Vietnamese words.** It is per **idea**, not per angle — several angles on one idea
+share one hero.
+
+**`ssc-ads-brief` Step 1a is the single definition; apply it unchanged.** Its three
+tests, restated only so you can fail a hero without leaving this file:
+
+- It is the **core concept** — not a detail, not a scene, not the situation the
+  idea sits in.
+- It is a **STRONGER version of the title, never an explanation of it.** It should
+  read as something that could REPLACE the title and hit harder. The moment it
+  describes what the title refers to, or supplies the reasoning behind it, it has
+  become a `core_message` and is wrong.
+- It is **short — around five words.** A sentence long enough to argue is long
+  enough to explain.
+
+Worked shape: title *"Vì sao ăn ít lại mà vòng 2 vẫn tăng sau tuổi 45"* → hero
+**"Ăn ít không còn đủ."** A purpose statement like *"the reader recognises that her
+stalled progress has a mechanism, not a discipline problem"* is NOT a hero — it is
+the `core_message`, and a hero written that way fails all three tests at once.
 
 - If `idea.hero` is already set, **read it and keep it.** Do not silently replace
   an operator's hero. If it plainly contradicts the angle spec, say so and let
   the caller decide.
-- If it is empty, derive it from the idea's title, its tags, and the month's
-  guidance, and return it for the caller to write via `update_idea(hero=…)`.
-
-A good hero is falsifiable and specific enough to reject a field: "the reader
-recognises that her stalled progress has a mechanism, not a discipline problem"
-rejects a `cta` that asks her to try harder. A hero that rejects nothing
-("inspire women to be healthy") is not a hero — rewrite it.
+- If it is empty, derive it from the idea's title and return it for the caller to
+  write via `update_idea(hero=…)`.
+- **On `stale_version` at that write, the caller must re-read and RE-DERIVE.** The
+  hero derives from the title, so a moved version most likely means an operator
+  just edited that title.
 
 ### Step 3: The taken set — read before proposing, not after
 
@@ -94,9 +135,16 @@ status**, draft and approved alike. Compare on the **five narrative fields**, no
 on labels: two briefs with different persona labels that open on the same line
 and carry the same argument are the same brief.
 
-When the caller passes sibling briefs too, treat repetition across ideas as a
-defect as well — a month whose posts all open the same way fails even when every
-individual brief is defensible.
+**On a single-angle channel this set is empty by construction, and that is not a
+pass.** A post idea has exactly one brief and it is the very row about to be
+written — its five fields are all null, so comparing against it always succeeds and
+tells you nothing. Do not report "taken set clear" as evidence of anything on a
+post. The only repetition a post can have is **against its sibling ideas**, which
+you never see; that check belongs to the caller and is listed in the diversity
+boundary above.
+
+So: this step does real work for **ads** (an idea accumulating angles across runs)
+and is inert for **posts**. Say which case you were in when you report.
 
 ### Step 4: Derive the five fields per angle
 
@@ -142,13 +190,21 @@ Use the full range. Everything scoring 5 means the scoring is not working.
 
 ### Step 6: Audit the set, then return
 
-Before returning, audit across everything you produced plus the taken set:
+Audit **only what you produced for this idea, plus a non-empty taken set** — the
+scope in the diversity boundary above. With `angle_count: 1` the first three checks
+have nothing to compare and are reported as not applicable, not as passed.
 
-- No two sets share the same opening strategy.
-- No two sets share the same `story_moment` shape.
-- `why_now` reasons are distinct, not one seasonal fact restated.
+- No two sets share the same opening strategy. *(≥2 sets only)*
+- No two sets share the same `story_moment` shape. *(≥2 sets only)*
+- `why_now` reasons are distinct, not one seasonal fact restated. *(≥2 sets only)*
 - Every set's fields are mutually consistent — hook, message and cta argue the
-  same thing.
+  same thing. *(always)*
+- The route FITS this idea's frame and journey stage. *(always — see the fit check
+  in the diversity boundary; a misfit returns below bar)*
+
+**Never report a batch-level verdict.** You cannot see the batch. Cross-idea
+repetition and route coverage are the caller's audit, and claiming them here would
+be a pass nobody actually ran.
 
 Then return to the caller:
 

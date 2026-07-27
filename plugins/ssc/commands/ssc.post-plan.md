@@ -28,12 +28,43 @@ The month is decided at the **monthly-plan head** (`/ssc.plan <period>`), which 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
 | **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context` | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
-| **Ideate** | ≥1 approved idea | **Three rounds, one per invocation.** ① *Distribution* — proposes the pillar split with a post count per pillar and writes it to the head (propose-only, no gate). ② *Titles* — one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Angle* — each surviving idea's hero + its **one** angle on its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas to schedule |
+| **Ideate** | ≥1 approved idea | **Three rounds, one per invocation** — see below. ① *Distribution* → the pillar split, written to the head (propose-only, no gate). ② *Titles* → one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Angle* → each **approved** idea's hero + its **one** angle, patched onto its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas to schedule |
 | **Schedule** | `schedule_approved` | Assigns each approved idea a publish date, honouring the **allocated** cadence and the head research's calendar → written as `schedule_entries` | Reviews + **approves** the calendar in the dashboard, then re-runs this command |
 
 The three human gates are **Approaches** (`approaches_approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`), all downstream of the month's single narrative approval.
 
 Re-run this command (same `period` / `step`) after each gate to advance.
+
+## Ideate runs in three rounds
+
+`/ssc.post-plan <period> ideate` runs **one round per invocation** and stops. You type
+the same command each time — **which round runs is read from the data, never
+remembered from the last conversation**, so it always advances rather than repeating:
+
+| What is stored | Round that runs |
+|---|---|
+| pillar counts all `0` | ① **Distribution** — proposes the split |
+| counts set, no ideas yet | ② **Titles** |
+| ideas exist and some are approved | ③ **Angle** — on the approved ones only |
+
+Rounds exist so effort follows commitment: no titles are written against a
+distribution nobody accepted, and no hero or angle work is spent on a title you were
+going to delete.
+
+**① Distribution** proposes a post count per pillar plus the cadence band and format
+mix. Three ways to accept: say so, edit the numbers in the dashboard panel, or just
+re-run the command. Whatever is **stored** is what round ② builds on — so editing the
+panel is the way to change the plan, and the round re-reads it every time rather than
+trusting its own earlier proposal.
+
+**② Titles** creates one draft idea per planned post and stops for you to prune.
+Scores are honest, not floored — a weak topic reads as weak, because pruning is the
+point of the checkpoint.
+
+**③ Angle** works **only ideas you approved**, so prune first. Each gets its hero and
+its single angle (persuasion route + the five narrative fields) patched onto the brief
+it already has. Routes are spread across the batch, honouring any route the month's
+themes single out for expansion.
 
 ## What this command is NOT
 

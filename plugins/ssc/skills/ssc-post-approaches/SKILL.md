@@ -212,10 +212,11 @@ the English section names below. It is a persisted artifact a Vietnamese operato
 reviews, edits and approves in the dashboard. Your chat-side reasoning may stay
 English.
 
-**Length: about 1000 words.** This is working guidance an operator reads before
-approving and a writer reads before drafting. Much longer and neither reads it;
-much shorter and the reasoning behind each rule is gone, leaving conclusions a
-writer cannot apply to a case the doc did not foresee.
+**Length: about 1200 space-separated tokens of Vietnamese** (`wc -w` on the
+document, roughly 700 words). This is working guidance an operator reads before
+approving and a writer reads before drafting. Longer and neither reads it. The
+way to hit it is not to delete reasoning but to stop repeating: §1 owns every
+shared rule, so §2-§5 cost a line each instead of a paragraph.
 
 ```markdown
 ## 1. Điều chung cho mọi bài tháng này  (What binds every post this month)

@@ -98,7 +98,7 @@ pipeline.
 
 | Pipeline | Command | Agent | Stages (skills) |
 |---|---|---|---|
-| Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Focus → Research → Ideate → Schedule → Measure |
+| Posts (plan) | `/ssc.post-plan` | `ssc-post-agent` | Approaches → Ideate → Schedule — the **channel** steps only, hanging off `month_plans(period)` and released by the head's Narrative approval. The channel authors **no** themes, **no** market research, **no** look-back and **no** quantities: those are the head's Tactics / Research / Review / allocation. Every step grounds in the **monthly plan first, the quarterly strategy second, the KB third**, and says so when they conflict. Channel `tactics` / `retrospective` were dropped server-side and `plan_targets` / detail writes are refused (`retired_plan_field`) from `2026-08` onward — `ssc-post-focus`, `ssc-post-research` and `ssc-post-measure` are **retired** accordingly |
 | Posts (produce) | `/ssc.post-writer` | `ssc-post-writer-agent` | produce ⇄ authority loop |
 | Ads (plan) | `/ssc.ads-plan` | `ssc-ads-agent` | Focus → Approaches → Ideate → Measure |
 | Ads (brief) | `/ssc.ads-brief <ideaId\|date>` | *(direct → ads-brief)* | Persona enters here — judges which personas (from the live persona roster) the persona-free concept fits, then fans it into distinct persona × route angle briefs via `save_brief`, each tagging its own declared media home (`awareness_stage` + `target_layer_term_id`). Append-only: re-running adds whichever distinct angles still remain (per persona) — no produce-once stop, no discard-and-regenerate. Operator approves each angle worth producing; every approved angle anchors its own independent production run |

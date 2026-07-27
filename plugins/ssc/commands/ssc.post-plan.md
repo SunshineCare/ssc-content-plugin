@@ -1,5 +1,5 @@
 ---
-description: Launch the standalone Cambridge Diet Vietnam Posts pipeline — Focus → Research → Ideate → Schedule → Measure — keyed on its own post channel_plan. State-driven across four human-gated steps; no /ssc.plan dependency.
+description: Run the Cambridge Diet Vietnam Posts channel of a monthly plan — Approaches → Ideate → Schedule — on channel_plans(channel='post', period), hanging off that period's monthly-plan head. Released by the head's narrative approval; the channel authors no themes, no research, and no quantities of its own. State-driven across three human gates; propose-only.
 metadata:
   brand: cambridge-diet-vn
   section: post
@@ -13,34 +13,59 @@ $ARGUMENTS
 
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
-- **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-07`). Required. This is the key the post `channel_plan` is stored under.
-- **Stage** (`stage`, optional — one of `focus`, `research`, `ideate`, `schedule`, `measure`) — names which pipeline step to work this invocation. The dashboard's per-stage Cowork button emits it **positionally after the period** (`/ssc.post-plan <period> <stage>`), so an operator standing on a given stage copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
+- **Period** (`period`, format `YYYY-MM` — the month being planned, e.g. `2026-08`). Required. This is the key the post `channel_plan` is stored under, and the key of the monthly plan it hangs off.
+- **Step** (`step`, optional — one of `approaches`, `ideate`, `schedule`) — names which of the three steps to work this invocation. The dashboard's per-step Cowork button emits it **positionally after the period** (`/ssc.post-plan <period> <step>`), so an operator standing on a given step copies a command that works THAT step. Omit it to run the next open step (plain state-driven pick).
 - **Plan ID** (`plan_id`, optional) — pass when resuming an in-flight plan. The plan is canonically resolved by `(channel='post', period)`, so this is informational only.
 
-If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `stage`.
+If no period is given, ask the operator for it (one question) before dispatching. Do not invent one. The token after the period (if any) is the `step`.
 
-This command is the **standalone entry point** for the Posts pipeline. It runs entirely on its own `channel_plan(channel='post', period)` — there is **no precondition** and no `/ssc.plan` dependency. The post plan carries its own tactics, context, targets, ideas, calendar, and retrospective, and runs independently of the Ads and YouTube channels.
+## What this command is
+
+This is the **Posts channel** of the monthly plan — the three steps the channel itself owns, and nothing above them.
+
+The month is decided at the **monthly-plan head** (`/ssc.plan <period>`), which authors the Review, the month's themes, the one outward research pass, and every channel's quantities, and carries the month's **single approval**. Approving the head's Narrative is what **releases** this channel. Until then, this command writes nothing.
+
+| Step | Gate | The agent does | Then the operator… |
+|---|---|---|---|
+| **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context` | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
+| **Ideate** | ≥1 approved idea | Generates DRAFT post ideas up to the quantities the **head allocated** for this channel (pillar term counts, format mix, total), self-enforcing the brand's diversity, hook-variety and banned-word rules | **Curates** the ideas — accepts or removes — in the dashboard → Ideate. Approving ≥1 idea opens the Ideas gate; then re-runs this command |
+| **Schedule** | `schedule_approved` | Assigns each approved idea a publish date, honouring the **allocated** cadence and the head research's calendar → written as `schedule_entries` | Reviews + **approves** the calendar in the dashboard, then re-runs this command |
+
+The three human gates are **Approaches** (`approaches_approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`), all downstream of the month's single narrative approval.
+
+Re-run this command (same `period` / `step`) after each gate to advance.
+
+## What this command is NOT
+
+- **It does not author the month's themes.** Those are the head's Tactics step (`month_plans.tactics`), authored once and applied to every channel. The channel realizes them; it never restates or re-decides them.
+- **It does not run market research.** There is exactly **one** outward signal pass per period — the head's Research step. This channel reads it and never runs its own WebSearch.
+- **It does not look back.** The system's only look-back is the head's Review, which ranks taxonomy terms across every channel. There is no per-channel Measure and no per-channel retrospective.
+- **It does not set its own quantities.** Pillar counts, cadence and format mix are allocated at the head's **Post** stage (dashboard) and stored on this channel's `plan_targets` + post detail row. The channel **reads** them and never writes them — a channel-side write is refused with `retired_plan_field`.
+
+## Grounding order — head, then quarter, then KB
+
+Every step grounds itself in the same three sources, **in this priority order**:
+
+1. **The monthly plan** (`get_month_plan(period)`) — the month's narrative, themes (`tactics`), outward research (`research`) and look-back (`performance_review`), plus the allocation the head set for this channel. This is the primary steering and it decides the month.
+2. **The quarterly strategy brief** (`get_strategy_brief(<quarter>, marked_only=true)`) — direction across the quarter. Used to place the month inside the quarter and to fill in where the month is silent. It never overrides the month.
+3. **The knowledge base** — read live, by path, every run. It supplies craft, vocabulary, persona detail and hard rules; it never supplies direction.
+
+Where two sources disagree, the higher one wins — and the step says so in one line rather than quietly picking.
 
 ## What to do
 
-This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-post-agent`**, passing the `period` (and `plan_id` / `stage` if provided). The agent is **state-driven**: it reads the post plan's current gate flags and runs whichever of the five steps is next, then stops at the next open human gate. When a `stage` is given, the agent instead works **that** step — still obeying the gate machine: it will not skip an unapproved upstream nor overwrite approved work (it reports what to approve first, or that the step is already approved), so the stage targets a step without ever walking a gate backward.
+This command is a thin entry point — it holds **no** orchestration logic. Dispatch the **`ssc-post-agent`**, passing the `period` (and `plan_id` / `step` if provided). The agent is **state-driven**: it reads the head's release gate and the post plan's gate flags, then works whichever step is next and stops. When a `step` is given, the agent works **that** step — still obeying the gate machine: it will not skip an unapproved upstream nor overwrite approved work.
 
-| Step | The agent does | Then the operator… |
-|---|---|---|
-| **Focus** | Resolves the quarter strategy + prior period's retrospective → drafts the month tactics (quarterly angles to push, priority-pillar bets, tactical themes) | Reviews + **approves** the Focus in the dashboard (flips `tactics_approved`), then re-runs this command |
-| **Research** | Light WebSearch pass + KB synthesis → drafts the month brief, pillar distribution (~30), and format mix | Reviews + **approves** the Research in the dashboard (flips `approved`), then re-runs this command |
-| **Ideate** | Generates ~30 DRAFT post ideas via `save_idea`, tagged to the plan | **Curates** the ideas — accepts or removes — in the dashboard → Ideas. Approving ≥1 idea opens the Ideas gate; then re-runs this command |
-| **Schedule** | Proposes the publish calendar (dates, pillars, cadence, key-date build-up) as `schedule_entries` | Reviews + **approves** the calendar in the dashboard (flips `schedule_approved`), then re-runs this command |
-| **Measure** | The **engagement lens**: reads the live page's per-post performance with each row's organic/paid class, ranks `organic_only` + `boosted` on engagement **rate** (never absolute counts) with boosted rows badged, excludes `paid_only` (that is `/ssc.ads-plan`'s conversion lens) → writes the `retrospective` (carried into next month's Focus) | — (ungated; closes the loop) |
+## Cutover
 
-The four human gates are **Focus** (`tactics_approved`) → **Research** (`approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`). **Measure** is ungated.
-
-Re-run this command (same `period` / `plan_id`) after each gate to advance to the next step.
+The monthly plan owns the month from **`2026-08` onward**. Periods at or before `2026-07` ran the retired five-step channel pipeline, keep `month_plan_id` NULL, render read-only in their legacy shape, and are **never** migrated or backfilled. If asked to run this command for a period ≤ `2026-07`, say plainly that the period predates the cutover and stop.
 
 ## Governance
 
-Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**: it never changes approval or lifecycle state in either direction (never `approve` — the ONLY gated promotion, denied to agents by the approval hook; never publish; and never `edit` used to demote/unapprove a row, demotion being an `edit` now rather than a separate `unapprove_*` tool) and never edits or deletes operator-curated or approved rows. Running steps requires `edit`; approving the Focus, Research, ideas, and calendar requires `approve`.
+Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**. Propose-only (hard rule): never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is not a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows.
+
+Running steps requires `edit`; approving the Approaches, the individual ideas, and the calendar requires `approve`.
 
 ## After it runs
 
-Point the operator to the **Posts pipeline dashboard** for the step that just ran. The Posts pipeline runs independently of the Ads and YouTube channels — `/ssc.ads-plan` and `/ssc.youtube` proceed on their own.
+Point the operator to the monthly-plan dashboard at `/content/plan/<period>?tab=post&step=<step>` for the step that just ran. The Posts channel runs independently of Ads and YouTube — they share only the monthly plan upstream.

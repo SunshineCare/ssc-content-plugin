@@ -212,11 +212,12 @@ the English section names below. It is a persisted artifact a Vietnamese operato
 reviews, edits and approves in the dashboard. Your chat-side reasoning may stay
 English.
 
-**Length: about 1200 space-separated tokens of Vietnamese** (`wc -w` on the
-document, roughly 700 words). This is working guidance an operator reads before
-approving and a writer reads before drafting. Longer and neither reads it. The
-way to hit it is not to delete reasoning but to stop repeating: §1 owns every
-shared rule, so §2-§5 cost a line each instead of a paragraph.
+**Length: about 1700 space-separated tokens of Vietnamese** (`wc -w` on the
+document). This is working guidance an operator reads before approving and a
+writer reads before drafting. Roughly 1200 of that is the guidance and 500 is the
+examples, which are load-bearing and are not what to cut. The way to hit it is to
+stop repeating, not to delete reasoning: §1 owns every shared rule, so §2-§5 cost
+a line each instead of a paragraph.
 
 ```markdown
 ## 1. Điều chung cho mọi bài tháng này  (What binds every post this month)
@@ -246,22 +247,41 @@ head's allocation (this doc says HOW, never how many), and a one-line compliance
 statement pointing at §5. Close §1 with the **shared chain** every pillar block
 then fills in, so §2 can be terse.
 
-**Every rule in §1 carries a worked ✅/❌ pair.** A rule stated abstractly is not
-a rule a writer can obey — "open on a belief" and "open on the product" are the
-same sentence to someone staring at a blank page. Show one line that passes and
-one that fails, so the boundary is visible rather than described.
+### Every item in the document carries an example
 
-- **Draw both from measured reality, never invent them.** The head's Review names
-  the actual openings that won and lost, `brand/angles`' organic retrospective
-  names the ones that bottomed out, and `winners/*` holds the proven shapes. Quote
-  from those. An invented example teaches your guess, not the channel's evidence.
-- **Attach the number when there is one** — a ❌ carrying its measured result is an
-  argument; a bare ❌ is an opinion.
-- **Label the whole set as reference, once, at the top of §1: these are shapes to
-  RECOGNISE, not lines to reuse.** They are last period's posts. Without that line
-  a writer copies a winning opening verbatim and the month ships a repeat.
-- For a rule with two distinct failure modes, show a ❌ for each — one pair cannot
-  teach a boundary that bends in two directions.
+Not just §1 — **every rule, every pillar block, every differentiation bullet,
+every format, every compliance line.** A rule stated abstractly is not a rule a
+writer can obey: "open on a belief" and "open on the product" are the same
+sentence to someone staring at a blank page. An item without an example is an
+item you have not finished writing.
+
+Two kinds, and the document says which is which:
+
+- **§1 — measured ✅/❌ pairs.** Real lines that were actually published and
+  actually scored. **Never invent these.** The head's Review names the openings
+  that won and lost, `brand/angles`' organic retrospective names the ones that
+  bottomed out, `winners/facebook-posts` holds the proven shapes, and `voice/tone`
+  carries its own ✅/❌ table. Quote from those. **Attach the number when there is
+  one** — a ❌ carrying its measured result is an argument; a bare ❌ is an opinion.
+  Where no measured pair exists for a rule, compose one and do not dress it up as
+  measured.
+- **§2–§5 — composed illustrations.** A suggested opening line per pillar block, a
+  suggested move per differentiation bullet, a concrete subject per format, a
+  ✅/❌ per compliance line. These are written fresh to show the shape.
+
+**Every example comes from POST content — organic page material only.** Never
+source one from ad copy, the ad performance lens, or an `ad/*` doc. The two
+channels are graded on different objectives (this channel earns conversation, ads
+convert), so a line that works in an ad routinely fails in the feed, and importing
+one teaches the wrong instinct. `rules/organic-vs-paid-firewall` is the boundary.
+
+**Label both kinds once, at the top of §1.** The measured ones are shapes to
+RECOGNISE, not lines to reuse — they are last period's posts, and without that
+line a writer pastes a winning opening verbatim and the month ships a repeat. The
+composed ones are suggestions, not copy to approve.
+
+For a rule with two distinct failure modes, show a ❌ for each — one pair cannot
+teach a boundary that bends in two directions.
 
 **§2 — Trụ cột × persona. Only what is unique to that pillar.** One short block
 per priority pillar this month (the allocated pillars when `plan.targets` is set;

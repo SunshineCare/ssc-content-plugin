@@ -1,11 +1,11 @@
 ---
 name: ssc-ads-ideate
 description: >-
-  Generates the month's plan-level pool of persona-free, tier-free ad SUBJECTS for the standalone
-  Cambridge Diet Vietnam Ads pipeline — one concrete tension / insight / myth / proof-territory per
-  planned creative, sized to the TOTAL count in the approved Focus's persona × route coverage target
-  (`creative_target`), never per ad set (the ad set / media buy no longer exists in the creative
-  pipeline). Gated on the approved Approaches (`approaches_approved`), not on any ad-set approval.
+  Generates the month's plan-level pool of persona-free, tier-free ad SUBJECTS for the Ads channel of
+  a Cambridge Diet Vietnam monthly plan — one concrete tension / insight / myth / proof-territory per
+  planned creative, sized to the creative count in the monthly-plan HEAD's Ad allocation, never per ad
+  set (the ad set / media buy no longer exists in the creative pipeline). Gated on the approved
+  Approaches (`approaches_approved`), not on any ad-set approval.
   Saves each subject via `save_idea` (channel='ad', plan_id, source='ai', status='draft', title=<the
   subject, one concise Vietnamese line>, score, comment) — with NO persona, value, frame, layer, or
   any other structural term: the idea tags nothing, because persona × route is chosen later, by the
@@ -19,14 +19,16 @@ metadata:
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  tools: [get_knowledge, search_knowledge, get_channel_plan, save_idea, delete]
+  tools: [get_knowledge, search_knowledge, get_month_plan, get_channel_plan, save_idea, delete]
 ---
 
 # Ads Ideate (`ssc-ads-ideate`)
 
-You generate the month's **plan-level pool of SUBJECTS** for the standalone Cambridge Diet Vietnam Ads pipeline. A subject is one concrete **tension, insight, myth, or proof-territory** — persona-free and tier-free. It carries no persona, no value/frame/against tag, no layer, and no ad-set link: the ad set / media buy has left the creative pipeline entirely (a separate ops concern), and persona is no longer bound at this level — the next step, the Brief, is what fans one subject into angles across the personas it fits, each via a persuasion route. Your only job is to write a **plan-wide pool of distinct subjects**, sized to the month's approved coverage target, and save each as a DRAFT `idea` via `save_idea`. Each subject's `title` is **ONE concise Vietnamese line** naming the tension/insight/myth/proof-territory itself (e.g. `"Nhiều người tin giảm cân nhanh mới là giảm cân đúng"` or `"60 năm an toàn được EU công nhận"`) — never a persona, a framing device, a layer, or a structural code. You self-enforce **plan-wide distinctiveness** (no two subjects restate the same underlying tension/insight/myth/proof-territory) and run an honest-scoring quality-replacement loop before finalising. You are propose-only: every subject is created as a DRAFT for a human to curate and approve in the dashboard. You NEVER call `approve` (the ONLY gated promotion — for any entity, incl. `idea` and `channel_plan`; the approval hook denies it to agents) or any publish tool, you NEVER use `edit` to demote/unapprove a row, and you NEVER flip a gate.
+You generate the month's **plan-level pool of SUBJECTS** for the Ads channel of a Cambridge Diet Vietnam monthly plan. A subject is one concrete **tension, insight, myth, or proof-territory** — persona-free and tier-free. It carries no persona, no value/frame/against tag, no layer, and no ad-set link: the ad set / media buy has left the creative pipeline entirely (a separate ops concern), and persona is no longer bound at this level — the next step, the Brief, is what fans one subject into angles across the personas it fits, each via a persuasion route. Your only job is to write a **plan-wide pool of distinct subjects**, sized to the head's Ad allocation, and save each as a DRAFT `idea` via `save_idea`. Each subject's `title` is **ONE concise Vietnamese line** naming the tension/insight/myth/proof-territory itself (e.g. `"Nhiều người tin giảm cân nhanh mới là giảm cân đúng"` or `"60 năm an toàn được EU công nhận"`) — never a persona, a framing device, a layer, or a structural code. You self-enforce **plan-wide distinctiveness** (no two subjects restate the same underlying tension/insight/myth/proof-territory) and run an honest-scoring quality-replacement loop before finalising. You are propose-only: every subject is created as a DRAFT for a human to curate and approve in the dashboard. You NEVER call `approve` (the ONLY gated promotion — for any entity, incl. `idea` and `channel_plan`; the approval hook denies it to agents) or any publish tool, you NEVER use `edit` to demote/unapprove a row, and you NEVER flip a gate.
 
-This is **step 3 of the four-step Ads pipeline** (**Focus → Approaches → Ideate → Measure**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`. There is no `/ssc.plan` dependency — the ad plan is self-contained. You run once the **Approaches** step is approved (`approaches_approved`) — this is a plan-level gate, not a per-ad-set one; there is no ad-set approval left to gate on. The month's **coverage/volume target** — `creative_target`, a `{persona, route, count}` array the Focus step set — is the sole source of "how much to make": you sum its counts for the total subject-pool size. You never re-derive that target, and you never touch persona or route yourself — that fan-out is the Brief step's job, run separately (`/ssc.ads-brief`) once subjects are approved here.
+This is **step 2 of the two-step Ads channel** (**Approaches → Ideate**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`, which hangs off that period's `month_plans(period)` head. You run once the **Approaches** step is approved (`approaches_approved`) — this is a plan-level gate, not a per-ad-set one; there is no ad-set approval left to gate on. **How much to make comes from the head's Ad allocation**, which the operator sets in the monthly plan's allocation panel: you size to it and never re-derive it. You never touch persona or route yourself — that fan-out is the Brief step's job, run separately (`/ssc.ads-brief`) once subjects are approved here.
+
+**Focus and Measure are retired steps, not skipped ones.** `channel_plans.tactics`, `tactics_approved` and `retrospective` were DROPPED from the schema; the month's bets are `month_plans.tactics`, the month's only look-back is `month_plans.performance_review`, and the channel's quantities live on the head (reached only through `allocate_channel`). Never read `plan.tactics`, `plan.creative_target` or `plan.retrospective` for direction — the first and last no longer exist, and `creative_target` lost its only writer when Focus was removed.
 
 ## Inputs
 
@@ -53,15 +55,26 @@ Do not proceed past this gate under any circumstances — do not load the KB or 
 If `plan.approaches_approved` is `true`, extract and hold from the aggregate:
 
 - `plan.id` — the plan id, passed to `save_idea` as `plan_id`
-- `plan.creative_target` — the month's persona × route coverage target set by Focus (an array of `{ persona, route, count }`). **This is the count authority.** Sum every row's `count` to get the total subject-pool size for this run. Never redistribute or invent a count — the Focus step already decided the total; you only size to it.
-- `plan.tactics` — the approved Focus (markdown): the month's bets — which pillars/angles/themes to push. Ground subjects in these bets.
 - `plan.context` — the approved Approaches (markdown): the creative HOW — route × persona differentiation guidance, month signals, experiments. Mine this for the underlying tension/trigger material (see Step 3) — never copy its persona/route framing onto a subject.
 
-**Total subject-pool size:** `N = sum(plan.creative_target[].count)`. If `plan.creative_target` is absent, `null`, or an empty array, STOP and tell the operator:
+### Step 1b: Read the head for the count and the month's bets
 
-> No coverage/volume target set — the Focus step's `creative_target` is empty. Review and set the coverage target in Focus before Ideate can size the subject pool.
+```
+Call: get_month_plan
+  period: <period>
+```
 
-Do not invent a total in its absence — there is no other count source left in the model (the old per-ad-set `creative_count` fallback no longer exists).
+Hold from the head:
+
+- **The Ad allocation** — the creative count for this channel. **This is the count authority.** `target_value` comes back as **TEXT** (`"12"`, not `12`) — coerce before summing, or `"0" + "0"` quietly passes a numeric check. Read the STORED number every run: the panel is where the operator changes the plan, and a `meta.reason` written earlier can contradict the value it sits on.
+- **`tactics`** — the month's bets: which pillars / angles / themes to push. Ground subjects in these bets. (The retired `channel_plans.tactics` is gone; this is where the bets live.)
+- **`research`** — the month's one outward signal pass, for real seasonal material.
+
+**Total subject-pool size `N` = the head's Ad creative count.** If the head is missing, its narrative is unapproved, or the Ad allocation is absent or sums to zero, STOP and tell the operator:
+
+> The month's Ad allocation is not set — Ideate sizes the subject pool to it. Open /content/plan/<period> → the allocation panel and set the Ads creative count, then re-run.
+
+Do not invent a total in its absence — there is no other count source left in the model (the retired `creative_target` lost its only writer when Focus was removed, and the old per-ad-set `creative_count` fallback no longer exists).
 
 ### Step 2: Load the knowledge base
 
@@ -87,13 +100,13 @@ Produce exactly **N** subjects (from Step 1), where each subject is one concrete
 - Mine `plan.context` (the approved Approaches) for its route × persona blocks — each names a trigger and how a route attacks it. Strip the persona/route wrapper and keep the underlying tension/insight; that's your subject. Two different `{persona, route}` blocks in `context` sometimes reduce to the *same* underlying subject — when they do, generate it **once** here (that's the whole point of moving persona off the Idea: one strong subject is meant to be reused across personas by the Brief step, not regenerated per pairing).
 - Mine the persona detail docs (Step 2) for recurring pains/objections/myths that show up across more than one persona — the more a tension is genuinely persona-agnostic, the better a subject it makes.
 - Mine `programme/kieu-my-story` for real, factual proof-territory.
-- Let `plan.tactics` (the approved Focus bets) steer which pillars/themes the pool should weight toward this month.
+- Let the head's `tactics` (the month's approved bets) steer which pillars/themes the pool should weight toward this month.
 
-**Vary the kind across the pool.** Do not make all N subjects the same kind (e.g. all myths) — a healthy pool mixes tensions, insights, myths, and proof-territory, in proportions that fit what `plan.tactics` and `plan.context` are actually pushing this month.
+**Vary the kind across the pool.** Do not make all N subjects the same kind (e.g. all myths) — a healthy pool mixes tensions, insights, myths, and proof-territory, in proportions that fit what the head's `tactics` and the approved `plan.context` are actually pushing this month.
 
 **Write out the count plan before saving anything:**
 ```
-Target (sum of creative_target counts): N
+Target (the head's Ad creative count): N
 Subjects planned: <kind>=<n>, <kind>=<n>, ... — total = N
 ```
 
@@ -120,7 +133,7 @@ Pass **no `terms`** — a subject tags no persona, value, frame, against, entry,
 **Field guidance:**
 
 - `title` — the subject, and only the subject: one concrete tension/insight/myth/proof-territory as ONE natural Vietnamese line. No persona, no layer, no value/frame/against/entry/experience code, no `/`-delimited path, no parenthetical taxonomy code, no slot or ad-set name. If a title needs any of those to make sense, it isn't persona-free yet — rewrite it as the bare subject.
-- `score` — **self-rate every subject on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how genuinely felt/credible the tension/insight/myth/proof-territory is, and how well it serves the month's approved bets (`plan.tactics`) — not structural integrity (there is no structure left to check). Rate honestly and **use the full range**: 5 = a standout you'd build several angles on; 3 = solid; 1–2 = weak/generic/filler. Nothing auto-approves on it.
+- `score` — **self-rate every subject on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how genuinely felt/credible the tension/insight/myth/proof-territory is, and how well it serves the month's approved bets (the head's `tactics`) — not structural integrity (there is no structure left to check). Rate honestly and **use the full range**: 5 = a standout you'd build several angles on; 3 = solid; 1–2 = weak/generic/filler. Nothing auto-approves on it.
 - `comment` — a **one-line rationale for the score, written in natural Vietnamese**: the single biggest reason the subject is strong or weak — e.g. `"Insight thật, nhiều chị gặp phải, chưa ai khai thác"` or `"Quá gần với chủ đề khác trong pool, thiếu sắc nét"`. Always Vietnamese; keep it short and honest.
 
 ### Step 5: Self-check plan-wide distinctiveness and compliance
@@ -159,8 +172,8 @@ After all subjects have been saved, all five self-checks pass, and the quality l
 
 **Subjects saved:** <N> drafts (channel='ad', propose-only — awaiting human curation)
 
-### Subject pool vs coverage target
-| | Target (creative_target total) | Saved | Status |
+### Subject pool vs the head's Ad allocation
+| | Target (head's Ad creative count) | Saved | Status |
 |---|---|---|---|
 | Subjects | <N> | <N> | PASS / FAIL |
 
@@ -177,14 +190,14 @@ All saved subjects ≥ 4★: <yes / no — list any bounded positions>
 Curate and approve subjects in the dashboard at: Ideas → <period> (filter channel = ad). An approved
 subject is the input to `/ssc.ads-brief <idea_id>` — the Brief step that fans it into angles across
 the personas it fits. Approving ≥1 subject opens the Ideas gate; then re-invoke the agent to run
-**Measure** (the final planning step — there is no Schedule step in the ad flow).
+the Brief step (`/ssc.ads-brief <ideaId>`), which is a separate command — the channel itself is complete at the Ideas gate. There is no Schedule step and no Measure step in the ad flow.
 ```
 
 ## Output
 
-- One DRAFT subject per planned creative — sized to the plan's `creative_target` total — saved via `save_idea(channel='ad', plan_id, source='ai', status='draft', title=<persona-free subject>, score, comment)`. No `terms`, no ad-set link — subjects carry no structural tag.
+- One DRAFT subject per planned creative — sized to the head's Ad creative count — saved via `save_idea(channel='ad', plan_id, source='ai', status='draft', title=<persona-free subject>, score, comment)`. No `terms`, no ad-set link — subjects carry no structural tag.
 - No gate flipped — subjects are drafts awaiting human curation
-- Summary showing pool-size accuracy against `creative_target` and the plan-wide distinctiveness check result
+- Summary showing pool-size accuracy against the head's Ad creative count and the plan-wide distinctiveness check result
 
 ## Governance
 
@@ -193,9 +206,9 @@ the personas it fits. Approving ≥1 subject opens the Ideas gate; then re-invok
 - **No persona, no framing, no layer.** A subject is persona-free and tier-free by construction: `save_idea` is called with no `terms` at all. Choosing persona × route is the Brief step's job, run separately after a subject is approved — this skill never pre-assigns an archetype, a value/frame/against/entry/experience code, or a layer.
 - **No finished copy.** Beyond the subject title, do NOT produce finished ad copy — no hook, headline, body, or CTA. This skill stops at the subject pool; angle derivation is the Brief step's job, finished copy is the Writer's.
 - **NEVER writes `phase_status`, `monthly_plans`, `targets.ads`, or any ad-set/slot data** — those belonged to the retired shared-head and ad-set models. The skill writes only DRAFT ideas; it makes no other plan-state write.
-- **No auto-approval.** The human operator curates and approves subjects in the dashboard (the Ideas gate is per-subject `approve(entity='idea', …)` → `status='approved'`). After the Ideas gate, the agent proceeds to the ungated **Measure** step — there is no Schedule step in the ad flow.
+- **No auto-approval.** The human operator curates and approves subjects in the dashboard (the Ideas gate is per-subject `approve(entity='idea', …)` → `status='approved'`). The Ideas gate is the channel's LAST gate — there is no Schedule step and no Measure step; production continues per approved subject via `/ssc.ads-brief`.
 - **Gate = Approaches approved** (`plan.approaches_approved === true`, Step 1) — a plan-level flag, not a per-item curation gate. There is no ad-set gate left to check. If the plan is null or the gate is not cleared, STOP — do not load the KB or save any subject.
 - References only the knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path — the structural docs the old ad-set/archetype machinery read (`brand/angles`, `ad/creative-guidelines`, `ad/layer-tones`, `ad/strategy`, `ad/awareness-framework`, `voice/founder-voice`) belong to the Brief step now, not Ideate.
-- **Reads its total volume from `plan.creative_target`** — the persona × route coverage target Focus set — summing every row's `count`. Never from `ad_plan_slots`, `detail.creative_count_config`, or any per-ad-set count; that model is gone. If `creative_target` is absent or empty, STOP rather than invent a total.
+- **Reads its total volume from the HEAD's Ad allocation** (`get_month_plan`), coercing the TEXT `target_value` before summing. Never from `plan.creative_target` (its only writer, Focus, was removed), `ad_plan_slots`, `detail.creative_count_config`, or any per-ad-set count; those models are gone. If the allocation is absent or sums to zero, STOP rather than invent a total.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires `edit` capability (plus `view` for the `get_channel_plan` and `get_knowledge` reads).

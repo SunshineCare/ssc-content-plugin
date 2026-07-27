@@ -18,8 +18,9 @@ ingested into Brand OS and translate it into findings — you never trigger inge
 and never write a RAW performance row. You then write your synthesis back into the
 **shared per-period digest** (`performance_analyses`) via `save_performance_analysis`:
 you own one named block of its `summary`. That write matters — the digest had readers
-(you, `ssc-post-research`, `ssc-strategy-directions`) and **no writer at all**, which
-is exactly why your own Step-2 digest read is "frequently null".
+(you and `ssc-strategy-directions`) and **no writer at all**, which
+is exactly why your own Step-2 digest read is "frequently null". Since the per-channel
+Measure steps were retired you are its **only** writer.
 
 > **These reads reflect *ingested* data, not the live platforms.** `get_*` returns
 > only what has already been ingested into Brand OS — it does **not** fetch live
@@ -35,8 +36,11 @@ You read from **three ingested sources** and combine whatever exists:
 1. **The digest** — `get_performance_analysis(YYYY-MM)` reads `performance_analyses`,
    the per-month *structured* analysis (ad-campaign health, YouTube retention,
    conversion audit) plus a shared `summary`. **Frequently null for older months** —
-   it is written by `ssc-ads-measure` (`ad_campaign_health`), `ssc-post-measure`, and
-   by you (Step 7b); months measured before those writers existed have no row at all.
+   written **only by you** (Step 7b) since the per-channel Measure steps were retired:
+   `ssc-ads-measure` and `ssc-post-measure` no longer exist, so nothing writes
+   `ad_campaign_health` any more and months with no row at all are the norm, not the
+   exception. The month's real look-back now lives in `month_plans.performance_review`
+   (markdown, written by `ssc-plan-review`) — read that when the digest is empty.
 2. **Ingested organic metrics** — `get_post_performance` reads the per-post Facebook
    metrics already ingested into the `performance` table.
 3. **Ingested paid-ad metrics** — `get_ad_performance` reads the per-ad / ad-set /
@@ -178,15 +182,14 @@ comment: <one-line Vietnamese rationale for the score>
 
 You are the one skill that reads **all three** sources and synthesises across them.
 That synthesis has to land somewhere the next cycle can read it — and until now it
-did not: `performance_analyses` had readers (this skill, `ssc-post-research`,
-`ssc-strategy-directions`) and **no writer at all**, which is exactly why Step 2's
-digest read is "frequently null". Close that loop by writing your synthesis back.
+did not: `performance_analyses` had readers (this skill and `ssc-strategy-directions`)
+and **no writer at all**, which is exactly why Step 2's digest read is "frequently
+null". Close that loop by writing your synthesis back — you are now its only writer.
 
 **Where:** the digest is keyed by **month** (`YYYY-MM`), your review is keyed by
 **quarter**. Write to the **LAST month of the prior quarter** — the one downstream
 consumers actually reach for (`ssc-strategy-directions` reads "the most recent
-available" prior-quarter month; `ssc-post-research` reads the prior month). For
-`2026-Q3` that is `2026-06`.
+available" prior-quarter month). For `2026-Q3` that is `2026-06`.
 
 ```
 Call: save_performance_analysis
@@ -203,8 +206,12 @@ exactly ONE named block inside it:
 | Block heading | Owner |
 |---|---|
 | `## Tổng hợp chu kỳ` | **you** (`ssc-strategy-performance-retrospective`) |
-| `## Quảng cáo (Ads)` | `ssc-ads-measure` |
-| `## Bài viết (Posts)` | `ssc-post-measure` |
+| `## Quảng cáo (Ads)` | *(no writer — `ssc-ads-measure` retired)* |
+| `## Bài viết (Posts)` | *(no writer — `ssc-post-measure` retired)* |
+
+The two retired blocks may still exist on older rows. **Leave them byte-for-byte
+unchanged and never adopt them** — a stale block is history, and re-writing one from
+your 120-day lookback would restate a per-month grading you did not perform.
 
 Take that month's `summary` as you already read it in **Step 2** (`{ analysis: null }`
 ⇒ treat it as an empty string). Replace your `## Tổng hợp chu kỳ` block if one exists,
@@ -225,9 +232,10 @@ reasoning stays English):
 **Tín hiệu cho chu kỳ sau:** <1-2 câu>
 ```
 
-**Pass NOTHING but `period` and `summary`.** Do **not** pass `ad_campaign_health` —
-`ssc-ads-measure` owns that field and re-writing it from a 120-day lookback would
-overwrite its tier-locked, per-month grading with a coarser one. Do **not** pass
+**Pass NOTHING but `period` and `summary`.** Do **not** pass `ad_campaign_health`:
+its writer (`ssc-ads-measure`) was retired, and filling the field from a 120-day
+lookback would put a coarse cross-quarter grading where a tier-locked, per-month one
+is expected. The ad look-back now lives in the head's `performance_review`. Do **not** pass
 `youtube_retention` or `conversion_audit` either: you have **no read** for YouTube or
 conversion (Step 6 says so explicitly), so any value — including a `null` meaning "no
 YouTube data" — would be a measurement you never took. Omitting a field preserves
@@ -278,7 +286,8 @@ Cycle synthesis saved to the digest: <YYYY-MM (block `## Tổng hợp chu kỳ`,
   promotes nothing and flips no gate — it stays inside propose-only.
 - **The digest is shared — never clobber another skill's block.** Read the month's
   `summary` in Step 2, replace/append ONLY `## Tổng hợp chu kỳ`, and pass no field
-  beyond `period` + `summary`: `ad_campaign_health` is `ssc-ads-measure`'s, and you
+  beyond `period` + `summary`: `ad_campaign_health` has no writer since
+  `ssc-ads-measure` was retired and is not yours to adopt, and you
   have no YouTube or conversion read at all, so writing `youtube_retention` or
   `conversion_audit` — even as `null` — would assert a measurement you never took.
   Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.

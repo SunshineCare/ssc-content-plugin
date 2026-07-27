@@ -8,7 +8,7 @@ metadata:
   section: post
   capability: edit
   orchestrates: [ssc-post-produce, ssc-post-authority]
-  tools: [get_brief, list_briefs, get_content_by_date, get_idea]
+  tools: [get_brief, list_briefs, get_content_by_date, get_idea, get_channel_plan, get_month_plan]
   approval-gates: human
 ---
 
@@ -116,6 +116,19 @@ single brief the same way (`list_briefs`), so every path below holds a `brief_id
 
 Announce: `Post Writer — brief(<brief_id>) · idea(<idea_id>) <pillar> · <persona>` once
 resolved.
+
+**Resolve the PERIOD too, and pass it down.** Take `YYYY-MM` from the post's `publish_at`
+and hand it to whichever skill you dispatch. Both skills load the month's governing frame
+themselves — the post channel plan's Approaches `context` via `get_channel_plan`, then the
+month plan's `research` + `tactics` via `get_month_plan` — so they write and score against
+the same rails. You do not summarise that frame for them: a paraphrase in a dispatch prompt
+is exactly the stale, remembered version those steps are required to avoid. Pass the period;
+let each read the documents live.
+
+You may read the channel plan yourself for **one** purpose: to warn early. If it is missing
+for that period, or its `approaches_approved` is false, say so in the announce line — the
+run still proceeds, but the operator should know the variations were not written to an
+approved set of month rails.
 
 Hold the resolved **`brief_id`** — it is the key the writer carries forward and the
 authority keys every read and write on. Content is **brief-keyed** (`brief_id` is a saved

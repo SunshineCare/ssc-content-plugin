@@ -1,13 +1,13 @@
 ---
 name: ssc-post-authority
-description: The AUTHORITY (brand/quality gate) of the standalone Cambridge Diet Vietnam post-writer production workflow, working ONE section per invocation — `copy` (the mandatory cold start) or `image_content` (the structured on-image copy the ImageStudio's Text layer renders, GATED on ≥1 approved copy), named via an optional section argument or auto-picked as the next open section. For `copy` it takes the N draft variations the writer (ssc-post-produce) just drafted in-conversation for ONE post idea; for `image_content` it drafts the N on-image versions ITSELF (there is no writer step for on-image copy), grounded in the post's live approved copies. It scores EACH candidate 1–5 with a Vietnamese rationale comment judged against rules/{banned-words,compliance,food-placeholder,review-standards} + voice/* (incl. voice/founder-voice — every variation must be written AS Kiều My) + programme/kieu-my-story (founder-story authenticity) + content/quick-checklist, drops + regenerates any rated ≤3 until N are ≥4, then PRESENTS the candidate set to the operator in chat (numbered body + score + comment) and PAUSES for review — the operator either requests revisions (regenerate, re-score, re-present) or gives the go-ahead, and ONLY THEN persists the set via save_content (channel='post', the target section STAMPED on every row — 'copy' or 'image_content' — plus the post's brief_id, one insert per candidate carrying body + score + comment). Saving persists DRAFTS to curate — it is NOT a gate approval. Propose-only; never approves, publishes, or flips a gate.
+description: The AUTHORITY (brand/quality gate) of the standalone Cambridge Diet Vietnam post-writer production workflow, working ONE section per invocation — `copy` (the mandatory cold start) or `image_content` (the structured on-image copy the ImageStudio's Text layer renders, GATED on ≥1 approved copy), named via an optional section argument or auto-picked as the next open section. For `copy` it takes the N draft variations the writer (ssc-post-produce) just drafted in-conversation for ONE post idea; for `image_content` it drafts the N on-image versions ITSELF (there is no writer step for on-image copy), grounded in the post's live approved copies. It loads the GOVERNING FRAME first (the post channel plan's Approaches `context` for the post's period via get_channel_plan, then the month plan's research + tactics via get_month_plan) and scores EACH candidate 1–5 with a Vietnamese rationale comment judged against that frame FIRST — every constraint the Approaches marks binding is a ≤3 cap, in both directions (an element its boundaries require on every post is a cap when missing, not only when violated), and strength is judged against its stated baseline rather than taste — then against the whole rules/voice/content KB slices (incl. voice/founder-voice — every variation must be written AS Kiều My) + programme/kieu-my-story (founder-story authenticity) + brand/angles + channels/facebook + the tagged persona's brand/persona-<slug> detail doc, drops + regenerates any rated ≤3 until N are ≥4, then PRESENTS the candidate set to the operator in chat (numbered body + score + comment) and PAUSES for review — the operator either requests revisions (regenerate, re-score, re-present) or gives the go-ahead, and ONLY THEN persists the set via save_content (channel='post', the target section STAMPED on every row — 'copy' or 'image_content' — plus the post's brief_id, one insert per candidate carrying body + score + comment). Saving persists DRAFTS to curate — it is NOT a gate approval. Propose-only; never approves, publishes, or flips a gate.
 metadata:
   type: skill
   stage: post-production
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, list_knowledge, list_content, check_compliance, save_content, edit, delete]
+  tools: [get_knowledge, list_knowledge, list_content, get_channel_plan, get_month_plan, check_compliance, save_content, edit, delete]
 ---
 
 # Post Authority (`ssc-post-authority`)
@@ -66,35 +66,81 @@ This is why the brief is the command's key. **A cold start is no longer a specia
 
 - If the `brief_id` does not resolve, `save_content` refuses the write with `brief_id_required` and nothing is written — surface that plainly (a post idea auto-gets a brief at creation, so this is an integrity edge, not a normal path).
 
+### Step 0b: Load the governing frame — the channel's Approaches, then the month plan
+
+You cannot score against rails you have not read. Load them keyed on the **period** of the post's
+`publish_at` (`YYYY-MM`) — the same two calls the writer made in its Step 2b, so you judge against the
+same frame it wrote to:
+
+```
+Call: get_channel_plan
+  channel: post
+  period: <period>
+
+Call: get_month_plan
+  period: <period>
+```
+
+**`get_channel_plan` → `plan.context` is the Approaches artifact**, and it is the **highest-precedence
+document in your rubric** — above the KB, because it is this month's specific ruling written on this
+month's evidence. From it, hold:
+
+- every constraint it marks **RÀNG BUỘC** (binding) — each becomes a hard cap in Step 2;
+- the block for this post's **pillar × persona** — what this post should argue, and what is off-limits for it;
+- its **boundaries** section — what every organic post must carry (verbatim, complete) and must not do;
+- its stated **baseline** metrics — the bar a candidate has to plausibly clear, and the yardstick your
+  `comment` should reason against rather than taste;
+- its ✅/❌ examples — the SHAPE of a pass and a fail. Judge shape against them; never require a candidate
+  to match their wording (several are already-published posts).
+
+**`get_month_plan` → `plan.research` + `plan.tactics`:** the month's calendar and evidence base, the
+cautions on what must not be claimed or coined, and the directions + explicit *không ưu tiên* list. A
+candidate that leans on a figure the research flags as needing a rewritten form, in its raw form, fails
+that caution regardless of how well-sourced it is.
+
+**Read both live, every run.** They are rewritten monthly; a rail you remember may have been dropped,
+narrowed, or inverted. If `plan` is null or `approaches_approved` is false, say so in the Step 5
+presentation and score on the KB alone — do not invent the missing rails, and do not penalise a candidate
+against a rail you cannot cite.
+
+**Precedence when documents disagree:** Approaches `context` → month plan → KB. Where the Approaches
+narrows a KB rule, the narrower one binds. Where it is silent, the KB governs.
+
 ### Step 1: Load the judging knowledge base
 
-Call `get_knowledge` for the rules + voice + content knowledge you score against. Fetch by category in one or two calls (the tool accepts `categories` to load a whole slice), or by explicit paths:
+Call `get_knowledge` for the rules + voice + content knowledge you score against. Fetch by category (the tool accepts `categories` to load a whole slice) plus the explicit cross-category paths:
 
 ```
 Call: get_knowledge
   paths: [
-    "rules/banned-words",
-    "rules/compliance",
-    "rules/food-placeholder",
-    "rules/review-standards",
     "brand/woman-to-woman",
     "brand/proof-points",
+    "brand/angles",
+    "channels/facebook",
     "programme/kieu-my-story",
-    "content/quick-checklist",
-    "content/pillars",
     "ad/headline-formulas",
     "ad/platform-constraints"
   ]
-  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
-                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
+  categories: ["rules", "voice", "content"]
+                                 # WHOLE slices, always. Never enumerate rules/*, voice/* or content/*
+                                 # paths: a hardcoded list drifts, and a retired doc leaves a dangling
+                                 # path. Fetching the category also picks up the situational docs a
+                                 # given month needs without this skill knowing their names in advance.
 ```
+
+... plus `brand/persona-<slug>` — the detail doc for the persona tagged on this post, resolved by the same
+mechanical rule the writer used (the persona tag's `code` with its leading `chi-` prefix removed). You
+score "đúng persona"; you cannot do that against the persona's NAME. Judge the candidate against that
+doc's own ranked trigger points, objections, vocabulary to echo, and the words it flags to avoid.
 
 These paths are your scoring rubric:
 
-- `rules/banned-words` — hard-banned words and phrases (zero tolerance; any match forces a fail)
-- `rules/compliance` — NĐ-15/2018 and brand compliance constraints (no banned medical/efficacy claims)
-- `rules/food-placeholder` — food-placeholder and imagery rules the copy must respect
-- `rules/review-standards` — the mandatory review criteria and quality thresholds (the definitive bar)
+- the `rules` slice — the hard rails: the banned-word list (zero tolerance; any match forces a fail), the
+  compliance constraints (NĐ-15/2018 — no banned medical/efficacy claims), the food/imagery rules, the
+  mandatory review criteria and quality thresholds (the definitive bar), and the **organic-vs-paid
+  firewall**. That last one is scored, not merely cited: a candidate may use what the firewall marks
+  acceptable for organic, but a candidate that would fail the doc's boost checklist must say so in its
+  `comment` — an organic post that later gets boosted becomes an ad.
 - `voice/tone` — the brand tone and voice principles
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị) — must be correct in every variation
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in
@@ -103,7 +149,9 @@ These paths are your scoring rubric:
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `voice/founder-voice` — Kiều My's founder voice — the rubric for founder-voice fit: every variation must be written AS her, first person, in one consistent tonal register (confessor / educator / friend), within the doc's Ranh Giới boundaries; there is no separate brand voice
 - `programme/kieu-my-story` — Kiều My's REAL founder story — the source of truth to verify any personal story / anecdote / result / quote a variation puts in her voice (the authenticity check: a biographical specific not grounded here is a fabrication)
-- `content/quick-checklist` — what to avoid and the quality bar
+- `brand/angles` — the approach/angle system: the named ways in and what each is for, so "hook is weak" is a judgement against a named angle rather than taste
+- `channels/facebook` — the channel's constraints, length, rhythm and tone — the rubric for judging a candidate's structure and read-through, not just its lines
+- the `content` slice — the pillar strategy, formats, CTA guidance, the pre-publish quality bar, plus the topical docs (persona-health, myth-busting, format) a given month's brief may put in play. Where a candidate argues a topic one of these docs owns, judge it against that doc.
 
 **For the `image_content` section only, also fetch two paths** (they ground on-image copy, and are not needed when the target section is `copy`):
 
@@ -182,7 +230,9 @@ For **each** of the N candidates — the writer's variations when the target sec
 
 > **Judge both sections against the POST channel's objective: ENGAGEMENT.** The monthly plan's Review reads this page on reactions / comments / shares / saves / read-through — **ads convert, posts earn conversation**. So a `copy` or `image_content` version that reads as an advertisement — offer framing, urgency, a Messenger/CTA push, a hard proof-stack pitch — **caps at ≤3** however polished it is: it is off-objective for this channel and suppresses organic reach. Reward the opposite: a variation she recognises herself in, that leaves her something to answer or share.
 
-- `score` — **an integer 1–5.** Judge: brand-voice fit (`voice/*` — **written AS Kiều My in her first-person founder voice, in one consistent tonal register, per `voice/founder-voice`**; tone; correct pronoun register; woman-to-woman register; natural non-translated Vietnamese), adherence to `content/quick-checklist`, the freshness/strength of the hook and angle, and fidelity to the idea's brief (`core_message`, pillar, persona, `why_now` honoured). **Any** banned-word, compliance, or food-placeholder violation caps the score at **≤3** (it cannot pass) regardless of other merits. **A variation carrying fewer than 3 distinct Cambridge proof points (from `brand/proof-points`) also caps at ≤3** — a post that could run for any brand is not publishable; strong copy weaves in ≥3 (60 năm, chuẩn EU / 26 vi chất, chuyên viên 1:1, …). **An off-voice variation also caps at ≤3**: not written as Kiều My in the first person (third-person narration about her, a corporate register, scripted brand-caption ad-speak), or breaking `voice/founder-voice`'s Ranh Giới (doctor-lecture register, promising someone else's result) — the page is founder-led; off-voice copy is not publishable. **And a fabricated real-person story caps at ≤3 — the automatic authenticity fail (NĐ-15 + brand authenticity)**: any personal story / anecdote / result / quote the copy puts in Kiều My's voice must trace to `programme/kieu-my-story`, and any other real person's testimonial must be real, consented material the brief handed over — verify against the doc, never trust the copy. Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead the month with; **4** = strong, publishable; **3** = solid but flawed; **1–2** = weak/violating.
+- `score` — **an integer 1–5.** Judge: brand-voice fit (`voice/*` — **written AS Kiều My in her first-person founder voice, in one consistent tonal register, per `voice/founder-voice`**; tone; correct pronoun register; woman-to-woman register; natural non-translated Vietnamese), adherence to `content/quick-checklist`, the freshness/strength of the hook and angle, and fidelity to the idea's brief (`core_message`, pillar, persona, `why_now` honoured). **Any** banned-word, compliance, or food-placeholder violation caps the score at **≤3** (it cannot pass) regardless of other merits. **A variation carrying fewer than 3 distinct Cambridge proof points (from `brand/proof-points`) also caps at ≤3** — a post that could run for any brand is not publishable; strong copy weaves in ≥3 (60 năm, chuẩn EU / 26 vi chất, chuyên viên 1:1, …). **An off-voice variation also caps at ≤3**: not written as Kiều My in the first person (third-person narration about her, a corporate register, scripted brand-caption ad-speak), or breaking `voice/founder-voice`'s Ranh Giới (doctor-lecture register, promising someone else's result) — the page is founder-led; off-voice copy is not publishable. **And a fabricated real-person story caps at ≤3 — the automatic authenticity fail (NĐ-15 + brand authenticity)**: any personal story / anecdote / result / quote the copy puts in Kiều My's voice must trace to `programme/kieu-my-story`, and any other real person's testimonial must be real, consented material the brief handed over — verify against the doc, never trust the copy. **And every constraint the month's Approaches `context` marks binding (RÀNG BUỘC) is itself a ≤3 cap — this is the highest-precedence family of caps you apply.** Work through them one by one against each candidate, as that document words them; do not compress them into a remembered summary, and do not skip one because a candidate is strong elsewhere. The same applies to its **boundaries** section in both directions: a candidate that omits, truncates, or paraphrases an element the boundaries require on every post caps at ≤3 exactly as one that does something the boundaries forbid — a required element is not a formality to trim for length. A candidate that violates one of the month's `research` cautions (claiming a figure in a form the research says must be rewritten, coining a term it says to record but not invent) caps at ≤3 on the same footing. Name the specific rail in the `comment`, in the words the Approaches uses, so the writer's regeneration targets it exactly.
+
+Judge strength against the Approaches' stated **baseline** rather than taste: a candidate you cannot argue would clear it is a 3, however clean it reads. Use the full range honestly — do not give everything 4–5. **5** = a standout you'd lead the month with; **4** = strong, publishable; **3** = solid but flawed; **1–2** = weak/violating.
 - `comment` — **a one-line Vietnamese rationale for the `score`** (the persisted prose a Vietnamese operator reads in the workspace next to the stars). State the single biggest reason the variation is strong or weak — e.g. "Đúng giọng Kiều My (ngôi thứ nhất, sắc thái Người Bạn), hook woman-to-woman tự nhiên, đúng persona <persona>, CTA mềm" or "Dùng từ cấm 'giảm cân cấp tốc', vi phạm rules/banned-words → phải viết lại". Always Vietnamese (never English); short and honest; it must justify the number you gave and name the rule/voice doc it traces to.
 
 **Scoring an `image_content` candidate** — the same rubric, adjusted for a format that carries no prose:
@@ -316,6 +366,8 @@ After persisting the approved set, output:
 - **Quality gate is hard.** Every persisted (and every presented) candidate is rated ≥4. Any banned-word / compliance / food-placeholder violation — or carrying <3 distinct Cambridge proof points, or off-voice (not written AS Kiều My per `voice/founder-voice`), or a fabricated real-person story (verify founder specifics against `programme/kieu-my-story`) — caps a variation at ≤3 → it is dropped + regenerated, never presented or saved. Score honestly; never inflate to exit the loop.
 - **All persisted prose in Vietnamese.** The saved `body` — the post copy, **and** every line of an `image_content` block (headline, and whatever subheadline/bullets its density profile carries; only the `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` markers are ASCII) — AND the saved `comment` (rationale) MUST be Vietnamese. Chat-side reasoning/analysis and the in-chat review dialogue may stay the operator's language; nothing written to the row may.
 - **Cowork-native.** You (Claude) score and judge directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the knowledge paths in Step 1 (rules/*, voice/*, brand/woman-to-woman, brand/proof-points, programme/kieu-my-story, content/quick-checklist, plus `ad/platform-constraints` for the `image_content` section's ~20% on-image text-COVERAGE guideline — directional on an organic post, not the brevity rubric; the Step 1b word-count targets are). Do not call `get_knowledge` for unrelated paths.
-- Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state. `ad/platform-constraints` is a knowledge READ of a platform doc, not ad state.
-- Requires the `edit` capability (plus `view` for the `get_knowledge` / `list_knowledge` / `list_content` reads).
+- References only the knowledge slices + paths in Step 1 (the `rules`, `voice` and `content` categories; brand/woman-to-woman, brand/proof-points, brand/angles, channels/facebook, programme/kieu-my-story, the resolved brand/persona-<slug>, plus `ad/headline-formulas` and `ad/platform-constraints` for the `image_content` section — the latter for its ~20% on-image text-COVERAGE guideline, directional on an organic post, not the brevity rubric; the Step 1b word-count targets are). Do not call `get_knowledge` for unrelated paths.
+- **Reads the month's plan state read-only.** `get_channel_plan` and `get_month_plan` (Step 0b) are `view`-capability reads. Never call `save_channel_plan` / `save_month_plan` / `save_plan_targets` / `allocate_channel`. If a rail looks wrong, say so in the presentation and keep scoring against it — changing a plan is the operator's action in the workspace, never a production step's.
+- **Never score against a rail you cannot cite.** Every cap you apply traces to a live document read this run — the Approaches `context`, the month plan, or a KB doc. A rail remembered from a previous month is not a rail; if the Approaches is missing or unapproved, score on the KB alone and say so.
+- Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state. `ad/platform-constraints` and `ad/headline-formulas` are knowledge READS of platform/craft docs, not ad state.
+- Requires the `edit` capability (plus `view` for the `get_knowledge` / `list_knowledge` / `list_content` / `get_channel_plan` / `get_month_plan` reads).

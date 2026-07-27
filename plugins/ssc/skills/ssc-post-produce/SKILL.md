@@ -1,13 +1,13 @@
 ---
 name: ssc-post-produce
-description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by brief id via get_brief, or by date via get_content_by_date), reads the idea's brief + strategic tags, and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in voice/*, content/*, and channels/facebook. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Propose-only; never approves, publishes, or flips a gate.
+description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by brief id via get_brief, or by date via get_content_by_date), reads the idea's brief + strategic tags, loads the GOVERNING FRAME (the post channel plan's Approaches `context` for the post's period via get_channel_plan — the month's binding writing rails, its pillar × persona blocks and its organic boundaries — then the month plan's research + tactics via get_month_plan), and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in the whole voice/content/rules KB slices plus channels/facebook, brand/angles and the measured winners/losers indexes. Precedence when they disagree: Approaches → month plan → KB; the brief is the instance, the Approaches rails are the frame, and a rail always wins over a brief instruction that would break it. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Propose-only; never approves, publishes, or flips a gate.
 metadata:
   type: skill
   stage: post-production
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_brief, list_briefs, get_content_by_date, get_idea, get_knowledge, list_knowledge]
+  tools: [get_brief, list_briefs, get_content_by_date, get_idea, get_channel_plan, get_month_plan, get_knowledge, list_knowledge]
 ---
 
 # Post Produce (`ssc-post-produce`)
@@ -88,9 +88,58 @@ The brief is the strategic frame you must honour. The `core_message`, `pillar`, 
 
 **Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. `chi-huong` → `brand/persona-huong`, `chi-lan` → `brand/persona-lan`, `chi-mai` → `brand/persona-mai`, `chi-thao` → `brand/persona-thao`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later. Hold this ONE resolved path forward into Step 3 (you load only the one detail doc for the persona actually in play this run, not all four).
 
+### Step 2b: Load the governing frame — the channel's Approaches, then the month plan
+
+The brief tells you what THIS post argues. It does **not** carry the month's writing rails. Load them
+before you draft a line, keyed on the **period** of the post's `publish_at` (`YYYY-MM`):
+
+```
+Call: get_channel_plan
+  channel: post
+  period: <period>
+
+Call: get_month_plan
+  period: <period>
+```
+
+**`get_channel_plan` → `plan.context` is the Approaches artifact** — the channel's own writing rules for
+this month, written by `ssc-post-approaches` and released by `approaches_approved`. Treat it as the
+**most binding document you hold**:
+
+- Any constraint it marks **RÀNG BUỘC** (binding) is a hard rail on every variation — not a suggestion,
+  not something the brief can override.
+- Its per-pillar / per-persona blocks say what this post's pillar × persona should argue and what is
+  off-limits for it — find the block matching the tags you resolved in Step 2 and write inside it.
+- Its engagement/reach **baseline** is the bar the authority scores against; its **boundaries** section
+  states what every organic post must carry and must not do.
+- Its worked ✅/❌ examples show the **shape** of a passing line. They are illustrations of the rule, not
+  copy to lift — several are real posts already published.
+
+**Read all of it live, every run. Never substitute a remembered version.** The Approaches doc is rewritten
+each month and its constraints change with the evidence; a rail you recall from a previous month may have
+been dropped, narrowed, or inverted.
+
+If `plan` is null, or `approaches_approved` is false, say so plainly and draft from the brief + KB alone —
+flag in the Step 5 summary that the month's Approaches were unavailable, so the operator knows the
+variations were not written to this month's rails.
+
+**`get_month_plan` → `plan.research` and `plan.tactics`** are the month above it:
+
+- `research` — the month's calendar (observances, seasonal windows, no-sell days), the evidence and
+  sourcing available to lean on, and its stated cautions: what a scan did **not** find, and which
+  terms/figures are recorded-but-not-to-be-used. Honour those cautions literally — they exist because a
+  previous run over-claimed.
+- `tactics` — the month's directions and its explicit *không ưu tiên* (do-not-prioritise) list.
+- `narrative` — background; read it for the month's framing, not for line-level rules.
+
+**Precedence, when two of these disagree:** Approaches `context` → month plan → KB. The brief is the
+*instance*; the Approaches rails are the *frame*. If honouring the brief as written would break a rail,
+write to the rail and say so in the Step 5 summary — do not silently follow either one.
+
 ### Step 3: Load the knowledge base
 
-Call `get_knowledge` for the voice + content + channel knowledge that grounds the copy. Fetch by category in one or two calls (the tool accepts `categories` to load a whole slice), or by explicit paths:
+Call `get_knowledge` for the voice + content + rules + channel knowledge that grounds the copy. Fetch by
+category (the tool accepts `categories` to load a whole slice) plus the explicit cross-category paths:
 
 ```
 Call: get_knowledge
@@ -98,15 +147,18 @@ Call: get_knowledge
     "brand/woman-to-woman",
     "brand/positioning",
     "brand/proof-points",
-    "content/pillars",
-    "content/formats",
-    "content/cta-guidelines",
-    "content/quick-checklist",
+    "brand/angles",
     "channels/facebook",
-    "programme/kieu-my-story"
+    "programme/kieu-my-story",
+    "winners/facebook-posts",
+    "losers/index"
   ]
-  categories: ["voice"]          # ALL voice docs, always. Never enumerate voice/* paths:
-                                 # a hardcoded list drifts, and a retired doc leaves a dangling path.
+  categories: ["voice", "content", "rules"]
+                                 # WHOLE slices, always. Never enumerate voice/*, content/* or rules/*
+                                 # paths: a hardcoded list drifts, and a retired doc leaves a dangling
+                                 # path. Fetching the category also picks up the situational docs a
+                                 # given month needs (a persona's health doc, a format doc, a
+                                 # myth-busting doc) without any skill knowing their names in advance.
 ```
 
 ... plus `brand/persona-<slug>` — the resolved persona's detail doc (see Step 2). It carries that persona's ranked trigger points with content guidance, her objections and how to dismantle them, real vocabulary to echo/avoid, and myths to debunk — ground the variations' hooks, angles, and lines in this doc rather than writing to the persona name alone.
@@ -120,11 +172,20 @@ These paths are:
 - `brand/proof-points` — the credibility lookup table (60 năm, DiRECT/DROPLET, chuẩn EU, 26 vi chất, chuyên viên 1:1, …) — each post weaves in ≥3 distinct of these
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules (no translated-English feel)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
-- `content/pillars` — the content pillar strategy (to honour the idea's pillar)
-- `content/formats` — Facebook post-copy formats and structure
-- `content/cta-guidelines` — how to land a soft, authentic CTA
-- `content/quick-checklist` — what to avoid and the quality bar
+- `brand/angles` — the approach/angle system: the named ways in, and what each one is for
+- the `content` slice — the pillar strategy, post formats, CTA guidance, the pre-publish quality bar, plus
+  whatever topical docs the slice currently holds (the persona-health, myth-busting and format docs a given
+  month's brief may need). Read the ones your pillar × persona × format actually calls for; do not skim
+  past a doc that names your persona's life stage or your post's format.
+- the `rules` slice — the hard rails you draft **inside**, not the ones the authority discovers afterwards:
+  the banned-word list, the compliance constraints, the food/imagery rules, and the organic-vs-paid
+  firewall. A draft that breaks one of these is dead on arrival at the authority gate, so read them first.
+  The firewall matters even though this is an organic channel: an organic post that later gets boosted
+  becomes an ad and must pass that doc's checklist.
 - `channels/facebook` — Facebook channel constraints, length, rhythm, and tone
+- `winners/facebook-posts` — the measured winning post patterns on this page. The month's opening rules were
+  derived from this population; read it for the SHAPE that has actually worked, never to re-run a published post.
+- `losers/index` — retired/losing copy. Check your angle against it so you do not regenerate something already measured as weak.
 - `programme/kieu-my-story` — Kiều My's REAL founder story: the authoritative **source** for any personal story / anecdote / experience the copy puts in her voice (see the Authenticity guardrail in Step 4). Never invent biographical specifics beyond this doc; never hard-code her stories — re-read it each run.
 - `voice/founder-voice` — Kiều My's founder voice — **the voice every variation is written in**: she is the narrator (first person; there is no separate brand voice), with three tonal registers (Confessor / Educator / Friend) mapped to frames/content types in the doc. Re-read it each run — the register mapping, pronoun rulings, and Ranh Giới (boundaries) sections all bind.
 
@@ -133,6 +194,23 @@ If you are unsure which paths exist, call `list_knowledge` (optionally `list_kno
 ### Step 4: Draft N distinct variations (do NOT save them)
 
 Draft **N variations** (default 4) of the full Facebook post copy. Each variation is the **finished post body in Vietnamese** — the caption a reader would see, ready for the authority to score and a human to approve.
+
+**The month's Approaches rails come FIRST (read before anything below):**
+
+Every variation is written **inside** the Approaches `context` you loaded in Step 2b. Before you write a
+line, restate to yourself — from the live doc, not from memory — the constraints it marks **RÀNG BUỘC**,
+the block for this post's pillar × persona, and its boundaries section. Then hold each of them across all
+N variations: they are fixed, exactly like `core_message` and `pillar` are. **The angle and hook vary
+inside the rails; the rails themselves never vary.** A variation that is fresh but breaks a rail is not a
+variation — the authority drops it, and regenerating it costs the operator a round.
+
+The rails also cover what must be **present** in a post, not only what is forbidden — if the boundaries
+section requires an element on every post, verbatim, every variation carries it, complete. "Tightening"
+a required element is a failure, not an edit.
+
+Where the month's `research` (Step 2b) names a figure, a source, or a term with a caution attached, obey
+the caution as written. A figure the research records as needing a compliance rewrite is used in the
+rewritten form or not at all — never in its raw form because it is "just a citation".
 
 **Write AS Kiều My — the channel voice (read FIRST):**
 
@@ -183,6 +261,9 @@ After drafting all N variations, present them for the authority to judge:
 **Variations drafted:** <N> (in-conversation, UNSAVED — handed to ssc-post-authority to score + present)
 
 **Brief honoured:** core_message, pillar, persona, why_now held fixed across all variations; angle/hook varied.
+**Frame read:** Approaches (channel plan <period>, approaches_approved <yes|no>) · month plan <period> (research + tactics) · KB voice/content/rules
+**Rails held:** <the constraints the Approaches marks binding, named as that doc names them — all held across all N>
+**Conflicts:** <none | a brief instruction that would break a rail, and which way it was resolved>
 
 ### Variation 1 — <one-line angle/hook>
 <full Vietnamese post body>
@@ -214,6 +295,8 @@ If the date had more than one scheduled post (Step 1, `count > 1`), add a line n
 - **All drafted prose in Vietnamese.** The variation bodies you draft MUST be Vietnamese (the authority persists them verbatim). Chat-side reasoning/analysis may stay English.
 - **Written as Kiều My (channel voice).** Every variation speaks in Kiều My's first-person founder voice per `voice/founder-voice` (one consistent tonal register — confessor / educator / friend — per variation); never a separate brand voice, never third-person narration about her. Her biographical specifics stay grounded in `programme/kieu-my-story` (the authenticity guardrail bounds the voice).
 - **Cowork-native.** You (Claude) write the copy directly. No app/provider-model calls — never reference or invoke an app model.
-- References only the knowledge paths in Step 3 (voice/*, brand/woman-to-woman, brand/positioning, brand/proof-points, content/*, channels/facebook, programme/kieu-my-story, the resolved brand/persona-<slug>). Do not call `get_knowledge` for unrelated paths.
+- References only the knowledge slices + paths in Step 3 (the `voice`, `content` and `rules` categories; brand/woman-to-woman, brand/positioning, brand/proof-points, brand/angles, channels/facebook, programme/kieu-my-story, winners/facebook-posts, losers/index, the resolved brand/persona-<slug>). Do not call `get_knowledge` for unrelated paths.
+- **Reads the month's plan state read-only.** `get_channel_plan` and `get_month_plan` (Step 2b) are `view`-capability reads. Never call `save_channel_plan` / `save_month_plan` / `save_plan_targets` / `allocate_channel`, and never propose an edit to a plan from inside a production run — the plan is the frame you write to, not an artifact this step owns.
+- **Never restate a plan or KB document from memory.** The Approaches `context`, the month plan, and every KB doc are re-read live each run. A rail recalled from a previous month is not evidence a rail still exists.
 - Operates only on the post channel (`channel='post'`); never reads or writes `ads`/`youtube` state.
 - Requires the `edit` capability (plus `view` for the `get_content_by_date` / `get_idea` / `get_knowledge` / `list_knowledge` reads).

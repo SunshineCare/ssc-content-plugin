@@ -210,7 +210,7 @@ The `creatives` row carries no `generation_prompt` column;
 ### Requirement: Propose-only, zero-credit governance
 The agent and every stage-skill SHALL hold only read tools plus `save_creative_prompt`.
 They SHALL NOT hold or call any generate tool (`generate_scene`, `generate_subject`,
-`generate_composition`, `edit_creative`, `generate_text_layer`), `approve` /
+`generate_composition`, `generate_image_edit`, `generate_text_layer`), `approve` /
 `unapprove`, `upload_creative` / `confirm_creative_upload` / `select_gallery_creative`,
 `set_cover`, `reorder_gallery`, any publish tool, or `update_budget`. Saving a prompt
 SHALL NOT approve anything and SHALL spend no credits.

@@ -7,7 +7,7 @@ metadata:
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, list_knowledge, list_content, get_channel_plan, get_month_plan, check_compliance, save_content, edit, delete]
+  tools: [get_knowledge, list_knowledge, list_content, get_channel_plan, get_month_plan, record_compliance, save_content, edit, delete]
 ---
 
 # Post Authority (`ssc-post-authority`)
@@ -247,7 +247,7 @@ Judge strength against the Approaches' stated **baseline** rather than taste: a 
 - **Anchor cap:** a version whose headline does not trace to an approved copy's hook — a new angle invented on the spot — caps at ≤3.
 - **Voice:** judge tone fit (woman-to-woman word choice, natural Vietnamese, correct register per `voice/*`), **not** first-person founder narration — terse on-image phrases are not prose, so the "written AS Kiều My in the first person" cap does not apply to this section.
 
-Do NOT call `check_compliance` at this stage — it requires a `content_id`, and no `content` row exists until the set is persisted in Step 6 (after the operator's go-ahead). Your scoring here IS the compliance judgment; the persisted verdict is handled at Step 6.
+Do NOT call `record_compliance` at this stage — it requires a `content_id`, and no `content` row exists until the set is persisted in Step 6 (after the operator's go-ahead). Your scoring here IS the compliance judgment; the persisted verdict is handled at Step 6.
 
 Hold each variation's `body`, `score`, and Vietnamese `comment` together.
 
@@ -315,7 +315,7 @@ Call: save_content
 `save_content` INSERTS a DRAFT `content` row at `status='draft'`, **`compliance_status='passed'`** — your authority self-review (banned-words / compliance / food-placeholder, Steps 2–3) IS the compliance gate for Cowork-produced copy, and the server persists a passing verdict so the operator's approve gate can complete (`approve(entity='content', …)` refuses approval unless `compliance_status='passed'`). One insert per passing variation; do NOT pass any approval field. Capture each returned `{ id, status }` so you can report the saved variation ids in the summary.
 
 - **Post-save tweak (secondary path — this run only):** the primary revision path is now **pre-save**, in the Step 4–5 in-chat review. But if the operator asks for a change to a variation AFTER the save (e.g. on a re-invoke), do not insert a duplicate — patch the field(s) of a row YOU created this run with one `edit(entity='content', id, patch, expected_version)` call (a just-inserted row is at version 1; on a `stale_version` error, re-read the row and retry once), or retire the row with `delete(entity='content', id, expected_version)` (soft-delete; refused with `has_active_children` while a non-deleted `schedule` row references it). `edit` can never promote a row to `approved`, and you must never use it to demote one. Only rows YOU created in this run — never an operator-curated or approved row.
-- **`check_compliance` (use only deliberately, after persistence):** it requires a `content_id`, so it can only run on a persisted row — and it WRITES the base `compliance_status` (recording `failed` flips the row's `passed` → `failed` and blocks the operator's approve gate). Persisted variations are already `passed`, so there is normally nothing to record; a variation that fails your review is never persisted in the first place (it is dropped in the Step 3 quality loop / Step 5 revise loop before the operator ever approves the set).
+- **`record_compliance` (use only deliberately, after persistence):** it requires a `content_id`, so it can only run on a persisted row — and it RECORDS the verdict YOU supply, writing the base `compliance_status` (the server judges nothing of its own; recording `failed` flips the row's `passed` → `failed` and blocks the operator's approve gate). Persisted variations are already `passed`, so there is normally nothing to record; a variation that fails your review is never persisted in the first place (it is dropped in the Step 3 quality loop / Step 5 revise loop before the operator ever approves the set).
 
 ### Step 7: Output summary
 

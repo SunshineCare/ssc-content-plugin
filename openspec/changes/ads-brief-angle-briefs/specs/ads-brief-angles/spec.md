@@ -71,19 +71,20 @@ at least one brief, the skill SHALL STOP and direct the operator to curate / app
 ### Requirement: Propose-only governance
 
 The skill SHALL be propose-only. It SHALL never call `approve` (any entity,
-including `brief`), never use `edit` to demote/discard, never call `update_idea`
-for the narrative fields, never call any publish/schedule tool, and never flip a
-gate. Its declared frontmatter `tools:` SHALL be exactly `[get_idea,
-get_channel_plan, get_knowledge, list_briefs, save_brief]` (no `list_post_content`
-— brief-first needs no copy read) and SHALL NOT include `update_idea`.
+including `brief`), never use `edit` to demote/discard, never write the narrative
+fields onto the `ideas` row (they live on `briefs`), never call any
+publish/schedule tool, and never flip a gate. Its declared frontmatter `tools:`
+SHALL be exactly `[get_idea, get_channel_plan, get_knowledge, list_briefs,
+save_brief]` (no `list_post_content` — brief-first needs no copy read) and SHALL
+NOT include any per-entity idea-patch tool.
 
 #### Scenario: Only draft writes occur
 - **WHEN** the skill runs to completion
-- **THEN** the only write it performs is `save_brief` (creating DRAFT briefs), with no `approve`, `edit`-demotion, `update_idea`, or publish call
+- **THEN** the only write it performs is `save_brief` (creating DRAFT briefs), with no `approve`, `edit`-demotion, idea-row narrative write, or publish call
 
 #### Scenario: Frontmatter tool surface
 - **WHEN** the skill's frontmatter `tools:` list is inspected
-- **THEN** it contains `list_briefs` and `save_brief`, and does not contain `update_idea` or `list_post_content`
+- **THEN** it is exactly `[get_idea, get_channel_plan, get_knowledge, list_taxonomies, list_briefs, save_brief, edit, delete]` — so it contains `list_briefs` and `save_brief`, and contains no `list_post_content` and no per-entity idea-patch tool (idea patches go through the generic `edit`)
 
 ### Requirement: Vietnamese persisted prose
 

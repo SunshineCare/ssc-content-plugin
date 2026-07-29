@@ -3,7 +3,7 @@
 ## Why
 
 The `ssc-ads-brief` skill's write step is broken against the live BrandOS server:
-`update_idea` now **hard-rejects** the five narrative brief fields
+the idea-row patch path now **hard-rejects** the five narrative brief fields
 (`hook_direction`/`core_message`/`why_now`/`story_moment`/`cta`) and `theme` —
 they moved out of the `ideas` row into a `briefs` table — so every run fails.
 The same skill should also stop producing one direct-overwrite brief and instead
@@ -13,8 +13,8 @@ angle briefs.
 
 ## What Changes
 
-- Rewrite `ssc-ads-brief` from "recompute one brief per run via `update_idea`
-  (direct overwrite, no draft/approve state)" to **producing 4-5 distinct, rated
+- Rewrite `ssc-ads-brief` from "recompute one brief per run via a direct idea-row
+  patch (direct overwrite, no draft/approve state)" to **producing 4-5 distinct, rated
   DRAFT angle briefs via `save_brief`**, then stopping.
 - Each angle anchors to a **distinct** persona trigger / objection / myth, carries
   a **mandatory** short Vietnamese `angle_label`, the five narrative fields, and a
@@ -27,11 +27,11 @@ angle briefs.
 - **Produce-once guard**: `list_briefs` before any write; if briefs already exist,
   **STOP** and tell the operator to curate/approve/discard in the dashboard. Never
   append, never silently overwrite.
-- **BREAKING (skill contract)**: frontmatter `tools:` change — **remove**
-  `update_idea`; **add** `list_briefs` + `save_brief`.
+- **BREAKING (skill contract)**: frontmatter `tools:` change — **remove** the
+  per-entity idea-patch tool; **add** `list_briefs` + `save_brief`.
 - Remove the "revise / direct-overwrite / no draft-approve" model. Briefs are now
   DRAFT rows an operator promotes via `approve(entity='brief')` — never the skill.
-- Fix downstream stale references that still describe the `update_idea` model:
+- Fix downstream stale references that still describe the idea-row-patch model:
   `commands/ssc.ads-produce.md`, `skills/ssc-ads-writer/SKILL.md`, root `CLAUDE.md`
   pipeline table.
 - Document the server **"Change 2"** dependency (per-idea multi-brief +
@@ -63,7 +63,8 @@ angle briefs.
   (description + brief-path paragraphs), `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md`
   (sibling mention), root `CLAUDE.md` (pipelines table row for `ads-produce`).
 - **MCP tools consumed**: `get_idea`, `get_channel_plan`, `list_post_content`,
-  `get_knowledge`, `list_briefs`, `save_brief` (removed: `update_idea`). All exist
+  `get_knowledge`, `list_briefs`, `save_brief` (removed: the per-entity idea-patch
+  tool). All exist
   on the live BrandOS surface.
 - **Runtime dependency**: server "Change 2" for the full multi-angle payoff —
   documented, non-blocking (the skill runs correctly today with one persisted

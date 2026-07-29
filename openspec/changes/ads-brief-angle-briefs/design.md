@@ -8,7 +8,7 @@ handoff reference. It was originally dispatched by `/ssc.ads-produce <idea_id> c
 
 Two facts force this change (both confirmed against the live BrandOS MCP schemas):
 
-1. **The write path is dead.** `update_idea` now hard-rejects the five narrative
+1. **The write path is dead.** The idea-row patch path now hard-rejects the five narrative
    fields (`hook_direction`/`core_message`/`why_now`/`story_moment`/`cta`) and
    `theme`, each annotated *"NOT ACCEPTED — use save_brief / edit(entity='brief')"*.
    The fields moved from the `ideas` row into a `briefs` table.
@@ -30,7 +30,7 @@ Full prior design: `docs/superpowers/specs/2026-07-12-ads-brief-angle-briefs-des
 ## Goals / Non-Goals
 
 **Goals:**
-- Replace the dead `update_idea` write with the `save_brief` draft-brief path.
+- Replace the dead idea-row narrative write with the `save_brief` draft-brief path.
 - Produce 4-5 **distinct, rated, DRAFT** angle briefs, each with a mandatory
   Vietnamese `angle_label`, then STOP.
 - Preserve the propose-only governance invariant (draft-only; never approve/demote/
@@ -42,12 +42,12 @@ Full prior design: `docs/superpowers/specs/2026-07-12-ads-brief-angle-briefs-des
 - Server-side Change 2 itself (not in this repo).
 - Any revise/refresh-existing-briefs flow — explicitly rejected (produce-once).
 - `approve(entity='brief')` wiring — an operator/dashboard action, never a skill.
-- `ssc-post-ideate`'s `update_idea` usage — it passes only `title`/`score`/`comment`
-  (still accepted), so it is unaffected and untouched.
+- `ssc-post-ideate`'s idea-row writes — they carry only `title`/`score`/`comment`
+  (and later `hero`), all still accepted, so it is unaffected and untouched.
 
 ## Decisions
 
-- **Write via `save_brief` (draft), not `update_idea`.** `update_idea` rejects the
+- **Write via `save_brief` (draft), not an idea-row patch.** An idea-row patch rejects the
   narrative fields; `save_brief` is the server's replacement and mints only drafts,
   which keeps the skill propose-only. *Alternative:* `edit(entity='brief')` — that
   patches an existing brief, not creation, so it is not the producer's tool.
@@ -75,7 +75,7 @@ Full prior design: `docs/superpowers/specs/2026-07-12-ads-brief-angle-briefs-des
   re-running a banned-words/compliance scan is redundant.
 
 - **Frontmatter `tools:` = `[get_idea, get_channel_plan, list_post_content,
-  get_knowledge, list_briefs, save_brief]`** — drop `update_idea`, add `list_briefs`
+  get_knowledge, list_briefs, save_brief]`** — drop the per-entity idea-patch tool, add `list_briefs`
   + `save_brief`. No `edit`, no `approve` (both would violate propose-only or are
   unused under produce-once).
 
@@ -91,7 +91,7 @@ Full prior design: `docs/superpowers/specs/2026-07-12-ads-brief-angle-briefs-des
   refuses to re-run once briefs exist, so it never clobbers dashboard edits (the
   central caution of the old recompute-every-run model disappears).
 - **Downstream doc drift** → `commands/ssc.ads-produce.md`, `ssc-ads-writer/SKILL.md`,
-  and root `CLAUDE.md` still describe `update_idea`; fix all three in this change
+  and root `CLAUDE.md` still describe the idea-row-patch model; fix all three in this change
   (dangling/stale refs are a called-out bug class in `CLAUDE.md`).
 
 ## Migration Plan

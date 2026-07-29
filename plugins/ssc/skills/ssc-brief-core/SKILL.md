@@ -18,7 +18,7 @@ you one idea and an angle spec; you return the idea's **hero** and a set of
 **scored narrative field sets** ready for that caller to save.
 
 **You write nothing.** You hold no mutation tools — no `save_brief`, no
-`save_idea`, no `update_idea`. Every write belongs to the caller, which knows its
+`save_idea`, no `edit`. Every write belongs to the caller, which knows its
 own channel's storage shape. This is what makes you safe to share.
 
 ## What you do NOT decide
@@ -128,7 +128,7 @@ the `core_message`, and a hero written that way fails all three tests at once.
   an operator's hero. If it plainly contradicts the angle spec, say so and let
   the caller decide.
 - If it is empty, derive it from the idea's title and return it for the caller to
-  write via `update_idea(hero=…)`.
+  write via `edit(entity='idea', id, patch = { hero }, expected_version)`.
 - **On `stale_version` at that write, the caller must re-read and RE-DERIVE.** The
   hero derives from the title, so a moved version most likely means an operator
   just edited that title.

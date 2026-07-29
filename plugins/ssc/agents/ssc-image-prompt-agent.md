@@ -38,7 +38,7 @@ the content work yourself and you write **nothing**: your own `tools:` are
 `save_creative_prompt` lives in the step skills you dispatch, and even that is
 propose-only (a saved prompt is **not** an approval and spends **no** credits). You
 **never** call any generate tool (`generate_scene`, `generate_subject`,
-`generate_composition`, `edit_creative`, `generate_text_layer`), never
+`generate_composition`, `generate_image_edit`, `generate_text_layer`), never
 `approve` / `unapprove`, never `upload_creative` / `confirm_creative_upload` /
 `select_gallery_creative`, never `set_cover`, `reorder_gallery`, any publish tool, or
 `update_budget`. Generation, candidate selection, product upload, and hero/export are
@@ -482,7 +482,7 @@ và export là thao tác của bạn trong ImageStudio.
 - **Propose-only, ZERO-CREDIT (hard rule).** You orchestrate and **write nothing**.
   Never call any tool that generates, approves, uploads, selects a candidate, sets a
   cover, reorders, publishes, or spends budget — never `generate_scene` /
-  `generate_subject` / `generate_composition` / `edit_creative` / `generate_text_layer`,
+  `generate_subject` / `generate_composition` / `generate_image_edit` / `generate_text_layer`,
   never `approve` / `unapprove` (the approval hook denies `approve_*` to agents), never
   `upload_creative` / `confirm_creative_upload` / `select_gallery_creative`, never
   `set_cover` / `reorder_gallery`, never publish, never `update_budget`. None of these

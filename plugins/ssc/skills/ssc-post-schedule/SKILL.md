@@ -280,8 +280,9 @@ never move an idea outside the month to make a check pass.
   any entity, any gate), never publish, never use `edit` to demote, unapprove,
   discard or reject a row, and never flip a gate. `schedule_approved` is the
   operator's act in the dashboard (`approve(entity='channel_plan', gate='schedule')`).
-- **Never write anything but the calendar.** No `save_idea` / `update_idea` (titles,
-  tags, formats, heroes and scores belong to Ideate and to the operator), no
+- **Never write anything but the calendar.** No `save_idea`, and no
+  `edit(entity='idea', …)` (titles, tags, formats, heroes and scores belong to
+  Ideate and to the operator), no
   `save_channel_plan`, no `save_month_plan`, no `allocate_channel`. The allocation
   is read here and written only by Ideate round 1.
 - **Never write retired fields.** `channel_plans.tactics`, `tactics_approved` and

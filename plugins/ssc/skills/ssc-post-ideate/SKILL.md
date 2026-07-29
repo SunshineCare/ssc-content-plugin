@@ -1,7 +1,7 @@
 ---
 name: ssc-post-ideate
 description: >-
-  Runs the IDEATE step of the Cambridge Diet Vietnam Posts channel in THREE ROUNDS, one per invocation, each ending at an operator checkpoint. Round 1 DISTRIBUTION proposes the month's pillar split with a suggested post count per pillar, writes it to the head via allocate_channel (propose-only, flips no gate, mints the channel row if absent) and STOPS; the operator accepts by saying so, by editing the numbers in the dashboard allocation panel, or simply by running the command again. Round 2 TITLES generates one titled draft idea per planned post via save_idea, sized exactly to the accepted distribution and audited for spread and diversity, then STOPS so the operator can prune before any deeper work is spent. Round 3 ANGLE enriches each surviving idea by dispatching ssc-brief-core for its HERO and its ONE angle — a post has exactly one angle, never a fan-out like ads — writes the hero via update_idea and the five narrative fields onto the idea's single existing brief, then STOPS for approval. State-driven: it reads the head's allocation and the plan's ideas and works whichever round is open, so re-invoking always advances rather than repeating. Gated on approaches_approved. Propose-only; every idea is a draft a human curates and approves, and the skill never flips a gate.
+  Runs the IDEATE step of the Cambridge Diet Vietnam Posts channel in THREE ROUNDS, one per invocation, each ending at an operator checkpoint. Round 1 DISTRIBUTION proposes the month's pillar split with a suggested post count per pillar, writes it to the head via allocate_channel (propose-only, flips no gate, mints the channel row if absent) and STOPS; the operator accepts by saying so, by editing the numbers in the dashboard allocation panel, or simply by running the command again. Round 2 TITLES generates one titled draft idea per planned post via save_idea, sized exactly to the accepted distribution and audited for spread and diversity, then STOPS so the operator can prune before any deeper work is spent. Round 3 ANGLE enriches each surviving idea by dispatching ssc-brief-core for its HERO and its ONE angle — a post has exactly one angle, never a fan-out like ads — writes the hero via edit(entity='idea') and the five narrative fields onto the idea's single existing brief, then STOPS for approval. State-driven: it reads the head's allocation and the plan's ideas and works whichever round is open, so re-invoking always advances rather than repeating. Gated on approaches_approved. Propose-only; every idea is a draft a human curates and approves, and the skill never flips a gate.
 metadata:
   type: skill
   stage: post-pipeline
@@ -9,7 +9,7 @@ metadata:
   section: post
   capability: edit
   orchestrates: [ssc-brief-core]
-  tools: [get_month_plan, get_channel_plan, get_knowledge, search_knowledge, list_taxonomies, list_ideas, get_idea, list_briefs, allocate_channel, save_idea, update_idea, save_brief, edit, delete]
+  tools: [get_month_plan, get_channel_plan, get_knowledge, search_knowledge, list_taxonomies, list_ideas, get_idea, list_briefs, allocate_channel, save_idea, save_brief, edit, delete]
 ---
 
 # Post Ideate (`ssc-post-ideate`)
@@ -268,8 +268,8 @@ win over anything inline here.
 To fix an idea you saved **this run**: `delete(entity='idea', id, expected_version)`
 then save one corrected replacement — never re-call `save_idea` hoping to update,
 which creates a duplicate. Score-only fixes use
-`update_idea(id, score, comment, expected_version)`. A freshly saved draft is at
-version 1. Only ever touch drafts **you** created in this run.
+`edit(entity='idea', id, patch = { score, comment }, expected_version)`. A freshly
+saved draft is at version 1. Only ever touch drafts **you** created in this run.
 
 ### 2d. Quality floor, then stop
 
@@ -345,13 +345,15 @@ below is yours.
 ### 3b. Write the hero
 
 ```
-update_idea(id = <idea id>, hero = <hero>, expected_version = <idea version>)
+edit(entity = 'idea', id = <idea id>, patch = { hero: <hero> },
+     expected_version = <idea version>)
 ```
 
 Only when the hero is new or the core reported it changed. **Never overwrite an
-operator's existing hero.** `update_idea` is a partial patch — pass only `hero`,
-and never a status or channel. A `stale_version` means re-read via `get_idea` and
-retry once.
+operator's existing hero.** `edit` is a partial patch — put only `hero` in
+`patch`, and never `status` (a `status` patch is a demotion and needs the
+`approve` capability this skill does not hold) or any channel/lineage field. A
+`stale_version` means re-read via `get_idea` and retry once.
 
 ### 3c. Write the angle onto the idea's ONE brief
 

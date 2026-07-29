@@ -2,6 +2,7 @@
 argument-hint: '<YYYY-MM> [review|tactics|research|narrative]'
 description: Author the Cambridge Diet Vietnam MONTHLY PLAN HEAD — the cross-channel month that sits above the per-channel plans. Four steps — Review → Tactics → Research → Narrative — keyed on month_plans(period). Review is the system's only look-back and ranks taxonomy terms, not metrics. Narrative is the month's ONLY gate; approving it releases every channel. State-driven; propose-only.
 metadata:
+  dispatches: [ssc-plan-agent]
   brand: cambridge-diet-vn
   section: plan
 ---

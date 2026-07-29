@@ -46,6 +46,10 @@ plugins/ssc/
   skills/    (41 × <name>/SKILL.md)# the actual work units
   hooks/approval-gate.mjs         # PreToolUse governance hook (the only real code)
   hooks/hooks.json                # wires the hook to mcp__ssc__(approve|unapprove)_*
+scripts/build-chatgpt-bundle.mjs  # commands+agents+skills → chatgpt/workflows.json
+scripts/publish-chatgpt-bundle.sh # mirrors that bundle into content/mcp-server/
+chatgpt/workflows.json            # GENERATED — never hand-edit
+docs/chatgpt-connector.md         # operator setup for the ChatGPT connector
 docs/superpowers/specs/           # design specs for in-flight work
 ```
 
@@ -215,6 +219,25 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   `.claude-plugin/plugin.json` in the **same commit** — operators update by
   version, so an unbumped change never reaches them. A change is not "committed"
   until the version moved with it. Do not wait to be asked.
+- **A prose change has TWO consumers now — republish the ChatGPT bundle.**
+  Cowork loads the skills; **ChatGPT cannot**, because it has no slash commands,
+  no subagents and no MCP prompts. It reads the same 11 workflows through three
+  read tools on the BrandOS server (`list_workflows` / `get_workflow` /
+  `get_workflow_step`), which serve a bundle generated from `plugins/ssc/**`:
+  ```bash
+  scripts/publish-chatgpt-bundle.sh          # rebuild + mirror into content/
+  scripts/publish-chatgpt-bundle.sh --check  # exit 1 if the mirror is stale
+  ```
+  So any command/agent/skill edit means: bump the version **and** republish,
+  then commit the refreshed mirror in the `content` repo and deploy
+  brandos-express — otherwise ChatGPT keeps running the old prose. The mirror at
+  `content/mcp-server/lib/brandos/workflows/workflows.json` is GENERATED; edit
+  the skills, never it. Setup + limits: `docs/chatgpt-connector.md`.
+- **A new command needs `metadata.dispatches: [<agent-or-skill>]`** in its
+  frontmatter. It is what the bundle generator reads to know which agent (or,
+  for `/ssc-ad` and `/ssc-ads-brief`, which skill) the command dispatches —
+  a command without it fails the build rather than shipping a workflow with no
+  entry point.
 
 ## Install / update (operators)
 

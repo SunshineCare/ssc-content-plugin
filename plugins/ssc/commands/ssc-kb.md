@@ -1,6 +1,8 @@
 ---
 argument-hint: '[focus] [review|audit|revise]'
 description: Launch the Cambridge Diet Vietnam Knowledge-base health cycle — review → audit → research → revise/gap-fill. Produces propose-only KB revisions; nothing is applied automatically.
+metadata:
+  dispatches: [ssc-kb-agent]
 ---
 
 ## User Input

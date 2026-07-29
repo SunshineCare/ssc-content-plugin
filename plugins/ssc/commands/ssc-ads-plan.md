@@ -2,6 +2,7 @@
 argument-hint: '<YYYY-MM> [approaches|ideate]'
 description: Run the Cambridge Diet Vietnam Ads channel of a monthly plan — Approaches → Ideate — on channel_plans(channel='ad', period), hanging off that period's monthly-plan head. Released by the head's narrative approval; the channel authors no bets, no research, no look-back, and no quantities. State-driven across two human gates; propose-only.
 metadata:
+  dispatches: [ssc-ads-agent]
   brand: cambridge-diet-vn
   section: ads
 ---

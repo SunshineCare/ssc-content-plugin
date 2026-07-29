@@ -2,6 +2,7 @@
 argument-hint: '<YYYY-MM> [approaches|ideate|schedule]'
 description: Run the Cambridge Diet Vietnam Posts channel of a monthly plan — Approaches → Ideate → Schedule — on channel_plans(channel='post', period), hanging off that period's monthly-plan head. Released by the head's narrative approval; the channel authors no themes, no research, and no quantities of its own. State-driven across three human gates; propose-only.
 metadata:
+  dispatches: [ssc-post-agent]
   brand: cambridge-diet-vn
   section: post
 ---

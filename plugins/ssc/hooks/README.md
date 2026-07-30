@@ -5,6 +5,18 @@ work, and the operator approves it. Approving (or un-approving) flips a
 governance gate on the Brand OS record — it has real downstream consequences —
 so it is an **operator action**, never something a pipeline step does on its own.
 
+The hook guards **two families of tool**, with the **same** deny/ask posture:
+
+| Family | Tools | Why it is gated |
+|---|---|---|
+| **Approval** | the generic `approve` / `unapprove`, plus the legacy per-entity `approve_*` / `unapprove_*` | Flips a governance gate with downstream consequences (spend, publishing). |
+| **Money-moving Meta** | `create_campaign`, `create_adset`, `create_ad`, `update_budget` | Spends **real money** and puts **public claims** in front of customers. Effectively irreversible. |
+
+The second family was added by `ads-publish-stage-linkage` (design D3): the
+Publish stage **prepares** a payload and **stops**, and the create is a human
+dashboard action (`POST /api/ad-publish/commit`, which is deliberately *not* an
+MCP tool). No skill, agent or automated step may call those four.
+
 There are three layers holding that line, weakest last:
 
 1. **Server-side capability** (authoritative). The Brand OS MCP server enforces
@@ -26,17 +38,31 @@ There are three layers holding that line, weakest last:
    harness backstop that enforces the propose-only rule where prose cannot,
    because it distinguishes *who is calling*:
 
-   | Caller | `mcp__ssc__approve` (and any legacy `approve_*`/`unapprove_*`) | Why |
-   |---|---|---|
-   | A **pipeline run** (any dispatched `ssc-*` agent / subagent) | **deny** | A propose-only step must never flip a gate as a side-effect of its run — even accidentally, even if the operator is watching. |
-   | The **main operator conversation** ("Cowork, approve idea #3 for me") | **ask** (confirm prompt) | The operator is explicitly in the loop; the confirmation *is* the authorization. An autonomous/unattended approval can't get past a prompt nobody clicks. |
-   | Anything else | defer | Not a gate-flip tool. |
+   | Caller | `mcp__ssc__approve` (and any legacy `approve_*`/`unapprove_*`) | `create_campaign` / `create_adset` / `create_ad` / `update_budget` | Why |
+   |---|---|---|---|
+   | A **pipeline run** (any dispatched `ssc-*` agent / subagent) | **deny** | **deny** | A propose-only step must never flip a gate — or spend money and publish public claims — as a side-effect of its run, even accidentally, even if the operator is watching. |
+   | The **main operator conversation** ("Cowork, approve idea #3 for me") | **ask** (confirm prompt) | **ask** (confirm prompt) | The operator is explicitly in the loop; the confirmation *is* the authorization. An autonomous/unattended approval or publish can't get past a prompt nobody clicks. |
+   | Anything else | defer | defer | Neither a gate-flip nor a money-moving tool. |
 
    The hook keys off the `agent_id`/`agent_type` fields that Claude Code adds to
    PreToolUse input inside a subagent (absent in the main conversation). This is
    the sanctioned way to **approve on the operator's behalf**: ask Cowork
    directly in the main conversation and confirm the prompt — not by having a
    pipeline skill do it.
+
+   Two matchers, two regexes, one script. `APPROVAL_TOOL` anchors its tail with
+   `(_|$)` so the bare generic `approve` verb cannot sail through; `SPEND_TOOL`
+   uses an **exact** `$` tail because the four money-moving names are the whole
+   set and have no per-entity suffix form — a looser tail would swallow unrelated
+   future tools (`create_adset_template`, …) and turn a governance gate into a
+   nuisance prompt. Both branches emit the same `deny`/`ask` decisions; they are
+   kept separate only so the reason text can name the real stakes (money and
+   public claims) instead of talking about approval gates.
+
+   **The publish posture in one line:** the ads Publish stage
+   (`ssc-ads-publish`) prepares the payload — assembled asset feed, re-run floor
+   and coverage verdicts, both linkage grains — and **stops**. The operator
+   commits with the Publish click in `/ad/[month]/[id]`.
 
 3. **Prose** (in every skill/agent). The propose-only hard rule states no
    `approve` (the single generic verb — the ONLY gated promotion) and no publish,
@@ -60,16 +86,29 @@ There are three layers holding that line, weakest last:
 
 Reversible, low-stakes gates (curate/select drafts, per-idea approval) are fine
 to do on the operator's explicit instruction via layer 2. **Consequential,
-hard-to-reverse actions — publishing, ad spend (`update_budget` syncs to the
-Facebook Marketing API) — are never agent-callable** and stay operator-only in
-the dashboard.
+hard-to-reverse actions — publishing an ad, ad spend (`update_budget` syncs to
+the Facebook Marketing API) — stay operator-only in the dashboard.** The ad
+create itself lives at `POST /api/ad-publish/commit`, a dashboard route rather
+than an MCP tool, precisely so that no agent path to it exists at all.
+
+**Be precise about what is actually closed, though.** Of the four money-moving
+tools, only **`update_budget`** is closed server-side: it declares
+`spendsCredits`, which makes it **invisible to an agent and refused if reached
+anyway**. `create_campaign`, `create_adset` and `create_ad` are **still
+registered as agent-callable MCP tools** on the Brand OS server. For those three
+this hook is **defence in depth, not server-side closure** — which is exactly why
+layer 2 matters here and why the gate is worth keeping honest. Do not write, in a
+skill or anywhere else, that the create surface is closed off server-side.
 
 ## Tests
 
-`approval-gate.test.mjs` pins **both** patterns — the `APPROVAL_TOOL` regex in
-`approval-gate.mjs` **and** the PreToolUse `matcher` in `hooks.json` (the latter
-decides whether the hook is even invoked, so it must agree with the former). Run
-it from `plugins/ssc-content/`:
+`approval-gate.test.mjs` pins **every** pattern — the `APPROVAL_TOOL` and
+`SPEND_TOOL` regexes in `approval-gate.mjs` **and** the PreToolUse `matcher`s in
+`hooks.json` (the latter decide whether the hook is even invoked, so they must
+agree with the former; the two families are disjoint, each with its own matcher
+entry, and the test unions them). It also exercises the script end to end for the
+four money-moving tools under both identities — subagent → `deny`, main → `ask`.
+Run it from `plugins/ssc-content/`:
 
 ```bash
 node --test "hooks/**/*.test.mjs"

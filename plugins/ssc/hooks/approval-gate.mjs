@@ -10,6 +10,11 @@
 //     ("Cowork, approve idea #3 for me")                -> ASK (confirm).
 //     The operator is explicitly in the loop; the confirmation prompt is the
 //     authorization. Autonomous/unattended approval cannot get past it.
+//   • create_campaign / create_adset / create_ad / update_budget — the
+//     money-moving Meta tools — carry EXACTLY the same posture: from a
+//     SUBAGENT -> DENY, from the MAIN conversation -> ASK. They spend real
+//     money and publish public claims; publishing is a human dashboard action
+//     (ads-publish-stage-linkage, D3).
 //   • everything else                                   -> defer (exit 0).
 //
 // This is a backstop, not the primary control — the MCP server still enforces
@@ -36,6 +41,20 @@
 // entity's approval field, and agents hold only `edit`. Do not try to teach this
 // regex about demotion; it is structurally blind to it, and the server is not.
 const APPROVAL_TOOL = /^mcp__ssc__(approve|unapprove)(_|$)/;
+
+// The money-moving, agent-callable Meta tools. Same posture as approval, for the
+// same reason: `create_campaign` / `create_adset` / `create_ad` / `update_budget`
+// spend REAL money and publish PUBLIC claims, and both are effectively
+// irreversible. Per ads-publish-stage-linkage D3, the Publish stage prepares a
+// payload and STOPS — the create itself is a human dashboard action, so no
+// skill, agent or automated step may call these.
+//
+// Exact-match tail (`$`, no `(_|$)`): unlike the approval family there is no
+// per-entity suffix form here — these four names are the whole set. A looser tail
+// would swallow unrelated future tools (`create_adset_template`, …) and turn a
+// governance gate into a nuisance prompt. Server-side capability remains the real
+// gate; this is the harness backstop.
+const SPEND_TOOL = /^mcp__ssc__(create_campaign|create_adset|create_ad|update_budget)$/;
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -90,7 +109,31 @@ async function main() {
   }
 
   const tool = input.tool_name ?? input.toolName ?? '';
-  if (!APPROVAL_TOOL.test(tool)) process.exit(0); // not a gate-flip tool
+  const isApproval = APPROVAL_TOOL.test(tool);
+  const isSpend = SPEND_TOOL.test(tool);
+  if (!isApproval && !isSpend) process.exit(0); // neither a gate-flip nor a spend tool
+
+  // Money-moving Meta tools — same deny/ask posture as approval, same identity
+  // detection. Kept as its own branch only so the reasons can name the real
+  // stakes (money + public claims) instead of talking about approval gates.
+  if (isSpend) {
+    if (isSubagent(input)) {
+      emit(
+        'deny',
+        `Propose-only: a pipeline run (subagent) must not call ${tool}. ` +
+          `These tools spend real money and publish public claims, and are effectively ` +
+          `irreversible. Publishing is a human dashboard action — the Publish stage ` +
+          `prepares the payload and stops.`,
+      );
+    }
+
+    emit(
+      'ask',
+      `${tool} spends real money and publishes public claims in the live ad account. ` +
+        `Publishing is normally a human dashboard action. Confirm you are doing this on ` +
+        `the operator's explicit instruction (not autonomously).`,
+    );
+  }
 
   if (isSubagent(input)) {
     emit(

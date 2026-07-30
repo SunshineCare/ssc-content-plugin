@@ -70,9 +70,13 @@ Local iteration follows the plugin cache rules in CLAUDE.md: a same-version cont
 
 ## Open Questions
 
-One question remains open. (The two that stood here before — whether the server should stop inferring, and what to do about lineage-less rows — are **resolved**: see Server Requirements A and B.)
+No question remains open. (The two that stood here before — whether the server should stop inferring, and what to do about lineage-less rows — are **resolved**: see Server Requirements A and B.)
 
 - **Do the rows carrying a WRONG (server-inferred) `brief_id` get audited?** Requirement B's purge does not touch them: they are not null, they are simply not *chosen*, and they look exactly like correct rows. Live data shows all 20 ad content rows on the five-brief idea `BGerzuw4JrrSz3Qd` stamped with the *same* `brief_id` (`IeZb6HjExf2PtUJD`), and nothing documents the rule that produced it (first approved? most recent? lowest id?) or says it is the angle any of those rows was actually written from. **One cheap audit signal was found live:** each content row's `comment` is a Vietnamese rationale that usually **names the brief it was written from** — e.g. *"Hiện thực đúng hook_direction của brief (tủ đồ mùa hè…)"* — so attribution is often recoverable by comparing the row's `comment` against the stamped brief's `angle_label`, far cheaper than re-deriving the angle from the body. Whether to run that audit is the owner's call. The plugin cannot make it: it has no record of which angle each historical row came from.
+
+  **RESOLVED 2026-07-30 — the audit was authorized and run (read-only) over all 46 rows on that stamp; see tasks.md 4.3 for the per-row verdict.** Two results matter beyond this change:
+  - The cheap signal is **weaker than this section claimed**. All four approved briefs on the idea open `core_message` with the same sentence — *"Chị không thiếu quyết tâm…"* — so the willpower language that dominates the comments discriminates nothing. Only `hook_direction` separates the angles. A `comment`-vs-`angle_label` comparison is not sufficient; `comment`-vs-`hook_direction` is.
+  - **Requirement A does not close the defect.** Mis-homed rows appear in the *post*-fix cohort too (explicit `brief_id`, 2026-07-20), most clearly `p6oSyFYk8k1uRqC1`, whose comment claims a hook belonging to a different brief. So the residual failure mode is **the operator/skill invoking the writer against the wrong `brief_id`**, which no server-side rule can catch — the server cannot know which angle the caller meant. Roughly 7 of 46 rows are flagged; ~33 are indeterminate because proof-led sections reuse proof points across every angle. This makes the lineage caution in the `ssc-image-prompt-*` skills **still correct and still necessary** — do not remove it on the strength of A having shipped.
 
 ## Drift Log
 

@@ -1,13 +1,13 @@
 ---
 name: ssc-plan-review
-description: Runs the REVIEW step of the Cambridge Diet Vietnam monthly plan head — the system's ONLY look-back, and the first of the Plan stage's four steps (Review → Tactics → Research → Narrative). Review learns WHICH TOPICS LAND, and POSTS are its primary evidence: the organic page is where a topic earns attention on its own merit, so the post lens ranks topic terms (pillar, entry, frame, journey_stage, persona, value, format, against) on ENGAGEMENT RATE, never on absolute counts. It reads THREE SEPARATE LENSES that are never blended into one score — (1) ORGANIC POSTS, the topic verdict; (2) BOOSTED POSTS, read as its own lesson about what money did to a topic's reach and resonance, never merged into the organic rate and never graded on an ad tier; (3) ADS, read BY LAYER first (L1/L2/L3, each on its OWN KPI — L2 on CPM + volume + continuity and NEVER on cost-per-purchase; L1/L3 on cost per PURCHASE, with cost per conversion demoted to diagnostic), then as a secondary signal on the narrow persona/route vocabulary the ad briefs carry. THE PERFORMANCE DATA IS THE AUTHORITY and content mapping only ENRICHES it: every lens is first read across its FULL population — ranking the rows themselves and reading the actual copy of the winners and losers — so a row that maps to no content is evidence without a label, never evidence to discard. It does NOT compare post performance against ad performance — they answer different questions on different denominators, and a blended per-term score is forbidden. Writes a McKinsey-style MARKDOWN report to month_plans.performance_review via save_month_plan — the column is markdown, NOT jsonb, so the report IS the column value with no structured envelope and nothing machine-readable. Answer-first and MECE across eight sections: §1 the conclusion before any evidence, §2 EXACTLY THREE lessons written as claims with confidence inline, §3–§5 the three lenses, §6 a directive handoff table whose consumers are the three PLAN STEPS ONLY (Tactics / Research / Narrative — channel pipelines read what Tactics decided, never this report), §7 coverage, and an appendix table of ranked terms carrying scale | maintain | drop or an explicit em-dash when no post-lens evidence exists. Because nothing is machine-readable, §6 is the ONLY carrier — a lesson not written there reaches no later step — and every number a later step needs must appear in the text. A section that cannot be answered STAYS and states 'không đủ dữ liệu'; it is never dropped and never filled from another lens. Carries every coverage degradation into the artifact rather than smoothing it: an uncovered date is UNKNOWN and never zero, conversions at/after provisional_from are labelled provisional, a boundary-straddling or genesis page segment is reported whole and excluded and never apportioned, and an incomplete lens is marked as not a settled measurement. Attributes performance to terms by MATCHING CONTENT (the content_id FKs are empty in practice, and the copy corpus's exact-hash bridge reaches only a fraction of what normalised matching does) and reads terms from BOTH idea_terms (posts) and the brief's persona/route/layer columns (ads); consults the server's copy corpus via search_copy for metrics that arrive ALREADY JOINED (ad spend/cpa, post engagement_rate, content brief_id) and NEVER recomputes a figure the rollup already carries, because a second copy of the join rules is how spend starts disagreeing with itself; counts a piece of content ONCE even when both published and boosted; reports what it cannot attribute as noted-only free text that NEVER auto-mints a taxonomy term. Reads the prior period's performance_analyses digest when one exists and treats it as authoritative — but NEVER writes, upserts or replaces it (that stays owned by the quarterly retrospective). Records the absence gracefully when the prior period has no data. Propose-only; sets no gate — the month's only approval is the Narrative, a human dashboard action.
+description: Runs the REVIEW step of the Cambridge Diet Vietnam monthly plan head — the system's ONLY look-back, and the first of the Plan stage's four steps (Review → Tactics → Research → Narrative). Review learns WHICH TOPICS LAND, and POSTS are its primary evidence: the organic page is where a topic earns attention on its own merit, so the post lens ranks topic terms (pillar, entry, frame, journey_stage, persona, value, format, against) on ENGAGEMENT RATE, never on absolute counts. It reads THREE SEPARATE LENSES that are never blended into one score — (1) ORGANIC POSTS, the topic verdict; (2) BOOSTED POSTS, read as its own lesson about what money did to a topic's reach and resonance, never merged into the organic rate and never graded on an ad tier; (3) ADS, read BY LAYER first (L1/L2/L3, each on its OWN KPI — L2 on CPM + volume + continuity and NEVER on cost-per-purchase; L1/L3 on cost per PURCHASE, with cost per conversion demoted to diagnostic), then as a secondary signal on the narrow persona/route vocabulary the ad briefs carry. THE PERFORMANCE DATA IS THE AUTHORITY and content mapping only ENRICHES it: every lens is first read across its FULL population — ranking the rows themselves and reading the actual copy of the winners and losers — so a row that maps to no content is evidence without a label, never evidence to discard. It does NOT compare post performance against ad performance — they answer different questions on different denominators, and a blended per-term score is forbidden. Writes a McKinsey-style MARKDOWN report to month_plans.performance_review via save_month_plan — the column is markdown, NOT jsonb, so the report IS the column value with no structured envelope and nothing machine-readable. Answer-first and MECE across eight sections: §1 the conclusion before any evidence, §2 EXACTLY THREE lessons written as claims with confidence inline, §3–§5 the three lenses, §6 a directive handoff table whose consumers are the three PLAN STEPS ONLY (Tactics / Research / Narrative — channel pipelines read what Tactics decided, never this report), §7 coverage, and an appendix table of ranked terms carrying a PROPOSED scale | maintain | drop or an explicit em-dash when no post-lens evidence exists — the skill proposes a disposition and the OPERATOR decides it; a disposition is never presented as settled and never acts on itself. Ranks the five per-asset COVERAGE-AXIS kinds — lead type, opening frame, proof device, register, length band — in the SAME single ranking as the existing kinds (pillar, persona, route, angle, layer), read from `get_term_performance`'s one `terms[]` list, with no second read, no separate axis section and no per-term score or rank number. Reads that read's top-level `untagged[]` bucket — one row per kind, `pieces` beside `tagged_pieces` — and states the untagged volume beside every axis ranking: untagged work (assets produced before the axes were recorded) is EXCLUDED from the axis ranking, NEVER counted as zero and NEVER dropped from the denominator, so a period that is mostly legacy reads as mostly legacy rather than as a confident ranking over a handful of tagged assets. `untagged` is NOT `unattributed` — the two are different failures and both are reported. Every per-axis figure is OBSERVATIONAL, never causal: delivery is not randomised across assets and axis interactions are not observable, so an axis that appears to win may simply have been given the better briefs. Because nothing is machine-readable, §6 is the ONLY carrier — a lesson not written there reaches no later step — and every number a later step needs must appear in the text. A section that cannot be answered STAYS and states 'không đủ dữ liệu'; it is never dropped and never filled from another lens. Carries every coverage degradation into the artifact rather than smoothing it: an uncovered date is UNKNOWN and never zero, conversions at/after provisional_from are labelled provisional, a boundary-straddling or genesis page segment is reported whole and excluded and never apportioned, and an incomplete lens is marked as not a settled measurement. Attributes performance to terms by MATCHING CONTENT (the content_id FKs are empty in practice, and the copy corpus's exact-hash bridge reaches only a fraction of what normalised matching does) and reads terms from BOTH idea_terms (posts) and the brief's persona/route/layer columns (ads); consults the server's copy corpus via search_copy for metrics that arrive ALREADY JOINED (ad spend/cpa, post engagement_rate, content brief_id) and NEVER recomputes a figure the rollup already carries, because a second copy of the join rules is how spend starts disagreeing with itself; counts a piece of content ONCE even when both published and boosted; reports what it cannot attribute as noted-only free text that NEVER auto-mints a taxonomy term. Reads the prior period's performance_analyses digest when one exists and treats it as authoritative — but NEVER writes, upserts or replaces it (that stays owned by the quarterly retrospective). Records the absence gracefully when the prior period has no data. Propose-only; sets no gate — the month's only approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
   brand: cambridge-diet-vn
   section: plan
   capability: edit
-  tools: [get_month_plan, get_performance_range, get_ad_performance, get_post_performance, get_performance_analysis, get_content_gaps, search_copy, list_taxonomies, get_brief, get_idea, list_content, save_month_plan]
+  tools: [get_month_plan, get_performance_range, get_ad_performance, get_post_performance, get_performance_analysis, get_term_performance, get_content_gaps, search_copy, list_taxonomies, get_brief, get_idea, list_content, save_month_plan]
 ---
 
 # Monthly Plan — Review (`ssc-plan-review`)
@@ -36,6 +36,23 @@ the same per-term score.
 **You rank TERMS, not metrics** — the judgement that survives is "this topic is
 worth **scaling / maintaining / dropping** next month", with the evidence shown
 **per lens**, never fused into one number.
+
+**You PROPOSE the disposition; the operator DECIDES it.** Ranking is this step's
+work, but `scale` / `maintain` / `drop` is a **proposal written into the
+artifact for a human to act on**, never a decision the step makes and never
+something that takes effect by being written. Nothing downstream is retired,
+demoted or amended because a ranking said so — doctrine and taxonomy change only
+at the quarterly cycle, by a human act. Write dispositions as what the evidence
+supports; never as what has been settled.
+
+**The figures are OBSERVATIONAL, never causal.** Delivery is **not randomised
+across assets** and axis interactions are **not observable**, so every figure
+here describes what was observed *beside* a term, never what a term *produced*.
+A term that appears to win may simply have been given the better briefs, the
+better budget or the better audience. Never write that a term, a lead, a frame,
+a device, a register or a length *caused*, *drove*, *lifted* or *produced* a
+result — write that it was observed alongside one. This qualification is
+mandatory in the persisted report, not optional colour.
 
 ## The three lenses — read separately, never blended
 
@@ -435,8 +452,10 @@ Four binding rules:
    appears on both sides; its terms receive its contribution **once**, never once
    per lens. Two ads running one piece of content are **one piece**. Report the
    two sides separately under that single term.
-2. **Rank leaf terms only** — pillar, persona, route, angle, layer. Never invent a
-   term, and never promote an emergent topic to one: that is a human action.
+2. **Rank leaf terms only** — the idea-level kinds (pillar, persona, route,
+   angle, layer) **and** the five per-asset coverage-axis kinds (see below), in
+   **one** ranking. Never invent a term, and never promote an emergent topic to
+   one: that is a human action.
 3. **A text match is evidence, not proof.** Say which path attributed each term
    and how much volume each path carried. A body match is strong; a headline-only
    or fuzzy match is weaker — label it, and never present a matched attribution as
@@ -445,6 +464,71 @@ Four binding rules:
    reaches is reported as **noted-only prose beside the ranking** — the share of
    the month the ranking does not explain, stated as a proportion of spend so its
    size is legible. It **never** auto-mints a taxonomy term.
+
+#### The coverage-axis kinds rank in the SAME list — `get_term_performance`
+
+Beyond the idea-level kinds, each produced asset now records its own **coverage
+axes**: **lead type**, **opening frame**, **proof device**, **register** and
+**length band**. They are ordinary taxonomy kinds, not a separate surface.
+
+```
+Call: get_term_performance
+  since: <first day of prior period>
+  until: <last ingested day of prior period>
+  kinds: <the idea-level kinds AND the five axis kinds, in ONE call>
+```
+
+- **One `terms[]` list, one ranking.** Axis term rows are structurally identical
+  to a pillar row — `term_id`, `kind`, `code`, `label`, `pieces`,
+  `content_ids`, a `page` side and an `ads` side. Rank them **alongside** the
+  existing kinds; there is **no second call**, no separate axis step and no
+  separate appendix table.
+- **Never enumerate the axis rosters.** Which lead types, frames, devices,
+  registers and length bands exist is the taxonomy's business — resolve every
+  term through `list_taxonomies` and the live KB doc. A new proof device or a
+  seventh lead must need **no change to this skill**.
+- **Every honesty rule above binds these kinds unchanged.** No merged total
+  across kinds; **no per-term score and no rank number** (any single scalar
+  would have to weigh page views against ad impressions); an **uncovered term is
+  uncovered, not zero**; figures at/after `provisional_from` stay labelled
+  provisional; and **no frequency** derived from `reach_day_sum`.
+- **Read the rollups, never recompute them** — the same rule as `search_copy`.
+
+##### `untagged[]` — legacy volume is reported, never zeroed
+
+The read carries a **top-level `untagged[]` bucket, one row per kind**:
+`kind`, `pieces`, `tagged_pieces`, a `page` side (`posts`, `totals`) and an
+`ads` side (`ads`, `metrics`).
+
+Assets produced before the axes were recorded carry **no axis term at all**.
+They are **excluded from the axis ranking** and reported here instead:
+
+- **Untagged is NEVER zero.** Those assets recorded no choice; a zero would
+  measure a decision nobody made. Never give them a term row, and never let one
+  appear in the ranking as a poorly-performing value.
+- **Untagged is NEVER dropped from the denominator.** State `pieces` and
+  `tagged_pieces` **side by side, unsummed** — the server deliberately does not
+  pre-sum them into a coverage score, and neither do you.
+- **Quote it whenever `pieces` dwarfs `tagged_pieces`.** A `lead_type` ranking
+  over three tagged assets out of a hundred and twenty is **not** a ranking of
+  the period, and must not read like one. **A period that is mostly legacy must
+  read as mostly legacy** — say so in §1 and §7, not only in the appendix.
+- **`untagged` is NOT `unattributed`.** They are two different failures and both
+  are reported, separately, never merged:
+
+  | Bucket | What it means |
+  |---|---|
+  | `untagged[]` | The piece **is** linked and **is** ranked — under some *other* kind — but carries no term of **this** kind. Chiefly work produced before that axis existed. |
+  | `unattributed` | The volume the ranking does not explain **at all** — a page post with no content link, an ad with no content link, or content carrying no term of any requested kind. |
+
+  A piece approved before the axes existed still carries its pillar: it ranks
+  under `pillar` and is **untagged** under `lead_type`. Never describe one bucket
+  with the other's words, and never add their figures together.
+
+**The observational rule binds every axis figure.** Delivery is not randomised
+across assets and axis interactions are invisible, so an axis value that appears
+to win may simply have been given the better briefs. Report the axis ranking as
+**an observation**, and pair it with the untagged share so its weight is legible.
 
 **Report the ranking's coverage honestly.** State what share of the period's spend
 and page volume the ranking actually explains — a ranking covering 11% of spend is
@@ -460,15 +544,31 @@ read those same names and their copy as ordinary observations in Step 3c: "the t
 cheapest ad sets both led with a safety objection" is a legitimate finding, stated
 as an observation rather than as a term.
 
-### Step 5: Judge each term's disposition
+### Step 5: Propose each term's disposition — the operator decides it
 
-For every attributable term, assign exactly one:
+For every attributable term, propose exactly one:
 
 | Disposition | Means |
 |---|---|
 | `scale` | Earned more next month — evidence supports increasing its share. |
 | `maintain` | Holding its role; keep roughly as-is. |
 | `drop` | Not earning its place — reduce or stop. |
+
+**A disposition is a PROPOSAL, not a decision, and least of all an action.**
+Writing `drop` beside a term retires nothing, demotes nothing and amends
+nothing — it tells the operator what the evidence supports so they can decide.
+Write it in that voice ("bằng chứng ủng hộ giảm…"), never as a settled verdict
+("đã loại…"). This binds the coverage-axis kinds especially: **one month's
+ranking never changes doctrine.** A lead type, frame, device, register or length
+band that ranks poorly is **not** retired here, and the floor is not altered
+here — doctrine amendment happens only at the **quarterly** cycle and only by a
+human act. If a period genuinely suggests a doctrinal change, **propose it in §6
+and stop there.**
+
+**And propose it observationally.** The evidence supports a disposition; it never
+proves a cause. Delivery is not randomised across assets and axis interactions
+are invisible, so a `scale` on an axis term means "this value was observed
+alongside the better results", never "this value produced them".
 
 **The organic post lens carries the disposition.** It is the only lens that says
 whether a *topic* works, because it is the only one where attention was earned
@@ -537,7 +637,10 @@ Two things this makes load-bearing:
 **§1 — Kết luận điều hành.** ~150 words. The answer **before** any evidence: what
 the period taught, what it could not teach, what should change. **A caveat that
 changes the conclusion belongs HERE, not §7** — burying one that inverts the
-answer is the single thing this report may never do.
+answer is the single thing this report may never do. **A period whose coverage
+axes are mostly untagged is exactly such a caveat**: say in §1 that the axis
+reading rests on a small tagged minority, rather than letting the appendix imply
+the period was ranked.
 
 **§2 — Ba điều rút ra.** **EXACTLY THREE.** Each is a **claim**, not a topic label
 ("Chủ đề mệt mỏi giữ được tương tác khi tăng ngân sách", never "Chủ đề mệt mỏi").
@@ -600,7 +703,13 @@ the honest one.
 
 **§7 — Độ tin cậy của số liệu.** Measured span; uncovered dates (**UNKNOWN, never
 zero**); provisional cutoff; excluded page segments **whole** with reason; per-lens
-completeness; attribution method and its coverage share; whether a digest existed;
+completeness; attribution method and its coverage share; **the untagged share
+per coverage-axis kind** (`tagged_pieces` beside `pieces`, unsummed, with the
+legacy cause named — an untagged asset is unknown on that axis, **never a
+zero**, and is **not** the same thing as the unattributed volume reported
+beside it); **the statement that every per-axis figure is observational rather
+than causal**, because delivery is not randomised across assets and axis
+interactions are not observable; whether a digest existed;
 and, when the copy corpus was consulted, its `pending_count` — entries not yet
 embedded are corpus coverage you did not have, and saying so is cheaper than a
 reader assuming the sweep was complete.
@@ -615,6 +724,18 @@ reader assuming the sweep was complete.
 - The three lens columns stay **separate** — no fused score, no column mixing a
   post metric with an ad metric.
 - An unmeasured lens renders **`không đo được`**, never `0`.
+- **The coverage-axis kinds are ROWS IN THIS SAME TABLE**, distinguished only by
+  their `Loại` cell — no second appendix, no separate axis ranking, no score or
+  rank number anywhere.
+- **Every axis kind is followed by its untagged line**, stated in the two halves
+  the read gives and never summed:
+  `<loại>: <tagged_pieces> nội dung có gắn thẻ / <pieces> nội dung KHÔNG gắn thẻ trục này (chủ yếu là nội dung sản xuất trước khi trục này được ghi nhận — KHÔNG phải bằng 0, và không bị loại khỏi mẫu số)`.
+  When the untagged half dwarfs the tagged half, the line says the ranking does
+  not describe the period.
+- **The table carries the observational caveat once, above it** — in Vietnamese,
+  stating that phân phối không được ngẫu nhiên hoá giữa các nội dung and that
+  tương tác giữa các trục không quan sát được, so the figures are quan sát, chứ
+  không phải nhân quả.
 - Rows must be **self-contained**: one that only makes sense beside a number in §3
   is broken, because nothing links them anymore.
 
@@ -674,14 +795,21 @@ Report to the operator in their language:
 1. The **measured span** and what it was worth — uncovered dates, provisional
    cutoff, which lenses were complete.
 2. The **organic baseline** engagement rate and how many posts it rests on.
-3. The **topic verdict** — ranked terms with dispositions, evidence per lens.
-   Lead with the post lens; it is the answer to "which topics land".
-4. The **boost lesson** — what budget bought (reach) versus what it cost
+3. The **topic verdict** — ranked terms with **proposed** dispositions, evidence
+   per lens. Lead with the post lens; it is the answer to "which topics land".
+   Say plainly that the dispositions are proposals for the operator to decide,
+   not decisions the step has made.
+4. The **coverage-axis reading** — the five axis kinds ranked in the same list,
+   each with **how much of the period was untagged on it** (tagged beside
+   untagged, unsummed). State that these figures are **observational, not
+   causal**, and that one month's ranking changes no doctrine.
+5. The **boost lesson** — what budget bought (reach) versus what it cost
    (engagement rate), stated against the organic baseline.
-5. The **ad reading** as secondary context on persona/route only, explicitly not
+6. The **ad reading** as secondary context on persona/route only, explicitly not
    compared against the post figures.
-6. What could **not** be attributed, and why.
-7. Where to review it: `/content/plan/<period>` — the report is markdown, so the
+7. What could **not** be attributed, and why — keeping **untagged** (no term of
+   that kind) distinct from **unattributed** (no link, no term of any kind).
+8. Where to review it: `/content/plan/<period>` — the report is markdown, so the
    operator edits the document itself.
 
 Lead with the degradation when there is any. An operator who reads your summary
@@ -714,8 +842,24 @@ document.
   those guards can look correct and still be unsafe. If the tool genuinely
   refuses, report that and stop rather than routing around it.
 - **Never hard-code KB content.** Name the doc and section and read it live —
-  personas, pillars, routes, the awareness framework, tier roles. Rosters are
-  open: a term added or retired must need no change to this skill.
+  personas, pillars, routes, the awareness framework, tier roles, and the
+  doctrine doc governing the coverage axes. Rosters are open: a term added or
+  retired — including a new proof device or an additional lead type — must need
+  **no change to this skill**. **A failed KB read STOPS the run**: report which
+  doc could not be read and stop, rather than proceeding on a remembered version.
+- **The disposition is a proposal; the operator decides.** Review ranks terms and
+  writes a proposed `scale`/`maintain`/`drop` beside each; it never decides one,
+  never presents one as settled, and writing one takes no effect on anything.
+- **Never amend doctrine or taxonomy.** One month's ranking retires no term,
+  demotes no proof device and alters no rule — about 2% of creatives win and
+  delivery is not randomised, so a month's ranking is mostly noise. Doctrine
+  changes only at the **quarterly** cycle, by a human act. Propose in §6; never
+  apply.
+- **Never present a per-axis figure causally.** Delivery is not randomised across
+  assets and axis interactions are not observable — the figures are
+  observational. No wording may imply an axis value caused a result.
+- **Never conflate `untagged` with `unattributed`**, never report untagged volume
+  as zero, and never drop it from the denominator.
 - **The persisted report is entirely Vietnamese** — every section, every table
   cell, every heading. Operator-facing chat may be the operator's language.
 - **Never fabricate to fill the structure.** Three lessons is a discipline, not a

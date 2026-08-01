@@ -43,7 +43,11 @@ Hold the full list of approved YouTube ideas — you will need each idea's `id`,
 
 Call `get_knowledge` for `channels/youtube` and `rules/scheduling`, and read the plan's briefing parameters from `plan.tactics`/`plan.context` and `plan.targets` (video count, stage mix, format mix, any key dates). **The KB documents are the source of truth for cadence — if they conflict with any inline guidance below, the document wins.** Derive the month's cadence (long-form-per-week, Shorts-per-week, the consistent publish day, series-alternation rule, documentary anchor window) from the KB applied to the month's briefing; do not freeze counts into this skill.
 
-As a fallback only when the KB is silent, the baseline Cambridge Diet Vietnam YouTube cadence is: 1–2 long-form/week on one consistent day held for the month; 1–2 Shorts/week on other days; no two consecutive long-form videos from the same series; and a monthly `documentary` anchored in week 2 or 3. Treat these as defaults the KB overrides.
+**Failed read = STOP.** If `channels/youtube` or `rules/scheduling` cannot be read, STOP the run immediately, save nothing, and tell the operator **which document could not be read**:
+
+> Could not read `<path>` from the knowledge base. The cadence rules live there, so scheduling stops here — re-run once the document is readable.
+
+There is no fallback cadence and no default to fall back to. Never schedule from prose in this skill, from memory, or from a cached copy of the document: the KB is the only source of cadence, and a cadence invented in its absence is indistinguishable from an approved one once it is written to `schedule_entries`.
 
 **2b. Key dates**
 
@@ -65,7 +69,7 @@ Apply all of the following constraints (parameters come from the KB/briefing per
 
 **C. Series alternation for long-form** — Within any two consecutive long-form publish dates, the two videos must not share the same series. If a collision occurs, swap the later video with the nearest same-week video from a different series.
 
-**D. Documentary anchor** — If a `documentary` series video is in the plan, assign it to the KB's anchor window (baseline: week 2 or 3). Do not assign it to week 1 (too early to anchor) or week 4 (too late to build momentum).
+**D. Documentary anchor** — If a `documentary` series video is in the plan, assign it to the anchor window the KB defines. Do not carry a remembered window here: the window is whatever `channels/youtube` / `rules/scheduling` states for this month's briefing, and Step 2's stop rule already guarantees those documents were read.
 
 **E. Key-date alignment** — For each key date: assign any thematically tied long-form video to publish 3–5 calendar days before it; assign any thematically tied Shorts to publish on the key date itself. If no idea is tied to a key date, skip (unlike posts, YouTube does not require a video on every key date).
 
@@ -133,5 +137,5 @@ Approve the schedule in the dashboard to finalise the publish calendar.
 
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **No auto-approval.** The operator reviews and approves the schedule in the dashboard.
-- Cadence constraints come from `channels/youtube` + `rules/scheduling` (the KB) applied to the month's briefing — the KB wins on any conflict. YouTube's publish rhythm (weekly long-form + Shorts) is fundamentally different from Facebook's daily-post cadence; do not apply Facebook cadence rules here.
+- Cadence constraints come from `channels/youtube` + `rules/scheduling` (the KB) applied to the month's briefing — the KB is the **only** source. There is no fallback cadence in this skill: if either document cannot be read, the run STOPS and names the document (Step 2a), rather than proceeding from prose, memory or a cached copy. YouTube's publish rhythm (weekly long-form + Shorts) is fundamentally different from Facebook's daily-post cadence; do not apply Facebook cadence rules here.
 - Requires `edit` capability (plus `view` for the reads via `get_channel_plan` and `list_ideas`).

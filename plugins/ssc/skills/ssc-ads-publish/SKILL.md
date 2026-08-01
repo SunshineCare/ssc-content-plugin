@@ -195,7 +195,8 @@ Load the live floor — **never a remembered version, and never restated here**:
 ```
 Call: get_knowledge
   paths: [
-    "ad/copy-checklist",
+    "craft/copy-floor",
+    "craft/coverage",
     "ad/creative-guidelines",
     "rules/banned-words",
     "rules/compliance",
@@ -204,7 +205,8 @@ Call: get_knowledge
   ]
 ```
 
-`ad/copy-checklist` owns the floor's items; `rules/*` own the hard bans and the mandatory footer.
+`craft/copy-floor` owns the floor's six pass/fail items; `rules/*` own the hard bans and the mandatory
+footer.
 Check `missing` on the call — an unread `missing` becomes a floor verdict that claims grounding it
 does not have. If the floor doc does not resolve, **STOP**: do not record a verdict you could not
 justify.
@@ -244,9 +246,8 @@ give the permutation engine genuinely different options, or has it collapsed ont
 applies **per section** because Meta permutes sections independently — a single-flavour headline pool
 bottlenecks the whole permutation however well the copy pool spans.
 
-Read the axes and the per-section span requirement from the **live** `ad/creative-guidelines` +
-`ad/copy-checklist` you already loaded; do not restate a remembered list here. Judge them across
-**exactly** the assets in this payload — never across everything the brief ever produced, and never
+Read the axes and the per-section span requirement from the **live** `craft/coverage` you already
+loaded; do not restate a remembered list here. Judge them across **exactly** the assets in this payload — never across everything the brief ever produced, and never
 inherited from what each section looked like when it was approved.
 
 - **A set that collapses onto one option on an axis its section must span → BLOCK**, naming the
@@ -349,8 +350,9 @@ investigating rather than working around.
 - **Verbatim or nothing.** Assembled text is exactly the approved `content.body`. Editing it here
   ships unapproved copy and breaks the text-keyed join at once.
 - **Never hard-code the floor or the coverage axes into this skill.** They live in the KB
-  (`ad/copy-checklist`, `ad/creative-guidelines`, `rules/*`), are revised on their own cadence, and
-  are read live every run. Two sources of truth for a compliance rule is drift waiting to happen.
+  (`craft/copy-floor`, `craft/coverage`, `ad/creative-guidelines`, `rules/*`), are revised on their
+  own cadence, and are read live every run. Two sources of truth for a compliance rule is drift
+  waiting to happen.
 - **Per-asset figures are observational.** Delivery is not randomised across assets and
   copy × headline interactions are invisible by construction. Nothing in this stage licenses a causal
   reading of per-asset performance.

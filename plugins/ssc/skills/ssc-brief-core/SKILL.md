@@ -1,7 +1,7 @@
 ---
 name: ssc-brief-core
 description: >-
-  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs that already exist. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, and whatever anchor that channel uses); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + scored field sets to the caller, which owns every save. Propose-only by construction; it holds no mutation tools at all.
+  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs that already exist. It CARRIES the idea's MECHANISM — inherited from the idea, written TO but never restated or varied — and carries the caller's declared AWARENESS STAGE through onto the fields — every channel that briefs declares one, posts included — plus the LAYER on a channel that has media layers (ads do; a post has no media home). It never declares a LEAD: the awareness-to-lead mapping is overlapping by design, and the lead is picked per asset by the writer, from the set the declared stage admits. `cta` is a DIRECTION only, never fixed wording, and is always subordinate to the declared layer's close job. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, anchor, the awareness stage, and — only where the channel has media layers — the layer); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + scored field sets to the caller, which owns every save. Never hard-codes a knowledge-base rule: it names the doc and section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction; it holds no mutation tools at all.
 metadata:
   type: skill
   stage: shared
@@ -23,17 +23,50 @@ own channel's storage shape. This is what makes you safe to share.
 
 ## What you do NOT decide
 
-Three things are the caller's, and guessing at them is how a shared skill starts
+Four things are the caller's, and guessing at them is how a shared skill starts
 serving neither channel:
 
 - **How many angles this idea gets.** The caller passes `angle_count`. A post is
   **exactly one** — one idea is one post, and its single brief is what production
   is keyed on. An ad fans out to one angle per fitting persona × route. You never
   infer this from the channel name.
-- **Which angle.** The caller passes the angle spec — persona, route, and
-  whatever anchor that channel uses. You turn a chosen angle into fields; you do
-  not choose it.
+- **Which angle.** The caller passes the angle spec — persona, route, the anchor
+  that channel uses, the **awareness stage** (every channel that briefs declares
+  one), and — only where the channel has media layers — the **layer**. You turn a
+  chosen angle into fields; you do not choose it, and you never re-diagnose a
+  stage or re-home a layer the caller declared. A caller that hands you no stage
+  is a **legacy** caller: proceed on the rest of the spec and report the absence,
+  never diagnose one in its place.
+- **The idea's MECHANISM.** It lives on the idea, resolved once above you, and is
+  handed to you. You write *to* it — never restate it, never vary it, never
+  invent one when the caller has none.
 - **Where any of it is stored**, and whether anything is approved.
+
+### The one thing NOBODY declares at brief time — the LEAD
+
+A brief declares the **awareness stage** (and, where the channel has one, the
+**layer**). It does **not** declare a **lead**, and neither do you: no field you
+return may name one, imply one, or be written so that only one lead could cash it
+out. The **writer** picks the lead per asset, from the set the declared stage
+admits — read live from `craft/awareness-framework` §7 at writing time, never from a
+list restated here.
+
+The reason matters, because "just decide it earlier" looks tidier and is wrong:
+
+- The awareness→lead mapping is **overlapping by design** — one stage admits
+  two or three leads — and **that overlap is exactly where coverage lives**. Fix
+  the lead at brief time and the overlap collapses to a point.
+- It would cost an **operator approval per lead**. Spanning four leads on one
+  angle would mean four briefs approved for **one creative decision** — the same
+  persona, route, anchor, stage and layer, differing only in a choice nobody has
+  made yet.
+- It removes the **only axis that changes the first line**, which is precisely
+  the part the ~125-character fold puts in front of the reader. Fixing it at
+  brief time freezes the one variable worth varying.
+
+So a `hook_direction` names the **route** and the **anchor** it works from, and
+stops there. If you find yourself writing a hook that only one lead type could
+open, you have written the writer's decision into the brief — rewrite it.
 
 ### The diversity boundary — who owns which half
 
@@ -59,12 +92,24 @@ about spread.
 
 ## Inputs (from the caller)
 
-- `idea` — the idea row: at minimum `id`, `title`, `channel`, `version`, and its
-  taxonomy `tags` (pillar / persona / value / entry / frame / journey_stage).
+- `idea` — the idea row: at minimum `id`, `title`, `channel`, `version`, its
+  `mechanism` (see below), and its taxonomy `tags` (pillar / persona / value /
+  entry / frame / journey_stage).
+- `idea.mechanism` — **why the thing works, or why past attempts fail**, resolved
+  once on the idea above you and inherited by every angle beneath it. Carried,
+  not authored: see **Step 4**. If the idea is a legacy row that carries none,
+  proceed and **report the absence** — never invent one to fill the gap.
 - `angle_count` — how many field sets to return. **1 for post.**
-- `angles[]` — one spec per requested set: `{ persona, route, anchor }`, where
-  `anchor` is the concrete thing this angle attacks (a belief, a trigger, an
-  objection, a myth) named by the caller.
+- `angles[]` — one spec per requested set:
+  `{ persona, route, anchor, awareness_stage?, layer? }`, where `anchor` is the
+  concrete thing this angle attacks (a belief, a trigger, an objection, a myth)
+  named by the caller. `awareness_stage` is the caller's declared reading of what
+  this reader already knows, and **every channel that authors a brief declares
+  one — posts included**. `layer` is the caller's declared **media home**, and
+  only a channel that has media layers has one (ads do; a post has none). You
+  carry both, and you never derive or revise either. **No spec ever carries a
+  lead type**;
+  if one arrives, ignore it and say so — that decision is the writer's.
 - `grounding` — the caller's already-loaded context: the month's guidance (a
   channel Approaches doc or equivalent), plus which KB docs it read. **This is an
   optimisation, not a substitute:** Step 1's list is read live regardless of what
@@ -82,6 +127,12 @@ about spread.
 The caller has already read the month's guidance and the personas. You need, and
 should read live rather than assume:
 
+- `craft/doctrine` — **§1 the chain** (what the spine actually is) and **§2 the
+  mechanism** (what a mechanism is, and what writing *to* one means). This is the
+  doc that governs Step 4's mechanism rule; never restate it here.
+- `ad/layer-tones` — the **per-layer close JOB**, and the source for `cta`'s
+  demotion to direction only. **Read it whenever the angle spec declares a
+  `layer`**; skip it only on a channel that has no layer at all.
 - `brand/angles` — the value / entry / against / experience dimensions and the
   frame codes. This is the vocabulary the fields are expressed in.
 - `brand/proof-points` — what the brand may actually claim, for `core_message`
@@ -100,6 +151,14 @@ should read live rather than assume:
 
 `search_knowledge` only when an anchor names something these do not cover and you
 need the brand's own position before writing a field about it.
+
+**Verify the load, and STOP on a failed read.** `get_knowledge` returns `found`
+**and** `missing` — read `missing` every time. If any doc above is missing, retry
+once; if it still does not resolve, **STOP and say which doc could not be read.**
+Do **not** proceed from a remembered version and do **not** fall back to a
+softer rule: these docs *are* the rules, two sources of truth for a compliance
+rule is the drift this repo has already been burned by, and a stopped run is
+recoverable in a way a silently-stale one is not.
 
 ### Step 2: Resolve the HERO — once per idea, before any field
 
@@ -157,19 +216,54 @@ For each requested angle, write, in Vietnamese:
 
 - **`hook_direction`** — what the opening does. Not the finished line: the
   strategy for it. Must obey the month's guidance on openings, and must ride the
-  angle's `anchor` rather than a generic pain.
+  angle's `anchor` rather than a generic pain. It names the **route** and the
+  **anchor** — never a lead type, and never a strategy only one lead could open
+  (see *The one thing NOBODY declares at brief time*).
 - **`core_message`** — the single argument, one sentence. This is what the hero
-  is cashed out as. If it does not serve the hero, the angle is wrong.
+  is cashed out as. If it does not serve the hero, the angle is wrong. It must
+  be **compatible with the idea's mechanism** — every lead the declared stage
+  admits has to be able to reach it.
 - **`why_now`** — why this month, tied to something real in the month's guidance
   (a date, a seasonal trigger, a signal). No evergreen filler; "always true" is a
   failed `why_now`.
 - **`story_moment`** — one concrete, sensory scene that grounds it. A time of day,
   a room, an object, a specific action. Abstractions are not moments.
-- **`cta`** — soft, authentic, and matched to the channel's objective as the
-  caller stated it. Never a hard sell.
+- **`cta`** — a **DIRECTION, not wording.** Name what the close should *do* for
+  this angle in a few Vietnamese words; never hand down a finished call-to-action
+  sentence for the writer to paste.
 
-Every field traces to the hero or to the angle's anchor. A field that traces to
-neither is decoration — cut it.
+**Carry the mechanism; never restate it.** The mechanism is the idea's, resolved
+once above you (`idea.mechanism`) and inherited by every angle beneath it. Your
+fields are written **to** it: they must be consistent with it and must leave the
+writer able to hit the mechanism beat. They must **not** reproduce it as a field
+of their own, paraphrase it into `core_message`, sharpen it, soften it, or offer
+this angle's own alternative mechanism — one subject sprouting contradictory
+mechanisms across its angles is exactly the failure the idea-level home prevents.
+If an angle genuinely cannot be written to the idea's mechanism, that is a
+**misfit angle**: return it below bar and say so. If the idea carries no
+mechanism at all (a legacy row), proceed, and **name the absence in the return**
+rather than authoring one here.
+
+**`cta` is subordinate to the layer's close job — the layer rule always wins.**
+Where the angle spec declares a `layer`, the close is governed by the per-layer
+close **job** in `ad/layer-tones`, read live: what the layer's close is *for* —
+qualifying, doing neither, or pre-selling. That doc's CTA phrasings are
+**non-exhaustive illustration**, not a menu to pick from and not a wording
+contract. So:
+
+- Your `cta` is a direction that **serves** that layer's job; it never overrides,
+  narrows or contradicts it.
+- Where the two disagree — including on a brief written before the layer's job
+  changed — **the layer rule governs and your `cta` yields.** Downstream, the
+  writer treats the layer as authoritative and corrects a mismatched `cta`; a
+  `cta` that fixes wording only guarantees that correction happens silently.
+- A `cta` that names a specific close sentence, or that would push a layer to do
+  a job that is not its own, is **wrong even if it reads well** — cut it back to
+  a direction.
+
+Every field traces to the hero or to the angle's anchor, is consistent with the
+idea's mechanism, and — where a layer is declared — leaves that layer's close job
+intact. A field that traces to none of those is decoration — cut it.
 
 ### Step 5: Score, drop, regenerate
 
@@ -185,6 +279,12 @@ above 3:
 - a `story_moment` that is not a concrete scene
 - a field that contradicts the hero
 - duplication of an existing brief in the taken set on the five fields
+- **a field that declares, names, or forces a lead type** — including a
+  `hook_direction` only one lead could open
+- **a field that restates, varies, sharpens, softens or contradicts the idea's
+  mechanism** instead of writing to it
+- **a `cta` that fixes wording rather than a direction, or that pulls against the
+  declared layer's close job** in `ad/layer-tones`
 
 Anything **≤ 3 is dropped and regenerated**, bounded at **two attempts per
 angle**. If a slot still cannot reach 4 after two attempts, return the best
@@ -206,6 +306,12 @@ have nothing to compare and are reported as not applicable, not as passed.
   same thing. *(always)*
 - The route FITS this idea's frame and journey stage. *(always — see the fit check
   in the diversity boundary; a misfit returns below bar)*
+- **No set declares or forces a lead**, and every set stays open to every lead its
+  declared stage admits. *(always)*
+- **Every set is written to the idea's mechanism** and none restates or varies it.
+  *(always; on a legacy idea with no mechanism, report the absence instead)*
+- **Every `cta` is a direction, not wording, and serves its declared layer's close
+  job.** *(whenever a layer is declared)*
 
 **Never report a batch-level verdict.** You cannot see the batch. Cross-idea
 repetition and route coverage are the caller's audit, and claiming them here would
@@ -215,18 +321,33 @@ Then return to the caller:
 
 ```
 hero:            <one sentence, or "unchanged">
+mechanism:       <the idea's mechanism, carried through verbatim — or
+                  "absent (legacy idea); not authored here">
 sets:            [ { angle, hook_direction, core_message, why_now,
                      story_moment, cta, score, comment, below_bar? } ]
 taken_compared:  <N briefs>
 audit:           <PASS, or the specific violations you could not resolve>
+declared:        <awareness stage as the caller declared it, echoed back
+                  unchanged — or "absent (legacy caller); not diagnosed here" —
+                  plus the layer, or "no layer (channel has no media home)">
+lead:            not declared — the writer picks it per asset, from the set the
+                  declared stage admits
 ```
+
+`mechanism` is echoed so the caller can see it was carried, not re-authored;
+`declared` is echoed so a caller can see its stage/layer arrived intact. The
+`lead` line is a constant, not a value you compute — it is there so a reader of
+the return can never mistake its absence for an omission.
 
 The caller saves. You do not.
 
 ## Output
 
 - One hero per idea (new, or reported unchanged)
+- The idea's mechanism, carried through — or its absence reported, never filled in
 - `angle_count` scored field sets, each with its Vietnamese comment
+- The caller's declared awareness stage + layer, echoed back unchanged
+- **No lead type, ever** — that decision belongs to the writer
 - Any set still below bar, flagged with why
 - A diversity audit result
 
@@ -241,9 +362,31 @@ The caller saves. You do not.
   post gets exactly one; nothing here may quietly produce more.
 - **Never overwrites an operator's hero** — read it, keep it, and escalate a
   genuine contradiction instead of resolving it.
+- **Never declares a lead (hard rule).** A brief declares the **awareness stage**
+  — on every channel that briefs, posts included — and, where the channel has a
+  media home, the **layer** — never a lead type. No returned
+  field may name one or admit only one. The **writer** picks the lead per asset
+  from the set the declared stage admits, read live from
+  `craft/awareness-framework` §7. The mapping is **overlapping by design** and that
+  overlap is where coverage lives: fixing the lead here would cost one operator
+  approval per lead for a single creative decision, and would freeze the one axis
+  that changes the first line — the part the ~125-character fold exposes.
+- **Never authors, restates or varies a mechanism (hard rule).** The mechanism
+  lives on the **idea**, is inherited by every angle beneath it, and is written
+  **to**, never reproduced. An angle that cannot be written to it returns below
+  bar; an idea that carries none has its absence **reported**, never filled in.
+- **`cta` is a direction only, and the layer rule always wins (hard rule).** No
+  returned `cta` fixes wording. Where a layer is declared, the per-layer close
+  **job** in `ad/layer-tones` governs — that doc's CTA phrasings are
+  non-exhaustive illustration — and a `cta` that pulls against it yields to it.
 - **Never hard-codes KB content.** Name the doc and its section and read it live —
-  personas and their triggers, the angle vocabulary, the proof points, the banned
-  words. No persona names in closed lists, no remembered trigger.
+  the doctrine and its mechanism, the per-layer close job, the lead taxonomy and
+  its awareness mapping, personas and their triggers, the angle vocabulary, the
+  proof points, the banned words. No persona names in closed lists, no lead
+  roster written out here, no remembered trigger.
+- **A failed KB read STOPS the run (hard rule).** Check `missing` on every load,
+  retry once, then stop and name the doc. Never proceed from a remembered
+  version and never substitute a softer rule for one you could not read.
 - All returned prose is **Vietnamese**; reasoning back to the caller may be the
   operator's language.
 - Requires `view` only.

@@ -1,6 +1,6 @@
 ---
 name: ssc-plan-tactics
-description: Runs the TACTICS step of the Cambridge Diet Vietnam monthly plan head — the SECOND of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the ONLY place the quarterly strategy and the monthly Review meet. Crosses the approved quarterly strategy brief (its approved directions + marked findings, read via get_strategy_brief) with the prior period's Review (month_plans.performance_review, markdown) to produce the month's THEMES — 3–5 cross-channel, directive one-liners — written as a Vietnamese markdown report to month_plans.tactics via save_month_plan. A theme with only a quarterly source is a strategy restatement; with only a monthly source it is a monthly reaction; BOTH is the point of the step, and an empty source column is left visible rather than hidden. Asks the operator AT MOST THREE questions, one at a time and never batched, and only about what no data can answer: Q1 business context (always — events, milestones, budget or staffing constraints, e.g. an anniversary), Q2 continuity-vs-correction (ONLY when the Review and the quarterly direction genuinely conflict), Q3 carry-over commitments (ONLY if Q1 surfaced an event). It NEVER asks what is readable — quarterly directions, what the Review found, which pillars are underweight. Operator answers become a THIRD traceable source column so a commitment-driven theme is visibly not a data finding. Themes are cross-channel and no channel_plans row carries its own; channels read this and decide their own Approaches. Also carries the month's explicit NON-GOALS (the Review's prohibitions must survive or they get re-litigated) and the measures next month's Review will judge each theme by, so themes stay falsifiable. Runs every month including a quarter's first, where the Review may be absent — the section stays and says so. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
+description: Runs the TACTICS step of the Cambridge Diet Vietnam monthly plan head — the SECOND of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the ONLY place the quarterly strategy and the monthly Review meet. Crosses the approved quarterly strategy brief (its approved directions + marked findings, read via get_strategy_brief) with the prior period's Review (month_plans.performance_review, markdown) to produce the month's THEMES — 3–5 cross-channel, directive one-liners — written as a Vietnamese markdown report to month_plans.tactics via save_month_plan. A theme with only a quarterly source is a strategy restatement; with only a monthly source it is a monthly reaction; BOTH is the point of the step, and an empty source column is left visible rather than hidden. Asks the operator AT MOST THREE questions, one at a time and never batched, and only about what no data can answer: Q1 business context (always — events, milestones, budget or staffing constraints, e.g. an anniversary), Q2 continuity-vs-correction (ONLY when the Review and the quarterly direction genuinely conflict), Q3 carry-over commitments (ONLY if Q1 surfaced an event). It NEVER asks what is readable — quarterly directions, what the Review found, which pillars are underweight. Operator answers become a THIRD traceable source column so a commitment-driven theme is visibly not a data finding. Themes are cross-channel and no channel_plans row carries its own; channels read this and decide their own Approaches. Also carries the month's explicit NON-GOALS (the Review's prohibitions must survive or they get re-litigated) and the measures next month's Review will judge each theme by, so themes stay falsifiable. Runs every month including a quarter's first, where the Review may be absent — the section stays and says so. ALSO authors the period's TWO HAND-DOWNS to the ads channel on the same save_month_plan call, each into its OWN field and never folded into the themes: proof_inventory ({ terms, notes }) — which proof devices can actually be supplied this period, its terms resolved live from the proof_device taxonomy roster via list_taxonomies so the roster stays open and is never enumerated in prose — and offer_state ({ promotion, label, startsOn, endsOn, notes }) — recorded ONLY when a real, DATED promotion exists, sourced from the operator's business-context answer and never derived from a theme or a seasonal opening. ABSENCE MEANS NONE: an omitted offer state is no promotion and an omitted inventory is a GAP the channel reports, never a default meaning every device is available — neither is ever invented to avoid an empty field. It does NOT author the market-sophistication read: that is the quarter's, authored once on the strategy brief and inherited by the month. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
@@ -23,6 +23,14 @@ Neither alone is a plan for the month. You cross them into the month's
 
 **A channel SHALL NOT author its own themes.** What you write here applies to
 every linked channel; the channels read it and decide their own Approaches.
+
+**You also state the month's two HAND-DOWNS** — the period's **proof inventory**
+and its **offer/promotion state** (Step 4). They are not themes and they are not
+prose: each is written into its **own** field on the same save, because the ads
+channel has to read the inventory as a *set* to span its proof-device axis, and a
+promotion buried in a paragraph is a timeliness claim nobody can check. The
+**market-sophistication read is NOT yours** — the quarter authors it once and the
+month inherits it (`ssc-plan-research` surfaces it).
 
 ## Inputs
 
@@ -48,6 +56,13 @@ against a draft, and the themes inherit that uncertainty.
 
 **The monthly Review** — `get_month_plan(period)` → `performanceReview`.
 
+The same call also publishes **what the period already states** for the two
+hand-downs — `proofInventory` and `offerState` (camelCase on the read surface),
+with an explicit `null` when nothing has been recorded. Read both before Step 4:
+you are either stating them for the first time or revising what is there.
+**`null` is a fact, not a failed read** — it means nothing has been stated yet,
+and it never means "all devices available" or "there is a promotion we forgot".
+
 It is **markdown, not structured**, so read it as prose. Its **§6 handoff table**
 was written to be directive and is your primary hook into it — each row names a
 Plan-step consumer, and the rows addressed to **Tactics** are instructions to
@@ -58,9 +73,11 @@ The spec requires Tactics to run regardless. Say plainly in §3 that there is no
 prior Review.
 
 **Optional grounding, read live, never restated from memory:** `get_content_gaps`
-for pillar balance, `list_taxonomies` for the live term rosters, and the KB
-(`get_knowledge` / `search_knowledge`) for personas, pillars and the awareness
-framework.
+for pillar balance, and the KB (`get_knowledge` / `search_knowledge`) for
+personas, pillars and the awareness framework.
+
+**`list_taxonomies` is NOT optional** when you state a proof inventory — it is the
+only source of the `proof_device` roster and its term ids (Step 4a).
 
 ## Step 2: Ask the operator — AT MOST THREE questions
 
@@ -79,6 +96,13 @@ you did not read.
 This is the highest-value question: nothing in Brand OS carries it, and it can
 invalidate an otherwise well-derived theme. A dated event also shapes **when** in
 the month things run, not only what.
+
+**This answer is also the ONLY source of `offer_state` (Step 4b).** If it names a
+promotion, capture its customer-facing **name** and its **start and end dates** in
+the same exchange — that is a clarification of the answer, not a fourth question.
+A promotion the operator cannot date is **not** recorded: record nothing rather
+than a dateless one, and never upgrade a seasonal opening or a milestone into a
+promotion.
 
 **Q2 — Continuity vs correction. ONLY when the Review and the quarterly
 direction genuinely conflict.** Skip it when they agree — do not manufacture a
@@ -122,16 +146,105 @@ evidence inline. Monthly themes are **short and directive** — an operator shou
 be able to act on one without re-reading the strategy. If your themes read like
 the quarterly brief, you have written a second strategy doc, not a month's plan.
 
-## Step 4: Write the report
+## Step 4: State the period's two hand-downs
+
+Two facts the ads channel **cannot verify for itself**, and neither of which is a
+theme: which **proof devices** are available this period, and whether a **real,
+dated promotion** exists. Both ride the same `save_month_plan` call as `tactics`,
+each in **its own field** — `proof_inventory` and `offer_state`.
+
+**Never fold either into `tactics`.** That field carries themes and only themes,
+and it stays readable as themes. A hand-down folded into prose is unreadable to
+the channel that has to act on it.
+
+### 4a — `proof_inventory`: which proof devices you can actually supply
+
+Read the roster live first:
+
+```
+Call: list_taxonomies
+```
+
+Work from the terms the **`proof_device`** kind returns, whatever they are. **Never
+enumerate the proof families in this file, and never list them from memory in the
+report** — the roster is deliberately open (a new proof device must need no change
+to this skill), and the families themselves are owned by `brand/proof-points`,
+which is read live by whoever needs their contents.
+
+For each term the roster returns, ask **one** question: *can we actually supply
+this device for this period* — is there a real, current trace behind it (a study,
+a document, a testimonial we hold, the product paperwork)? Include only the terms
+whose answer is yes.
+
+```
+  proof_inventory:
+    terms: [<the proof_device TERM IDS available this period>]
+    notes: "<Vietnamese prose — caveats, what is NOT available and why>"
+```
+
+- **`terms` are leaf taxonomy term ids** from the `list_taxonomies` call you just
+  made — never codes, never labels, never hand-typed, never reused from memory
+  across runs.
+- **`notes` is optional** free Vietnamese prose. Use it for what is missing this
+  period and why; a named absence is what next month acts on.
+
+**When nothing is stated, OMIT the whole field.** Absence is a **GAP** the ads
+channel reports plainly — it is never a default meaning "every device is
+available", and you never invent an inventory to avoid an empty field. Do **not**
+write `terms: []` to mean "not decided": an empty array is a positive statement
+that **no** device is available this period, which is a different and much
+stronger claim.
+
+**An omitted field preserves what was already stored** — it does not clear it. So
+when the inventory changes, re-state it in full; do not expect omission to remove
+a device that is no longer supportable.
+
+### 4b — `offer_state`: only a real, dated promotion
+
+```
+  offer_state:
+    promotion: true
+    label:     "<the promotion's name as the customer sees it>"
+    startsOn:  "<YYYY-MM-DD>"
+    endsOn:    "<YYYY-MM-DD>"
+    notes:     "<Vietnamese prose — terms, exclusions>"
+```
+
+**Record a promotion ONLY when it is real and dated** — it has a name the customer
+sees and a start and an end. Its source is the operator's business-context answer
+(Step 2, Q1/Q3); nothing in Brand OS carries it. **Never derive one** from a
+theme, a seasonal opening, a competitor's campaign or a calendar date. An undated
+"sale" is not an offer state.
+
+**If there is no promotion, record nothing. ABSENCE MEANS NONE.** Omit the field
+and the channel carries **no** timeliness claim and neither infers nor invents
+one. Writing `{ promotion: false }` is permitted and is stored distinctly from
+absence — use it only to record that the question was **asked and answered no**.
+It grants nothing extra: both absence and an explicit `false` mean *no promotion*,
+and neither ever licenses a timeliness claim.
+
+A stated promotion may be stated **once, as information**, downstream — that is the
+channel's call under the urgency rule, not yours. Your job is only to state the
+fact accurately, with its dates.
+
+## Step 5: Write the report
 
 ```
 Call: save_month_plan
   period: <period>
   tactics: "<the markdown document below>"
+  proof_inventory: <Step 4a — OMIT ENTIRELY when nothing is stated>
+  offer_state:     <Step 4b — OMIT ENTIRELY when there is no promotion>
 ```
 
-`tactics` is **markdown**, ungated, carried on `edit`. Nothing here is
+`tactics` is **markdown**, ungated, carried on `edit`. Nothing in *it* is
 machine-readable, so every instruction a later step needs must be **in the text**.
+The two hand-downs are the exception and the reason they are separate fields: they
+are structured, and the channel reads them as data, not as prose.
+
+**The hand-downs are NOT sections of this report.** Do not restate the inventory
+or the promotion as a theme — the fields are their record. §4 may note the
+*consequence* of an absent promotion (no timeliness this month) as a non-goal.
 
 ### Report skeleton — Vietnamese, 400–700 words
 
@@ -191,7 +304,10 @@ there is no schema to catch it.
   an existing version through nested shells — that is where escaping breaks
   silently.
 - **Verify what was STORED, not what you sent** — re-read the saved value and
-  re-check the cell counts.
+  re-check the cell counts. Re-read the hand-downs too: `get_month_plan(period)`
+  publishes them back as `proofInventory` / `offerState`, with an explicit `null`
+  when unrecorded. A `null` where you intended to state something is a failed
+  write, not an absence — say so rather than reporting the field as stated.
 
 ## Output
 
@@ -201,7 +317,14 @@ Report to the operator in their language:
 2. For each, **what it crosses** (quarterly / monthly / operator), naming any
    theme that rests on a single source.
 3. The **non-goals** carried forward.
-4. Where to review it: `/content/plan/<period>`.
+4. The **two hand-downs**, one line each and stated as facts, not as themes:
+   - `Kho chứng minh: <n thiết bị đã nêu | CHƯA NÊU — kênh Ads sẽ báo thiếu>`
+   - `Khuyến mãi: <tên + ngày bắt đầu–kết thúc | không có>`
+
+   Say plainly when either is unstated, and say what that means: an unstated
+   inventory is a gap the ads channel will report, and no promotion means the
+   month's copy carries no timeliness claim at all.
+5. Where to review it: `/content/plan/<period>`.
 
 Say plainly which operator answers shaped the themes, and which themes are
 commitments rather than bets — that distinction is the one most easily lost
@@ -224,6 +347,17 @@ downstream.
   Post / Ad / YouTube stages, not this step.
 - **Never write `performance_review`** — that is the Review step's artifact. You
   read it.
+- **Never author the market-sophistication read.** `sophistication_stage` /
+  `sophistication_read` live on the **quarterly** strategy brief, authored once
+  there and inherited by the month. You do not hold `save_strategy_brief`, you do
+  not derive a stage, and you do not restate one in `tactics`. A quarter with no
+  read recorded is a gap reported by whoever reads it — never filled in here.
+- **Never fold a hand-down into `tactics`.** `proof_inventory` and `offer_state`
+  have their own fields for a reason; the themes field stays themes.
+- **Absence is never a default (hard rule).** An omitted proof inventory is a GAP
+  the ads channel reports — it never means every device is available. An omitted
+  offer state means NO promotion. Never state a proof device you cannot supply,
+  and never state a promotion that is not real and dated.
 - **Write through `save_month_plan`, never around it.** The MCP tool is the only
   supported write path: it carries the capability check, the audit trail and the
   optimistic-concurrency guard. Never write the column by any other route, even
@@ -231,7 +365,19 @@ downstream.
   those guards can look correct and still be unsafe. If the tool genuinely
   refuses, report that and stop rather than routing around it.
 - **Never hard-code KB content.** Name the doc and its section and read it live —
-  personas, pillars, routes, the awareness framework. Rosters are open: a term
-  added or retired must need no change to this skill.
+  personas, pillars, routes, the awareness framework, and the proof families in
+  `brand/proof-points`. Rosters are open: a term added or retired — including a
+  **new proof device** — must need no change to this skill, so the `proof_device`
+  roster is read live from `list_taxonomies` and never enumerated in this file or
+  in the report.
+- **A FAILED READ STOPS THE RUN.** If a KB doc you named comes back missing,
+  empty or unreadable, or if `list_taxonomies` fails while you are building the
+  proof inventory, STOP, write NOTHING, and tell the operator:
+
+  > Không đọc được `<tài liệu / danh mục>`. Tactics dừng lại — bước này không chạy
+  > bằng bản ghi nhớ. Vui lòng kiểm tra rồi chạy lại. Chưa ghi gì cả.
+
+  Never substitute a remembered version and never guess a term id: a mistyped id
+  is rejected outright, and a remembered roster silently overrides the live one.
 - Persisted prose is **Vietnamese**. Operator-facing chat may be the operator's
   language.

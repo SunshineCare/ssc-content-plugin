@@ -37,33 +37,45 @@ against **real performance**. You save findings to the strategy brief. Propose-o
 Call `get_knowledge` for:
 - `brand/angles` — the canonical ad+content angle library (single source of truth: the Dimensions → Angle → Frame model)
 - `brand/personas` — each persona's prioritised ad approaches (`Góc tiếp cận ưu tiên`, #1–#9)
+- `craft/awareness-framework` **§1** (the awareness ladder — levels, `awareness_stage` codes, opening
+  strategy per level) and **§2** (the market-saturation ladder + Cambridge Diet Vietnam's stated
+  position) — the source of truth for Steps 2 and 3. Read it live and never substitute a remembered
+  version. **If this read fails, STOP the run** and say which document could not be read; do not
+  diagnose awareness or saturation from prose, memory or a cached copy.
 - `ad/strategy` — ad strategy guiding principles + persona × layer angle deployment (§2)
-- `ad/layer-tones` — the L1/L2/L3 awareness-layer tone & CTA model
+- `ad/layer-tones` **§4** (tone per media layer) and **§7** (layer vs awareness stage, and the
+  awareness → L1/L2/L3 mapping) — what the Step 7 layer recommendation rests on. The close-job
+  vocabulary and the CTA wording are **not** in this doc: they are owned by `craft/close-job` and
+  `craft/cta`
 - `brand/proof-points` — credibility signals
 - `winners/curated-index` — angles/copy proven to work
 - `losers/index` — angles already retired as fatigued/failed (do NOT re-flag these)
 
 ### Step 2: Diagnose market awareness level
 
-Using Eugene Schwartz's 5 Levels of Awareness, assess where the Vietnamese weight-loss /
-meal-replacement market currently sits:
+Work from `craft/awareness-framework` **§1** as loaded live in Step 1 — the awareness ladder, its
+numbering, each level's `awareness_stage` code, what that audience already knows, and the opening
+strategy it calls for are **that document's to state, and are deliberately not restated here**. Read
+it; never diagnose from a remembered ladder. (The levels have been renumbered before, so a baked-in
+copy does not merely go stale — it silently overrides the live doc.)
 
-1. **Unaware** — audience doesn't know they have a problem
-2. **Problem-aware** — know they struggle with weight but don't know solutions
-3. **Solution-aware** — know diet programs exist but haven't evaluated Cambridge Diet
-4. **Product-aware** — have heard of Cambridge Diet but haven't decided
-5. **Most aware** — warm leads/existing users
+Assess where the Vietnamese weight-loss / meal-replacement market currently sits **on §1's own
+table**, and name the level with §1's `Mã` code plus the bậc number exactly as §1 numbers it.
 
 Search signals (substitute `<years>` with the current and prior year from `period`, e.g. `2026-Q3` → `2026 2025`):
 - `WebSearch("Facebook Ads giảm cân Việt Nam <years> phổ biến")`
 - `WebSearch("quảng cáo thực phẩm chức năng giảm cân Facebook Việt Nam nội dung gì")`
 
-Assess: are most FB ads problem-aware (hook on pain) or product-aware (hook on solution comparison)?
+Assess against §1's opening/headline-strategy column: which row's opening strategy do most FB ads in
+this market actually match? That row is the market's level — name it by its `Mã` code as §1 gives it.
 
 ### Step 3: Assess market sophistication
 
-Count how many direct competitors run similar angles. The higher the count, the higher the
-sophistication — meaning **bold new angles are needed to cut through**.
+Count how many direct competitors run similar angles, and read that count against
+`craft/awareness-framework` **§2** — the market-saturation ladder and the position it states for
+Cambridge Diet Vietnam — again live, and again not restated here. The higher the saturation, the
+more the winning move shifts from claim to **mechanism / identification**, per §2's own strategy
+column.
 
 ### Step 4: Read OUR actual paid performance (`get_ad_performance`)
 
@@ -113,9 +125,9 @@ For the market diagnosis (always saved):
 ```
 dimension: ad_market
 brief_id: <brief_id>
-title: "Market awareness diagnosis — Level <N>: <label>"
+title: "Market awareness diagnosis — Level <N>: <label from craft/awareness-framework §1>"
 detail: <2-3 sentence reasoning: why we assess this level, what ad patterns confirm it>
-evidence: { awareness_level: <1-5>, sophistication: "high|medium|low", dominant_hook: "<pain|aspiration|social-proof|science>" }
+evidence: { awareness_level: <the bậc number exactly as §1 numbers it>, awareness_stage: "<the §1 Mã code>", sophistication: "high|medium|low", dominant_hook: "<pain|aspiration|social-proof|science>" }
 track: proven
 score: <1–5 self-rating>
 comment: <one-line Vietnamese rationale for the score>
@@ -186,6 +198,10 @@ Findings saved: <N>
   read-only). **Never** call `pull_all_ad_performance` or any ingestion tool — that hits
   external APIs and needs connected accounts. No content writes.
   Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
+- **The awareness and saturation ladders are never written into this skill.** They are owned by
+  `craft/awareness-framework` §1 and §2 and are read live every run — no level list, no code list, no
+  remembered numbering lives here. A failed read of that document **stops the run** and names the
+  document that could not be read; it never proceeds from prose, memory or a cached copy.
 - An empty `get_ad_performance` means *not ingested* (usually no connected ad account), not
   *no ad activity* — fall back to the winners/losers KB and say so.
 - All findings use `dimension: 'ad_market'` and `track: 'proven'`.

@@ -44,7 +44,7 @@ Optional:
 - **This scene's `Hình` and `Lời`** from the approved Storyboard — what the scene shows, and what it has to say while showing it.
 - **The SELECTED keyframe itself.** This is the one place a look is genuinely warranted: use `view_image` on the selected keyframe candidate so the motion you describe starts from the frame that actually exists, not from the frame the prompt asked for. One look, not a sweep.
 - **The adjacent scenes** — motion has to hand off. A scene that ends on a push-in next to one that opens on a push-in reads as a stutter.
-- **KB** — `brand/visual-identity` for pace and register; `rules/compliance`, because motion can imply a claim (a shrinking body, a scale's needle moving) that still text would not.
+- **KB** — `visual/identity` for pace and register; `rules/compliance`, because motion can imply a claim (a shrinking body, a scale's needle moving) that still text would not.
 
 ## What to write
 

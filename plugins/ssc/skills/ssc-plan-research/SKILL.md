@@ -1,6 +1,6 @@
 ---
 name: ssc-plan-research
-description: Runs the RESEARCH step of the Cambridge Diet Vietnam monthly plan head — the THIRD of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the month's ONE outward signal pass. Exactly one pass exists per period and NO channel authors its own market research; every linked channel consumes this document. It is a TIME-SENSITIVE OPPORTUNITY SCAN, not a strategy pass: the quarterly cycle finds durable truths (8-dimension market intelligence, its own skills), while this finds what is true RIGHT NOW — dated calendar openings, competitor and platform moves of the last few weeks, audience triggers shifting this month, and emergent topics no taxonomy term covers yet. It is GROUNDED in the approved quarterly strategy AND the month's Tactics, so it looks for openings that serve the month's declared themes rather than roaming across interesting trends; an opportunity serving no theme is a distraction and is dropped or explicitly parked. Its fifth lens is the one that makes opportunity actionable: crossing our OWN content gaps (get_content_gaps — which pillars are empty or unmeasured) against an outward opening. Uses WebSearch for genuine outward signal, and every claim carries its source so nothing unsourced survives — there is NO research ledger (the research table, save_research and knowledge_versions.evidence_research_id were all removed when the head moved to a markdown research column), so the report's source section IS the provenance and an unsourced claim is a defect. Writes a Vietnamese markdown report to month_plans.research via save_month_plan. Asks the operator NOTHING by default — Tactics already captured the month's business context — and only surfaces a question if the scan hits a genuine fork it cannot resolve. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
+description: Runs the RESEARCH step of the Cambridge Diet Vietnam monthly plan head — the THIRD of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the month's ONE outward signal pass. Exactly one pass exists per period and NO channel authors its own market research; every linked channel consumes this document. It is a TIME-SENSITIVE OPPORTUNITY SCAN, not a strategy pass: the quarterly cycle finds durable truths (8-dimension market intelligence, its own skills), while this finds what is true RIGHT NOW — dated calendar openings, competitor and platform moves of the last few weeks, audience triggers shifting this month, and emergent topics no taxonomy term covers yet. It is GROUNDED in the approved quarterly strategy AND the month's Tactics, so it looks for openings that serve the month's declared themes rather than roaming across interesting trends; an opportunity serving no theme is a distraction and is dropped or explicitly parked. Its fifth lens is the one that makes opportunity actionable: crossing our OWN content gaps (get_content_gaps — which pillars are empty or unmeasured) against an outward opening. Uses WebSearch for genuine outward signal, and every claim carries its source so nothing unsourced survives — there is NO research ledger (the research table, save_research and knowledge_versions.evidence_research_id were all removed when the head moved to a markdown research column), so the report's source section IS the provenance and an unsourced claim is a defect. ALSO SURFACES THE INHERITED MARKET-SOPHISTICATION READ — sophisticationStage + sophisticationRead, read off the linked quarterly strategy brief via get_strategy_brief and carried into the report VERBATIM as §0, the one section that is not a finding of this scan. The month INHERITS this read and NEVER authors one: the skill holds no save_strategy_brief, derives no stage, and re-derives nothing monthly (that would churn the very thing the quarter stabilises). An absent read is an explicit null on the read surface and is reported plainly as a gap — never guessed, never defaulted, never inferred from the scan's own findings — and the scan continues regardless. Writes a Vietnamese markdown report to month_plans.research via save_month_plan. Asks the operator NOTHING by default — Tactics already captured the month's business context — and only surfaces a question if the scan hits a genuine fork it cannot resolve. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
@@ -63,6 +63,36 @@ the report is unanchored to the month's themes.
 
 Then read your own gaps: `get_content_gaps` (which pillars are empty,
 underperforming or never measured), and `list_taxonomies` for the live rosters.
+
+### Step 1b: Carry down the quarter's market-sophistication read
+
+The same `get_strategy_brief` call returns, on the `brief`, the quarter's
+**market-sophistication read**:
+
+- **`sophisticationStage`** — the stage as a label, free text. **There is no fixed
+  vocabulary**, so take whatever label the quarter wrote and carry it **verbatim**.
+  Never normalise it, never map it onto a ladder of your own, never abbreviate it.
+- **`sophisticationRead`** — the reasoning: what the market has already heard, and
+  therefore **how indirect a lead now has to be**.
+
+**The month INHERITS this; it does not author it.** The read is written once, on
+the quarterly brief, precisely so it does not churn month to month. You hold no
+`save_strategy_brief`, you never derive a stage, and you never "update" the read
+from what this month's scan happened to turn up. If your scan genuinely
+contradicts the quarter's read, that is a **finding for the quarterly cycle** —
+report it as such in §3 and leave §0 exactly as the quarter wrote it.
+
+**An absent read is a GAP, reported plainly.** Both fields come back as an
+explicit `null` when the quarter recorded none — that is a readable fact, not a
+failed read. Then §0 says so in one line, the summary says so, and the scan
+**continues**. Never guess a stage, never carry one over from a previous quarter,
+never infer one from a competitor's positioning, and never leave the section out
+(an omitted section is indistinguishable from an unread one).
+
+**Who consumes it.** The ads channel reads this to judge **how indirect a lead
+must be** — it is the reason a bare benefit claim can be dead on arrival in a
+claim-saturated market. Carrying it here is what lets the channel read one
+inherited read rather than deriving four conflicting ones.
 
 ## Step 2: Scan five lenses
 
@@ -159,6 +189,7 @@ every fact a later step needs must be **in the text**.
 ```markdown
 # Nghiên Cứu Tháng <period>
 
+## 0. Kế thừa từ quý — mức độ tinh vi thị trường
 ## 1. Cơ hội tháng này
 ## 2. Lịch & thời điểm
 ## 3. Đối thủ & nền tảng
@@ -166,6 +197,23 @@ every fact a later step needs must be **in the text**.
 ## 5. Chủ đề nổi lên
 ## 6. Nguồn
 ```
+
+**§0 — Kế thừa từ quý.** The quarter's market-sophistication read, carried down
+**verbatim** (Step 1b): the stage label as written, then the read itself. **It is
+numbered 0 because it is not a finding of this scan** — nothing here was
+discovered this month, and nothing in §§1–5 may revise it.
+
+- Name the quarter it came from (`<quarter>`), so a reader can tell a fresh read
+  from one inherited across a quarter boundary.
+- **Recorded read:** one line for the stage, then the read's own words.
+- **No read recorded:** the section stays and says exactly that —
+  `Quý <quarter> chưa ghi nhận mức độ tinh vi thị trường. Không suy đoán. Kênh Ads
+  sẽ báo thiếu khi chọn lead type.` Then continue. **Never fill it in.**
+- Add **one line** on what it constrains — how indirect a lead must be — in the
+  quarter's terms, not in a mapping you invent.
+- Source it in §6 like anything else, as a **Brand OS read**: name the tool
+  (`get_strategy_brief(<quarter>)`), not a web source. Record the row whether the
+  read was present or `null` — "we looked and the quarter had none" is provenance.
 
 **§1 — Cơ hội tháng này.** The deliverable: **3–6 opportunities**, ranked by
 actionability. Each carries **why now** (the time-sensitivity that makes it a
@@ -233,11 +281,15 @@ theme, or an opening large enough to reopen a settled decision — surface it as
 
 Report to the operator in their language:
 
-1. The **opportunities**, ranked, one line each, with the theme each serves.
-2. Any **constraint** found (platform policy, competitor move) that limits what
+1. The **inherited sophistication read**, first and in one line —
+   `Mức độ tinh vi (kế thừa từ <quarter>): <stage đúng như quý đã ghi>` or
+   `CHƯA CÓ — quý <quarter> không ghi nhận; không suy đoán`. Say plainly that it
+   is inherited, not authored here, so nobody reads it as a finding of this scan.
+2. The **opportunities**, ranked, one line each, with the theme each serves.
+3. Any **constraint** found (platform policy, competitor move) that limits what
    the month can run.
-3. What the scan **did not find** — a thin month said plainly beats a padded one.
-4. Where to review it: `/content/plan/<period>`.
+4. What the scan **did not find** — a thin month said plainly beats a padded one.
+5. Where to review it: `/content/plan/<period>`.
 
 ## Governance
 
@@ -254,6 +306,18 @@ Report to the operator in their language:
   research. One pass serves every channel.
 - **Never write `performance_review` or `tactics`** — those are the Review and
   Tactics artifacts. You read them.
+- **Never write the hand-downs.** `proof_inventory` and `offer_state` are the
+  Tactics step's artifacts. You may read them off `get_month_plan`
+  (`proofInventory` / `offerState`, explicit `null` when unstated) for context,
+  and you never state, extend or "correct" either — in particular, an opening you
+  found is **not** a promotion, and only a real dated promotion recorded by
+  Tactics is one.
+- **Never author the market-sophistication read (hard rule).** It is the
+  **quarter's**, authored once on the strategy brief and **inherited** here. You
+  hold no `save_strategy_brief`, you never derive or normalise a stage, and you
+  never revise the read from this month's findings. A `null` read is reported as a
+  gap and the scan continues — the gap is never filled, and no stage is ever
+  invented, carried over from a prior quarter, or inferred from the scan.
 - **Never auto-mint a taxonomy term.** Emergent topics are noted-only; promotion
   is a human act.
 - **Write through `save_month_plan`, never around it.** The MCP tool is the only
@@ -267,6 +331,17 @@ Report to the operator in their language:
   is a recurring shipped-bug class here. When a tool you expect is missing,
   verify against the deployed server before assuming it is a transient gap.
 - **Never hard-code KB content.** Name the doc and its section and read it live —
-  personas, pillars, routes, the awareness framework. Rosters are open.
+  personas, pillars, routes, the awareness framework. Rosters are open: a term
+  added or retired, including a new proof device, needs no change to this skill,
+  so no roster is ever enumerated in this file or in the report.
+- **A FAILED KB READ STOPS THE RUN.** If a KB doc you named comes back missing,
+  empty or unreadable, STOP, write NOTHING, and tell the operator:
+
+  > Không đọc được tài liệu KB `<path>`. Research dừng lại — bước này không chạy
+  > bằng bản ghi nhớ. Vui lòng kiểm tra tài liệu trong Knowledge dashboard rồi
+  > chạy lại. Chưa ghi gì cả.
+
+  Never substitute a remembered version. A `null` sophistication read is **not**
+  this case — it is a recorded absence, reported as a gap while the scan continues.
 - Persisted prose is **Vietnamese**. Operator-facing chat may be the operator's
   language.

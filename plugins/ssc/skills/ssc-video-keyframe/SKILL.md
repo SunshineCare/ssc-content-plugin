@@ -45,7 +45,7 @@ Optional:
 - **This scene's `Hình`** from the approved Storyboard — the primary source. The keyframe is that description, made concrete.
 - **This scene's `Lời`**, when it has one — it tells you what the frame has to *support*, not what to draw.
 - **The idea's hero** and the **approved copy** (via `list_content`, `status='approved'`) — for meaning and register only. Never render a copy string as text in the image.
-- **KB** — `brand/visual-identity` for the brand's look; `rules/compliance` because a frame can carry a claim (a scale, a clinical setting, a before/after read) as surely as a sentence can.
+- **KB** — `visual/identity` for the brand's look; `rules/compliance` because a frame can carry a claim (a scale, a clinical setting, a before/after read) as surely as a sentence can.
 - **The run's profile** — `get_video_run` gives the pinned `style_ref` and `aspect_ratio`. **Do not describe them in the prompt.** The server applies the style reference as a conditioning image and the aspect ratio as a generation parameter; re-describing them in words fights the mechanism that keeps 20 scenes looking like one video.
 
 ## What to write

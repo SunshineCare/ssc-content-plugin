@@ -1,7 +1,7 @@
 ---
 name: ssc-post-approaches
 description: >-
-  Runs the APPROACHES step — the first step and first gate of the Cambridge Diet Vietnam Posts channel, on channel_plans(channel='post', period), hanging off that period's monthly-plan head. It authors the channel's creative HOW for organic Facebook posts and nothing above it. Grounding is strictly ordered: the MONTHLY PLAN first (its narrative, themes, one outward research pass and only look-back), the QUARTERLY strategy brief second (to place the month in the quarter and fill in where the month is silent), the KNOWLEDGE BASE third (craft, persona detail, hard rules — read live by path, never remembered). Where two sources disagree the higher one wins and the doc says so in one line. It NEVER restates the head, NEVER runs WebSearch (the head's Research is the period's only outward pass), NEVER writes plan_targets or the detail row (the head allocates; a channel-side write is refused with retired_plan_field), and NEVER touches the head. Blocked until the month is released by the head's narrative approval. Writes Vietnamese markdown to channel_plans.context via save_channel_plan, minting the post plan row if none exists. Propose-only; ends at the Approaches gate; never sets approaches_approved.
+  Runs the APPROACHES step — the first step and first gate of the Cambridge Diet Vietnam Posts channel, on channel_plans(channel='post', period), hanging off that period's monthly-plan head. It authors the channel's creative HOW for organic Facebook posts and nothing above it. Grounding is strictly ordered: the MONTHLY PLAN first (its narrative, themes, one outward research pass and only look-back), the QUARTERLY strategy brief second (to place the month in the quarter and fill in where the month is silent), the KNOWLEDGE BASE third (craft, persona detail, hard rules — read live by path, never remembered). Where two sources disagree the higher one wins and the doc says so in one line. What governs an APPROACH is read live and never restated here — craft/doctrine (the production chain an approach sits inside, the mandatory mechanism, and the rule-ownership table that decides what this doc may state and what it must instead point at) and craft/awareness-framework (awareness staging, and the boundary that a brief declares the stage while the writer picks the lead); the per-asset floor and the set-level coverage verdict are deliberately NOT read here, because this step produces neither. A failed KB read STOPS the run, writes nothing, and names the document that could not be read — never prose, memory or a cached copy. It NEVER restates the head, NEVER runs WebSearch (the head's Research is the period's only outward pass), NEVER writes plan_targets or the detail row (the head allocates; a channel-side write is refused with retired_plan_field), and NEVER touches the head. Blocked until the month is released by the head's narrative approval. Writes Vietnamese markdown to channel_plans.context via save_channel_plan, minting the post plan row if none exists. Propose-only; ends at the Approaches gate; never sets approaches_approved.
 metadata:
   type: skill
   stage: post-pipeline
@@ -176,6 +176,24 @@ These are the paths this step draws on:
   vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
   is how this skill shipped 7 titles addressing the reader as "chị" when
   `voice/pronouns` says public posts use "bạn" - the doc was simply never loaded.
+- `craft/doctrine` — the cross-channel content doctrine, and the reason this
+  document writes rails rather than rules. **§1** is the production chain an
+  approach sits **inside** — you set how this month's posts are written through
+  it, you never author a second chain. **§2** is the mandatory mechanism: guidance
+  that leaves a post with no mechanism to be written *to* is guidance a writer
+  cannot obey, so every pillar block has to leave one reachable. **§6**'s
+  rule-ownership table says which document owns which rule — use it to decide what
+  §1 of *your* doc may state and what it must instead point at. A rule this
+  document restates is a second source of truth for that rule, and the stale copy
+  always wins the day it drifts.
+- `craft/awareness-framework` — **awareness staging.** What the reader of this
+  month's posts is assumed to already know is a decision, and it belongs here: a
+  pillar × persona block that does not say it leaves the writer guessing. **§5**
+  carries the craft rules; its awareness-ladder and market-saturation sections are
+  the vocabulary staging is expressed in. **§7.1** is the boundary that keeps this
+  step honest — the **brief** declares the stage and the **writer** picks the lead
+  per asset — so this doc may set staging direction and must never fix a lead type
+  or an opening formula for the month.
 - `rules/organic-vs-paid-firewall` — what organic content may say that paid may
   not, and the reverse. This channel is organic; the line matters.
 - `rules/banned-words` — hard-banned Vietnamese words and compounds. Zero
@@ -186,6 +204,18 @@ These are the paths this step draws on:
   compliance violations (a kg-plus-timeframe claim, a spot-reduction claim, a
   banned technical term); organic performance is not evidence of safety, and a
   post can top the engagement table and still be unquotable.
+
+> **A FAILED KB READ STOPS THE RUN — it never falls back to a remembered version
+> (hard rule).** `get_knowledge` reports an absent path in `missing` rather than
+> failing, so check `missing` on **every** call in this step. If any document named
+> above could not be read, **STOP immediately**, write **nothing** (no `context`,
+> no allocation, nothing), and tell the operator **which document** could not be
+> read and that the run stopped for it. Do not proceed from prose in this file,
+> from memory, from a summary, from a similar-looking doc, or from a previous run's
+> reading — this skill deliberately holds no copy of any rule it applies, so a
+> remembered version is a guess. An unreadable persona detail doc stops the run
+> too, rather than silently shrinking the roster. A stopped run is recoverable; a
+> month's approved rails written from stale doctrine are not.
 
 Use `search_knowledge` only when the head's research or Review names something
 these paths do not cover (a specific proof point, a myth, a programme detail) and
@@ -444,6 +474,18 @@ Ideate, rồi chạy lại lệnh để sang Ideate.
 - **Never hard-codes KB content.** Name the doc and its section and read it live —
   personas, their triggers and prohibitions, the angle vocabulary, the firewall,
   the banned words. No persona names in closed lists, no remembered trigger.
+- **The doctrine is read, never restated.** `craft/doctrine` §1 (the production
+  chain), §2 (the mandatory mechanism) and §6 (the rule-ownership table), and
+  `craft/awareness-framework` §5 + §7.1 (awareness staging, and the brief-declares
+  / writer-picks boundary) are named with their sections and read live every run.
+  This document points at them; it never carries a copy of what they say. The
+  per-asset floor (`craft/copy-floor`), the set-level coverage verdict
+  (`craft/coverage`) and the close's wording rules (`craft/close-job`,
+  `craft/cta`) are **not** read here — they govern an asset and a set, which this
+  step never produces.
+- **A failed KB read STOPS the run** (Step 4): nothing is written, the failing
+  **document is named**, and the run never falls back to prose, memory or a cached
+  copy.
 - All persisted prose is **Vietnamese**, headings included. Chat-side reasoning
   may be the operator's language.
 - Operates only on the post channel (`channel='post'`); never reads or writes

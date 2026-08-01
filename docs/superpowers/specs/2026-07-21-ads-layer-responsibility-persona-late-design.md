@@ -137,7 +137,7 @@ awareness-stage.
   quality loop and a *subject-distinctiveness* check scoped to the whole plan.
 - **`ssc-ads-brief` → persona is chosen here, and the media home is tagged here.** Reads a
   persona-free idea; enumerates the personas the subject fits (from `brand/personas`); for each,
-  derives an angle (persona × route) grounded in that persona's detail doc + `craft/awareness-framework`.
+  derives an angle (persona × route) grounded in that persona's detail doc + `ad/awareness-framework`.
   One idea fans to several personas. The awareness stage is **declared by the angle** (not read from
   an ad set), and from it the Brief **tags the angle's target layer + ad set**. The "taken set"
   de-dup widens from *this idea's briefs* to *the plan's angles* (so the same (persona × route) is
@@ -210,7 +210,7 @@ awareness-stage.
    > `awareness_stage` and `target_layer` both **stay**. `awareness_stage` is an angle *judgment*, not
    > a lookup — route→stage is not 1:1 (the same route serves unaware vs problem-aware depending on the
    > persona's anchor) — and it has a live consumer (Writer register/length; Measure). `target_layer` is
-   > the one thing deployment acts on, and is pinned at save so a quarterly `craft/awareness-framework`
+   > the one thing deployment acts on, and is pinned at save so a quarterly `ad/awareness-framework`
    > revision cannot silently re-home already-approved briefs.
 3. **Broad-vs-persona targeting reconciliation.** The current KB (`ad/campaign-architecture`,
    `ad/strategy`) assumes some persona-based ad-set audiences; a persona-late, broad/Advantage+
@@ -221,7 +221,7 @@ awareness-stage.
    `ad_idea_details.slot_id` → `ad_plan_slots.layer_term_id`. **(b) Content-driven classification:** for
    each brief, **read its `content` rows individually** (the finished copy/headline/description/
    image_content) and fill the **two** net-new fields from what the copy actually is — `route_term_id`
-   (Problem/Solution/Comparison/Proof/Curiosity per `craft/awareness-framework` §4) and `awareness_stage`.
+   (Problem/Solution/Comparison/Proof/Curiosity per `ad/awareness-framework` §4) and `awareness_stage`.
    (`audience_intent` was the third; **cut** — see the amendment on point 2. It is never backfilled.)
    This is an LLM
    judgment per brief, run by a one-time backfill **script** writing directly (so it can set

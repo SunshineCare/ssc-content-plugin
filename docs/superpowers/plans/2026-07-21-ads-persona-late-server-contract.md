@@ -578,7 +578,7 @@ git commit -m "feat(channel_plan): add creative_target (Focus coverage/volume ta
    COMMIT;
    ```
 
-   **(b) Content-driven classification** — `scripts/backfill-angle-fields.ts` (standalone tsx, modelled on the existing `scripts/backfill-briefs.ts`). The two net-new fields have **no columnar source**, so they are derived by **reading each brief's content individually**. For every existing brief: load its `content` rows (the finished `copy`/`headline`/`description`/`image_content`), then classify — grounded in `craft/awareness-framework` §4 + the persona doc:
+   **(b) Content-driven classification** — `scripts/backfill-angle-fields.ts` (standalone tsx, modelled on the existing `scripts/backfill-briefs.ts`). The two net-new fields have **no columnar source**, so they are derived by **reading each brief's content individually**. For every existing brief: load its `content` rows (the finished `copy`/`headline`/`description`/`image_content`), then classify — grounded in `ad/awareness-framework` §4 + the persona doc:
    - `route_term_id` ← the Problem/Solution/Comparison/Proof/Curiosity the copy actually takes → the matching `route` taxonomy leaf.
    - `awareness_stage` ← the stage the copy addresses (`unaware`…`most-aware`).
    - ~~`audience_intent`~~ — **not backfilled** (field deprecated 2026-07-21; the column is dropped in Contract).

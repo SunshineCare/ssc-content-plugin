@@ -48,14 +48,14 @@ to a remembered version.
 | Doctrine element | Home | Why there |
 |---|---|---|
 | The spine, its rationale, and the honest statement that no efficacy evidence exists | **new doc** (`ad/copy-doctrine` or similar) | Nothing owns this ground; it is the one genuinely new artefact |
-| Lead taxonomy + awareness→lead mapping | `craft/awareness-framework` | It already holds the Schwartz grid the leads hang off |
-| The six-item floor | `craft/copy-floor` | It is already the checklist the writer runs |
+| Lead taxonomy + awareness→lead mapping | `ad/awareness-framework` | It already holds the Schwartz grid the leads hang off |
+| The six-item floor | `ad/copy-checklist` | It is already the checklist the writer runs |
 | Permitted opening frames + the **person rule** | `rules/banned-words` or a sibling in `rules/` | It is a compliance constraint, not a craft preference — though the doc is a word-substitution table and this rule is grammatical, so a sibling may be cleaner than stretching it |
 | Coverage axes | `ad/creative-guidelines` §4.3, **reconciled** | §4.3 already mandates in-batch diversity in different words; two overlapping statements is the failure mode to avoid |
 | Proof families, adopted and refused | `brand/proof-points` (families) + `rules/compliance` (the refusals and their legal basis) | Each already owns its half |
 | Register values | `voice/founder-voice` — **unchanged** | The three registers already exist; the doctrine cites them and invents nothing |
 | Per-layer close job | `ad/layer-tones` / `ad/creative-guidelines` §3 | They already hold the layer→CTA/tone rule; it is restated as a *job*, not a phrasing table |
-| The mechanism as a named required element | **new doc**, with `craft/copy-floor` enforcing it | It has no home anywhere today |
+| The mechanism as a named required element | **new doc**, with `ad/copy-checklist` enforcing it | It has no home anywhere today |
 
 ### Consequences to carry forward
 

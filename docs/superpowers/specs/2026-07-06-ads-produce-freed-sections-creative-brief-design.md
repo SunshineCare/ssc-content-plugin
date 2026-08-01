@@ -104,7 +104,7 @@ opportunistically, instead of hard-requiring it:
   the gate).
 - `description` — live approved `copy` (primary, leads the promise) **+** live
   approved `headline` **if any** (secondary complement-check per
-  `craft/copy-floor` (ghi chú riêng cho section `description`)). If no headline is approved yet, proceed on copy
+  `ad/copy-checklist` Bước 2B). If no headline is approved yet, proceed on copy
   alone and note in the Step 9 summary that there was no headline to complement
   against yet.
 - `image_content` — live approved `copy` (anchor) **+** live approved `headline` /

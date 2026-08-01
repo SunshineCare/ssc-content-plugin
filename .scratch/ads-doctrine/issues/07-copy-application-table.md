@@ -25,7 +25,7 @@ The table below is what the writer works from. It composes decisions already mad
 [15](./15-layer-vs-spine.md)), the proof families ([12](./12-proof-problem.md)), the opening
 rule ([14](./14-opening-beat-policy.md)), coverage ([08](./08-variation-mechanics.md)) and the
 Vietnamese adaptation ([10](./10-vietnamese-adaptation.md)) — and adds only the per-section
-sizing. Existing KB docs (`craft/copy-floor`, `ad/headline-formulas`,
+sizing. Existing KB docs (`ad/copy-checklist`, `ad/headline-formulas`,
 `ad/creative-guidelines`, `ad/cta-catalog`, `rules/compliance`) keep their authority over the
 concrete caps and formulas; nothing here restates or overrides them.
 

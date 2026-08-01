@@ -440,8 +440,8 @@ truth for a compliance rule is the drift this repo has already been burned by. A
 | Element | Home |
 |---|---|
 | Spine, rationale, the no-efficacy-evidence statement, the mechanism | **New doc** — nothing owns this ground |
-| Lead taxonomy + awareness mapping | `ad/awareness-framework` — already holds the grid |
-| The six-item floor | `ad/copy-checklist` |
+| Lead taxonomy + awareness mapping | `craft/awareness-framework` — already holds the grid |
+| The six-item floor | `craft/copy-floor` |
 | Opening frames + the person rule | `rules/` — a compliance constraint, not craft |
 | Coverage axes | `ad/creative-guidelines` §4.3, **reconciled** with its existing diversity rule |
 | Proof families / refusals | `brand/proof-points` + `rules/compliance` |

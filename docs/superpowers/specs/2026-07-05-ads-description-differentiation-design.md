@@ -1,7 +1,7 @@
 # Design: description must complement — not echo — the headline
 
 **Date:** 2026-07-05
-**Status:** IMPLEMENTED. Operator directed "check ad/copy-checklist and revise this skill accordingly." Finding: **`ad/copy-checklist` (v5) already exists on the BrandOS server and already contains the exact Description spec** (its "Bước 2B: Viết Description" section + the Bước 4 checklist item). The gap was never the KB — it was that **the skill never loaded `ad/copy-checklist`**. So the fix is **Approach B/C grounded in the existing doc**: wire the writer to load + apply it (no authoring needed). The Approach-A framing below is retained for the decision trail but was superseded by this finding.
+**Status:** IMPLEMENTED. Operator directed "check ad/copy-checklist and revise this skill accordingly." Finding: **`craft/copy-floor` (v5) already exists on the BrandOS server and already contains the exact Description spec** (its "Bước 2B: Viết Description" section + the Bước 4 checklist item). The gap was never the KB — it was that **the skill never loaded `craft/copy-floor`**. So the fix is **Approach B/C grounded in the existing doc**: wire the writer to load + apply it (no authoring needed). The Approach-A framing below is retained for the decision trail but was superseded by this finding.
 **Scope:** `plugins/ssc-content/skills/ssc-ads-writer/SKILL.md` only
 **Builds on:** the copy-first reorder (`2026-07-05-ads-produce-copy-first-reorder-design.md`)
 
@@ -52,10 +52,10 @@ check** (Step 7) so the honest-scoring loop drops + regenerates offenders.
 
 ## Placement — resolved by inspecting the live KB (supersedes Approach A)
 
-The operator then directed: "check `ad/copy-checklist` and revise this skill
+The operator then directed: "check `craft/copy-floor` and revise this skill
 accordingly." Inspecting the live BrandOS KB settled the open question:
 
-- **`ad/copy-checklist` (id `9ABnZuOYJ4anwaN9`, v5, "Copy Checklist") EXISTS**
+- **`craft/copy-floor` (id `9ABnZuOYJ4anwaN9`, v5, "Copy Checklist") EXISTS**
   and **already contains the full Description spec** as its section
   **"Bước 2B: Viết Description"** — verbatim the four rules (complement-don't-echo,
   lead-with-one-concrete-proof + vary, layer-aware L2/L1/L3, diverse set) plus a
@@ -63,11 +63,11 @@ accordingly." Inspecting the live BrandOS KB settled the open question:
   **Bước 4** ("Description BỔ TRỢ headline … KHÔNG lặp lại góc của headline").
 - **But the skill never loaded it.** The writer's Step 3 `get_knowledge` list
   had `ad/creative-guidelines`, `ad/headline-formulas`, `ad/cta-catalog`,
-  `content/quick-checklist` — no `ad/copy-checklist`. The writer only obeys prose
+  `content/quick-checklist` — no `craft/copy-floor`. The writer only obeys prose
   it loads, so the authoritative spec was invisible to it.
 
 **Chosen fix (what was implemented):** wire the writer to **load and apply**
-`ad/copy-checklist` — add it to Step 3, and inline its Bước 2B rules as the
+`craft/copy-floor` — add it to Step 3, and inline its Bước 2B rules as the
 operating frame in Steps 4/6 + a Bước 4-derived cap in Step 7 (citing the doc as
 the live authoritative source, matching how Step 5 treats `ad/headline-formulas`).
 Nothing was authored on the server; the doc already held the spec. This is
@@ -84,7 +84,7 @@ The original three-option analysis (retained for the trail):
   approved headlines (Step 4) and the layer/tier (`build_spec`, Step 1b) — so
   even the layer-aware caveat needs **no new KB path**. Trade-off: tuning the
   spec later means a plugin release, not a dashboard edit.
-- **B — KB doc + skill wiring.** Author `ad/copy-checklist` on the BrandOS
+- **B — KB doc + skill wiring.** Author `craft/copy-floor` on the BrandOS
   server (propose-only) and add the path to Step 3 + an enforcement hook.
   Durable/editable without a release, but depends on a server doc that cannot be
   authored or verified from this repo, and can't be tested end-to-end until the
@@ -92,12 +92,12 @@ The original three-option analysis (retained for the trail):
 - **C — Both.** Inline hard rule (floor) + KB doc (tunable depth).
 
 **A is chosen** because it is the only option that fully and reliably fixes the
-bug within this repo, and it is the exact floor of C — a later `ad/copy-checklist`
+bug within this repo, and it is the exact floor of C — a later `craft/copy-floor`
 doc (B) is a clean additive follow-up, not a redo.
 
 ## Design — the edits (all in `ssc-ads-writer/SKILL.md`)
 
-**Edit 0 — Step 3 loads `ad/copy-checklist`.** Add the path to the
+**Edit 0 — Step 3 loads `craft/copy-floor`.** Add the path to the
 `get_knowledge` list (now 19 paths, under the 20-path cap) and a descriptive
 bullet naming it the authoritative source for the description-differentiation
 rules (its Bước 2B + Bước 4). Without this, none of the edits below would bite.
@@ -172,7 +172,7 @@ a rule in the scoring gate is enforced):
   — no change; this refines *how* a description is written, not the chain. (The
   frontmatter's "description compresses those copies" stays true.)
 - **The layer-aware rule keys off the `build_spec`** already held in Step 1b — no
-  new dependency there. (Step 3 does gain one KB path, `ad/copy-checklist`, which
+  new dependency there. (Step 3 does gain one KB path, `craft/copy-floor`, which
   is where the layer-nuanced Description spec lives.)
 
 ## Testing / verification
@@ -190,6 +190,6 @@ Prose consistency (no test runner):
 
 ## Out of scope
 
-- Authoring the `ad/copy-checklist` KB doc (Approach B/C) — a clean later
+- Authoring the `craft/copy-floor` KB doc (Approach B/C) — a clean later
   follow-up if the operator wants dashboard-tunable guidance.
 - Any change to variation counts (`n_descriptions` stays default 5).

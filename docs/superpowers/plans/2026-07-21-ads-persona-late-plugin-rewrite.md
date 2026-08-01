@@ -15,7 +15,7 @@
 ## Global Constraints (bind every task)
 
 - **Propose-only (hard rule).** No skill/agent may reference `approve`, publish/schedule, `update_budget`, `create_*`, or use `edit` to demote/unapprove. Never flip a gate. (Preserve exactly as today.)
-- **Never hard-code KB content.** Reference the live KB doc + section and read it live (personas, `ad/awareness-framework`, `brand/angles`, routes). No persona names in closed enums, no baked persona hooks/prohibitions, no route lists restated. (See root CLAUDE.md "Never hard-code KB content".)
+- **Never hard-code KB content.** Reference the live KB doc + section and read it live (personas, `craft/awareness-framework`, `brand/angles`, routes). No persona names in closed enums, no baked persona hooks/prohibitions, no route lists restated. (See root CLAUDE.md "Never hard-code KB content".)
 - **Every referenced MCP tool must exist** on the BrandOS surface. New/changed tool fields this rewrite relies on (all shipped): `save_brief(persona_term_id, route_term_id, target_layer_term_id, awareness_stage)` — **never** `audience_intent` (cut, dormant), `save_channel_plan(creative_target)`, `save_idea` (persona-free ad ideas now allowed — `frame` no longer required for ad). Do NOT reference `save_ad_plan_slots` from any creative skill (media buy left the pipeline).
 - **`/ssc.*` cross-refs must resolve to a real command.** Update pipeline tables; don't leave dangling `ssc.ads-plan`/blueprint refs.
 - **Persisted prose is Vietnamese** (copy, angle_label, comments); operator-facing chat/system text may be the operator's language.
@@ -46,7 +46,7 @@
 
 **What changes:**
 - Keep Focus as "the month's bets," but add a concrete **coverage/volume target** output: which `subject × persona × route` combinations to cover and how many creatives, written to the channel_plan via `save_channel_plan(channel='ad', period, creative_target=[{ persona, route, count }], tactics=…)`.
-- `creative_target` replaces the retired Blueprint's per-ad-set `creative_count` as the single source of "how much to make." Personas come from the live `brand/personas` roster (read live, never enumerated here); routes from `ad/awareness-framework` (problem/solution/comparison/proof/curiosity).
+- `creative_target` replaces the retired Blueprint's per-ad-set `creative_count` as the single source of "how much to make." Personas come from the live `brand/personas` roster (read live, never enumerated here); routes from `craft/awareness-framework` (problem/solution/comparison/proof/curiosity).
 - Update the pipeline line: "step 1 of **Focus → Approaches → Ideate → Measure**" (no Blueprint). Remove the sentence deferring budget-split/creative-counts/ad-set-build-map "to the Blueprint step."
 - Preserve: retrospective read, propose-only, ends at the Focus gate, never sets `tactics_approved`.
 
@@ -108,9 +108,9 @@
 **File:** Modify `plugins/ssc/skills/ssc-ads-brief/SKILL.md`
 
 **What changes (the L1=Lan lock-breaker):**
-- For ONE persona-free subject (an approved ad idea), the Brief now **chooses the personas the subject fits** (from the live `brand/personas` roster) and, per persona, a **route** (problem/solution/comparison/proof/curiosity from `ad/awareness-framework`) — fanning into DISTINCT briefs across `persona × route`. One subject → many persona-angles (Lan AND Hương AND Thảo).
+- For ONE persona-free subject (an approved ad idea), the Brief now **chooses the personas the subject fits** (from the live `brand/personas` roster) and, per persona, a **route** (problem/solution/comparison/proof/curiosity from `craft/awareness-framework`) — fanning into DISTINCT briefs across `persona × route`. One subject → many persona-angles (Lan AND Hương AND Thảo).
 - Each brief now sets, via `save_brief`: `persona_term_id`, `route_term_id`, plus the five narrative fields + `angle_label` + score/comment, AND declares the media home — `awareness_stage` + `target_layer_term_id` (the tier that stage implies). Resolve persona/route/layer codes → term ids via `list_taxonomies` (kinds `persona`, `route`, `campaign_layer`); the server kind-validates them. **Never set `audience_intent`** (cut — dormant column).
-- **`awareness_stage` is a JUDGMENT, not a lookup.** Derive it per angle from the **live** `ad/awareness-framework` ladder + the chosen persona's anchors in `brand/persona-<slug>` — never from a route→stage table baked into this skill. The same route serves different stages depending on the persona's anchor; a baked table collapses stage into a mechanical function of route (and goes stale when the framework is revised quarterly). `target_layer_term_id` follows from the stage via the same live doc, and is pinned at save so a later framework revision cannot re-home approved briefs.
+- **`awareness_stage` is a JUDGMENT, not a lookup.** Derive it per angle from the **live** `craft/awareness-framework` ladder + the chosen persona's anchors in `brand/persona-<slug>` — never from a route→stage table baked into this skill. The same route serves different stages depending on the persona's anchor; a baked table collapses stage into a mechanical function of route (and goes stale when the framework is revised quarterly). `target_layer_term_id` follows from the stage via the same live doc, and is pinned at save so a later framework revision cannot re-home approved briefs.
 - The idea no longer carries a persona tag, so the Brief READS no persona off the idea — it CHOOSES persona(s). Anchor each angle on the chosen persona's detail doc (`brand/persona-<slug>`, read live) + the awareness framework, exactly as today, but persona is now a Brief choice, not an inherited idea tag.
 - Distinctiveness widens: the "taken set" compares across ALL of the idea's briefs (all persona × route), and — per the design — ideally across the plan's angles. Preserve the never-pad rule, the `Tránh` per-persona gate, the quality loop, and propose-only (`save_brief` mints drafts only).
 - Fix pipeline/cross-refs.

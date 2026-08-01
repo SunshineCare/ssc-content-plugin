@@ -201,7 +201,7 @@ server changes.
   instruction to read named docs live; every revisable rule lives in the KB. The floor is
   deliberately **not** duplicated into skill prose — a failed KB read stops the run instead.
   Landing shape: **one new doc for the spine + the mechanism**, edits into the docs that already
-  own each surface (`ad/awareness-framework` ← leads, `ad/copy-checklist` ← floor, `rules/` ←
+  own each surface (`craft/awareness-framework` ← leads, `craft/copy-floor` ← floor, `rules/` ←
   person rule, `ad/creative-guidelines` §4.3 ← coverage *reconciled*, `brand/proof-points` +
   `rules/compliance` ← proof, `ad/layer-tones` ← per-layer close job); `voice/founder-voice`
   unchanged. **Sequencing now fully determined**: content-repo schema → KB edits approved → skill

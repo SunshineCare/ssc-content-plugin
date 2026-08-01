@@ -181,7 +181,7 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
 - **Never hard-code KB content into a skill — reference the doc and read it
   live.** Skills must name the KB doc (and its section) they draw on, not
   restate its contents. This covers persona docs (trigger points, vocabulary,
-  the per-persona `Tránh` prohibitions, search keywords), `ad/awareness-framework`
+  the per-persona `Tránh` prohibitions, search keywords), `craft/awareness-framework`
   (the awareness/sophistication ladders, Cambridge's stated position, the
   emotion cluster), `brand/angles`, `ad/cta-catalog` — all of it. Two reasons:
   the KB is revised on its own cadence (persona docs and the framework are

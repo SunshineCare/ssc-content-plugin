@@ -8,7 +8,9 @@ metadata:
   brand: cambridge-diet-vn
   section: ads
   capability: edit
-  orchestrates: [ssc-ads-approaches, ssc-ads-ideate]
+  orchestrates: [ssc-ads-approaches, ssc-ads-ideate, ssc-approaches-core]
+  # ssc-approaches-core is a shared sub-skill dispatched INSIDE Approaches by
+  #   ssc-ads-approaches — not a third operator stage, and never invoked directly
   tools: [get_month_plan, get_channel_plan, list_ideas]
   approval-gates: human
 ---

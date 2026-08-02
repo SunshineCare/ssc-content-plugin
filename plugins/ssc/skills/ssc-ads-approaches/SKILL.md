@@ -1,12 +1,13 @@
 ---
 name: ssc-ads-approaches
-description: Runs the Approaches step of the Ads channel of a Cambridge Diet Vietnam monthly plan — the period's VOICE-OF-CUSTOMER research and CANDIDATE-MECHANISM pass (the doctrine's generator), the creative HOW, and the channel's FIRST authored step. Released by the HEAD's narrative approval (the server gates the context write on it), not by any channel flag — Focus and its tactics_approved gate are retired. Grounds in the head first (its bets, its one outward research pass, its review, its Ad allocation, and its two hand-downs — proof inventory + offer/promotion state), the quarter's strategy second (its market-sophistication read and its marked audience/ad findings), the KB third; runs NO WebSearch of its own — the voice-of-customer pass COMPILES verbatim customer language from those recorded sources rather than scraping a second outward pass, and an empty source is recorded as a named gap, never filled from memory. Writes the Approaches md to context via save_channel_plan — a structured Vietnamese template (Month signals · Voice of customer · Candidate mechanisms · Route × persona approaches · Differentiation · Experiments to test) — and AUTHORS creative_target on the same call, the period's creative COVERAGE SHAPE (persona × route × angle count), whose owner this step is. Coverage shape only: volume and budget belong to the monthly head's allocation and a channel-authored volume is refused server-side. Reads every doctrinal rule LIVE from the named KB docs and STOPS the run on a failed read rather than falling back to memory. Must NOT restate the head's bets and must NOT steer per ad set or per layer — the ad set / media buy sits outside the creative pipeline entirely. Propose-only; ends at the Approaches gate; never sets approaches_approved.
+description: Runs the Approaches step of the Ads channel of a Cambridge Diet Vietnam monthly plan — the creative HOW, the doctrine's generator, and the channel's FIRST authored step. For the channel-agnostic pieces of Approaches work — the inherited market-sophistication read, the per-persona VOICE-OF-CUSTOMER pass and the CANDIDATE-MECHANISM supply — it dispatches the shared sub-skill ssc-approaches-core with channel='ad', then composes the returned blocks into its own sections, carrying the named gaps through and never re-authoring, re-scoring, paraphrasing or re-attributing them. Released by the HEAD's narrative approval (the server gates the context write on it), not by any channel flag — Focus and its tactics_approved gate are retired. Grounds in the head first (its bets, its one outward research pass, its review, its Ad allocation, and its two hand-downs — proof inventory + offer/promotion state), the quarter's strategy second (its market-sophistication read and its marked audience/ad findings), the KB third; runs NO WebSearch of its own (the head's Research is the period's only outward pass). Writes the Approaches md to context via save_channel_plan — a structured Vietnamese template (Month signals · Voice of customer · Candidate mechanisms · Route × persona approaches · Differentiation · Experiments to test) — and AUTHORS creative_target on the same call, the period's creative COVERAGE SHAPE (persona × route × angle count), whose owner this step is. Coverage shape only: volume and budget belong to the monthly head's allocation and a channel-authored volume is refused server-side. Reads every doctrinal rule LIVE from the named KB docs and STOPS the run on a failed read rather than falling back to memory. Must NOT restate the head's bets and must NOT steer per ad set or per layer — the ad set / media buy sits outside the creative pipeline entirely. Propose-only; ends at the Approaches gate; never sets approaches_approved.
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
   capability: edit
+  orchestrates: [ssc-approaches-core]
   tools: [get_knowledge, search_knowledge, get_month_plan, get_channel_plan, get_strategy_brief, save_channel_plan]
 ---
 
@@ -16,8 +17,8 @@ You run the **Approaches** step of the Ads channel of a Cambridge Diet Vietnam m
 
 **This step is the pipeline's GENERATOR.** The ads doctrine's front half lands here, and it is the reason this step exists at all: everything downstream arranges material, and only this step *finds* it. Three things are yours, and nothing below you can supply them:
 
-1. **The period's voice-of-customer research** (Step 4) — what real customers actually say: their language, their triggers, their objections, the myths they hold, **in their own words**. Without it the pipeline invents topics.
-2. **Candidate mechanisms** (Step 5) — as `craft/doctrine` §2 defines a mechanism, read live (this file defines it nowhere). Ideate may not approve a subject without one, so this step is where the supply comes from. You propose candidates; you never pick the one a subject carries and you never approve anything.
+1. **The period's voice-of-customer research** — what real customers actually say: their language, their triggers, their objections, the myths they hold, **in their own words**. Without it the pipeline invents topics. The shared core **returns** it (Step 4); this step **composes** it into the doc and **saves** it (Steps 5–6).
+2. **Candidate mechanisms** — as `craft/doctrine` §2 defines a mechanism, read live (this file defines it nowhere). Ideate may not approve a subject without one, so this step is where the supply reaches the plan. Same division: the core **returns** the candidates (Step 4), this step **composes and saves** them (Steps 5–6). You propose candidates; you never pick the one a subject carries and you never approve anything.
 3. **The creative coverage target** (Step 6b) — `creative_target` on the ad channel plan. **You own this field.** It is COVERAGE SHAPE — which personas and routes must be covered this period and in how many *angles* — never volume: the period's creative volume and budget belong to the monthly head's Ad allocation (`allocate_channel`), and a channel-authored volume is refused server-side.
 
 The output is a markdown brief (the Approaches doc) written to `context`, plus the structured `creative_target`. You are propose-only: you write `context` + `creative_target` via `save_channel_plan`, then stop. A human reviews and approves the Approaches in the dashboard before Ideate begins. You NEVER call `approve` (the ONLY gated promotion; the approval hook denies it to agents), publish, schedule, or spend; you never use `edit` to demote/unapprove a row; and you NEVER set `approaches_approved`.
@@ -79,8 +80,10 @@ Hold from the head, in this priority order:
 
 Then read the quarter's strategy as the SECOND tier — `get_strategy_brief(<quarter>, marked_only=true)` — to place the month inside the quarter and fill in where the month is silent. It never overrides the month. Where two tiers disagree, the higher one wins and you say so in one line. Hold from it:
 
-- **`sophisticationStage` + `sophisticationRead`** — the quarter's **market-sophistication read**, authored ONCE at the quarter and inherited by the month. It constrains how indirect a lead may be, so it frames which mechanisms are worth proposing at all. **You never derive a read of your own.** If the linked brief carries none, say so plainly in the doc and in the summary — the gap is reported, never filled with a guessed stage.
-- **The marked findings** — in particular the audience and ad dimensions. These are the quarterly cycle's own voice-of-customer and competitor gathering, and they are a primary source for Step 4.
+- **`sophisticationStage` + `sophisticationRead`** — the quarter's **market-sophistication read**, authored ONCE at the quarter and inherited by the month.
+- **The marked findings** — in particular the audience and ad dimensions. These are the quarterly cycle's own voice-of-customer and competitor gathering.
+
+**These two, together with the head's `research`, `performanceReview` and the two hand-downs above, are passed to `ssc-approaches-core` in Step 4** — what the read constrains, and what the findings are worth as a source, are the core's to apply. You hold them, pass them through verbatim, and report back what the core returns (including a `NOT STATED` read) in the doc and in the Step 7 summary.
 
 ### Step 2: Load ad and brand knowledge — LIVE, and a failed read STOPS the run
 
@@ -96,6 +99,8 @@ Call `get_knowledge` for each of these verified paths:
 - `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections, real vocabulary, myths to debunk, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a BATCH skill (one run features the pairs you select from the head's bets), so load every currently-listed persona's detail doc upfront — not just the ones you end up featuring — so the "Route × persona approaches" section can name each featured persona's actual seasonal trigger instead of a generic one.
 - `content/pillars` — the content pillar strategy and pillar names
 - `rules/banned-words` — hard-banned Vietnamese words/compounds — verify every Vietnamese string you write
+
+Use `search_knowledge` only when the head's research or the quarter's findings name something these paths do not cover (a specific proof point, a myth, a programme detail) and you need the brand's own recorded position on it before writing guidance about it — never to invent a phrase.
 
 Read these carefully. They are the authoritative source for *how* to differentiate by persona and route and *which* persona triggers to ride. Use the KB to translate the head's bets into concrete per-route/persona creative approaches — it supplies the route/awareness lens, persona framing, and angle vocabulary; the strategic direction is already fixed by the head's `tactics`, and the KB never supplies direction.
 
@@ -117,41 +122,87 @@ Take from the head's `research` (Step 1b), and take it as given:
 
 If the research is silent on something you need, **say so in the doc** rather than filling the gap from a search or from memory. A named gap is information the next month's Research can act on; an invented signal is not.
 
-### Step 4: The voice-of-customer pass — what she actually says, in her own words
+### Step 4: Dispatch `ssc-approaches-core` — the voice-of-customer pass and the candidate-mechanism supply
 
-**This is the generator's first half, and the reason blandness starts here.** Downstream stages arrange material; only this step supplies it. The pass produces, per featured persona, the **language, triggers, objections and myths in the customer's own words** — verbatim where a source gives you verbatim.
+**The generator's channel-agnostic half is not authored here.** The
+voice-of-customer pass and the candidate-mechanism supply are the **shared
+core's**: `ssc-approaches-core` holds them ONCE for both Approaches channels, so
+no second copy of that doctrine exists to drift. Every rule that governs them —
+which sources the pass compiles from and in what order of authority, what must be
+attributed, what an avoid-list does, what a candidate carries, how a proof route
+is selected against this period's inventory, how indirectness is judged against
+the inherited read — lives in that skill and is **deliberately not restated
+here.** Do not re-derive them and do not keep a local copy.
 
-**It is COMPILED from recorded sources, not scraped.** You run no outward pass of your own (Step 3); there is exactly one per period and it is the head's. Compile from, in this order of authority:
+Dispatch it with what you have already read. It reads **no plan state** of its
+own (no `get_month_plan`, no `get_channel_plan`, no `get_strategy_brief`) and
+holds **no mutation tool**, so the release gate you cleared in Step 1b and every
+save in Steps 6 / 6b stay yours — one read, one gate:
 
-1. **The head's `research`** (Step 1b) — the period's own outward pass: what the month found people saying, asking and reacting to.
-2. **The quarter's marked strategy findings** (Step 1b) — the audience dimension above all, which is the quarterly cycle's own voice-of-customer gathering, plus the ad dimension for the language competitors are answering.
-3. **Each persona's detail doc** (`brand/persona-<slug>`, Step 2) — her real vocabulary, her ranked trigger points, her stated objections, the myths she holds, and the paired avoid-list. This is the standing record; the two above are what changed this period.
-4. **The head's `performanceReview`** (Step 1b) — the month's only look-back, for which language actually landed and which did not. You run no look-back of your own.
+```
+Dispatch: ssc-approaches-core
+  channel:  ad
+  period:   <period>
+  head:     { research, performanceReview, proofInventory, offerState }   ← Step 1b
+  quarter:  { sophisticationStage, sophisticationRead, marked findings }  ← Step 1b
+  personas: <the personas this run features>
+```
 
-Use `search_knowledge` when a term or phrase turns up in the head's research or the quarterly findings and you need to find where the KB already records it. Never use it to invent a phrase.
+| Payload key | What you pass | What rides with it |
+|---|---|---|
+| `channel` | `ad` — always | This skill dispatches the core on no other channel; `post` is `ssc-post-approaches`' dispatch |
+| `period` | the plan month, `YYYY-MM` | The same period you read in Step 1 |
+| `head` | `research`, `performanceReview`, `proofInventory`, `offerState`, exactly as `get_month_plan` returned them (Step 1b) | A `null` `proofInventory` and a `null` `offerState` are **facts** — pass the null. Never an assumed inventory, never an invented promotion |
+| `quarter` | `sophisticationStage`, `sophisticationRead` and the marked findings from `get_strategy_brief` (Step 1b) | Pass them **verbatim**. A brief carrying no read comes back `NOT STATED`, which you report — never a stage you supplied |
+| `personas` | the personas this run features, selected from the head's bets against the live `brand/personas` roster (Step 2) | Pass none and the core features the whole current roster and names that fallback; never hand-guess a subset |
 
-Rules that make the pass worth having:
+It returns three blocks — the **inherited sophistication read**, the **per-persona
+voice-of-customer pass**, and the **candidate-mechanism supply** — plus the named
+gaps, the personas it featured, and the KB docs it read live. It writes nothing:
+**Step 5 is what you do with them.**
 
-- **Verbatim, attributed.** Every quoted phrase names the source it came from (head research / quarterly finding / which persona doc / performance review). A phrase you cannot attribute does not go in.
-- **Never invent a quote.** No plausible-sounding customer voice, no composite phrasing presented as something someone said, no remembered line from an earlier period.
-- **Respect each persona's avoid-list.** A phrase her detail doc says to avoid is recorded as *what she avoids*, never repeated as her voice.
-- **An empty source is a NAMED GAP.** If the sources yield nothing usable for a featured persona — or nothing at all — write the gap into the doc's Voice-of-customer section and into the Step 7 summary, saying which source was silent. **Do not fill it.** A named gap is the input the next period's Research and the next quarter's audience dimension can act on; an invented voice poisons every stage below.
-- The gap does **not** stop the run — only a failed KB read does (Step 2).
+The core runs no outward pass either, so Step 3's rule holds across the dispatch:
+there is exactly one outward signal pass per period and it is the head's.
 
-### Step 5: Candidate mechanisms — the supply Ideate draws on
+A **failed KB read inside the core STOPS this run too.** The core then returns no
+block at all: write **nothing** (no `context`, no `creative_target`) and name the
+document the core reported as unreadable, exactly as Step 2's rule does for your
+own reads.
 
-Read what a mechanism must be — what qualifies, what does not, and the mandatory mechanism beat it feeds — LIVE from `craft/doctrine` **§2**. It is deliberately **not** defined in this file: a second copy of that definition here is exactly the drift this design refuses, and a remembered version of it is a guess.
+### Step 5: Compose the core's blocks into the doc — never re-author them
 
-**Ideate may not approve a subject without one, so this step is where the supply comes from.** Propose a set of candidates for the period — enough that the pairings in Step 6 each have something to draw on, and more than the month can use. Ground each candidate in Step 4's voice-of-customer material: a mechanism with no observed failure or belief behind it is exactly the invented topic this design exists to stop.
+The voice-of-customer pass and the candidate mechanisms are already authored; the
+core returned them in Step 4. This step is **composition**, and the material is
+handled as returned:
 
-Each candidate carries, in one short block:
+- **Compose the doc's *Voice of customer* section** (Step 6's template) from the
+  core's `voice_of_customer` block — per featured persona, with each quoted line
+  keeping the attribution the core gave it.
+- **Compose the doc's *Candidate mechanisms* section** (Step 6's template) from
+  the core's `candidate_mechanisms` block — one short block per candidate, keeping
+  its quoted voice-of-customer item, its proof route (`verified` /
+  `unverified_for_period`) and its indirectness call exactly as returned.
+- **Carry the named gaps through.** The core's `gaps:` line, and any gap inside a
+  persona's block, goes into the doc's Voice-of-customer section AND the Step 7
+  summary, saying which source was silent about which persona. Do not fill a gap
+  and do not quietly drop one. A gap does **not** stop the run — only a failed KB
+  read does (Step 2).
+- **Carry the sophistication read through** as the core returned it, `NOT STATED`
+  included — reported in the doc and in the Step 7 summary as a gap, never filled
+  with a guessed stage.
+- **Never re-author and never re-score.** Do not re-word a mechanism sentence,
+  re-attribute or re-punctuate a quote, add a candidate the core did not return,
+  drop one because it reads awkwardly, or re-judge a proof route or an
+  indirectness call. Where a returned item looks wrong, say so to the operator
+  instead of silently rewriting it: a caller-side edit of the core's material is a
+  second copy of the doctrine with none of its rules attached.
 
-- **The mechanism itself** — why this works, or why past attempts fail. One sentence, specific.
-- **What it explains** — the voice-of-customer item it answers, quoted and attributed (Step 4). No candidate without one.
-- **Its proof route** — which proof family from `brand/proof-points` it would lean on, and the trace (a live KB proof point, or the product paperwork). A candidate whose only proof route is refused by `rules/compliance` is not proposed at all. **Select only from this period's stated `proofInventory`** (Step 1b); where the inventory is `null`, say so and mark every candidate's proof route as unverified for the period rather than assuming the device is available.
-- **How indirect it forces the lead to be** — read against the quarter's inherited sophistication read (Step 1b). Where there is no read, say so; never assume a stage.
-
-**You propose; you never choose and never approve.** Ideate picks the one mechanism a subject carries (one per subject, inherited by every angle brief beneath it) and a human approves the subject. Candidates the month does not use are not wasted — they stay in the approved Approaches doc for the period and can be picked up by any subject the month generates.
+**You propose; Ideate picks; a human approves.** This step's pipeline position is
+unchanged: Ideate picks the one mechanism a subject carries (one per subject,
+inherited by every angle brief beneath it) and a human approves the subject. You
+choose none of them and approve none of them. Candidates the month does not use
+are not wasted — they stay in the approved Approaches doc for the period and can
+be picked up by any subject the month generates.
 
 ### Step 6: Write the Approaches doc (`context`)
 
@@ -318,7 +369,8 @@ Approaches (`context`) + `creative_target` saved to the ad channel_plan (propose
 - **Does NOT restate the head's bets, and authors NO volume.** The Approaches doc adds the creative "how"; it assumes the bets named in the head's `tactics`. Re-listing the pillar bets / re-justifying the angle selection / naming a creative count is forbidden — it makes the dashboard a fragmented duplicate, and volume belongs to the head's allocation. The single quantity this step authors is the **angle count per persona × route pairing** in `creative_target` — coverage shape, machine-readable, never in the prose and never a creative/budget/ad-set figure.
 - **OWNS `creative_target`** — its only writer. Coverage shape only (persona × route × angle count), always the full set, always live roster labels. Never `detail` (refused with `retired_plan_field` from `2026-08`), never `plan_targets`, never `allocate_channel`.
 - **Does NOT write budget split, layer/ad-set assignment, or media-buy data** — the layer/ad-set tag is decided later, per angle, by the Brief step; the actual media buy (budgets, audiences, ad-set setup) is a separate ops concern outside the creative pipeline entirely. Approaches carries only the creative differentiation direction (`context`) and the coverage shape (`creative_target`); it never names an ad set, a layer, a budget, or an audience.
-- **Runs NO outward research** (Step 3): there is exactly one outward signal pass per period and it is the head's Research step. `WebSearch` is not in the tool list. The voice-of-customer pass (Step 4) COMPILES from recorded sources — the head's research, the quarter's marked findings, the persona detail docs, the head's performance review — and quotes only what a source actually says.
+- **The voice-of-customer pass and the candidate-mechanism supply are the SHARED CORE's** — `ssc-approaches-core`, dispatched in Step 4 with `channel='ad'`. This skill **composes** what the core returns into the Approaches doc and **saves** it (Steps 5–6); it never re-authors, re-scores, re-attributes or paraphrases it, and it keeps **no** second copy of the sophistication-inherit rule, the voice-of-customer pass or the candidate-mechanism construction — two copies of doctrine diverge the day one is edited, and the stale copy wins wherever it is read first. The core reads no plan state and holds no mutation tool: the release gate (Step 1b) and every save (Steps 6/6b) stay here.
+- **Runs NO outward research** (Step 3): there is exactly one outward signal pass per period and it is the head's Research step. `WebSearch` is not in the tool list, and the shared core holds none either — the voice-of-customer pass (Step 4) COMPILES from the recorded sources this step passes it, and quotes only what a source actually says.
 - **Never invents a customer voice, a mechanism's evidence, a proof device, a promotion, or a sophistication stage.** Where a source is silent the gap is NAMED in the doc and in the summary and left open. Only a failed KB read stops the run; a named gap does not.
 - **Proposes mechanisms; never chooses or approves one.** Ideate picks the mechanism a subject carries (one per subject, inherited by its briefs) and a human approves the subject.
 - **Design creative for each pairing's job, not a per-ad-set/per-layer steer.** A `{persona, route}` pairing's awareness stage (read live from `craft/awareness-framework` each run) determines whether its creative should cold-open (mechanism/curiosity) or warm-close (proof/reassurance/comparison) — never hardcode a route-to-stage mapping in this skill, and never frame guidance as "L1/L2/L3" or per-ad-set. This sets the creative intent only — the look-back that grades performance is the head's Review, not this step.

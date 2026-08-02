@@ -126,6 +126,26 @@ values can disagree, and `meta.reason` prose can contradict the value it sits on
 **the pillar `target_value`s govern**; report a mismatch rather than reconciling it
 silently.
 
+**Also hold `plan.context` — the approved Approaches document — off this same
+response.** It costs nothing: the gate-check above already fetched it. Make **no
+second call**, add **no tool**, and open **no additional KB doc** for it — the "You
+need no other KB doc" line in Step 4 stays true.
+
+From that document read **one thing only: the sophistication line in §1 (`Điều
+chung cho mọi bài`)** — the numbered rule stating how indirect this month's openings
+must be. It is **inherited, never derived**: the quarter authored the read, the
+Approaches step carried it down, and you carry it further. You never infer, adjust,
+upgrade or default a stage of your own, and you name §1 as where it came from when
+you apply it.
+
+- Where §1 records `NOT STATED`, or carries no sophistication line at all (a
+  document approved before this section existed), that is a **fact**: apply no
+  bar, make no sequencing claim, and say so in the report.
+- Read nothing else from the document here. Pillars, personas, differentiation and
+  format rules were already spent at Ideate; re-reading them at Schedule invites you
+  to re-judge work you are only arranging. Key dates in particular are **not** here
+  — see the trap stated in Step 1.
+
 ### Step 3: Read the approved ideas — page correctly
 
 ```
@@ -190,6 +210,30 @@ Every approved idea appears exactly once: no omissions, no duplicates.
    keeps deliberately small stays one post.
 3. **Spread the remainder** across every day of the month including weekends —
    `rules/scheduling` prefers one post per day over clustering.
+
+   **Sequencing preference (inside this step only).** Where §1's rule requires
+   indirect openings this month, let the mechanism-led, more **indirect** posts take
+   the earlier free days and let the more direct ones land later in the month. This decides only *which*
+   remaining idea fills a free day.
+
+   It is **subordinate to everything harder**: it never moves a post pinned to a key
+   date, never displaces a build-up or follow-up post from its window (steps 1–2),
+   and never survives a conflict with the adjacency repair (step 4) — those encode
+   real constraints, this is a preference. When it collides with any of them, the
+   preference loses, silently and without comment.
+
+   Where §1 records `NOT STATED`, or carries no sophistication line, apply **no**
+   ordering preference at all and assume no stage.
+
+   **What you sort on — `mechanism` is not readable here.** `list_ideas` does not
+   return `mechanism`; the field is write-only on this tool surface. Judge how
+   indirect a post is only from what is actually on the row: the idea's `tags`
+   (`journey_stage`, `frame`, `entry`) and its brief fields (`hook_direction`,
+   `core_message`, and `awareness_stage` where it was persisted). **Never re-derive a
+   mechanism to sort by.** A guessed mechanism used as a sort key is a silent,
+   invisible error — nothing downstream can see it, and the resulting order reads as
+   deliberate. If those signals do not separate two ideas, leave their order as the
+   spread produced it and say nothing.
 4. **Repair adjacency last.** No two consecutive days share a pillar; the last
    pillar of day N differs from the first of day N+1.
 
@@ -242,6 +286,10 @@ out-of-month date is accepted and persisted.
 
 Bài đã xếp: <N> · nhịp <min>–<max> bài/tuần · <one line on any drift or conflict>
 
+Thứ tự theo mức bão hòa: <mức bão hòa kế thừa từ mục 1 của tài liệu Hướng tiếp cận>
+  — <quy tắc đã áp dụng, một dòng: bài thiên về cơ chế / gián tiếp xếp trước, bài
+  trực diện xếp sau; xếp sau ngày trọng điểm và luật kề trụ cột>
+
 | Ngày | Thứ | Trụ cột | Định dạng | Tiêu đề | Ghi chú |
 |---|---|---|---|---|---|
 
@@ -256,6 +304,17 @@ Bài đã xếp: <N> · nhịp <min>–<max> bài/tuần · <one line on any dri
 | Bài dẫn vào / tiếp nối | theo rules/scheduling | PASS/FAIL |
 | Mọi bài đã duyệt được xếp đúng một lần | <N>/<N> | PASS/FAIL |
 ```
+
+**The sophistication line is reported every run — one line, never omitted.** Where
+§1 carried a read, name the read and the rule you applied. Where it recorded
+`NOT STATED` or carried no such line, make **no** sequencing claim and say exactly
+that:
+
+> Thứ tự theo mức bão hòa: tài liệu Hướng tiếp cận không nêu mức bão hòa —
+> không áp thứ tự theo cơ chế.
+
+A run that says nothing here reads the same as a run where the rule was applied, so
+silence is the one thing this line may not be.
 
 Then tell the operator plainly: review and approve the calendar at
 `/content/plan/<period>?tab=post&step=schedule`, which flips `schedule_approved`;
@@ -291,6 +350,16 @@ never move an idea outside the month to make a check pass.
 - **Never read the retired root `approved` flag**, and never gate on it. Release is
   the head's `narrative_approved`; the channel's own precondition is
   `approaches_approved` plus ≥1 approved idea.
+- **Never derive a sophistication read, and never re-derive a mechanism to sort
+  by.** The read is inherited from §1 of the approved Approaches doc, held off the
+  `get_channel_plan` response Step 2 already fetches — no extra call, no extra tool,
+  no extra KB doc. `mechanism` is not returned by `list_ideas`, so the sequencing
+  judgement uses only readable signals (`tags`, `hook_direction`, `core_message`,
+  `awareness_stage`); a guessed mechanism as a sort key is a silent error. No read
+  stated → no bar, no ordering claim, and the report says so.
+- **The sequencing preference never outranks a constraint.** Key-date pins and the
+  adjacency repair govern; the preference only picks which idea fills an already-free
+  day, and it never moves a pinned post.
 - **Never hard-code KB content.** Name the doc and read it live — the cadence
   thresholds, the adjacency rule and the key-date phase table are all
   `rules/scheduling`'s, and inline numbers here are illustrative only.

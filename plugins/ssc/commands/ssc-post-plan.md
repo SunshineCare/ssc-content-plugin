@@ -29,7 +29,7 @@ The month is decided at the **monthly-plan head** (`/ssc-plan <period>`), which 
 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
-| **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context` | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
+| **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context`. It carries the quarter's **market-sophistication read** (inherited verbatim, never derived) and supplies the period's **candidate mechanisms** — both produced by the shared `ssc-approaches-core` sub-skill it dispatches | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
 | **Ideate** | ≥1 approved idea | **Three rounds, one per invocation** — see below. ① *Distribution* → the pillar split, written to the head (propose-only, no gate). ② *Titles* → one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Angle* → each **approved** idea's hero + its **one** angle, patched onto its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas to schedule |
 | **Schedule** | `schedule_approved` | Assigns each approved idea a publish date, honouring the **allocated** cadence and the head research's calendar → written as `schedule_entries` | Reviews + **approves** the calendar in the dashboard, then re-runs this command |
 
@@ -80,10 +80,12 @@ themes single out for expansion.
 Every step grounds itself in the same three sources, **in this priority order**:
 
 1. **The monthly plan** (`get_month_plan(period)`) — the month's narrative, themes (`tactics`), outward research (`research`) and look-back (`performance_review`), plus the allocation the head set for this channel. This is the primary steering and it decides the month.
-2. **The quarterly strategy brief** (`get_strategy_brief(<quarter>, marked_only=true)`) — direction across the quarter. Used to place the month inside the quarter and to fill in where the month is silent. It never overrides the month.
+2. **The quarterly strategy brief** (`get_strategy_brief(<quarter>, marked_only=true)`) — direction across the quarter, including the **market-sophistication read** the channel inherits verbatim and never derives (`NOT STATED` is reported as a gap, never filled with a guessed stage). Used to place the month inside the quarter and to fill in where the month is silent. It never overrides the month.
 3. **The knowledge base** — read live, by path, every run. It supplies craft, vocabulary, persona detail and hard rules; it never supplies direction.
 
 Where two sources disagree, the higher one wins — and the step says so in one line rather than quietly picking.
+
+Approaches folds these three into the shared `ssc-approaches-core` sub-skill, which returns the inherited sophistication read, the per-persona voice-of-customer pass and the period's **candidate-mechanism supply** — the supply Ideate prefers when it settles each idea's mechanism, and the sophistication read Schedule sequences by.
 
 ## What to do
 

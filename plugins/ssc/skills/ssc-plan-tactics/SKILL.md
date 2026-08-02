@@ -241,7 +241,28 @@ Call: save_month_plan
   proof_inventory:   <Step 4a — OMIT ENTIRELY when nothing is stated>
   offer_state:       <Step 4b — OMIT ENTIRELY when there is no promotion>
   strategy_brief_id: <Step 1's brief id — OMIT ENTIRELY when the quarter has no brief>
+  expected_version:  <the head's `version` from Step 1's get_month_plan — OMIT when no head exists yet>
 ```
+
+**`expected_version` is the head's optimistic-concurrency guard, and it is not
+optional.** This write is an UPSERT keyed on `period`, so the guard is asymmetric:
+
+- the head **already exists** (`get_month_plan` returned one) → pass the `version`
+  you just read. Omitting it is refused with `expected_version_required` and
+  nothing is written;
+- **no head yet** (`get_month_plan` returned null) → pass NOTHING. Presenting a
+  version for a period with no head is refused too — it means you believe you are
+  updating something that is not there.
+
+**Never assume or reuse a version.** Read the head immediately before writing and
+pass that value. If the write is refused as `stale_version`, someone else (another
+step, or the dashboard) wrote the head after you read it: **re-read the head,
+re-apply your section to the fresh row, and write again**. Never blind-retry the
+same version, and never drop your write because it was refused.
+
+Note the difference from the fields above it: `expected_version` being absent is
+NOT the "omission preserves" rule. An omitted hand-down means *nothing stated*; an
+omitted version on an existing head means *refused*.
 
 **`strategy_brief_id` records which quarterly brief this month was planned from.**
 It rides this call, never a second one — the provenance lands in the same write as

@@ -83,9 +83,23 @@ Otherwise hold these fields from the head — they are your entire state machine
 | `narrativeApproved` | the month's only gate |
 
 **Carry `version` into the step you dispatch.** The head's writers take an
-optimistic-concurrency guard, and the head is touched by the dashboard too — a
-stale version writes nothing. Never assume a version; always pass the one you
-just read.
+optimistic-concurrency guard on `expected_version`, and the head is touched by the
+dashboard too — a stale version writes nothing and is refused as `stale_version`.
+Never assume a version; always pass the one you just read.
+
+**The guard is asymmetric, because the head's write is an UPSERT keyed on
+`period`.** Tell the step which case it is in:
+
+- **the head exists** → `expected_version` is REQUIRED. A write without it is
+  refused with `expected_version_required` and changes nothing.
+- **no head yet** (`get_month_plan` returned null) → `expected_version` must be
+  ABSENT. Presenting one for a period with no head is refused rather than
+  creating it.
+
+**A refusal is not a failure to report and abandon.** On `stale_version` the step
+re-reads the head, re-applies its section to the fresh row, and writes again — the
+other writer's content survives and so does this one's. Never blind-retry the same
+version, and never drop the write.
 
 ## Step 2: Pick the step
 

@@ -116,7 +116,10 @@ has a different job and therefore a **different KPI**; a single ranking across a
 ads compares work that was never trying to do the same thing.
 
 Resolve the layer from the brief's `target_layer_term_id` where a brief maps, and
-otherwise from the campaign/ad-set's deployment-time name (`L1` / `L2` / `L3`).
+otherwise from the deployment-time name the group **already carries**
+(`campaign_name`, and `adset_name` at adset and ad level) — `L1` / `L2` / `L3`.
+Every group names its own place in the hierarchy, so the mapping is read off the
+one response: **never call `get_ad_performance` again per campaign to recover it.**
 When neither resolves, report the group as **`chưa rõ lớp`** — never guess, and
 never default it to a layer.
 
@@ -238,6 +241,26 @@ artifact:
 | `complete` (per side) | Whether that side is a settled measurement | When false, **state the degradation** beside the figure. Never present it as measurement. |
 | `coverage.last_step_success_at` | Per-step ingestion success | A healthy page snapshot never vouches for a failed ad pull. Read them separately. |
 
+**Extent is degradation too — state the window each lens was actually read
+over.** The same honesty applies to how MUCH was measured, not only how well.
+**Read every lens over the reported period wherever the surface lets you ask for
+an explicit date range**, rather than over a trailing window ending today. Where
+a lens could not be read over the period — the surface takes no date range,
+ingestion covered less than the period, or `page.excluded[]` dropped
+boundary-straddling segments — **name the span that lens WAS read over, beside
+that lens's own figures**, and never present those figures as measuring the
+period. The report's title is not a claim about a lens that was read elsewhere.
+
+Two consequences that are not optional:
+
+- **A window differing from the period is never left implicit.** A silently
+  different window is worse than a stated one: every figure in that section is
+  then quietly about a different span than the report says it is.
+- **Two lenses read over different spans are not compared as if aligned.** State
+  both spans and say plainly that the comparison is not like-for-like — the
+  post side and the ad side can cover different spans even when both were asked
+  for the same range.
+
 **Never trigger ingestion to improve a reading.** `pull_fb_performance`,
 `pull_all_ad_performance` and `pull_fb_ad_hierarchy` are operator/worker actions.
 You report what has been ingested.
@@ -254,6 +277,16 @@ Call: get_performance_range
   since: <first day of prior period>
   until: <last day of prior period, or the last ingested day when the month is still running>
 ```
+
+**The three heavy reads are routinely large** — `get_performance_range` here, and
+`get_post_performance` and `get_ad_performance` (especially at `level='ad'`) in
+Step 3 — large enough to exceed the tool-result limit and be spilled to a file
+instead of returned inline. That is normal, not an error. Read the spilled file
+rather than re-calling: a second call costs a second full read and spills the
+same way. A spilled result is a **delivery**, not a degradation — its figures
+carry the same standing as an inline result, and it is **never** recorded as a
+coverage degradation in the artifact (Rule 2 is about ingestion coverage, not
+about how a result reached you).
 
 Hold `ads.days_uncovered`, `ads.provisional_from`, both `complete` flags,
 `page.excluded[]` and `coverage.last_step_success_at`. **These gate everything
@@ -284,6 +317,10 @@ and **record in the artifact that no digest existed**.
 
 **Read the post side first. It is the primary evidence, not a supplement.**
 
+Both reads below spill to a file when they exceed the tool-result limit — normal,
+not an error, not a degradation. Read the delivered file; do not retry. See the
+out-of-band note in Step 1.
+
 **Step 3a — the page read (lenses 1 and 2)** —
 `get_post_performance(limit=100, platform='facebook')`. Each row carries its
 `class` (`organic_only` | `paid_only` | `boosted` | `unknown`) and, when boosted,
@@ -302,8 +339,28 @@ this baseline: a boosted post's rate is only meaningful next to what the same pa
 earns without money. Without the baseline there is no boost lesson, only a number.
 
 **Step 3b — the ad read (lens 3, secondary)** —
-`get_ad_performance(level='adset', window_days=<span>)`. Each group carries
-`class`, `class_counts` and `by_class` (the same metrics split per class). Read
+read the **prior period's own calendar range**, never a trailing window:
+
+```
+Call: get_ad_performance
+  level: adset
+  since: <first day of prior period>
+  until: <last day of prior period, or the last ingested day when the month is still running>
+```
+
+`since` / `until` are inclusive, and they are **mutually exclusive with
+`window_days`** — passing both is refused, and so is one endpoint without the
+other. **Never pass `window_days` here.** A trailing window ends *today*, so §5's
+figures would silently describe a different span than the month this Review
+reports on.
+
+**Report the window from the response's `range`, never recomputed.** The read
+states the span it actually served (`range.since` / `range.until`); that is what
+§5 and §7 name as the ad lens's window. Where it differs from the reported
+period, say so beside §5's figures — the Rule 2 extent rule binds this call.
+
+Each group carries `class`, `class_counts` and `by_class` (the same metrics split
+per class), plus its own campaign (and, at adset and ad level, adset) identity. Read
 `classification.linkage_populated` and `classification.authoritative` first:
 **treat organic/paid classes as authoritative only when both are true**, and when
 they are not, say plainly that classification was not authoritative this period
@@ -686,7 +743,9 @@ tier.
 **§5 — Quảng cáo: theo lớp, rồi persona/route** (lens 3, secondary).
 
 **Open with the LAYER table — L1 / L2 / L3 / `chưa rõ lớp`** — covering the whole
-ad population, since layer resolves from campaign names even when no brief maps:
+ad population, since layer also resolves from the deployment-time name the group
+already carries (`campaign_name`, and `adset_name` at adset and ad level) even
+when no brief maps:
 
 | Lớp | Chi | Hiển thị | CPM | Chuyển đổi | Chi/chuyển đổi | Đơn | Chi/đơn | Số ngày chạy |
 

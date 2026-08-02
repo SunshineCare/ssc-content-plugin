@@ -1,7 +1,7 @@
 ---
 name: ssc-post-ideate
 description: >-
-  Runs the IDEATE step of the Cambridge Diet Vietnam Posts channel in THREE ROUNDS, one per invocation, each ending at an operator checkpoint. Round 1 DISTRIBUTION proposes the month's pillar split with a suggested post count per pillar, writes it to the head via allocate_channel (propose-only, flips no gate, mints the channel row if absent) and STOPS; the operator accepts by saying so, by editing the numbers in the dashboard allocation panel, or simply by running the command again. Round 2 TITLES generates one titled draft idea per planned post via save_idea, sized exactly to the accepted distribution and audited for spread and diversity, then STOPS so the operator can prune before any deeper work is spent. Round 3 ANGLE enriches each surviving idea by dispatching ssc-brief-core for its HERO and its ONE angle — a post has exactly one angle, never a fan-out like ads — writes the hero via edit(entity='idea') and the five narrative fields onto the idea's single existing brief, and DECLARES that angle's awareness_stage on it — a post HAS an awareness stage (only the media layer is ads-only), read live from craft/awareness-framework's awareness-level ladder and never from a remembered copy, persisted when the brief is created here and otherwise reported as declared-not-yet-persisted because awareness_stage is a save_brief-only field; no existing brief is ever back-filled. Then STOPS for approval. State-driven: it reads the head's allocation and the plan's ideas and works whichever round is open, so re-invoking always advances rather than repeating. What governs an IDEA is read live and never restated here — craft/doctrine (the production chain an idea opens, and the mandatory mechanism a title must leave reachable) in round 2, and craft/awareness-framework (awareness staging, and the boundary that the brief declares the stage while the writer picks the lead) in round 3; the per-asset floor and the set-level coverage verdict are deliberately not read, because this step produces neither. Each post idea carries ONE named MECHANISM, stored on the idea (never on the brief) and inherited by the single brief beneath it, which is written TO it and never restates or contradicts it — the mechanism is a condition of PROPOSING an idea as ready for approval, never a condition of drafting one, so an idea without one is still titled, saved, kept and given its angle. Ideas approved before this requirement landed are grandfathered: never re-opened, never back-filled, their absent doctrinal inputs named in the run's report and none invented. A failed KB read STOPS the run, saves nothing, and names the document that could not be read. Gated on approaches_approved. Propose-only; every idea is a draft a human curates and approves, and the skill never flips a gate.
+  Runs the IDEATE step of the Cambridge Diet Vietnam Posts channel in THREE ROUNDS, one per invocation, each ending at an operator checkpoint. Round 1 DISTRIBUTION proposes the month's pillar split with a suggested post count per pillar, writes it to the head via allocate_channel (propose-only, flips no gate, mints the channel row if absent) and STOPS; the operator accepts by saying so, by editing the numbers in the dashboard allocation panel, or simply by running the command again. Round 2 TITLES generates one titled draft idea per planned post via save_idea, sized exactly to the accepted distribution and audited for spread and diversity, then STOPS so the operator can prune before any deeper work is spent. Round 3 ANGLE enriches each surviving idea by dispatching ssc-brief-core for its HERO and its ONE angle — a post has exactly one angle, never a fan-out like ads — writes the hero via edit(entity='idea') and the five narrative fields onto the idea's single existing brief, and DECLARES that angle's awareness_stage on it — a post HAS an awareness stage (only the media layer is ads-only), read live from craft/awareness-framework's awareness-level ladder and never from a remembered copy, persisted on BOTH paths - passed on save_brief when the brief is minted here, and written as its own edit(entity='brief') patch when round 2 already minted it; an existing brief IS back-filled, and the stage is never left merely declared. Then STOPS for approval. State-driven: it reads the head's allocation and the plan's ideas and works whichever round is open, so re-invoking always advances rather than repeating. What governs an IDEA is read live and never restated here — craft/doctrine (the production chain an idea opens, and the mandatory mechanism a title must leave reachable) in round 2, and craft/awareness-framework (awareness staging, and the boundary that the brief declares the stage while the writer picks the lead) in round 3; the per-asset floor and the set-level coverage verdict are deliberately not read, because this step produces neither. Each post idea carries ONE named MECHANISM, stored on the idea (never on the brief) and inherited by the single brief beneath it, which is written TO it and never restates or contradicts it — the mechanism is a condition of PROPOSING an idea as ready for approval, never a condition of drafting one, so an idea without one is still titled, saved, kept and given its angle. The month's candidate-mechanism SUPPLY and its SOPHISTICATION constraint both arrive inside the approved Approaches already read in step 0 (plan.context) — no second strategy-brief call and no re-derivation: round 2 carries a matching supply candidate's mechanism exactly as the approved doc words it and omits the argument where none matches, round 3's mechanism pass prefers that same supply while permitting an off-supply mechanism provided the report names it as off-supply, and round 3's angle — with the awareness stage declared alongside it — must clear the sophistication read the doc carries, a bar that is inherited and never derived here, that constrains the ANGLE (rewritten until it clears) and never the draft, and that is simply absent, reported and unapplied where the doc states no read. Ideas approved before this requirement landed are grandfathered: never re-opened, never back-filled, their absent doctrinal inputs named in the run's report and none invented. A failed KB read STOPS the run, saves nothing, and names the document that could not be read. Gated on approaches_approved. Propose-only; every idea is a draft a human curates and approves, and the skill never flips a gate.
 metadata:
   type: skill
   stage: post-pipeline
@@ -63,6 +63,15 @@ Call: get_channel_plan
 
 Then hold `plan.id` (the channel plan id), `plan.context` (the approved
 Approaches — your primary steering), `plan.targets` and `plan.detail`.
+
+**Two things you need later travel inside `plan.context` and nowhere else.** The
+approved Approaches carries this month's **sophistication constraint**, stated
+once in its **§1**, and the period's **candidate-mechanism supply**, in its
+**§3**. Hold both off this read: round 2 draws on §3, round 3 applies §1's bar
+and draws on §3 again. There is **no second fetch for either** — this skill calls
+`get_strategy_brief` never, and re-derives neither the read nor a candidate. A
+doc approved before those sections existed simply has no §1 constraint line and
+no §3; that is a fact you report where each round says to, never a gap you fill.
 
 ```
 Call: list_ideas
@@ -237,7 +246,9 @@ save_idea(
   source   = 'ai',
   title    = <natural Vietnamese title, specific to this month>,
   mechanism = <this idea's ONE mechanism, in Vietnamese, one or two plain sentences —
-               as `craft/doctrine` §2 defines and tests it. Pass it ONLY when round 2's
+               as `craft/doctrine` §2 defines and tests it. Where the title matches a
+               candidate in the approved doc's §3, this is THAT candidate's mechanism,
+               carried as the doc states it. Otherwise pass one ONLY when round 2's
                grounding already yields one. OMIT the argument entirely otherwise;
                never a placeholder, an empty string, or a restatement of the title>,
   score    = <1-5, honest>,
@@ -279,6 +290,26 @@ filler to clear a field — a fabricated mechanism is the single failure this wh
 requirement exists to prevent. Whatever is still missing is settled in round 3's
 mechanism pass, on the ideas that survived pruning.
 
+**Look in the approved supply first — and CARRY what you find, never re-author
+it.** The approved Approaches (`plan.context`, held in Step 0) carries the
+period's candidate-mechanism supply in its **§3**. Before you decide a title has
+no mechanism, check it against that supply. Where the title matches a candidate
+there, pass **that candidate's mechanism, worded as the approved doc states it**
+— this is a *carry*, not an authoring act, so do not paraphrase it, sharpen it,
+soften it, shorten it, translate it into your own phrasing, or merge two
+candidates into one sentence. The operator approved that wording; changing it
+en route is how an approved supply quietly becomes an unapproved one.
+
+**Where no candidate matches, omit the argument exactly as today.** Never bend a
+title toward a candidate so it earns a mechanism, and never stretch a candidate
+to cover a title it does not actually explain — either move is a fabrication
+wearing an approved sentence. The supply is deliberately larger than the month's
+post count, so candidates going unused is the supply working, not a coverage
+failure; and a doc with no §3 (approved before the supply existed) simply means
+every title takes the omit path, which is exactly today's behaviour. The rule
+above is unchanged by any of this: **never delay, shrink or withhold a title for
+want of a mechanism, and never pass filler to clear the field.**
+
 > **If `save_idea` rejects a title-only idea on validation**, add the minimum its
 > validator demands and note in your summary which fields you were forced to fill
 > early, so round 3 knows to deepen rather than assume them thin. Report the
@@ -301,6 +332,17 @@ win over anything inline here.
   reading identically.
 - **Month-specificity** — each title is tied to this month; evergreen filler above
   the `rules/review-standards` threshold is replaced.
+- **MECHANISM SPREAD — count it, do not eyeball it.** Tally how many titles carry
+  each §3 candidate. **No single mechanism may carry more than about a quarter of
+  the batch**, and every §3 candidate that genuinely fits the month should appear
+  at least once before any candidate is used a fourth time. Where the tally
+  breaches the cap, first re-check whether the over-used candidate is really the
+  best fit for each title carrying it (usually two or three are lazy matches);
+  where the supply is simply too small to spread — fewer candidates than a quarter
+  of the batch requires — **say so in the report as a supply gap, name the count,
+  and do not invent mechanisms to pad the spread.** The fix for a thin supply is
+  the next Approaches run, not fabricated mechanisms here. *(2026-08 shipped with
+  one mechanism on 8 of 31 posts because nothing counted this.)*
 - **No banned words** in any title. Zero tolerance, checked against
   `rules/banned-words`.
 
@@ -390,6 +432,33 @@ idea's single brief **inherits** it rather than authoring its own; and the
 requirement bites at **approval**, not at drafting. Same failed-read rule — if
 `craft/doctrine` comes back in `missing`, **STOP**, write nothing, and name it.
 
+**The angle clears the inherited sophistication bar — read it, never derive it.**
+The approved Approaches (`plan.context`, held in Step 0) states this month's
+sophistication constraint **once, in its §1**: the stage the quarter read, and
+how indirect that read says this month's openings must be. That statement is the
+bar. Take it from there and **nowhere else** — no `get_strategy_brief` call (this
+skill holds none), no re-reading the quarter, no stage of your own. The quarter
+authors the read, the head and the Approaches carry it down, and a stage derived
+here would be a second position no operator ever approved. Judge the angle **and
+the awareness stage you declare with it** against that read **in the read's own
+terms**: §1 says what it demands, and this file restates no rung, no stage label
+and no saturation ladder.
+
+**The bar constrains the ANGLE, never the DRAFT.** An angle that does not clear
+it is **rewritten until it does** — a different anchor, a different persona, a
+different awareness stage, an opening that argues the mechanism rather than
+asserting the benefit — and then the idea proceeds exactly like any other. Never
+hold back, delay, shrink, drop or withhold an idea because of the bar, and never
+leave an angle standing below it while putting the idea to the operator as ready.
+Whichever bar you applied is stated in the 3d report.
+
+**Where §1 says the read is not stated** — an explicit `NOT STATED`, or a doc
+carrying no sophistication line at all because it was approved before the
+constraint existed — **say so and apply no bar.** Do not assume a stage, do not
+infer one from the month's tactics or from last month's posts, and do not read
+the absence as licence to open as directly as you like. Report it on the 3d bar
+line; filling that gap is the quarter's job, not this round's.
+
 Work ideas one at a time. For each, choose the angle first — persona, route, the
 concrete **anchor** it attacks (a belief, a trigger, an objection, a myth), and
 the **awareness stage** the angle assumes — grounded in the approved Approaches,
@@ -464,21 +533,32 @@ numbered **backwards**, and silently inverted every value recorded against it. I
 STOPped — there is no remembered fallback for a stage, and a guessed rung is
 worse than an absent one.
 
-**Where the value can actually land, today — read this before you build the
-call.** `awareness_stage` is a **`save_brief`-only** field:
+**Where the value lands — both branches persist it.** `awareness_stage` is a
+real, writable brief field on **either** path:
 
 - **The `save_brief` branch** (the idea carries no brief) — pass
-  `awareness_stage` on the call together with the five fields. It lands.
+  `awareness_stage` on the call together with the five fields.
 - **The `edit` branch** (the normal case — round 2's `save_idea` already minted
-  the brief) — `edit(entity='brief')`'s patchable-field allowlist **excludes**
-  `awareness_stage` deliberately, and the patch is parsed **strictly**: a patch
-  carrying it is refused **whole** and **writes nothing**, taking the five
-  narrative fields down with it. So **never put `awareness_stage` in an `edit`
-  patch.** Write the five fields as above, and report the stage you declared in
-  the 3d report as **declared, not yet persisted**, named plainly so the operator
-  can set it. Never delete-and-replace the brief to force the field (the
-  auto-created brief refuses `delete` anyway — see *Facts that bite*), and never
-  mint a second brief to carry it: a post gets exactly one.
+  the brief) — `edit(entity='brief')` **accepts `awareness_stage`**. Send it as
+  its **own patch**, after the narrative patch and against the version that patch
+  returned. Two calls, not one: the narrative fields and the stage are both
+  ordinary fields, but keeping them separate means a rejection on either one
+  cannot take the other down with it.
+
+Verified live on 2026-08-02 across 30 briefs: `edit(entity='brief',
+patch={awareness_stage})` returned success and bumped the row each time.
+
+> **This paragraph used to say the opposite** — that the allowlist excluded
+> `awareness_stage`, that a patch carrying it was refused whole, and that the
+> normal round-3 path could therefore only *declare* the stage and leave it
+> unpersisted. That was wrong, it was stated with false precision, and a whole
+> month of briefs shipped with an empty stage because this file was believed over
+> the server. **Never re-derive that claim from memory; the branch above is what
+> the surface actually does.**
+
+Never delete-and-replace the brief to force the field (the auto-created brief
+refuses `delete` anyway — see *Facts that bite*), and never mint a second brief
+to carry it: a post gets exactly one.
 
 **The brief is written TO the idea's mechanism, and inherits it.** When the idea
 carries one, every field you set has to be consistent with it — `core_message`
@@ -524,8 +604,23 @@ the mechanism against `craft/doctrine` §2 as read live in 3a:
 
 For each idea in the second list, do **one** of these, in this order:
 
-1. **Find the mechanism.** Go back to the approved Approaches and the docs
-   already read. If you find one §2 accepts, write it onto the idea:
+1. **Find the mechanism — the approved supply FIRST.** Look in the approved
+   Approaches doc's **§3**, the period's candidate-mechanism supply
+   (`plan.context`, held in Step 0), before you look anywhere else. Where a
+   candidate genuinely fits the idea, carry **that candidate's mechanism as the
+   doc states it** — carried, not re-authored and not paraphrased, same rule as
+   round 2. Where none fits, go back to the rest of the approved Approaches and
+   the docs already read this run.
+
+   **A mechanism outside the supply is PERMITTED.** The operator approved
+   creative rails, not a closed list, and refusing an off-supply mechanism would
+   stall a good idea behind an Approaches re-run. What it is not is silent:
+   **every off-supply mechanism is named in the 3d report** — the idea, the
+   mechanism, and why no §3 candidate fitted — so the operator can see which
+   ideas went outside the doc they approved and feed that back into next month's
+   Approaches. Never stretch a candidate to look like a match in order to stay
+   "on supply"; a forced fit is the same fabrication as an invented mechanism,
+   only harder to spot. If you find one §2 accepts, write it onto the idea:
 
    ```
    edit(entity = 'idea', id = <idea id>, patch = { mechanism: <the mechanism> },
@@ -575,6 +670,17 @@ post that carries one.
   and never `edit` a `mechanism` onto it — a blind write overwrites whatever is
   already there, including the operator's own. See *Facts that bite*.
 
+  **The off-supply list inherits this boundary; it does not get a second one.**
+  Reporting a mechanism as off-supply means comparing it against the approved
+  §3 — which you can only do for a mechanism you can actually see. So the
+  off-supply list is authoritative **only for the mechanisms you authored in
+  this run**. An idea enriched in an earlier run appears in **neither** the
+  off-supply list nor any on-supply count, for exactly the reason it appears in
+  neither approval list: you cannot read its mechanism, so you cannot tell an
+  off-supply one from an on-supply one from an absent one. It is reported under
+  the same *not readable through the tool surface* line, and nothing about the
+  supply is inferred for it.
+
 ### 3d. Audit across the month, then stop
 
 Before finishing, audit the enriched set as a whole — this is the last point where
@@ -588,6 +694,12 @@ cross-idea repetition is cheap to fix:
 - Every idea's **declared awareness stage** is named, together with whether it
   actually landed on the brief. A stage that could not be persisted is reported,
   never quietly dropped and never re-declared as if it had been saved.
+- Every angle — and the stage declared with it — **clears the §1 sophistication
+  bar**, or §1 stated no read and no bar was applied. An angle still sitting
+  below the bar is rewritten now, not reported as an exception.
+- Every mechanism **authored this run** is either traced to a §3 candidate or
+  listed as off-supply. Ideas from earlier runs are in neither list (third
+  boundary above).
 
 Any set the core flagged **below bar** is reported with its reason, never
 presented as passing.
@@ -610,12 +722,29 @@ presented as passing.
 (Bậc nhận thức đọc sống từ `craft/awareness-framework`; không bậc nào được đoán.
 Post không có `layer` — đó là trường của kênh quảng cáo.)
 
+### Mức chặn độ tinh vi thị trường (thừa hưởng từ Approaches §1)
+**Mức chặn đã áp:** <the §1 constraint, in the approved doc's own words> — mọi
+góc tiếp cận trong lượt này đều đã vượt mức đó.
+[hoặc: **Không có mức chặn:** Approaches §1 ghi `NOT STATED` (hoặc không có dòng
+nào về độ tinh vi) — không áp mức chặn nào, không đoán bậc nào. Cần nêu ở bản
+brief chiến lược quý.]
+(Mức này thừa hưởng, không tự suy ra ở bước này; kỹ năng này không gọi
+`get_strategy_brief`.)
+
 ### Cơ chế — sẵn sàng để duyệt
 **Sẵn sàng duyệt:** <n> / <N>
 **Chưa duyệt được — thiếu cơ chế:** <n>
 | Ý tưởng | Còn thiếu gì |
 |---|---|
 | <title> | <what would have to be established> |
+**Cơ chế ngoài danh sách đã duyệt:** <n>
+| Ý tưởng | Cơ chế | Vì sao không ứng viên nào ở §3 phù hợp |
+|---|---|---|
+| <title> | <the mechanism, as written onto the idea> | <why no supply candidate fitted> |
+(Ngoài danh sách là được phép — người vận hành duyệt định hướng, không duyệt một
+danh sách đóng. Nêu ra đây để tháng sau bổ sung vào §3. Danh sách này chỉ đúng
+với cơ chế viết trong lượt chạy NÀY: `mechanism` không đọc lại được qua tool, nên
+ý tưởng từ lượt chạy trước không nằm ở danh sách nào.)
 **Không đọc được cơ chế qua tool (ý tưởng từ lượt chạy trước):** <n> — <list>
 (Không ý tưởng nào bị chặn ở khâu soạn thảo vì thiếu cơ chế; tất cả đều đã lưu và
 đã có góc tiếp cận. Kỹ năng này không duyệt gì cả — duyệt là việc của người vận
@@ -633,8 +762,14 @@ Ideas; sau đó chạy `/ssc-post-plan <period>` để sang Schedule.
 ```
 
 The mechanism block is reported in full every run, including when every idea is
-ready — a silent pass reads the same as a pass that was never run. Ideas listed
-as not yet approvable are **saved drafts with their angle written**; nothing about
+ready — a silent pass reads the same as a pass that was never run. **The
+sophistication-bar line and the off-supply block are reported every run on the
+same principle**, including when the bar was `NOT STATED` and when no mechanism
+went off-supply: a missing bar line cannot be told apart from a bar that was
+never applied, and an absent off-supply block cannot be told apart from one
+nobody checked. State `0` and state the absence rather than dropping either.
+
+Ideas listed as not yet approvable are **saved drafts with their angle written**; nothing about
 them is withheld, and the operator remains free to approve any of them.
 
 ## Facts that bite
@@ -648,14 +783,14 @@ Each of these cost a wrong write or a wasted round on the 2026-08 run.
   delete-and-replaced, so do not plan a discard-and-regenerate loop in round 3.
   Patching narrative fields is neither promotion nor demotion, so plain `edit`
   capability suffices.
-- **`awareness_stage` is a `save_brief`-only field, and an `edit` patch carrying
-  it writes NOTHING.** The brief's patchable-field allowlist excludes it by
-  design, and the patch is parsed strictly — so one illegal key refuses the whole
-  patch, five good narrative fields included. Since round 2's `save_idea` already
-  minted the brief and takes no stage of its own, the normal round-3 path can
-  **declare** the stage but cannot persist it. Declare it, report it, and let the
-  operator set it; never build a patch around it, and never re-mint or delete a
-  brief to get it in.
+- **`awareness_stage` is writable on BOTH paths — `save_brief` and `edit`.**
+  `edit(entity='brief', patch={awareness_stage})` is accepted and persists
+  (verified live 2026-08-02 across 30 briefs). Send it as its **own** patch after
+  the narrative one, against the version that patch returned, so neither can take
+  the other down. Round 3 therefore **declares AND persists** the stage; it never
+  reports one as unpersisted. An earlier version of this file claimed the
+  allowlist excluded the field and that any patch carrying it wrote nothing —
+  that was false and cost a month of briefs their stage.
 - **`mechanism` can be written but not read back.** `save_idea` accepts it on any
   channel and `edit(entity='idea', patch={ mechanism })` patches it, but no read
   tool returns it — `get_idea` and `list_ideas` expose `hero`, the tags and the
@@ -692,11 +827,14 @@ Each of these cost a wrong write or a wasted round on the 2026-08 run.
 - **Round 2** — one titled DRAFT idea per planned post, tagged to the plan
 - **Round 3** — a hero per idea and the five narrative fields on each idea's
   single brief, plus that angle's **declared awareness stage** (persisted when
-  the brief is created here, otherwise reported as declared-not-yet-persisted),
+  the brief is created here, otherwise written as its own `edit` patch),
   written to the idea's one mechanism; the mechanism pass's split
   between ideas ready to approve and ideas held back for a missing mechanism,
   plus any doctrinal input absent on a pre-existing approved idea, named and
-  never invented
+  never invented; the inherited sophistication bar the angles were judged
+  against (or the stated absence of one), and every mechanism authored this run
+  that sits outside the approved supply, named with the reason no §3 candidate
+  fitted
 - No gate flipped in any round, and no idea approved — a missing mechanism costs
   an idea its place on the ready-to-approve list, never its draft
 
@@ -733,6 +871,20 @@ Each of these cost a wrong write or a wasted round on the 2026-08 run.
   `edit(entity='idea', patch={ mechanism })`, which touches no approval field and
   promotes nothing. It is never written onto a brief and never varied per angle;
   the brief is written **to** it and never restates or contradicts it.
+- **The supply is a source to PREFER, never a closed list; the sophistication
+  bar is INHERITED, never derived.** Both arrive in `plan.context` — the approved
+  Approaches this skill already reads in Step 0 — and neither costs a second
+  call: this skill never invokes `get_strategy_brief` and re-derives neither.
+  **§3** is the period's candidate-mechanism supply: round 2 and round 3's
+  mechanism pass look there first and **carry** a fitting candidate's wording as
+  the doc states it, never re-authoring or paraphrasing it; a mechanism outside
+  §3 is permitted and is named as off-supply in the 3d report, and no candidate
+  is ever stretched to force a match. **§1** carries this month's sophistication
+  constraint: it bounds the **angle** and the awareness stage declared with it —
+  an angle below it is rewritten, never a draft delayed, shrunk or withheld —
+  and where §1 states no read, the round says so and applies no bar rather than
+  assuming a stage. Neither the read nor the ladder behind it is restated in
+  this file; both are read from the approved doc, live.
 - **Ideas approved before this requirement are grandfathered** (`craft/doctrine`
   §7, read live). One carrying no mechanism stays approved and usable, is never
   re-opened, demoted, deleted, re-approved, back-filled or reported as invalid,

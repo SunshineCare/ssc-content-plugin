@@ -343,6 +343,19 @@ win over anything inline here.
   and do not invent mechanisms to pad the spread.** The fix for a thin supply is
   the next Approaches run, not fabricated mechanisms here. *(2026-08 shipped with
   one mechanism on 8 of 31 posts because nothing counted this.)*
+- **NEAR-DUPLICATE CHECK — compare the batch to ITSELF, not just to the axes.**
+  Every audit above counts tag spread, and a straight duplicate passes all of
+  them: two titles can sit in different pillars, carry different personas and
+  different frames, and still be the same post. So read the titles against each
+  other and ask of any pair sharing a mechanism: **would these two open on the
+  same scene?** Same subject, same moment, same person doing the same thing at
+  the same hour is ONE idea wearing two pillar labels — replace one with a
+  different subject, do not keep both and hope the writer differentiates them.
+  Pairs that share a mechanism are where this hides, so start there; a mechanism
+  used three or more times gets every pair checked. *(2026-08 shipped
+  "Người nhìn vào dữ liệu mỗi sáng" in P1 and "Chuyên viên mở dữ liệu ra xem
+  trước khi nhắn" in P4 — same mechanism, same 7am scene, near-identical
+  story moment, and every tag-spread check passed them.)*
 - **No banned words** in any title. Zero tolerance, checked against
   `rules/banned-words`.
 
@@ -687,13 +700,20 @@ Before finishing, audit the enriched set as a whole — this is the last point w
 cross-idea repetition is cheap to fix:
 
 - No two ideas share an opening strategy.
-- No two share a `story_moment` shape.
+- **No two share a `story_moment` — check it PAIRWISE, and start with the pairs
+  that share a mechanism.** "No two share a shape" is not a thing you can see by
+  reading down a list: the 2026-08 batch put the same 7am scene (an app screen
+  still lit, a message not yet sent) on two ideas in different pillars, and the
+  repetition was invisible until someone counted mechanisms. So for every
+  mechanism carried by two or more ideas, read those ideas' `story_moment` and
+  `hook_direction` **against each other** and rewrite one of any pair that opens
+  on the same moment, the same person, the same hour.
 - `why_now` reasons are genuinely distinct.
 - Persona × route spread matches the Approaches, and no pairing is over-used.
 - Every idea's hero, fields and tags argue the same thing.
-- Every idea's **declared awareness stage** is named, together with whether it
-  actually landed on the brief. A stage that could not be persisted is reported,
-  never quietly dropped and never re-declared as if it had been saved.
+- Every idea's **declared awareness stage** is named AND landed on its brief.
+  The stage is writable on both paths, so an idea finishing this round without
+  one is a defect to fix here, not a gap to report.
 - Every angle — and the stage declared with it — **clears the §1 sophistication
   bar**, or §1 stated no read and no bar was applied. An angle still sitting
   below the bar is rewritten now, not reported as an exception.

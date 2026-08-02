@@ -1,7 +1,7 @@
 ---
 name: ssc-strategy-ad-intelligence
 description: >-
-  Diagnoses the Vietnamese meal-replacement / weight-loss ad market (awareness stage + sophistication) and assesses Cambridge Diet VN's own paid angles — grounded in our ACTUAL ingested ad-set performance (get_ad_performance: spend, CTR, cost-per-result) alongside the angle KB and a competitor scan. Flags fatigued/inefficient angles and winning ones. Saves findings via save_strategy_finding (dimension=ad_market).
+  Diagnoses the Vietnamese meal-replacement / weight-loss ad market (awareness stage + sophistication) and assesses Cambridge Diet VN's own paid angles — grounded in our ACTUAL ingested ad-set performance (get_ad_performance: spend, CTR, cost-per-result) alongside the angle KB and a competitor scan. Flags fatigued/inefficient angles and winning ones. Saves findings via save_strategy_finding (dimension=ad_market). It is the ONE step of the quarterly cycle that derives the market-sophistication read — named in craft/awareness-framework §2's own stage vocabulary, read live, plus its Vietnamese reasoning — and it REPORTS that pair back to ssc-strategy-agent rather than writing it: the agent is the brief row's only writer, the quarter authors the read once, and the month inherits it.
 metadata:
   type: skill
   stage: strategy
@@ -71,11 +71,33 @@ this market actually match? That row is the market's level — name it by its `M
 
 ### Step 3: Assess market sophistication
 
+This is the **only** step in the whole quarterly cycle that derives the market-sophistication
+position. No other dimension reports one, and no monthly artifact authors one — the month inherits
+what this quarter establishes.
+
 Count how many direct competitors run similar angles, and read that count against
 `craft/awareness-framework` **§2** — the market-saturation ladder and the position it states for
-Cambridge Diet Vietnam — again live, and again not restated here. The higher the saturation, the
-more the winning move shifts from claim to **mechanism / identification**, per §2's own strategy
-column.
+Cambridge Diet Vietnam — again live as loaded in Step 1, and again **deliberately not restated
+here**. What each rung means, and what the winning move becomes as saturation rises, is §2's own
+strategy column to state; read it there.
+
+**Name the position in §2's own stage vocabulary** — the bậc number plus that row's trạng thái
+label, exactly as §2 writes them. There is no second scale: a coarse three-point rating of your own
+is **not** a sophistication stage and is never emitted — not in the finding, not in the summary,
+not in chat. One fact, one vocabulary, and it is the one every downstream consumer already applies.
+
+Alongside the stage, write its **reasoning** in Vietnamese, 1–2 sentences: what this market has
+already heard, and therefore how indirect a lead now has to be. The stage names the position; the
+reasoning is what the ads channel actually applies.
+
+**A failed §2 read stops the run.** If `craft/awareness-framework` could not be loaded in Step 1,
+STOP and name the document that could not be read. A ladder that cannot be read yields **no stage
+at all** — never one from memory, from this file's prose, or from a cached copy. The ladder does
+not live here.
+
+**Partial output is no read.** A stage with no reasoning, or reasoning with no stage, is reported
+as **no read established** and neither half is carried forward. Half a hand-down is worse than a
+reported gap, because the consumer cannot tell that it is half.
 
 ### Step 4: Read OUR actual paid performance (`get_ad_performance`)
 
@@ -127,11 +149,16 @@ dimension: ad_market
 brief_id: <brief_id>
 title: "Market awareness diagnosis — Level <N>: <label from craft/awareness-framework §1>"
 detail: <2-3 sentence reasoning: why we assess this level, what ad patterns confirm it>
-evidence: { awareness_level: <the bậc number exactly as §1 numbers it>, awareness_stage: "<the §1 Mã code>", sophistication: "high|medium|low", dominant_hook: "<pain|aspiration|social-proof|science>" }
+evidence: { awareness_level: <the bậc number exactly as §1 numbers it>, awareness_stage: "<the §1 Mã code>", sophistication_stage: "<the §2 stage label, exactly as §2 names it>", sophistication_read: "<the Vietnamese reasoning from Step 3 — what the market has already heard, how indirect a lead must now be>", dominant_hook: "<pain|aspiration|social-proof|science>" }
 track: proven
 score: <1–5 self-rating>
 comment: <one-line Vietnamese rationale for the score>
 ```
+
+`sophistication_stage` + `sophistication_read` travel **as a pair**. Where Step 3 established no
+position — or only half of one — **omit both keys** from `evidence` rather than writing one alone,
+and never substitute a coarse rating for the pair. This finding's `evidence` is the durable audit
+record of the read; the Step 7 report line (below) is how the value reaches the agent.
 
 For each **winning paid angle** rated ≥4 (from Step 4):
 ```
@@ -169,7 +196,7 @@ If no winning/fatigued/gap signal clears the gate: `title: "Ad market — no new
 ```
 ## Ad Intelligence — <period>
 
-**Market awareness: Level <N> — <label>**   ·   **Sophistication: <high|medium|low>**
+**Market awareness: Level <N> — <label>**   ·   **Sophistication: <the §2 stage label, verbatim | NOT ESTABLISHED>**
 **Our paid read:** <N ad-sets from get_ad_performance | KB-only (no ad data ingested)>
 
 ### Winning paid angles (protect / scale)
@@ -184,13 +211,28 @@ If no winning/fatigued/gap signal clears the gate: `title: "Ad market — no new
 ### Recommended awareness layer for next cycle
 L1 / L2 / L3 — <rationale>
 
+### Sophistication read — for the strategy brief
+sophistication_stage: <the §2 stage label, verbatim | NOT ESTABLISHED>
+sophistication_read: <the Vietnamese reasoning | NOT ESTABLISHED>
+
 Findings dropped (rated ≤3, no ≥4 replacement found): <N>
 Findings saved: <N>
 ```
 
+**That last block is the hand-back, and it is the only way the read travels.**
+`ssc-strategy-agent` reads it and stamps `sophistication_stage` + `sophistication_read` onto the
+quarterly brief on the **same** `save_strategy_brief` call that records this dimension's status.
+**You never write the brief row yourself** — you hold no `save_strategy_brief` and call none; you
+derive, you record in `evidence`, you report. One writer, one row.
+
+Print `NOT ESTABLISHED` on **both** lines whenever Step 3 established no position, or established
+only half of one, so the agent omits both fields rather than guessing. An omitted field keeps the
+brief's previously saved value, and a brief that carries no read is a gap the ads channel reports
+plainly — that is the specified outcome, not a failure of this dimension.
+
 ## Output language
 
-**Write the finding prose in Vietnamese.** `title`, `detail`, and `comment` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no new signals" fallback. The structured `evidence` values (awareness_level, sophistication, dominant_hook, source, adset, metric, value, slugs) and the `dimension` / `track` enums stay as their literal codes; ad-set names and the Vietnamese WebSearch queries stay verbatim; your chat-side reasoning stays English.
+**Write the finding prose in Vietnamese.** `title`, `detail`, and `comment` are persisted artifacts the Vietnamese operator reads and curates in the Strategy dashboard, so write them in Vietnamese. This applies to **every** finding you save — including the "no new signals" fallback. The structured `evidence` values (awareness_level, awareness_stage, dominant_hook, source, adset, metric, value, slugs) and the `dimension` / `track` enums stay as their literal codes; `sophistication_stage` carries `craft/awareness-framework` §2's own label **verbatim** (§2 is a Vietnamese doc, so the label arrives Vietnamese — never translate, normalise or abbreviate it), and `sophistication_read` is Vietnamese prose like the rest of the finding; ad-set names and the Vietnamese WebSearch queries stay verbatim; your chat-side reasoning stays English.
 
 ## Governance
 
@@ -202,6 +244,18 @@ Findings saved: <N>
   `craft/awareness-framework` §1 and §2 and are read live every run — no level list, no code list, no
   remembered numbering lives here. A failed read of that document **stops the run** and names the
   document that could not be read; it never proceeds from prose, memory or a cached copy.
+- **The market-sophistication read is derived here, reported here, and written elsewhere.** This is
+  the cycle's only step that derives it (Step 3); it is named in `craft/awareness-framework` §2's own
+  stage vocabulary, recorded in the market-diagnosis finding's `evidence`, and handed back in the
+  Step 7 report. `ssc-strategy-agent` is the brief row's **only** writer and stamps the pair on the
+  same `save_strategy_brief` call that records this dimension's status — this skill holds no
+  `save_strategy_brief`, makes no brief write of its own, and sets no approval or lifecycle flag on
+  the read (it is ungated and operator-overridable in the dashboard). The quarter authors the read
+  once; the month inherits it and authors none.
+- **A stage and its reasoning are one artifact.** Half of one is no read: report both as
+  `NOT ESTABLISHED` and omit both from `evidence`, so the agent preserves whatever the brief already
+  carried rather than blanking it or guessing. A reported gap is a correct outcome; an invented stage
+  never is.
 - An empty `get_ad_performance` means *not ingested* (usually no connected ad account), not
   *no ad activity* — fall back to the winners/losers KB and say so.
 - All findings use `dimension: 'ad_market'` and `track: 'proven'`.

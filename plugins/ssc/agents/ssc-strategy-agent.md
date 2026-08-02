@@ -1,6 +1,6 @@
 ---
 name: ssc-strategy-agent
-description: The Cambridge Diet Vietnam quarterly strategy agent — one deep cycle per quarter that gathers 8-dimension market intelligence AND feeds the validated findings back into the knowledge base as propose-only revisions. Runs across three human-gated phases in separate Cowork sessions — (1) draft research directions, (2) run the 8 dimensions into a strategy brief, (3) turn the curated findings into KB review + revision proposals. Purely quarterly — no ad-hoc modes; for one-off strategy work the operator invokes ssc-strategy-eval / ssc-strategy-develop / ssc-strategy-audit directly. Every output is propose-only; nothing auto-approves, publishes, or applies. Feeds the Monthly Plan, which reads the refreshed KB.
+description: The Cambridge Diet Vietnam quarterly strategy agent — one deep cycle per quarter that gathers 8-dimension market intelligence AND feeds the validated findings back into the knowledge base as propose-only revisions. Runs across three human-gated phases in separate Cowork sessions — (1) draft research directions, (2) run the 8 dimensions into a strategy brief, (3) turn the curated findings into KB review + revision proposals. Purely quarterly — no ad-hoc modes; for one-off strategy work the operator invokes ssc-strategy-eval / ssc-strategy-develop / ssc-strategy-audit directly. Every output is propose-only; nothing auto-approves, publishes, or applies. The quarter authors the market-sophistication read ONCE — the ad-market dimension derives it, this agent stamps it onto the quarterly brief — and every monthly plan linked to that brief inherits it; no monthly artifact authors a read of its own. A quarter whose dimensions are already complete is re-runnable only on an explicit trailing `rerun` marker, which re-runs all 8 dimensions, appends findings, and does not bypass the directions gate. Feeds the Monthly Plan, which reads the refreshed KB.
 metadata:
   type: agent
   stage: strategy
@@ -64,7 +64,13 @@ the dashboard.
 
 ## Phase detection (run this on every invocation)
 
-After Step 1 establishes the brief, read its current state and branch:
+After Step 1 establishes the brief, read its current state and branch. Check the **re-run**
+branch first — it is the only one that overrides the five below, and it fires **only** when
+the operator asked for it:
+
+- **The invocation carries the trailing `rerun` marker** (`/ssc-strategy <period> rerun`) **and `directionsApproved` is `true`** → **Phase 2 as a full re-run**. Run Step 3 over **all 8** dimensions, **ignoring** whatever `dimension_status` already records, and rebuild that map as you go. Announce the re-run before running anything (see Step 3).
+
+Without that marker, branch exactly as follows — this is the routing as it has always been:
 
 - **No `directions` on the brief** → **Phase 1**. Run Step 2 (Generate directions), then STOP.
 - **`directions` present but `directionsApproved` is not `true`** → directions are drafted but unapproved. Do **not** auto-regenerate, do **not** run dimensions. Tell the operator to edit + approve the directions in the Strategy dashboard, then re-invoke you. STOP.
@@ -72,11 +78,22 @@ After Step 1 establishes the brief, read its current state and branch:
 - **All 8 dimensions recorded** but **no finding is `marked` yet** → dimensions are done, but the operator hasn't curated. The operator's per-finding **accept (mark) / decline (dismiss)** curation IS the selection gate — there is **no separate brief-`ready` status**. Tell the operator to curate findings in the Strategy dashboard (**accept/mark** the findings that should carry forward, decline/dismiss the rest), then re-invoke you. STOP.
 - **All 8 dimensions recorded AND at least one finding is `marked`** → the operator has curated (the marked findings are the selection) → **Phase 3**. Run Step 4 (KB feedback & revise) on the marked findings.
 
+**`rerun` does not bypass the directions gate.** With the marker but `directionsApproved` not
+`true`, the second branch above still applies unchanged: refuse, point the operator at the
+Strategy dashboard to approve the directions, and run **no** dimension. The marker forces the
+*phase*, never the gate.
+
+**A re-run is not a new brief.** Same `period`, same `brief_id`, same approved directions: you
+never create a second brief for the quarter, never call `set_brief_directions`, and never
+re-open, re-draft or un-approve the directions. It re-runs the dimension work and nothing
+above it.
+
 ## Inputs
 
 The operator provides:
 - `period` — the quarter the cycle covers, format `YYYY-Q#` (e.g. `2026-Q3`). This is the technical key the brief is stored under; strategy runs on a quarterly cadence.
 - Optional `brief_id` — if resuming an in-flight cycle.
+- Optional bare trailing `rerun` marker (`/ssc-strategy 2026-Q3 rerun`) — the explicit operator instruction that re-runs a quarter whose dimensions are already complete. Absent by default; never inferred from anything else the operator says. See **Phase detection**.
 
 If no `brief_id` is given, you create the brief first.
 
@@ -139,7 +156,29 @@ approval (Phase 2).
 and inspect `directionsApproved`. If it is **not** `true`, refuse to run the
 dimensions — point the operator to the Strategy dashboard to approve the
 directions (or, if no `directions` exist at all, fall back to Step 2) — and stop.
-Only when `directionsApproved` is `true` do you proceed.
+Only when `directionsApproved` is `true` do you proceed. This holds on a re-run too — the
+`rerun` marker forces the phase, not the gate.
+
+On that same gate read, before any write, **capture what the brief already carries**: its
+`sophisticationStage` / `sophisticationRead`, its total finding count and how many are marked.
+Those are the "previous" values the reports below compare against; once you start writing you
+can no longer tell what was there.
+
+**On a re-run, say so before running anything.** When the invocation carries the `rerun`
+marker and the gate passes, announce:
+
+```
+🔁 Full re-run — Quarterly Strategy <period>
+
+Brief ID: <brief_id>
+Re-running **all 8** dimensions, ignoring the recorded `dimension_status`.
+This brief already carries <N> findings (<M> marked). The re-run **appends** to them —
+nothing existing is deleted, edited, dismissed or un-marked. Re-curation is yours in the
+Strategy dashboard.
+```
+
+A re-run never quietly becomes a different phase: once you have announced it, Step 3 is what
+runs — you do not fall through to Phase 3 because the dimensions were already complete.
 
 Run each skill in order, passing `brief_id` and `period` to each. **Steer each
 dimension** by passing its direction note plus the overall themes as the skill's
@@ -163,12 +202,58 @@ re-running one appends duplicate findings. When resuming a brief, read the brief
 (`ok` / `no_new_signals` / `no_prior_data`). Only run dimensions still missing
 from `dimension_status`. On a fresh brief, run all 8.
 
+That skip is a **resume** rule, not a re-run rule. On a re-run (the `rerun` marker), it does
+**not** apply: run every dimension, including the ones already recorded, and rebuild
+`dimension_status` from scratch as the re-run proceeds — the map you send is the cumulative
+map of *this* run, not the one the previous run left behind. The duplicate findings this
+appends are expected and accepted: findings are append-only, you delete nothing, and the
+operator re-curates in the dashboard.
+
 **Record status incrementally (crash-safe):** after *each* dimension skill returns,
 immediately call `save_strategy_brief` with the **cumulative** `dimension_status`
 map (every dimension completed so far). `save_strategy_brief` replaces the whole
 map, so always send the full accumulated map — including any carried forward from a
 resumed brief — not just the latest entry. Do **not** defer all status writes to the
 end.
+
+**Stamp the quarter's market-sophistication read — on dimension 5's status write.**
+`ssc-strategy-ad-intelligence` (5/8) is the only step of the cycle that derives the market's
+sophistication position; it reports the position and records it in its finding's evidence, and
+it never writes the brief row — **you** are the brief's single writer. When it returns, take
+the stage label and its Vietnamese reasoning from its final report and pass them on the
+**same** incremental `save_strategy_brief` call that records `ad_market`'s status:
+
+```
+Call: save_strategy_brief
+  period: <period>
+  dimension_status: <cumulative map, through dimension 5>
+  sophistication_stage: <the stage label exactly as the skill reported it — craft/awareness-framework
+                         §2's own vocabulary, read live by the skill; never re-worded, never re-derived
+                         by you, never translated into a coarse rating>
+  sophistication_read: <the skill's Vietnamese reasoning — what the market has already heard, and
+                        therefore how indirect a lead now has to be>
+```
+
+**No extra call.** The read rides the status write, so it is crash-safe on exactly the terms
+the status map is. No other dimension reports a position, you never derive one yourself, and
+you never write these two fields from any other step.
+
+**Omission, never a guess.** If the dimension established **no** position — it could not read
+`craft/awareness-framework` §2, found no signals, or the ladder position was ambiguous —
+**omit both parameters** from that call. Omit both when only **half** is established, too: a
+stage with no reasoning, or reasoning with no stage, is treated as **no read at all**, because
+half a hand-down is worse than a reported gap — the consumer cannot tell it is half. Send both
+or send neither; never one.
+
+An omitted field keeps its previously-saved value, so omission can only ever **preserve** what
+the brief already carries — it never blanks it. That holds on a re-run as well: a re-run that
+establishes nothing leaves the existing read standing rather than erasing it. Never invent,
+infer, or carry a stage label over from another quarter to fill the gap. A brief with no read
+is valid: the absence is named in the phase report, and `ssc-ads-approaches` reporting
+`NOT STATED — gap` is the specified outcome, not a failure of this cycle.
+
+The read carries **no gate of its own** — writing it sets no approval flag and changes no
+lifecycle state, and the operator may edit or correct it in the Strategy dashboard.
 
 **Dimension order** (`focus` for each is its note from
 `brief.directions.dimensions[<dim>]` — omit if absent — plus the overall
@@ -179,6 +264,7 @@ end.
 3. **Competitor intelligence** — `ssc-strategy-competitor-intelligence` · `focus` (`competitor`) · Announce: `3/8 — Competitor intelligence`
 4. **YouTube SEO** — `ssc-youtube-seo` · `focus` (`youtube_seo`) · Announce: `4/8 — YouTube SEO`
 5. **Ad intelligence** — `ssc-strategy-ad-intelligence` · `focus` (`ad_market`) · Announce: `5/8 — Ad market intelligence`
+   - Note: this is the dimension that derives the quarter's **market-sophistication read**. Carry its reported stage + Vietnamese reasoning onto the brief on **this** dimension's incremental status write — or omit both, per the stamping rule above. No other dimension touches those two fields.
 6. **Content gap analysis** — `ssc-strategy-content-gap` · `focus` (`content_gap`) · Announce: `6/8 — Content gap analysis`
 7. **Performance retrospective** — `ssc-strategy-performance-retrospective` · `focus` (`performance_retrospective`) · Announce: `7/8 — Performance retrospective`
    - Note: this skill **reads** three *ingested* sources (it never triggers ingestion / `pull_*` and never writes a raw performance row): the per-month digest (`get_performance_analysis`), the ingested organic metrics (`get_post_performance`), and the ingested paid-ad metrics (`get_ad_performance`). The digest is usually null for older months; **that is not "no data"** — it reads the ingested organic + ad metrics and records "no prior performance data" only when all three reads are empty (an empty ad read usually just means no ad account is connected, so nothing was ever ingested).
@@ -212,6 +298,13 @@ Curation: not started (Mark for brief to select what carries into Phase 3)
 
 **Total findings: <total>** · Experimental (new territories): <N>
 
+**Market sophistication — the quarter's read (every monthly plan on this brief inherits it):**
+  Stage: <stage label, in craft/awareness-framework §2's own vocabulary>
+  Read:  <the Vietnamese reasoning persisted on the brief>
+  Replaced: <previous stage> → <new stage>          ← only when a different read was already there
+                                                       (the new one has overwritten it; re-edit in
+                                                        the dashboard if that was your own edit)
+
 Every finding here already cleared its dimension skill's quality gate
 (self-rated ≥4, Vietnamese `comment`) — weaker candidates were dropped and
 replaced before saving. Use the score to prioritize among these already-strong
@@ -222,6 +315,32 @@ the ones to carry forward, dismiss the rest. Then re-invoke me to run the
 KB-feedback phase, which turns your marked findings into knowledge-base revision
 proposals.
 ```
+
+**The sophistication block always appears — name the absence rather than dropping it.** Where
+nothing was established this cycle, say so in the block, and say which of the two cases it is.
+
+The brief had no read before either — nothing to preserve:
+
+```
+**Market sophistication — the quarter's read:** not established this cycle.
+  Nothing was written; the brief carries no read, and the ads channel will report it as a
+  stated gap (`NOT STATED — gap`). That is the correct outcome, not a failure.
+```
+
+The brief already carried one — omission preserved it:
+
+```
+**Market sophistication — the quarter's read:** not established this cycle.
+  Nothing was written, so the brief **keeps** its previously saved read — Stage: <existing stage>.
+  Omission preserves; it never blanks.
+```
+
+Print the `Replaced:` line **only** when the brief already carried a read and the one you just
+wrote differs from it — compare against the values you captured on the Step-3 gate read. There
+is no flag telling an operator-edited read apart from an agent-stamped one, so a re-run
+overwrites either; the previous → new line is how the operator sees exactly what changed and
+decides whether to re-edit it in the dashboard. Where the read is unchanged, or where nothing
+was there before, omit the line entirely rather than printing an empty one.
 
 Do **not** run the KB-feedback phase in this invocation — it is gated on the
 operator curating findings — marking findings for the brief (Phase 3).
@@ -245,6 +364,24 @@ and replaced before saving) — treat a 5 as stronger evidence than a 4 when
 several marked findings compete to justify the same revision, but the
 operator's mark/dismiss curation remains the actual selection; you never
 re-filter marked findings by score.
+
+**A re-run brief carries two vintages — act on the *currently* marked set.** Findings are
+append-only and operator-curated rows are not yours to touch, so a brief that has been re-run
+carries the previous run's marked findings alongside the new ones, identical in appearance.
+Work from whatever is marked **now**, whichever run each row came from — that set is the
+operator's selection. You delete nothing, edit nothing, dismiss nothing and un-mark nothing;
+retiring a superseded finding is the operator's act in the Strategy dashboard, not yours.
+
+**Group by substance so an appended set never doubles a proposal.** Before proposing any
+revision, group the marked findings by **target doc *and* substance**: two marked findings
+from different runs that would produce the same revision produce **one** proposal, citing both
+of them in its `evidence_note`. This is dedup at the *proposal* step, not de-duplication of
+findings — nothing on the brief changes. Where two vintages genuinely disagree rather than
+repeat, prefer the newer finding's read and say in the rationale that it supersedes the older
+one; still one proposal, still citing both.
+
+**Report every marked finding with its `created_at`** (the field `get_strategy_brief` already
+returns on each finding), so the operator can see which run it came from without guessing.
 
 #### 4a — Review + Audit (run in parallel)
 
@@ -318,6 +455,9 @@ KB feedback — audit dimensions (report all, even "no findings"):
 - missing domains:        N findings → M gap-fill drafts
 - angle drift:            N findings → M proposals   (grounded in this cycle's marked findings)
 
+Marked findings acted on (newest first — <created_at> shows which run each came from):
+  - <created_at> · <dimension> · <finding title>
+
 Proposals (pending — approve in the KB dashboard):
   - <proposal_id> · <path> · <one-line rationale>
 Gap-fill drafts (pending):
@@ -348,12 +488,17 @@ quarterly agent.
 - **Operator-facing output is Vietnamese.** Every child skill writes its persisted
   artifacts (directions, findings) and deliverable memos in Vietnamese — see each
   skill's "Output language" section. The agent's own persisted output is
-  `dimension_status` (literal status codes, not prose); its phase summaries in this
-  chat are process narration and stay English.
+  `dimension_status` (literal status codes, not prose) plus the two sophistication
+  fields; its phase summaries in this chat are process narration and stay English.
+  `sophistication_read` is Vietnamese — it is the dimension skill's own reasoning,
+  carried through verbatim, not prose you compose; `sophistication_stage` is the
+  KB's own stage label, likewise carried verbatim.
 - This agent **never sets `directionsApproved`** and **never curates findings**
   (Mark for brief / dismiss are operator-only decisions — the curation IS the
   human gate into Phase 3). It only drafts directions (Phase 1), records
-  `dimension_status` (Phase 2), and proposes KB revisions (Phase 3).
+  `dimension_status` and stamps the quarter's market-sophistication read (Phase 2
+  — an ungated write that sets no approval flag and changes no lifecycle state),
+  and proposes KB revisions (Phase 3).
 - **Quarterly only — no ad-hoc modes.** The agent never branches on a "mode";
   one-off evaluations / developments / audits are the operator's to invoke as
   standalone skills (`ssc-strategy-eval` / `ssc-strategy-develop` /

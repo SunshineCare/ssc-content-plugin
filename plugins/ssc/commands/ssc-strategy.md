@@ -1,5 +1,5 @@
 ---
-argument-hint: '<YYYY-Q#> [brief_id]'
+argument-hint: '<YYYY-Q#> [brief_id] [rerun]'
 description: Launch the Cambridge Diet Vietnam quarterly Strategy cycle — the deep, once-a-quarter cycle that gathers 8-dimension market intelligence and then feeds the validated findings back into the knowledge base as propose-only revisions. State-driven across three human-gated phases.
 metadata:
   dispatches: [ssc-strategy-agent]
@@ -15,6 +15,7 @@ Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Cycle key** (`period`, format `YYYY-Q#` — the quarter the cycle covers, e.g. `2026-Q3`). Required. This is the technical key the brief is stored under; strategy runs on a quarterly cadence.
 - **Brief ID** (optional) — pass when resuming an in-flight cycle.
+- **`rerun` marker** (optional, bare trailing token — `/ssc-strategy 2026-Q3 rerun`) — the explicit instruction to re-run a quarter whose dimensions are already complete. Absent by default; never infer it from anything else the operator says. Pass it through to the agent verbatim.
 
 If no cycle key is given, ask the operator for it (one question) before dispatching. Do not invent one.
 
@@ -29,6 +30,10 @@ This command is a thin entry point — it holds **no** orchestration logic. Disp
 | **3 — KB feedback** | Turns the curated findings (+ a KB review/audit) into **propose-only KB revisions** | **Approves** each revision in the **KB dashboard** |
 
 Re-run this command (same `period` / `brief_id`) after each gate to advance to the next phase.
+
+**Re-running a completed quarter — the `rerun` marker.** Once all 8 dimensions are recorded, re-invoking normally advances to Phase 3; the trailing `rerun` marker instead forces **Phase 2 as a full re-run** — all **8** dimensions again, ignoring the recorded `dimension_status` and rebuilding it as the run proceeds. It is **not** a new brief: same `period`, same `brief_id`, same approved directions — no new brief, no re-drafted directions. Findings are **appended**; nothing existing is deleted, edited, dismissed or un-marked, so the brief carries both vintages and re-curation is the operator's in the Strategy dashboard. And `rerun` **does not bypass the directions gate**: with the marker but directions unapproved, the agent still refuses and points the operator at the Strategy dashboard. The marker forces the *phase*, never the gate.
+
+**The quarter authors the market-sophistication read once.** The ad-market dimension derives it and the agent stamps it onto the quarterly brief; every monthly plan linked to that brief **inherits** it. No monthly artifact authors a read of its own.
 
 **Strategy is quarterly — there are no ad-hoc modes.** For a one-off strategy task *between* quarters (pressure-test a proposal, develop options for a problem, audit one focus area), the operator invokes the standalone skills directly — `ssc-strategy-eval`, `ssc-strategy-develop`, `ssc-strategy-audit` — not this command.
 

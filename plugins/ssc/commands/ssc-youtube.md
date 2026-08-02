@@ -1,6 +1,6 @@
 ---
 argument-hint: '<YYYY-MM>'
-description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Requires the month's context/tactics to be approved first (in the content workspace).
+description: Launch the Cambridge Diet Vietnam YouTube channel — briefing → ideate [approve ideas] → schedule [approve schedule]. Released by the monthly plan head's Narrative approval; the channel authors no themes, no research and no quantities of its own.
 metadata:
   dispatches: [ssc-youtube-agent]
 ---
@@ -19,19 +19,19 @@ If no period is given, ask the operator for it (one question) before dispatching
 
 ## Precondition
 
-Requires the month's **context/tactics on the YouTube plan to be approved** first (the `tactics_approved` gate). If not yet approved, approve it in the content workspace (`/content/youtube`), then return here.
+Requires the month's **Narrative on the monthly-plan head to be approved** first — that single approval is what releases every channel. If not yet approved, author and approve it via `/ssc-plan`, then return here.
 
 ## What to do
 
 This command is a thin entry point — no orchestration logic. Dispatch the
 **`ssc-youtube-agent`**, passing `period`. The agent is state-driven: it reads
-the YouTube `channel_plan`'s gate booleans (`tactics_approved`, `approved`,
-`schedule_approved`) and runs whichever YouTube step is next, then stops at the
-human gate.
+the head's `narrative_approved` plus the YouTube `channel_plan`'s gate booleans
+(`approved`, `schedule_approved`) and runs whichever YouTube step is next, then
+stops at the human gate.
 
 | Phase | The agent does | Then the operator… |
 |---|---|---|
-| **Briefing** | Reads approved context/tactics + KB → drafts a YouTube briefing (formats × buyer-stage × cadence) | Reviews + approves the briefing in `/content/youtube` (opens Ideate), re-runs this command |
+| **Briefing** | Reads the head's approved themes + KB → drafts a YouTube briefing (formats × buyer-stage × cadence) and proposes the month's cadence/distribution onto the head | Reviews + approves the briefing in `/content/youtube` (opens Ideate), re-runs this command |
 | **Ideate** | Generates draft video ideas via `save_idea`, tagged to the plan | **Curates** the ideas in `/content/youtube`, re-runs this command |
 | **Schedule** | Proposes the publish calendar as `schedule_entries` | **Approves** the calendar in `/content/youtube` |
 
@@ -50,4 +50,5 @@ unapprove a row, demotion being an `edit` now rather than a separate
 ## After it runs
 
 Point the operator to the content workspace (`/content/youtube`). Posts, Ads,
-and YouTube run independently once each channel's context/tactics are approved.
+and YouTube run independently of each other once the month's Narrative is
+approved — that one head gate releases all three.

@@ -18,6 +18,15 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/approval-gate.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "^mcp__ssc__edit$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/approval-gate.mjs\""
+          }
+        ]
       }
     ]
   }

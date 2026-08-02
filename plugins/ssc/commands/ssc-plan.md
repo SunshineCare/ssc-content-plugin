@@ -30,7 +30,7 @@ The monthly plan is authored in **four stages — Plan → Post → Ad → YouTu
 |---|---|---|
 | **Review** | `month_plans.performance_review` | The system's **only** look-back. Reads the **prior** period's page-side and ad-side performance and ranks **taxonomy terms** (pillar, persona, route, angle), each with a `scale` / `maintain` / `drop` disposition. Ranks terms, never metrics — per-channel metrics are not comparable across channels. |
 | **Tactics** | `month_plans.tactics` | Crosses the approved **quarterly strategy brief** with Review's ranked terms into the month's **cross-channel themes**. The only place the two altitudes meet. |
-| **Research** | `month_plans.research_id` | **One** outward signal pass per period — seasonal/cultural calendar, competitor and platform signals, audience triggers, emergent topics. No channel authors its own market research. |
+| **Research** | `month_plans.research` | **One** outward signal pass per period — seasonal/cultural calendar, competitor and platform signals, audience triggers, emergent topics. No channel authors its own market research. |
 | **Narrative** | `month_plans.narrative` | Written **last**, and the month's **ONLY** gate. Approving it releases every linked channel. |
 
 **Ordering is presentational and semantic, not a chain of locks.** Every step stays freely editable until the Narrative is approved; no step must be complete before a later one is authored.

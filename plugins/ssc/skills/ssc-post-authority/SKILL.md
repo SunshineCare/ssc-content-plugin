@@ -231,7 +231,7 @@ compliance rule is exactly the drift this repo has already been burned by.
 
 **For the `image_content` section only, also fetch two paths** (they ground on-image copy, and are not needed when the target section is `copy`):
 
-- `brand/proof-points` — already in the list above; for `image_content` it is the **source of the bullets** (0–3 per density profile; real, compliant proof: 60 năm, chuẩn EU 2016/1413, 26 vi chất, chuyên viên 1:1 đồng hành, chương trình 6 bước, the app).
+- `brand/proof-points` — already in the list above; for `image_content` it is the **source of the bullets** (0–3 per density profile). Every bullet must trace to a proof point that doc actually carries, in the wording it actually uses. This file names no proof point and holds no copy of the list: the doc is revised on its own cadence, and a remembered proof is how a stale or non-compliant claim reaches an image.
 - `ad/platform-constraints` — read it for **one specific line**: *"Text trên ảnh: nên giữ dưới 20% [diện tích ảnh]"* — a **text-COVERAGE** guideline. It lives under `ad/` by history and that line is written as a Meta **paid-delivery reach** rule, so on an **organic post** treat it as **directional, not binding**: it is a useful sanity check that the block is not covering the picture, and it is **not** a legibility rubric (the doc carries none). The **binding** brevity bar for this section is the **explicit word-count target per element** in Step 1b — that is what the Step 2 brevity cap is judged against.
 
 If you are unsure which paths exist, call `list_knowledge` (optionally `list_knowledge(category='rules')`, `list_knowledge(category='voice')`, `list_knowledge(category='content')`) to confirm the inventory before fetching. Read all of it carefully before scoring a single variation — your score and `comment` must trace to these documents, not to taste.
@@ -274,7 +274,13 @@ The `HEADLINE:` / `SUBHEADLINE:` / `BULLETS:` labels are **fixed structural mark
   **Why characters, not just words:** on-image type is sized to fit, so character count *is* the font size — a headline under ~30 characters renders roughly twice the point size of one over ~60. Long text does not merely read slower; it physically shrinks until it stops nobody.
   **Write it to a named formula, not by shortening the copy.** Pick one of the formulas in `craft/headline-formulas` and write TO it, then check it against that doc's rules: it must not be a `Brand: feature` tagline, and it must pass its **competitor test** — if swapping "Cambridge" for another wellness brand leaves the line unchanged, it is too generic. On top of those, this channel's own bar: it must **HOOK, not convert** — no CTA language on the image (that doc gates its *CTA mời gọi* formula to an audience already ready to act, which a post never declares). The anchor copy's hook is *source material*, not a template; **a merely-shortened copy sentence is the weak-hook failure this rule exists to prevent.** Use a different formula across the versions. (The 5–8-word band lives in `ad/headline-formulas` and is for a Facebook headline *field*, where type is a fixed size — on-image the cap is 6, so **re-cut the formula**, never let a 7–8-word line breach the cap.)
 - **SUBHEADLINE — cap: 8 Vietnamese words.** One phrase paying off the headline. Never a sentence — no verb chains, no sub-clause.
-- **BULLETS — 0 to 3 per the density profile, cap: 5 Vietnamese words each.** Terse keyword fragments from `brand/proof-points` — e.g. "60 năm khoa học", "Chuẩn EU · 26 vi chất", "Chuyên viên 1:1". Never sentences.
+- **BULLETS — 0 to 3 per the density profile, cap: 5 Vietnamese words each.** Terse keyword fragments cut down from the proof points in the **live** `brand/proof-points` — one proof each, in that doc's own wording, compressed to a fragment. Never sentences, and never a proof this file or your memory supplied: no example is given here on purpose, because at this length an example *is* the deliverable and would be copied instead of the doc being read.
+
+> **These word/character caps are the one thing this file states rather than reads.** No KB doc
+> carries an on-image brevity spec today, so they live here deliberately — the same caps
+> `ssc-ads-writer` states on the ad side. If an on-image brevity spec is ever added to the KB,
+> these caps must move there and this block must become a reference. Everything else on this
+> page — proof wording, formulas, opening frames, compliance — is read live and never restated.
 
 **Choose a DENSITY PROFILE per version — do not emit all five elements by reflex.**
 

@@ -6,6 +6,7 @@ metadata:
   stage: monthly-plan
   brand: cambridge-diet-vn
   section: youtube
+  capability: edit
   tools: [get_knowledge, get_channel_plan, list_ideas, save_schedule_entries]
 ---
 

@@ -24,9 +24,11 @@ A list of one or more findings, each with:
 
 - `path` — the target doc (e.g. `rules/compliance`).
 - `finding` — what's wrong and why it should change.
-- `evidence` — a `research_id` (preferred) and/or an evidence note (e.g. the
-  performance signal or regulatory source). **Required** — a proposal without
-  evidence is invalid (FR-061).
+- `evidence` — a free-text evidence note naming the substantiating source or
+  signal (the publisher/domain, the query, the date accessed, or the performance
+  signal). **Required** — a proposal without evidence is invalid (FR-061).
+  There is no research ledger and no `research_id`: the `research` table and
+  `save_research` were removed, so the note IS the provenance.
 - `severity` *(optional)* — `high | medium | low` as emitted by `ssc-kb-review`
   or `ssc-kb-audit`. When absent, treated as unclassified.
 
@@ -58,7 +60,8 @@ A list of one or more findings, each with:
    - `path`
    - `proposed_content` (the full "after")
    - `rationale` (one paragraph covering all findings for that path)
-   - `evidence_research_id` and/or `evidence_note` (at least one per proposal)
+   - `evidence_note` (required in practice — the tool's only evidence field;
+     there is no `evidence_research_id`)
 
    Proposals for independent paths may be submitted in parallel.
 
@@ -67,7 +70,7 @@ A list of one or more findings, each with:
 Before calling `propose_knowledge_revision` for any proposal, verify every item:
 
 - [ ] No two proposals share the same `path`
-- [ ] Every proposal has at least one of `evidence_research_id` or `evidence_note`
+- [ ] Every proposal carries an `evidence_note` naming a real source
 - [ ] All `gap_fill` findings have been moved to the "Routed to gap-fill" list,
       not drafted as revisions
 - [ ] The "after" content is a complete doc replacement, not a patch fragment

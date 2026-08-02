@@ -23,7 +23,8 @@ Extreme concision. Sacrifice grammar for brevity — drop articles, pronouns, fi
 
 ## What this repo is
 
-This is the **`ssc-content` Cowork plugin** — a Claude Code marketplace plugin
+This is the **`ssc` Cowork plugin** (marketplace `ssc-content-plugin`, so
+`ssc@ssc-content-plugin`) — a Claude Code marketplace plugin
 for Cambridge Diet Vietnam (Sunshine Care) content operators. It defines the
 ads, posts, YouTube, knowledge-base, and strategy workflows as **prose**
 (markdown skills / agents / commands) plus one executable governance hook, and
@@ -41,11 +42,13 @@ Claude/Cowork session.
 .claude-plugin/marketplace.json   # marketplace manifest → points at plugins/ssc
 plugins/ssc/
   .claude-plugin/plugin.json      # plugin manifest (version, MCP server config) — the ONLY MCP config
-  commands/  (11 × ssc-*.md)      # thin slash-command entry points
-  agents/    (8 × ssc-*-agent.md) # pipeline orchestrators
-  skills/    (41 × <name>/SKILL.md)# the actual work units
+  commands/  (12 × ssc-*.md)      # thin slash-command entry points
+  agents/    (9 × ssc-*-agent.md) # pipeline orchestrators
+  skills/    (44 × <name>/SKILL.md)# the actual work units
   hooks/approval-gate.mjs         # PreToolUse governance hook (the only real code)
-  hooks/hooks.json                # wires the hook to mcp__ssc__(approve|unapprove)_*
+  hooks/approval-gate.test.mjs    # its test suite — node --test hooks/
+  hooks/hooks.json                # wires the hook to the approve/unapprove verbs,
+                                  #   the four money-moving Meta tools, and `edit`
 scripts/build-chatgpt-bundle.mjs  # commands+agents+skills → chatgpt/workflows.json
 scripts/publish-chatgpt-bundle.sh # mirrors that bundle into content/mcp-server/
 chatgpt/workflows.json            # GENERATED — never hand-edit
@@ -64,16 +67,20 @@ its agent, and a skill together:
 
 1. **Commands** (`/ssc-*`) are **thin entry points that hold no orchestration
    logic.** They parse operator input and dispatch a single agent. Exception:
-   `/ssc-ad` and `/ssc-ads-brief` dispatch their production skills
-   (`ssc-ads-writer`, `ssc-ads-brief`) directly rather than through an agent.
+   `/ssc-ad`, `/ssc-ads-brief` and `/ssc-ads-publish` dispatch their skills
+   (`ssc-ads-writer`, `ssc-ads-brief`, `ssc-ads-publish`) directly rather than
+   through an agent — a command's `metadata.dispatches` names whichever it uses.
 2. **Agents** (`ssc-*-agent`) are **orchestrators.** Frontmatter declares
    `orchestrates: [skills…]`, the read-only `tools:` they use to resolve state,
    a `capability` (`view`/`edit`), and `approval-gates: human`. Agents are
    **state-driven**: each invocation runs the next open step of the pipeline and
    stops at the next human gate. They never do the content work themselves.
 3. **Skills** (`skills/<name>/SKILL.md`) are the **work units** — one pipeline
-   step each. Frontmatter carries `metadata.section` (strategy/post/ads/youtube/kb),
-   `stage`, `capability`, and the `tools:` (BrandOS MCP tools) it calls.
+   step each. Frontmatter carries `metadata.section` (live values: `strategy`,
+   `ads`, `post`, `knowledge`, `youtube`, `video`, `plan`, `shared`), `stage`,
+   `capability`, and the `tools:` (BrandOS MCP tools) it calls. All four are
+   required on every skill — nothing enforces that yet, so a missing one ships
+   silently.
 
 ### Ads: the persona-late creative hierarchy
 
@@ -88,6 +95,15 @@ the others own:
   one angle per fitting persona × persuasion route — each angle tags its own
   declared media home (`awareness_stage` + `target_layer_term_id`). One
   subject can carry several angles, across several personas.
+
+  > **Coverage targets are set one stage earlier; FIT is still judged here.**
+  > `ssc-ads-approaches` owns `creative_target` on the channel plan — which
+  > personas × routes the period must cover, and in how many angles. That is
+  > coverage *shape*, not a persona assignment: it says what the month owes,
+  > while `ssc-ads-brief` remains the only step that decides whether a given
+  > subject genuinely fits a given persona, and no persona/route/layer tag ever
+  > reaches the idea. "Persona enters at the brief" is about the SUBJECT staying
+  > persona-free — it does not forbid the plan step from setting coverage.
 - **Copy = EXECUTION.** `ssc-ads-writer` tunes hook / structure / register /
   proof-phrasing to the one angle it's anchored to (that angle's declared
   persona/route/awareness_stage) — never to an ad-set steering spec.
@@ -95,22 +111,32 @@ the others own:
 The ad set / media buy is a **dashboard/ops concern outside the creative
 pipeline** — no skill plans, tags, or references an ad set's budget / audience
 / placement setup; deployment (`create_ad`) is a human dashboard action.
-`ssc-ads-blueprint` is retired — there is no media/ad-set step in the creative
-pipeline.
+`ssc-ads-blueprint` is retired — there is **no media-PLANNING step** in the
+creative pipeline.
+
+**The one place an ad set is named is Publish.** `/ssc-ads-publish` takes an
+existing `ad_set_id` as an input and assembles the creative payload for it. That
+is not a media step: it plans no ad set, sets no budget/audience/placement, and
+calls none of `create_campaign` / `create_adset` / `create_ad` / `update_budget`
+— it presents the payload and STOPS, and the commit is a human dashboard action.
+Referencing an ad set the operator already made is allowed; authoring one is not.
 
 ### Pipelines (which skills each agent orchestrates)
 
 | Pipeline | Command | Agent | Stages (skills) |
 |---|---|---|---|
-| Posts (plan) | `/ssc-post-plan` | `ssc-post-agent` | Approaches → Ideate → Schedule — the **channel** steps only, hanging off `month_plans(period)` and released by the head's Narrative approval. The channel authors **no** themes, **no** market research, **no** look-back and **no** quantities: those are the head's Tactics / Research / Review / allocation. Every step grounds in the **monthly plan first, the quarterly strategy second, the KB third**, and says so when they conflict. Channel `tactics` / `retrospective` were dropped server-side and `plan_targets` / detail writes are refused (`retired_plan_field`) from `2026-08` onward — `ssc-post-focus`, `ssc-post-research` and `ssc-post-measure` are **retired** accordingly |
+| Monthly plan (head) | `/ssc-plan` | `ssc-plan-agent` | Review → Tactics → Research → Narrative, keyed on `month_plans(period)` — the cross-channel head above the per-channel plans. **Review is the system's only look-back** and ranks taxonomy TERMS (each with `scale`/`maintain`/`drop`), never metrics. Tactics crosses the quarterly strategy brief with those terms into the month's themes. Research is the ONE outward signal pass per period. **Narrative is authored last and is the month's ONLY gate** — approving it releases every linked channel. Ordering is presentational, **not a chain of locks**: every step stays editable until the Narrative is approved, so an already-written step is re-authored on request, never refused. The head also allocates each channel's quantities (`allocate_channel`) |
+| Posts (plan) | `/ssc-post-plan` | `ssc-post-agent` | Approaches → Ideate → Schedule — the **channel** steps only, hanging off `month_plans(period)` and released by the head's Narrative approval. The channel authors **no** themes, **no** market research, **no** look-back and **no** quantities *of its own*: those are the head's Tactics / Research / Review / allocation. (One nuance: `ssc-post-ideate` round 1 **proposes** the pillar split by calling `allocate_channel`, which writes the **head's** allocation, not a channel field. That is propose-only — it sets no status and flips no gate — and the operator edits it in the dashboard. The retired channel-side writes stay refused.) Every step grounds in the **monthly plan first, the quarterly strategy second, the KB third**, and says so when they conflict. Channel `tactics` / `retrospective` were dropped server-side and `plan_targets` / detail writes are refused (`retired_plan_field`) from `2026-08` onward — `ssc-post-focus`, `ssc-post-research` and `ssc-post-measure` are **retired** accordingly |
 | Posts (produce) | `/ssc-post` | `ssc-post-writer-agent` | produce ⇄ authority loop |
-| Ads (plan) | `/ssc-ads-plan` | `ssc-ads-agent` | Focus → Approaches → Ideate → Measure |
+| Ads (plan) | `/ssc-ads-plan` | `ssc-ads-agent` | Approaches → Ideate — the **channel** steps only, on `channel_plans(channel='ad', period)` hanging off the head. **Focus and Measure are retired steps, not skipped ones**: `channel_plans.tactics` / `tactics_approved` / `retrospective` were dropped server-side, so the month's bets are `month_plans.tactics` and its only look-back is `month_plans.performance_review`. Released by the head's Narrative approval; the channel authors no bets, no research, no look-back and no quantities. Approaches owns `creative_target` — the period's persona × route coverage SHAPE (not volume, which is the head's) |
 | Ads (brief) | `/ssc-ads-brief <ideaId\|date>` | *(direct → ads-brief)* | Persona enters here — judges which personas (from the live persona roster) the persona-free concept fits, then fans it into distinct persona × route angle briefs via `save_brief`, each tagging its own declared media home (`awareness_stage` + `target_layer_term_id`). Append-only: re-running adds whichever distinct angles still remain (per persona) — no produce-once stop, no discard-and-regenerate. Operator approves each angle worth producing; every approved angle anchors its own independent production run |
 | Ads (produce) | `/ssc-ad <briefId> [section]` | *(direct → ads-writer)* | Anchored to the operator's chosen approved angle brief — `briefId` is the sole input (the writer resolves the concept from it via `get_brief`, no `idea_id`). Text-only per-section stepper (copy first from the brief; then headline/description/image_content freed, each gated only on copy) tuned to the angle's declared persona/route/awareness_stage — never an ad-set steering spec; saves via `save_content` (content is brief-keyed — `brief_id` required for ads, no `idea_id`) |
 | Image (prompt) | `/ssc-image-prompt <briefId> [step]` | `ssc-image-prompt-agent` | Scene → Subject → Composition → Edit → Text (all optional) — the **only** image path, and it is **zero-credit**: it authors each step's prompt + `generation_config` and saves via `save_creative_prompt`, then stops. **Cowork never generates** — the operator clicks Generate and selects a candidate in the ImageStudio dashboard, which is what spends fal credits. Anchored to ONE approved `briefId`; the owning idea **and the channel** resolve from the brief (`ad` and `post` both run; any other channel stops). **Scene asks before it writes**: grounded on the idea's `hero` + all approved copy, it proposes **five scene setups** (Vietnamese title + one sentence each) and waits for the operator's pick (`setup: <n|title|description>`) — nothing is saved until one is chosen. Prompts are grounded in the brief + that channel's approved contents + persona doc + brand KB and reach the engine verbatim. Product is upload-only. |
-| YouTube | `/ssc-youtube` | `ssc-youtube-agent` | briefing → ideate → schedule (+ seo) |
-| Knowledge base | `/ssc-kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill |
-| Strategy (quarterly) | `/ssc-strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → eval/develop/audit |
+| Ads (publish) | `/ssc-ads-publish <briefId> <adSetId>` | *(direct → ads-publish)* | Assembles the creative payload for an ad set the operator already made, records the compliance assessment, **presents the payload and STOPS**. Holds no money-moving tool — `create_campaign` / `create_adset` / `create_ad` / `update_budget` are dashboard-only, and the hook denies all four to a subagent. Not a media-planning step: see the ad-set note above |
+| YouTube | `/ssc-youtube` | `ssc-youtube-agent` | briefing → ideate → schedule, on `channel_plans(channel='youtube', period)` hanging off the head. Released by the head's Narrative approval — **not** by any channel flag (`tactics_approved` is gone). The channel authors no themes, no research and no quantities of its own: briefing writes the channel brief to `context` and proposes the month's cadence + distribution onto the HEAD via `allocate_channel`, since `save_plan_targets` and a `detail` payload are refused (`retired_plan_field`) from `2026-08` onward. `ssc-youtube-seo` exists but is orchestrated by `ssc-strategy-agent`, not here |
+| Video | `/ssc-video <briefId>` | `ssc-video-agent` | Script → Storyboard → Keyframe → Clip, brief-keyed and per-scene. Later steps (Assemble / Package / Voice) need backend AI-generation tools that have not shipped — the agent reports that plainly and stops rather than working around it |
+| Knowledge base | `/ssc-kb` | `ssc-kb-agent` | review → audit → research → revise / gap-fill. Research **persists nothing**: there is no `research` table and no `save_research` tool, so the report's own source lines are the provenance a revision's `evidence_note` carries |
+| Strategy (quarterly) | `/ssc-strategy` | `ssc-strategy-agent` | directions → 8-dimension intelligence → KB review + revision proposals. **`ssc-strategy-eval` / `-develop` / `-audit` are NOT entry points of this agent** — they are standalone skills the operator invokes directly for one-off strategy work |
 
 ## Propose-only governance — the core invariant
 
@@ -124,8 +150,14 @@ first):
    repo) — the real gate.
 2. **`hooks/approval-gate.mjs`** (PreToolUse, wired in `hooks.json`) — a harness
    backstop that keys off the subagent-identity fields Claude Code adds to hook
-   input: `approve_*`/`unapprove_*` from a **subagent → deny**; from the **main
-   operator conversation → ask** (confirm). See `hooks/README.md`.
+   input: from a **subagent → deny**, from the **main operator conversation →
+   ask** (confirm). It governs three families: the `approve`/`unapprove` verbs
+   (generic and legacy `approve_*` forms), the four money-moving Meta tools, and
+   — because a **demotion has no verb of its own** — the generic `edit` when its
+   patch carries an approval-bearing field (`status`, `approved`,
+   `<gate>_approved`, `gate`). An `edit` without one is ordinary draft authoring
+   and passes through untouched. `delete` is a known blind spot; see
+   `hooks/README.md`.
 3. **Prose** in every skill/agent stating the propose-only hard rule.
 
 When editing skills/agents, preserve this invariant: **never** add
@@ -212,8 +244,17 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
   echo '{"tool_name":"mcp__ssc__approve_idea"}' \
     | node plugins/ssc/hooks/approval-gate.mjs   # → ask (main conversation)
   ```
-- There is **no automated test suite yet**; a design for a local test + lint
-  harness is at `docs/superpowers/specs/2026-07-03-plugin-test-lint-harness-design.md`.
+- **The hook has a test suite; the prose does not.** Run it with
+  `node --test hooks/` from `plugins/ssc/` — `hooks/approval-gate.test.mjs` pins
+  every matcher (both the `.mjs` regexes and the `hooks.json` entries, which must
+  agree) and exercises the script end to end for each identity. Run it after any
+  hook change. There is still **no lint/test harness for the skills, agents or
+  commands**; a design for one is at
+  `docs/superpowers/specs/2026-07-03-plugin-test-lint-harness-design.md`. The
+  nearest thing that exists today is the bundle build (`node
+  scripts/build-chatgpt-bundle.mjs`), which fails on a missing
+  `metadata.dispatches`, a skill dir that does not match its frontmatter `name`,
+  and an `orchestrates` entry with no such skill.
 - **The version bump is part of the commit, not a follow-up.** Any change to a
   skill, agent, command, or hook requires bumping the version in
   `.claude-plugin/plugin.json` in the **same commit** — operators update by
@@ -242,9 +283,10 @@ skill or agent. Consequential, hard-to-reverse actions (publishing, `update_budg
 ## Install / update (operators)
 
 `claude plugin install` takes a **plugin name**, not a git URL, and `update`
-needs the **qualified `plugin@marketplace` id** (plain `ssc-content` reports
+needs the **qualified `plugin@marketplace` id** (a bare plugin name reports
 "not found"). The marketplace name is `ssc-content-plugin`; the plugin name is
-`ssc-content`.
+**`ssc`** (as declared in both manifests) — so the qualified id is
+`ssc@ssc-content-plugin`.
 
 ```bash
 # Install: add the marketplace once, then install by name
@@ -286,5 +328,5 @@ claude plugin install  ssc@ssc-content-plugin
 
 (Bumping `version` in `plugin.json` then `marketplace update` + `plugin update`
 also works; reinstall is simpler for iteration.) Both `update` and `uninstall`
-require the **qualified `plugin@marketplace` id** — plain `ssc-content` reports
+require the **qualified `plugin@marketplace` id** — a bare plugin name reports
 "not found".

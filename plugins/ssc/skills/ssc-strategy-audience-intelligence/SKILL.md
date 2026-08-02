@@ -18,7 +18,7 @@ You research the **Cambridge Diet Vietnam audience** across the current persona 
 
 - `brief_id` — the strategy brief to save findings to
 - `period` — current cycle, e.g. `2026-Q3`
-- Optional `focus` — one of the current persona codes listed in `brand/personas` (e.g. `chị-hương`, `chị-lan`, `chị-mai`, `chị-thảo`) or a channel
+- Optional `focus` — either one persona `code` as listed live in `brand/personas`, or a channel. The roster is open: read it live and match the operator's input against what the doc actually carries; never validate against a list written here.
 
 ## Procedure
 
@@ -26,7 +26,7 @@ You research the **Cambridge Diet Vietnam audience** across the current persona 
 
 Call `get_knowledge` for:
 - `brand/personas` — the current persona archetypes + their core motivations
-- `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`; today's four are `brand/persona-huong`, `brand/persona-lan`, `brand/persona-mai`, `brand/persona-thao`) — each persona's own detail doc (ranked trigger points, real Vietnamese vocabulary, objections). Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. Grounds each persona's search-keyword block in Step 2 in her actual documented language rather than invented keywords
+- `brand/persona-<slug>` — one call per persona currently listed in `brand/personas`, whatever that roster turns out to be. Derive the set from the doc you just read; never from a count or a path list written here — each persona's own detail doc (ranked trigger points, real Vietnamese vocabulary, objections). Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. Grounds each persona's search-keyword block in Step 2 in her actual documented language rather than invented keywords
 - `brand/journey-stages` — touchpoint map across awareness/consideration/decision
 - `channels/facebook` — current Facebook behavioural context
 - `channels/youtube` — current YouTube behavioural context

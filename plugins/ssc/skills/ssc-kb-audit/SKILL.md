@@ -18,8 +18,10 @@ a research record, a regulatory source (NĐ-15/2018), nutrition science, or a
 documented brand fact. Unsubstantiated claims in these categories are the
 highest-risk KB defect: they directly drive compliance verdicts and ad copy.
 (`winners/` holds curated winning ad copy that is used verbatim in live ads, so
-its efficacy/credibility claims — "60 năm", "chuẩn EU", "26 vitamin" — carry the
-same compliance risk as `ad/` and must trace to evidence.)
+its efficacy and credibility claims carry the same compliance risk as `ad/` and
+must trace to evidence. Judge each such claim against the live `brand/proof-points`
+and `rules/compliance` — this file names no claim, because an auditor working from
+a remembered list audits the list rather than the document.)
 
 You produce findings only. You NEVER edit or apply.
 

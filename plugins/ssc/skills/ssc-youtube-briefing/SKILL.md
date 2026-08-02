@@ -1,20 +1,22 @@
 ---
 name: ssc-youtube-briefing
-description: Derives the YouTube briefing for a Cambridge Diet Vietnam monthly YouTube cycle — turns the approved month context + tactics on the youtube channel_plan into concrete YouTube parameters (long-form/Shorts cadence, video counts by buyer stage and series, themes mapped to videos). Writes the cadence onto the plan detail via save_channel_plan and the distribution via save_plan_targets. Reads the compliance rails live — rules/compliance, brand/proof-points, rules/food-placeholder, rules/person-rule — at the step where the briefing fixes scope, so a non-compliant premise is refused before any idea is generated against it; a failed knowledge read stops the run and names the document. Gated on the approved Focus (tactics_approved). Propose-only; the operator approves the briefing (the plan gate) in the content workspace.
+description: Derives the YouTube briefing for a Cambridge Diet Vietnam monthly YouTube cycle — turns the month's cross-channel themes on the monthly-plan head into concrete YouTube parameters (long-form/Shorts cadence, video counts by buyer stage and series, themes mapped to videos). Writes the channel brief via save_channel_plan and proposes the cadence + distribution onto the HEAD via allocate_channel — the channel authors no quantities of its own. Reads the compliance rails live — rules/compliance, brand/proof-points, rules/food-placeholder, rules/person-rule — at the step where the briefing fixes scope, so a non-compliant premise is refused before any idea is generated against it; a failed knowledge read stops the run and names the document. Released by the head's Narrative approval. Propose-only; the operator approves the briefing (the plan gate) in the content workspace.
 metadata:
   type: skill
   stage: youtube-pipeline
   brand: cambridge-diet-vn
   section: youtube
   capability: edit
-  tools: [get_knowledge, get_channel_plan, save_channel_plan, save_plan_targets, list_taxonomies]
+  tools: [get_knowledge, get_month_plan, get_channel_plan, save_channel_plan, allocate_channel, list_taxonomies]
 ---
 
 # Monthly YouTube Briefing (`ssc-youtube-briefing`)
 
-You derive concrete YouTube video parameters from the approved month context + tactics on the youtube `channel_plan` and write them onto that plan. You write only via `save_channel_plan` (the youtube cadence detail) and `save_plan_targets` (the buyer-stage and series distribution), and stop immediately after. You are propose-only: the operator reviews the briefing in the content workspace (`/content/youtube`) and approves it there — approving flips the plan's `approved` gate (via `approve(entity='channel_plan', gate='plan')`, a dashboard-only action), which opens Ideate.
+You derive concrete YouTube video parameters from the month's cross-channel themes and write them where they belong. You write the channel's own brief via `save_channel_plan` (`context` only) and propose the month's YouTube quantities onto the **head** via `allocate_channel`, then stop immediately. You are propose-only: the operator reviews the briefing in the content workspace (`/content/youtube`) and approves it there — approving flips the plan's `plan` gate (via `approve(entity='channel_plan', gate='plan')`, a dashboard-only action), which opens Ideate.
 
-This is step 1 of the YouTube pipeline (**Briefing → Ideate → Schedule**), keyed on `channel_plans(channel='youtube', period=YYYY-MM)`. There is no monthly-plan dependency — the youtube plan is self-contained.
+This is step 1 of the YouTube pipeline (**Briefing → Ideate → Schedule**), keyed on `channel_plans(channel='youtube', period=YYYY-MM)` and hanging off that period's monthly-plan head.
+
+**The channel authors nothing above itself.** The month's themes, its look-back and its outward research belong to the head (`/ssc-plan`); you read them and never author them. `save_plan_targets` and a `detail` payload on `save_channel_plan` are **refused with `retired_plan_field` from `2026-08` onward** — never call either. Quantities are reached through `allocate_channel`, which writes the HEAD's allocation, sets no status and flips no gate.
 
 ## Inputs
 
@@ -22,27 +24,32 @@ This is step 1 of the YouTube pipeline (**Briefing → Ideate → Schedule**), k
 
 ## Procedure
 
-### Step 1: Read the plan and gate-check the Focus
+### Step 1: Read the head and gate-check the release
 
-Call:
+The channel is released by the head's **single narrative approval** — not by a
+channel-side flag. Call:
 
 ```
-Call: get_channel_plan
-  channel: youtube
+Call: get_month_plan
   period: <period>
 ```
 
-**Gate-check:** From the returned `{ plan }`, if `plan` is null **or** `plan.tactics_approved` is not `true`, STOP immediately and tell the operator:
+**Gate-check:** if the head is null **or** its `narrative_approved` is not `true`,
+STOP immediately and tell the operator:
 
-> The YouTube month context/tactics have not been approved yet. Please review and approve them in the content workspace (`/content/youtube`) before running the briefing.
+> The month's narrative has not been approved yet. Please review and approve it in the monthly plan (`/ssc-plan`) before running the YouTube briefing.
 
-Do not proceed past this gate under any circumstances.
+Do not proceed past this gate under any circumstances — no KB reads, no writes.
 
-If `plan.tactics_approved` is `true`, extract and hold from the aggregate:
+If the narrative is approved, extract and hold from the head:
 
-- `plan.id` — the plan id, passed to `save_plan_targets`
-- `plan.context` — the approved month brief (markdown): priority pillars/themes, key dates, seasonal moments
-- `plan.tactics` — the approved month tactics (markdown): the bets and emphasis that shape the video mix
+- `head.id` — the month-plan id, passed to `allocate_channel` as `month_plan_id`
+- `head.version` — passed to `allocate_channel` as `expected_version` (each call bumps it; re-read before a second allocation)
+- `head.tactics` — the month's cross-channel **themes**: what shapes the video mix
+- `head.performance_review` / `head.research` — the month's look-back and outward signal, read for context only
+
+Then call `get_channel_plan(channel='youtube', period=<period>)` for the channel's
+own state. A null plan is fine — `allocate_channel` mints the row.
 
 ### Step 2: Load YouTube knowledge and the compliance rails
 
@@ -67,7 +74,7 @@ Read all seven documents carefully. Use them to assign video counts per buyer st
 
 > Could not read `<path>` from the knowledge base. The briefing is derived from it, so the run stops here — re-run once the document is readable.
 
-There is no fallback and no default. Never brief from prose in this skill, from memory, from a similar-looking document, or from a cached copy: this file deliberately holds no copy of any cadence, persona or compliance rule, so a remembered version is a guess — and a premise written into `plan_targets` is indistinguishable from a compliant one once Ideate reads it back and produces against it.
+There is no fallback and no default. Never brief from prose in this skill, from memory, from a similar-looking document, or from a cached copy: this file deliberately holds no copy of any cadence, persona or compliance rule, so a remembered version is a guess — and a premise written into the allocation is indistinguishable from a compliant one once Ideate reads it back and produces against it.
 
 ### Step 3: Derive YouTube parameters
 
@@ -107,26 +114,36 @@ Screen every premise this briefing is about to fix — each theme mapping from D
 
 **The rails are read, never restated.** Every question above names a doc and a section and is answered from the live document. This file holds the question and never the answer — a second copy of a compliance rule is drift this repo has already been burned by, and a briefing that passed a *remembered* rule is worse than a run that stopped, because it looks approved.
 
-### Step 4: Write the briefing onto the plan (only the fields you own)
+### Step 4: Write the briefing (only what you own, in the place that owns it)
 
-The per-channel save tools have patch semantics — `save_channel_plan` updates only the fields you pass (unset fields are preserved), so send ONLY what this skill owns. Do NOT re-send `context`, `tactics`, `status`, or any field another step wrote.
+Two writes, to two different rows. Both save tools have patch semantics — they
+update only the fields you pass — so send ONLY what this step owns.
 
-**Only compliant premises are written.** A premise refused in Step 3 E must not appear in `detail`, in any `plan_targets` row, or in any row's `meta.themes` — the refusal is reported to the operator (Step 5) and nowhere else. Writing it and flagging it in prose is not a refusal: Ideate reads the targets, not the chat.
+**Only compliant premises are written.** A premise refused in Step 3 E must not appear in the channel brief, in any allocated target row, or in any row's `meta.themes` — the refusal is reported to the operator (Step 5) and nowhere else. Writing it and flagging it in prose is not a refusal: Ideate reads the targets, not the chat.
 
-**4a. Cadence detail:**
+**4a. The channel brief** — the qualitative YouTube brief for the month, in
+Vietnamese markdown: the theme→series→stage mapping, what each series is for this
+period, and the refusals. This is the channel's own field:
 
 ```
 Call: save_channel_plan
   channel: youtube
   period: <period>
+  context: <the YouTube brief, markdown>
+```
+
+Never pass `detail`, `status`, or `strategy_brief_id` here. A `detail` payload is
+refused with `retired_plan_field` and writes NOTHING — cadence goes to the head in
+4b.
+
+**4b. Cadence + distribution — proposed onto the HEAD.** First resolve term ids: call `list_taxonomies` (e.g. `list_taxonomies(kind='buyer_stage')` and `list_taxonomies(kind='youtube_series')`, or one unfiltered call) and build `code → id` maps. Then propose the month's YouTube quantities in one call:
+
+```
+Call: allocate_channel
+  month_plan_id: <head.id>
+  channel: youtube
+  expected_version: <head.version>
   detail: { longFormPerWeek: <n>, shortsPerWeek: <n> }
-```
-
-**4b. Distribution targets.** First resolve term ids: call `list_taxonomies` (e.g. `list_taxonomies(kind='buyer_stage')` and `list_taxonomies(kind='youtube_series')`, or one unfiltered call) and build `code → id` maps. Then write the distribution as a SET — one row per leaf term with its count:
-
-```
-Call: save_plan_targets
-  plan_id: <plan.id>
   targets: [
     { term_id: <buyer_stage:awareness id>,     target_value: <n> },
     { term_id: <buyer_stage:consideration id>, target_value: <n> },
@@ -137,7 +154,12 @@ Call: save_plan_targets
   ]
 ```
 
-Pass resolved taxonomy **ids** in `term_id`, never codes. `save_plan_targets` replaces the plan's whole `plan_targets` set (DELETE-then-INSERT) — send the complete distribution (all buyer-stage rows + all series rows) in one call. This skill owns the youtube plan's `plan_targets`, so replacing the set is correct here.
+Pass resolved taxonomy **ids** in `term_id`, never codes. `targets` is a SET — given, it REPLACES the stored set wholesale, so send the complete distribution (all buyer-stage rows + all series rows) in one call. `detail` keys must be YouTube's own (`longFormPerWeek`, `shortsPerWeek`); a payload carrying another channel's keys is rejected whole (`invalid_detail`).
+
+`allocate_channel` is **propose-only**: it writes the head's allocation, sets no
+status and flips no gate. Writing the numbers is not accepting them — the operator
+remains free to edit them in the dashboard. A `stale_version` error means the head
+moved: re-read it with `get_month_plan` and retry once with the fresh version.
 
 ### Step 5: Output the YouTube briefing table
 
@@ -169,24 +191,26 @@ Always print this section. An empty table means nothing was refused this month; 
 indistinguishable from not having screened.
 
 ---
-Briefing written to the youtube channel_plan (propose-state): detail {longFormPerWeek, shortsPerWeek} + plan_targets (buyer_stage + youtube_series distribution).
+Briefing written (propose-state): the YouTube brief on the youtube channel_plan `context`, and the month's cadence {longFormPerWeek, shortsPerWeek} + distribution (buyer_stage + youtube_series) proposed onto the monthly-plan head.
 
-Next step: review the briefing in the content workspace (/content/youtube) and approve it (flips the plan's `approved` gate), then re-invoke the agent to begin Ideate.
+Next step: review the briefing in the content workspace (/content/youtube) and approve it (flips the plan's `plan` gate), then re-invoke the agent to begin Ideate.
 ```
 
 ## Output
 
-- `detail.longFormPerWeek` / `detail.shortsPerWeek` written to the youtube `channel_plan`
-- `plan_targets` written as a SET: one row per `buyer_stage` term and per `youtube_series` term with `target_value` counts (+ theme/persona `meta` on series rows)
+- `context` written to the youtube `channel_plan` — the month's YouTube brief in Vietnamese markdown
+- The head's YouTube allocation proposed via `allocate_channel`: `detail.longFormPerWeek` / `detail.shortsPerWeek`, plus a target SET with one row per `buyer_stage` term and per `youtube_series` term (+ theme/persona `meta` on series rows)
 - No gate flipped — the briefing is a proposal awaiting the operator's plan-gate approval
 
 ## Governance
 
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
-- Always gate-check `tactics_approved` first (Step 1). If the Focus is not approved, STOP — do not load the KB or write anything.
-- Write only the fields you own: `detail` via `save_channel_plan` and the `plan_targets` set. Never pass `context`, `tactics`, `status`, or `retrospective` — the save tools patch only provided fields, so omitting them preserves other steps' writes.
-- Derive counts and cadence from `channels/youtube` + the month's tactics/context — never from remembered defaults. Persona archetypes come from `brand/personas` — do not inline persona names.
-- **Compliance is a briefing-time gate, not a word scan.** A premise that fails `rules/compliance`, `brand/proof-points`, `rules/food-placeholder` § Quy Tắc Chung or `rules/person-rule` §4 is refused in Step 3 E and never reaches `detail` or `plan_targets`. The verdict is always the live document's: name the doc and section, read it live, and never restate, summarise or hard-code a compliance rule in this file — a second copy goes stale silently and overrides the doc it was meant to mirror.
+- **Always gate-check the head's narrative approval first** (Step 1). Under an unapproved narrative: no KB reads, no strategy read, no write.
+- **Never writes retired fields.** `save_plan_targets` and a `detail` payload on `save_channel_plan` are both refused with `retired_plan_field` from `2026-08` onward, and the refusal is correct: the head allocates. `tactics`, `tactics_approved` and `retrospective` no longer exist on `channel_plans` — never read or write them.
+- **Never writes the head's authoring fields.** `save_month_plan` is not this skill's tool: the Review, the themes, the research and the narrative belong to the monthly plan and you only read them. The one head write you hold is `allocate_channel`, which is propose-only and flips no gate.
+- Write only what you own: `context` via `save_channel_plan`, and the YouTube allocation via `allocate_channel`. Never pass `status` or `strategy_brief_id` — the save tools patch only provided fields, so omitting them preserves other steps' writes.
+- Derive counts and cadence from `channels/youtube` + the head's themes — never from remembered defaults. Persona archetypes come from `brand/personas` — do not inline persona names.
+- **Compliance is a briefing-time gate, not a word scan.** A premise that fails `rules/compliance`, `brand/proof-points`, `rules/food-placeholder` § Quy Tắc Chung or `rules/person-rule` §4 is refused in Step 3 E and never reaches the channel brief or any allocated target row. The verdict is always the live document's: name the doc and section, read it live, and never restate, summarise or hard-code a compliance rule in this file — a second copy goes stale silently and overrides the doc it was meant to mirror.
 - **A failed KB read STOPS the run** (Step 2): it names the document that could not be read, saves nothing, and never proceeds from prose in this file, from memory, from a similar document or from a cached copy. Every later step leans on the Step 2 load, so there is no second place to fall back from — by design.
 - References only the seven knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
 - Series and buyer-stage vocabularies are the `youtube_series` and `buyer_stage` taxonomies (via `list_taxonomies`) — never invent codes or ids.

@@ -261,10 +261,12 @@ Wait for both, then merge all findings into one list sorted high → medium → 
 
 For findings that need external grounding (regulatory updates, algorithm changes,
 nutrition science, Vietnamese cultural shifts) **and** are not already covered by a
-marked finding's evidence from this cycle, run `ssc-kb-research` to gather evidence
-and `save_research`, so each revision can cite a `research_id`. Skip for findings
-already grounded in a KB quote, a named performance signal, or a marked research
-finding from Phase 2.
+marked finding's evidence from this cycle, run `ssc-kb-research` to gather evidence,
+so each revision can cite a real source. `ssc-kb-research` persists nothing — there
+is no research ledger and no `research_id`; its report's source lines ARE the
+provenance, and they are what the revision's `evidence_note` carries. Skip for
+findings already grounded in a KB quote, a named performance signal, or a marked
+research finding from Phase 2.
 
 #### 4c — Route per finding
 
@@ -297,8 +299,9 @@ A `stale_version` error means the doc changed between the two calls — re-read 
 final report.
 
 Every revision proposal MUST carry a target path, the proposed change, a
-rationale, and an **evidence citation** (a `research_id` and/or an evidence
-note — a marked finding from this cycle qualifies). A proposal without evidence is
+rationale, and an **evidence citation** — an `evidence_note` naming the
+substantiating source or signal (a marked finding from this cycle qualifies).
+`evidence_note` is the tool's only evidence field. A proposal without evidence is
 not produced.
 
 #### Final report (Phase 3)

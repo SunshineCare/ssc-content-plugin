@@ -60,7 +60,7 @@ The result is `{ brief, idea }`. If `{ brief: null }` → STOP (Vietnamese): kh�
 
 Hold the resolved `channel`, the brief's `angle_label` (an ad angle label; a post brief may carry none — then anchor on the idea itself) + its five narrative fields (`hook_direction`, `core_message`, `why_now`, `story_moment`, `cta`) — **the angle anchor** — and the flat `idea` (`title`, `ad_notes` — ads carry it, on a post it is simply absent, `tags[]`). `get_idea` may be called as a follow-up only if fuller idea detail is needed — it is not an input.
 
-**Resolve the persona detail-doc path.** The persona tag's `code` maps to `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` stripped (`chi-huong` → `brand/persona-huong`, `chi-mai` → `brand/persona-mai`, …) — the same mechanical rule `ssc-ads-writer` uses. Hold the one path (for Step 4). No persona tag → ground the person in the structural tags + brief alone; invent no doc path.
+**Resolve the persona detail-doc path.** The persona tag's `code` maps to `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` stripped (a code of `chi-huong` resolves to `brand/persona-huong`) — the same mechanical rule `ssc-ads-writer` uses, holding for any persona on the live roster; no roster is written here. Hold the one path (for Step 4). No persona tag → ground the person in the structural tags + brief alone; invent no doc path.
 
 ### Step 2: Check this layer's own state
 

@@ -102,26 +102,39 @@ skill or anywhere else, that the create surface is closed off server-side.
 
 ## Tests
 
-`approval-gate.test.mjs` pins **every** pattern — the `APPROVAL_TOOL` and
-`SPEND_TOOL` regexes in `approval-gate.mjs` **and** the PreToolUse `matcher`s in
-`hooks.json` (the latter decide whether the hook is even invoked, so they must
-agree with the former; the two families are disjoint, each with its own matcher
-entry, and the test unions them). It also exercises the script end to end for the
-four money-moving tools under both identities — subagent → `deny`, main → `ask`.
-Run it from `plugins/ssc-content/`:
+`approval-gate.test.mjs` pins **every** pattern — the `APPROVAL_TOOL`,
+`SPEND_TOOL` and `STATUS_EDIT_TOOL` regexes in `approval-gate.mjs` **and** the
+PreToolUse `matcher`s in `hooks.json` (the latter decide whether the hook is even
+invoked, so they must agree with the former; the three families are disjoint,
+each with its own matcher entry, and the test unions them). It also exercises the
+script end to end for the four money-moving tools under both identities —
+subagent → `deny`, main → `ask` — and for every demotion shape the generic `edit`
+can carry, plus the ordinary draft edits that must stay ungated.
+Run it from `plugins/ssc/`:
 
 ```bash
-node --test "hooks/**/*.test.mjs"
+node --test hooks/
 ```
 
 Zero dependencies — plain `node:test` + `node:assert`. It reads each pattern **from
 disk** rather than restating it (a test carrying its own copy of the regex would
 keep passing while the real hook regressed), and asserts that the generic
 `approve`/`unapprove` verbs and the legacy `approve_*`/`unapprove_*` names are
-gated, that `edit`/`delete`/reads are not, and that adversarial near-misses
-(`approval_status`, `approved_thing`, `disapprove`, `mcp__other__approve`) stay
+gated, that `delete` and reads are not, that `edit` is gated **only** on an
+approval-bearing patch, and that adversarial near-misses (`approval_status`,
+`approved_thing`, `disapprove`, `edit_knowledge`, `mcp__other__approve`) stay
 ungated. This is load-bearing precisely because the gate is **default-allow**: a
 name the matcher misses does not fail loudly — it is silently **allowed**.
+
+## Known blind spot: `delete`
+
+`mcp__ssc__delete` is **not** gated here. It is destructive rather than
+gate-flipping; the server refuses it for approved rows and runs the brief cascade
+preview-then-confirm, and gating it would prompt on every ordinary draft cleanup.
+So the only thing standing between an agent and a draft deletion is the server's
+own refusal plus the prose rule in each skill ("the generic `edit`/`delete` verbs
+may target ONLY draft rows this skill itself created in the current run"). If that
+server-side behaviour ever changes, this is the gap to close first.
 
 ## Deploy note
 

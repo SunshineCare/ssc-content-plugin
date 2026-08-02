@@ -86,7 +86,7 @@ And the **strategic tags** from `tags[]` (each tag is `{ term_id, kind, code, la
 
 The brief is the strategic frame you must honour. The `core_message`, `pillar`, `persona`, and `why_now` are fixed across all N variations — what changes is the **angle and hook**. Do not drift off the brief's pillar/persona/message.
 
-**Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. `chi-huong` → `brand/persona-huong`, `chi-lan` → `brand/persona-lan`, `chi-mai` → `brand/persona-mai`, `chi-thao` → `brand/persona-thao`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later. Hold this ONE resolved path forward into Step 3 (you load only the one detail doc for the persona actually in play this run, not all four).
+**Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. a code of `chi-huong` resolves to `brand/persona-huong`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later, and no roster is written here. Hold this ONE resolved path forward into Step 3 (you load only the detail doc for the persona actually in play this run, never the whole roster).
 
 **Legacy rows PROCEED — record the absence, invent nothing.** The doctrine is **not retroactive**. A
 post idea, brief, or earlier saved row **approved before this change stays valid, is never re-opened,
@@ -257,7 +257,7 @@ These paths are:
 - `voice/pronouns` — the pronoun system (Mình / Bạn / Chị) — get this right in every variation
 - `brand/woman-to-woman` — the woman-to-woman register the brand speaks in
 - `brand/positioning` — the competitive positioning + "chúng mình hơn ở đâu" per competitor (the source for pressing our edge)
-- `brand/proof-points` — the credibility lookup table (60 năm, DiRECT/DROPLET, chuẩn EU, 26 vi chất, chuyên viên 1:1, …) and the owner of the proof **families** the set's proof-device axis draws from. The ≥3-distinct proof bar is the **SET's**, not any one variation's — owned by `craft/coverage` §4.2 and read live (Step 4)
+- `brand/proof-points` — the credibility lookup table and the owner of the proof **families** the set's proof-device axis draws from. Which proofs exist, and their exact compliant wording, come from this doc alone — this file lists none. The ≥3-distinct proof bar is the **SET's**, not any one variation's — owned by `craft/coverage` §4.2 and read live (Step 4)
 - `voice/vietnamese-rules` — Vietnamese grammar and authenticity rules (no translated-English feel)
 - `voice/vocabulary` — approved vocabulary and preferred phrasings
 - `brand/angles` — the approach/angle system: the named ways in, and what each one is for
@@ -351,9 +351,8 @@ The Posts channel is written in **Kiều My's voice** — but voice is NOT licen
 Non-person content (science/mechanism, product, app, 6-step) — write freely. When in doubt, write representative ("nhiều chị…") rather than a fabricated specific. A fabricated real-person story is an automatic fail at the authority gate (NĐ-15 + brand authenticity).
 
 **Proof points — the ≥3-distinct bar is the SET's, never one variation's (read FIRST):** the requirement
-for at least three distinct Cambridge USP / proof points from `brand/proof-points` (60 năm nghiên cứu,
-DiRECT/DROPLET, chuẩn EU / 26 vi chất, chương trình 6 bước, chuyên viên 1:1 đồng hành, the app, …) is
-satisfied **across the set**. That rule is `craft/coverage` **§4.2**, read live in Step 3 — in its own
+for at least three distinct Cambridge USP / proof points from `brand/proof-points` — whichever ones that
+doc carries this quarter, read live in Step 3, never recalled — is satisfied **across the set**. That rule is `craft/coverage` **§4.2**, read live in Step 3 — in its own
 terms: **no variation is required to carry three, and none may cram three to satisfy the bar alone**,
 and two variations leaning on the same proof family fail the set on the proof-device axis. Read it
 there, not from this line.
@@ -362,8 +361,10 @@ In practice: give each variation the proof point(s) that actually answer the ten
 opened — as many as its argument carries cleanly, which may be one — and spread the **families** across
 the set at the axis positions you planned. Weave them into the argument, **never a bare list**, and
 press our edge per `brand/positioning` when the post contrasts with an alternative. Keep them concrete,
-not slogans, and inside the compliance rails (no fabricated number; spell out "nghiên cứu lâm sàng độc
-lập" never "RCT"; **26** not 25; no commercial drug-brand name; no income/business-opportunity claim).
+not slogans, and inside the compliance rails — which are `rules/compliance` and `brand/proof-points` as
+they read **today**, not as summarised anywhere in this file. Take every number, every permitted phrasing
+and every prohibition from those live docs; a rail restated here would go stale silently and then
+override the doc it was meant to mirror.
 
 **Both post sections are held to this ONE rule.** The `copy` set you draft and the `image_content` set
 the authority drafts read the same set-level bar from `craft/coverage` §4.2 — that doc binds every

@@ -1,6 +1,6 @@
 ---
 name: ssc-plan-tactics
-description: Runs the TACTICS step of the Cambridge Diet Vietnam monthly plan head — the SECOND of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the ONLY place the quarterly strategy and the monthly Review meet. Crosses the approved quarterly strategy brief (its approved directions + marked findings, read via get_strategy_brief) with the prior period's Review (month_plans.performance_review, markdown) to produce the month's THEMES — 3–5 cross-channel, directive one-liners — written as a Vietnamese markdown report to month_plans.tactics via save_month_plan. A theme with only a quarterly source is a strategy restatement; with only a monthly source it is a monthly reaction; BOTH is the point of the step, and an empty source column is left visible rather than hidden. Asks the operator AT MOST THREE questions, one at a time and never batched, and only about what no data can answer: Q1 business context (always — events, milestones, budget or staffing constraints, e.g. an anniversary), Q2 continuity-vs-correction (ONLY when the Review and the quarterly direction genuinely conflict), Q3 carry-over commitments (ONLY if Q1 surfaced an event). It NEVER asks what is readable — quarterly directions, what the Review found, which pillars are underweight. Operator answers become a THIRD traceable source column so a commitment-driven theme is visibly not a data finding. Themes are cross-channel and no channel_plans row carries its own; channels read this and decide their own Approaches. Also carries the month's explicit NON-GOALS (the Review's prohibitions must survive or they get re-litigated) and the measures next month's Review will judge each theme by, so themes stay falsifiable. Runs every month including a quarter's first, where the Review may be absent — the section stays and says so. ALSO authors the period's TWO HAND-DOWNS to the ads channel on the same save_month_plan call, each into its OWN field and never folded into the themes: proof_inventory ({ terms, notes }) — which proof devices can actually be supplied this period, its terms resolved live from the proof_device taxonomy roster via list_taxonomies so the roster stays open and is never enumerated in prose — and offer_state ({ promotion, label, startsOn, endsOn, notes }) — recorded ONLY when a real, DATED promotion exists, sourced from the operator's business-context answer and never derived from a theme or a seasonal opening. ABSENCE MEANS NONE: an omitted offer state is no promotion and an omitted inventory is a GAP the channel reports, never a default meaning every device is available — neither is ever invented to avoid an empty field. It does NOT author the market-sophistication read: that is the quarter's, authored once on the strategy brief and inherited by the month. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
+description: Runs the TACTICS step of the Cambridge Diet Vietnam monthly plan head — the SECOND of the Plan stage's four steps (Review → Tactics → Research → Narrative), and the ONLY place the quarterly strategy and the monthly Review meet. Crosses the approved quarterly strategy brief (its approved directions + marked findings, read via get_strategy_brief) with the prior period's Review (month_plans.performance_review, markdown) to produce the month's THEMES — 3–5 cross-channel, directive one-liners — written as a Vietnamese markdown report to month_plans.tactics via save_month_plan. A theme with only a quarterly source is a strategy restatement; with only a monthly source it is a monthly reaction; BOTH is the point of the step, and an empty source column is left visible rather than hidden. Asks the operator AT MOST THREE questions, one at a time and never batched, and only about what no data can answer: Q1 business context (always — events, milestones, budget or staffing constraints, e.g. an anniversary), Q2 continuity-vs-correction (ONLY when the Review and the quarterly direction genuinely conflict), Q3 carry-over commitments (ONLY if Q1 surfaced an event). It NEVER asks what is readable — quarterly directions, what the Review found, which pillars are underweight. Operator answers become a THIRD traceable source column so a commitment-driven theme is visibly not a data finding. Themes are cross-channel and no channel_plans row carries its own; channels read this and decide their own Approaches. Also carries the month's explicit NON-GOALS (the Review's prohibitions must survive or they get re-litigated) and the measures next month's Review will judge each theme by, so themes stay falsifiable. Runs every month including a quarter's first, where the Review may be absent — the section stays and says so. ALSO authors the period's TWO HAND-DOWNS to the ads channel on the same save_month_plan call, each into its OWN field and never folded into the themes: proof_inventory ({ terms, notes }) — which proof devices can actually be supplied this period, its terms resolved live from the proof_device taxonomy roster via list_taxonomies so the roster stays open and is never enumerated in prose — and offer_state ({ promotion, label, startsOn, endsOn, notes }) — recorded ONLY when a real, DATED promotion exists, sourced from the operator's business-context answer and never derived from a theme or a seasonal opening. ABSENCE MEANS NONE: an omitted offer state is no promotion and an omitted inventory is a GAP the channel reports, never a default meaning every device is available — neither is ever invented to avoid an empty field. ALSO records strategy_brief_id on that same call — which quarterly brief the month was planned from, the provenance no other Plan step can supply because this is the only one that both reads the brief and writes the head; omitted entirely when the quarter has no brief (an omission preserves and never blanks), never defaulted or back-filled, and it re-routes nothing — every channel still derives the quarter from period and reads the brief directly. It does NOT author the market-sophistication read: that is the quarter's, authored once on the strategy brief and inherited by the month. Propose-only and UNGATED: it sets no approval flag; the month's single approval is the Narrative, a human dashboard action.
 metadata:
   type: skill
   stage: monthly-plan
@@ -53,6 +53,11 @@ Use the **approved directions** (`directions.themes`, `directions.dimensions`)
 and the **marked findings** only. An unmarked finding was not curated and is not
 strategy. If `directionsApproved` is false, say so — you are then crossing
 against a draft, and the themes inherit that uncertainty.
+
+**Hold the brief's `id`.** You are the only step of the Plan stage that reads the
+quarterly brief AND writes the head, so you are the only one that can record
+which brief this month was planned from. Carry the id to Step 5. If no brief
+exists for the quarter, carry nothing — you still write the month (see Step 5).
 
 **The monthly Review** — `get_month_plan(period)` → `performanceReview`.
 
@@ -233,9 +238,33 @@ fact accurately, with its dates.
 Call: save_month_plan
   period: <period>
   tactics: "<the markdown document below>"
-  proof_inventory: <Step 4a — OMIT ENTIRELY when nothing is stated>
-  offer_state:     <Step 4b — OMIT ENTIRELY when there is no promotion>
+  proof_inventory:   <Step 4a — OMIT ENTIRELY when nothing is stated>
+  offer_state:       <Step 4b — OMIT ENTIRELY when there is no promotion>
+  strategy_brief_id: <Step 1's brief id — OMIT ENTIRELY when the quarter has no brief>
 ```
+
+**`strategy_brief_id` records which quarterly brief this month was planned from.**
+It rides this call, never a second one — the provenance lands in the same write as
+the work it describes, so the two cannot disagree. Same omission rule as the
+hand-downs: **no brief for the quarter → omit the parameter entirely.** The tool
+patches only the fields you provide, so an omission preserves whatever the head
+already carried and can never blank it. Never default it, never infer it from a
+neighbouring period, never write a placeholder — a null is a truthful record that
+none was recorded, and a wrong id is worse than an honest absence.
+
+**An absent brief does not stop the month.** You run every month including a
+quarter's first, where the Review may be absent too — write the themes, omit the
+field, and name the absence in the report.
+
+**Do NOT back-fill a head that already carries a null.** A month authored before
+its brief was recorded was planned against a brief state you cannot reconstruct;
+stamping today's id on it asserts something false.
+
+**This is provenance, not plumbing.** No channel resolves the quarter through this
+field — each derives the quarter from `period` and reads the brief directly, and
+that is unchanged. You are recording what happened, not re-routing how anything is
+read. Recording it sets no flag and moves no lifecycle state: Tactics stays
+ungated and the month's single approval is still the Narrative.
 
 `tactics` is **markdown**, ungated, carried on `edit`. Nothing in *it* is
 machine-readable, so every instruction a later step needs must be **in the text**.
@@ -324,7 +353,13 @@ Report to the operator in their language:
    Say plainly when either is unstated, and say what that means: an unstated
    inventory is a gap the ads channel will report, and no promotion means the
    month's copy carries no timeliness claim at all.
-5. Where to review it: `/content/plan/<period>`.
+5. The **strategy provenance**, one line, naming what you recorded:
+   - `Chiến lược quý: <brief id> (<quarter>) — đã ghi vào kế hoạch tháng`
+   - or `Chiến lược quý: KHÔNG CÓ brief cho <quarter> — không ghi xuất xứ`
+
+   Provenance the operator cannot see at the moment it is claimed is provenance
+   nobody audits until it is already wrong.
+6. Where to review it: `/content/plan/<period>`.
 
 Say plainly which operator answers shaped the themes, and which themes are
 commitments rather than bets — that distinction is the one most easily lost

@@ -1,7 +1,7 @@
 ---
 name: ssc-approaches-core
 description: >-
-  Shared sub-skill, dispatched by the two Approaches skills, never invoked directly by an operator — the SHARED, channel-agnostic core of the Approaches step of a Cambridge Diet Vietnam monthly plan, dispatched by ssc-ads-approaches and ssc-post-approaches. It returns THREE blocks of text for the caller to compose into its own document: the INHERITED market-sophistication read (carried through verbatim from the quarter the caller passed in, never derived — `NOT STATED` is returned as a fact, never filled with a guessed stage); the per-persona VOICE-OF-CUSTOMER pass (her language, triggers, objections and myths in her own words, COMPILED from four ranked recorded sources, every quote attributed, never invented, each persona's avoid-list respected, and a silent source named as a gap that does not stop the run); and the CANDIDATE-MECHANISM supply (the mechanism per craft/doctrine §2 read live, the quoted attributed voice-of-customer item it explains, its proof route selected only from THIS period's stated proof inventory, and how indirect the inherited read forces the lead to be). It has exactly ONE conditional, `channel` — on `post` it binds every candidate and every quoted line to rules/organic-vs-paid-firewall and refuses any ad-sourced line; on `ad` it behaves as the Ads Approaches step behaved inline. It writes nothing, holds no mutation tool, reads NO plan state (the head, the quarter brief and the featured personas all arrive from the caller, which owns the release gate and every save), runs no outward pass, and never hard-codes a knowledge-base rule — it names the doc and its section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction.
+  Shared sub-skill, dispatched by the two Approaches skills, never invoked directly by an operator — the SHARED, channel-agnostic core of the Approaches step of a Cambridge Diet Vietnam monthly plan, dispatched by ssc-ads-approaches and ssc-post-approaches. It returns THREE blocks of text for the caller to compose into its own document: the INHERITED market-sophistication read (carried through verbatim from the quarter the caller passed in, never derived — `NOT STATED` is returned as a fact, never filled with a guessed stage); the per-persona VOICE-OF-CUSTOMER pass (her language, triggers, objections and myths in her own words, COMPILED from four ranked recorded sources, every quote attributed, never invented, each persona's avoid-list respected, and a silent source named as a gap that does not stop the run); and the BANK-FIRST CANDIDATE-MECHANISM supply (matched against craft/mechanism-bank read live BEFORE anything is authored, so every candidate drawn from it names its `bank_id`, while gap-fill — the ONLY invention this skill makes — is authored against a voice-of-customer item no entry fits and marked `in_bank: false`; the bank saves the AUTHORING and never the GROUNDING, so an entry with nothing this period to explain is NOT supplied, and a draw relaxes nothing else — proof route from THIS period's stated inventory only, a compliance-refused sole route dropped rather than softened, indirectness judged against the inherited read, both volume floors unchanged; each candidate also carries its `valence` per the bank's §2 read live, with the mix reported and NO quota enforced here). The returned candidate shape gains exactly TWO fields, `bank_id` (or `null`) and `valence`, and loses none. It has exactly ONE conditional, `channel` — the bank read is unconditional — on `post` it binds every candidate and every quoted line to rules/organic-vs-paid-firewall and refuses any ad-sourced line; on `ad` it behaves as the Ads Approaches step behaved inline. It writes nothing, holds no mutation tool, reads NO plan state (the head, the quarter brief and the featured personas all arrive from the caller, which owns the release gate and every save), runs no outward pass, and never hard-codes a knowledge-base rule — it names the doc and its section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction.
 metadata:
   type: skill
   stage: shared
@@ -20,8 +20,9 @@ caller to compose into its own document:
 
 1. **The inherited sophistication read** — carried, never derived.
 2. **The voice-of-customer pass** — per featured persona, attributed, compiled.
-3. **The candidate-mechanism supply** — grounded in that pass, proof-routed, and
-   deliberately larger than the period can use.
+3. **The candidate-mechanism supply** — drawn **bank-first** from
+   `craft/mechanism-bank`, grounded in that pass, proof-routed, and deliberately
+   larger than the period can use.
 
 **You are dispatched, never invoked directly.** No operator runs you; no command
 points at you. If you find yourself running without a caller's payload, that is a
@@ -51,7 +52,9 @@ These are the caller's or the operator's, and guessing at them is how a shared
 skill starts serving neither channel:
 
 - **Which mechanism a subject carries.** You propose candidates. Ideate picks the
-  one a subject carries (one per subject, inherited by every brief beneath it)
+  one a subject carries (settled once on the subject and inherited by every angle
+  beneath it, which may carry a bounded angle-local override — **one angle, one
+  mechanism**)
   and a human approves the subject. You assign no candidate to any idea, subject
   or pairing.
 - **Which ideas the period runs, and in what order.** You select nothing and rank
@@ -122,6 +125,17 @@ Call `get_knowledge` for:
   not, and the mandatory mechanism beat it feeds. This governs Step 4 and is
   **defined nowhere in this file**. (§6 is the doc's rule-ownership table — follow
   it to whichever doc owns a rule rather than deciding one here.)
+- **`craft/mechanism-bank`** — the brand's standing supply of mechanisms, and the
+  document Step 4 matches against **before it authors anything**. §1 says what the
+  document is and points at `craft/doctrine` §2 for the definition; §2 holds the
+  valence vocabulary and its priority rule; §3 holds the entries, each with its
+  own `id`. **Read live, every run, on both channels — this read is
+  unconditional.** Restate **no** part of it here: no mechanism sentence, no
+  entry `id`, no valence example, no `fits` phrasing. The bank is revised on its
+  own cadence through the KB revision cycle, so a baked-in copy goes stale
+  silently and then outranks the live document it was meant to reflect, and a run
+  that proceeded from a remembered bank would produce a supply indistinguishable
+  from an invented one while claiming to be bank-first.
 - **`craft/awareness-framework`** — the Market Awareness × Sophistication ladders
   and the brand's stated position on them, the persuasion-route lens (§4), and the
   lead taxonomy plus the awareness→lead mapping (§6/§7). Read live for how
@@ -161,6 +175,10 @@ do not continue with the remaining docs: these docs *are* the rules, two sources
 of truth for a doctrinal rule is exactly the drift this design refuses, and a
 stopped run is recoverable in a way a silently-stale one is not. A doc that
 exists but is still awaiting approval is the same case — stop and say which doc.
+**`craft/mechanism-bank` is this same case, with no softer fallback**: an
+unreadable bank stops the run and is named, and the supply is **not** authored
+fresh instead — a run that silently degraded to authoring everything would look
+exactly like a bank-first run to everyone downstream.
 
 ### Step 2: Carry the sophistication read — inherit it, never derive it
 
@@ -182,9 +200,13 @@ else in this file may substitute for it.
 ### Step 3: The voice-of-customer pass — what she actually says, in her own words
 
 **This is the generator's first half, and the reason blandness starts upstream.**
-Everything downstream arranges material; this pass and Step 4 *find* it. Produce,
-per featured persona, her **language, triggers, objections and myths in her own
-words** — verbatim wherever a source gives you verbatim.
+Everything downstream arranges material; this pass and Step 4 *find* it — this
+pass in the period's own recorded sources, Step 4 in the standing bank first and
+only then in new craft. **This half is never saved by the bank**: what the brand
+has already articulated says nothing about what people are saying this month, so
+this pass runs in full whatever the bank holds. Produce, per featured persona,
+her **language, triggers, objections and myths in her own words** — verbatim
+wherever a source gives you verbatim.
 
 **It is COMPILED from recorded sources, not scraped.** Compile from these four,
 in this order of authority:
@@ -229,16 +251,65 @@ beat it feeds — **live from `craft/doctrine` §2** (Step 1). It is deliberatel
 **not** defined in this file: a second copy of that definition here is the drift
 this design refuses, and a remembered version of it is a guess.
 
-**Ground every candidate in Step 3's material.** A mechanism with no observed
-failure or belief behind it is exactly the invented topic this design exists to
-stop.
+**Ground every candidate in Step 3's material — drawn or authored, no
+exception.** A mechanism with no observed failure or belief behind it is exactly
+the invented topic this design exists to stop.
+
+**Build the supply BANK-FIRST: match before you author.** Take Step 3's
+voice-of-customer items and match `craft/mechanism-bank` §3 against them — each
+entry's `fits` against each item — **before you author a single new mechanism.**
+Where an entry fits an item, **that entry supplies the candidate**, and the
+candidate **names that entry's `bank_id`**. Re-derivation is the expensive half
+of this step and the half that does not need to be per-period: the reading of
+what people are actually saying genuinely changes month to month; the craft of
+why something works does not. Naming the `bank_id` is also what lets every
+reader downstream tell a draw from an invention without guessing.
+
+**Gap-fill is the ONLY invention you make here, and it must be visible.** Where
+no bank entry fits a voice-of-customer item, author a new candidate for that item
+and mark it **`in_bank: false`**, with `bank_id: null`. That is the only place in
+this step you author a mechanism the bank does not hold, and you **never** attach
+an entry's `id` to something you wrote. An invented mechanism must be *visibly*
+invented: that flag is what the harvest path later acts on, and what tells an
+operator reading the approved document which lines are new craft rather than
+standing craft.
+
+**The bank saves the AUTHORING, never the GROUNDING (hard rule).** A bank entry
+still requires an **attributed voice-of-customer quote from this period** (Step
+3) before it may be supplied. **A bank entry with nothing this month to explain
+is NOT supplied**, however good it is. The bank removes the cost of writing the
+sentence again; it says nothing about whether this month's readers are actually
+saying the thing that mechanism explains. A supply drawn from the bank alone
+would be a standing list dressed as a reading of the period — the failure Step 3
+exists to prevent, inverted and worse, because nothing about it would look wrong.
+
+**A bank draw relaxes NOTHING else (hard rule).** An entry's presence in the bank
+is evidence that the brand has articulated the mechanism — not that it is
+compliant this period, provable from this period's inventory, or indirect enough
+for the read the quarter set. Every rule below binds a drawn candidate exactly as
+it binds one you authored: the proof route is selected **only** from this
+period's stated `head.proofInventory`; a candidate whose only route
+`rules/compliance` refuses is **dropped, not softened and not re-traced**;
+indirectness is judged against the **inherited** read, with **no bar derived
+where the quarter states none**; and both volume floors stand unchanged. Treating
+a bank draw as pre-cleared is the one way a governed library becomes a bypass.
 
 Each candidate carries, in one short block:
 
-- **The mechanism itself** — why this works, or why past attempts fail. **One
-  specific Vietnamese sentence.**
+- **The mechanism itself** — **one specific Vietnamese sentence**, meeting
+  `craft/doctrine` §2's definition read live. A drawn candidate carries the bank
+  entry's sentence; a gap-filled one is written here.
+- **Where it came from** — the **`bank_id`** of the entry it was drawn from, or
+  **`bank_id: null` and `in_bank: false`** where you gap-filled it.
+- **Its valence** — `positive` or `negative`, **as defined in the bank's §2**,
+  read live (Step 1). The two values, what each means and which one the brand
+  prioritises live in that document and are **never restated here**. A drawn
+  candidate carries its entry's valence; a gap-filled one is judged against §2.
+  **You report the mix; you enforce no quota** — a quota is a rule about *usage*,
+  and usage happens at Ideate, which knows how many assets the period actually
+  runs. You never drop, trim or re-word a candidate to move the mix.
 - **What it explains** — the voice-of-customer item it answers, **quoted and
-  attributed** (Step 3). **No candidate without one.**
+  attributed** (Step 3). **No candidate without one — including a bank draw.**
 - **Its proof route** — which proof family from `brand/proof-points` it would
   lean on, and the **trace** (a live KB proof point, or the product paperwork).
   **Select only from this period's stated `head.proofInventory`**; where that
@@ -263,6 +334,11 @@ the floor from whichever is larger:
   passed none, say in the return that the supply was sized on the persona floor
   alone and name the risk.
 
+**Draws and gap-fills count the same toward both floors, and the floors are
+unchanged.** The bank makes them **cheaper to reach; it does not lower them** —
+a thin bank is a reason to gap-fill more, never a reason to return a smaller
+supply.
+
 **Why the second floor exists.** The per-persona floor alone is how a 31-post
 month got 7 candidates and one mechanism ended up on 8 posts (2026-08). A supply
 smaller than the month forces repetition downstream no matter how carefully the
@@ -278,12 +354,16 @@ and a human approves the subject.
 
 **On `channel='post'`**, bind each candidate to `rules/organic-vs-paid-firewall`
 before proposing it, and drop — with the refusal stated — any candidate that can
-only be argued the way paid creative argues it.
+only be argued the way paid creative argues it. **This binds a bank-drawn
+candidate exactly as it binds one you authored**: the bank is channel-agnostic
+and clears nothing, so a drawn entry that only survives as paid argument is
+dropped and the refusal is stated, naming its `bank_id`.
 
 ### Step 5: Return the three blocks
 
 Return this fenced, fixed shape. A caller can be read against it, so do not
-rename a field, drop one, or add an eighth:
+rename a field, drop one, or add a **ninth** — and inside a candidate, do not add
+a **seventh**:
 
 ```
 channel:              <'ad' | 'post'>
@@ -291,17 +371,28 @@ sophistication:       <stage> — <read, carried through verbatim>
                       | NOT STATED (quarter carries none; no bar derived here)
 voice_of_customer:    [ { persona, language[], triggers[], objections[], myths[],
                           sources[], gaps[] } ]        # every quote attributed
-candidate_mechanisms: [ { mechanism, explains: { quote, source },
+candidate_mechanisms: [ { mechanism, bank_id | null, valence,
+                          explains: { quote, source },
                           proof: { family, trace, verified | unverified_for_period },
                           indirectness } ]
+valence_mix:          <how the candidates split across the two values in the
+                       bank's §2 — reported, never capped here>
 gaps:                 <which source was silent about which persona, or "none">
 personas_featured:    <as passed | "roster fallback — caller passed none">
 reads:                <the KB docs read live this run>
 ```
 
-**Language.** The field labels above are **structural English**. The **values
-that will be persisted** — mechanism sentences, quoted customer language, trigger
-/ objection / myth wording, the sophistication read as the quarter wrote it — are
+`bank_id` and `valence` are the **two** fields this shape gained; nothing was
+renamed, dropped or re-ordered to make room for them. **`bank_id: null` IS the
+statement `in_bank: false`** — say it that way where a caller's document names
+the flag; it is not a third field on the return, and nothing else on the
+candidate encodes provenance.
+
+**Language.** The field labels above are **structural English**, and so are the
+values that are labels rather than prose — `bank_id`, `in_bank`, and the two
+valence values as the bank's §2 spells them. The **values that will be
+persisted** — mechanism sentences, quoted customer language, trigger / objection
+/ myth wording, the sophistication read as the quarter wrote it — are
 **Vietnamese**, because the caller pastes them into a Vietnamese artifact. Your
 chat-side reasoning back to the caller may be the operator's language.
 
@@ -330,10 +421,14 @@ disagreeing.
   returned as a fact with no bar derived
 - A **per-persona voice-of-customer block**, every quoted line attributed to a
   recorded source, avoid-lists respected, silent sources named as gaps
-- A **candidate-mechanism supply**: at minimum one per featured persona and more
-  than the period can use, each with its quoted VOC item, its proof route
-  (`verified` or `unverified_for_period`) and its indirectness against the
+- A **candidate-mechanism supply, built bank-first**: at minimum one per featured
+  persona and more than the period can use, each naming the **`bank_id`** it was
+  drawn from — or stated `in_bank: false` where it was gap-filled — each carrying
+  its **`valence`** per the bank's §2 read live, its quoted VOC item, its proof
+  route (`verified` or `unverified_for_period`) and its indirectness against the
   inherited read
+- The period's **valence mix**, reported as a fact — **no quota applied, no
+  candidate removed to move it**; the cap on usage is Ideate's
 - The featured personas as passed — or the **roster fallback** named
 - The KB docs read live this run
 - **No document, no section layout, no heading set** — those are the caller's
@@ -347,6 +442,23 @@ disagreeing.
   `approve` (the ONLY gated promotion; the approval hook denies it to agents),
   never calls `unapprove`, and never uses `edit` to demote or unapprove a row. The
   caller owns every save and is where the propose-only rules are enforced.
+  **This holds over the bank too: it reads the bank and never writes it** — no
+  `save_knowledge`, no `propose_knowledge_revision`, no `edit`, and nothing
+  approved. A gap-filled candidate reaches the bank only through the KB
+  pipeline's propose-only path and an operator's approval, never from here. A
+  shared skill is the worst possible place to erode propose-only, because the
+  erosion would land in both channels at once.
+- **Bank-first, with invention visible (hard rule).** The supply is built by
+  matching `craft/mechanism-bank` against this period's voice-of-customer items
+  **before** anything is authored; a drawn candidate names its `bank_id`, and
+  gap-fill — the only invention this skill makes — is marked `in_bank: false`.
+  **The bank saves the authoring, never the grounding**: an entry with no
+  attributed quote from this period is not supplied. **The bank clears nothing
+  else** — proof route from this period's stated inventory only, a
+  compliance-refused sole route is dropped rather than softened, indirectness
+  judged against the inherited read with no bar derived where the quarter states
+  none, and both volume floors unchanged. **The mix of valences is reported and
+  no quota is enforced** — a quota is about usage, and usage happens at Ideate.
 - **Reads no plan state (hard rule).** No `get_month_plan`, no `get_channel_plan`,
   no `get_strategy_brief`. The head payload, the quarter payload and the featured
   personas arrive from the caller. The **release gate stays with the caller**: it
@@ -357,7 +469,9 @@ disagreeing.
   stating each refusal; `ad` behaves as the Ads Approaches step did inline.
   **Adding a second conditional is a design change, not an edit** — anything else
   that differs by channel (document shape, headings, coverage targets, gates,
-  saves) belongs to the caller.
+  saves) belongs to the caller. **The bank read is unconditional** — it loads on
+  every run on both channels, and the `post` firewall binding applies to a
+  bank-drawn candidate exactly as it applies to an authored one.
 - **Sophistication is inherited, never derived (hard rule).** Carried verbatim
   from the quarter payload. Where the quarter carries none, `NOT STATED` is
   returned as a fact and **no bar is derived** — a guessed stage is a second,
@@ -376,10 +490,13 @@ disagreeing.
 - **Never hard-codes KB content.** Name the doc and its section and read it live —
   the mechanism definition, the awareness and sophistication ladders and the
   awareness→lead mapping, the proof families, the compliance refusals, the persona
-  roster and each persona's triggers, objections, myths and avoid-list, and the
-  organic/paid firewall. **No persona name in a closed list, no trigger, no
-  prohibition, no ladder rung, no proof family restated in this file.** The roster
-  stays open, so a persona added or retired needs no change here.
+  roster and each persona's triggers, objections, myths and avoid-list, the
+  organic/paid firewall, and **the mechanism bank and its valence vocabulary**.
+  **No persona name in a closed list, no trigger, no prohibition, no ladder rung,
+  no proof family — and no mechanism sentence, no bank `id`, no valence example
+  and no `fits` phrasing — restated in this file.** The roster stays open, so a
+  persona added or retired needs no change here; the bank is revised on its own
+  cadence, so an entry added, sharpened or dropped needs none either.
 - **A failed KB read STOPS the run (hard rule).** Check `missing` on every load,
   retry once, then stop and name the document. Never proceed from a remembered
   version, never substitute a softer rule for one you could not read, and produce

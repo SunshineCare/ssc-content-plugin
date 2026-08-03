@@ -11,7 +11,17 @@ description: >-
   layer, or any other structural term: the idea tags nothing, because persona × route is chosen later,
   by the Brief step, per subject. Each subject carries ONE named MECHANISM, which lives on the idea and
   is inherited by every angle brief beneath it; the mechanism is a condition of proposing a subject as
-  ready for APPROVAL, never a condition of drafting it. It CONSUMES the coverage shape the Approaches
+  ready for APPROVAL, never a condition of drafting it. The period's candidate mechanisms reach this
+  step through the approved Approaches document, each carrying its BANK PROVENANCE (`bank_id`, or
+  `in_bank: false` where the supply gap-filled instead of drawing) and its `valence`; this step carries
+  that provenance into its RUN REPORT ONLY — `save_idea` takes one free-text `mechanism` argument and no
+  provenance argument, so no id, bracket tag or valence marker is ever smuggled into the Vietnamese
+  mechanism sentence the writer must carry verbatim. It holds negative-valence mechanisms, taken
+  together, to NO MORE THAN A THIRD of the period's assets, re-mechanising over the cap from the
+  supply's POSITIVE candidates and reporting a named gap rather than inventing one; a supply with no
+  valence labels leaves the cap unapplied and reported, never inferred. It runs NO per-mechanism spread
+  tally — the ~¼ concentration cap is `ssc-post-ideate`'s and is deliberately not imported here. It
+  CONSUMES the coverage shape the Approaches
   step authors on `channel_plans.creative_target` (persona × route × angle count) and never authors or
   overrides it — volume still comes from the monthly head's Ad allocation. Distinctiveness is enforced
   plan-wide (no two subjects restate the same underlying tension/insight/myth/proof-territory,
@@ -61,7 +71,7 @@ Do not proceed past this gate under any circumstances — do not load the KB or 
 If `plan.approaches_approved` is `true`, extract and hold from the aggregate:
 
 - `plan.id` — the plan id, passed to `save_idea` as `plan_id`
-- `plan.context` — the approved Approaches (markdown): the creative HOW — route × persona differentiation guidance, month signals, experiments, and the period's voice-of-customer research and **candidate mechanisms**. Mine this for the underlying tension/trigger material and for mechanism candidates (Steps 3 and 4) — never copy its persona/route framing onto a subject.
+- `plan.context` — the approved Approaches (markdown): the creative HOW — route × persona differentiation guidance, month signals, experiments, and the period's voice-of-customer research and **candidate mechanisms**. Mine this for the underlying tension/trigger material and for mechanism candidates (Steps 3 and 4) — never copy its persona/route framing onto a subject. Its §Candidate mechanisms blocks carry, per candidate, a **`bank_id: <slug>`** (the `craft/mechanism-bank` entry the supply drew from) **or `in_bank: false`** (the supply gap-filled and authored it), plus a **`valence`** label. Hold those labels alongside each candidate — this document is the ONLY carrier either label has (there is no `bank_id` column and no `valence` column), so a candidate that arrives without them has no provenance to report and no valence to tally, which Step 7 reports rather than guesses at.
 - `plan.creative_target` — the **coverage target** authored by Approaches: `{persona, route, count}[]`, where `count` is a number of ANGLES, expressed with persona/route LABELS. **Read it; never re-derive it, never write it.** It is the coverage shape your pool has to be able to feed.
 - `plan.creative_coverage` — the same target read back against angles already produced (`{persona, route, target, produced, gap}[]`, `gap = target − produced`), ad-only. Rows with `target: 0` are angles produced outside the declared target. Use the `gap` column to see which pairs this month is still short on.
 
@@ -116,7 +126,7 @@ Produce exactly **N** subjects (from Step 1), where each subject is one concrete
 - Mine the persona detail docs (Step 2) for recurring pains/objections/myths that show up across more than one persona — the more a tension is genuinely persona-agnostic, the better a subject it makes.
 - Mine `programme/kieu-my-story` for real, factual proof-territory.
 - Let the head's `tactics` (the month's approved bets) steer which pillars/themes the pool should weight toward this month.
-- Mine `plan.context` again for the period's **candidate mechanisms** — Approaches runs the voice-of-customer and mechanism pass, so the material a subject's mechanism should be drawn from is usually already there. Adopting a candidate is normal; inventing one is not.
+- Mine `plan.context` again for the period's **candidate mechanisms** — Approaches runs the voice-of-customer and mechanism pass, so the material a subject's mechanism should be drawn from is usually already there. Adopting a candidate is normal; inventing one is not. Keep each candidate's `bank_id` / `in_bank: false` and `valence` labels attached to it in your own working notes: Step 7 reports the provenance of the mechanism each subject settles on, and tallies the valence mix across the settled set. Prefer a candidate the supply labelled `positive` where two candidates fit a subject equally well — the cap in Step 7 is much cheaper to satisfy before the pool is saved than after.
 
 **Vary the kind across the pool.** Do not make all N subjects the same kind (e.g. all myths) — a healthy pool mixes tensions, insights, myths, and proof-territory, in proportions that fit what the head's `tactics` and the approved `plan.context` are actually pushing this month.
 
@@ -162,7 +172,8 @@ Pass **no `terms`** — a subject tags no persona, value, frame, against, entry,
 **Field guidance:**
 
 - `title` — the subject, and only the subject: one concrete tension/insight/myth/proof-territory as ONE natural Vietnamese line. No persona, no layer, no value/frame/against/entry/experience code, no `/`-delimited path, no parenthetical taxonomy code, no slot or ad-set name. If a title needs any of those to make sense, it isn't persona-free yet — rewrite it as the bare subject.
-- `mechanism` — the subject's **single named mechanism**, written in Vietnamese, one or two plain sentences. **`craft/doctrine` §2 governs it** — what qualifies, what does not, and how it is stated — so judge every candidate against that section as read live in Step 2, never against a paraphrase (this file deliberately carries none). Three structural facts you do hold: it lives on the **idea**, not the brief (one subject, one mechanism, inherited unchanged by every angle brief beneath it — which is exactly what stops one subject sprouting contradictory mechanisms across personas); it is **optional at draft** and required only before approval (Step 7); and it must be **traceable** — drawn from `plan.context`'s candidate mechanisms or from what `programme/kieu-my-story` actually documents, never invented, and never a number or an outcome claim. If a subject's mechanism is not yet known, **save the draft without one** and let Step 7 flag it. Passing a filler mechanism to clear a checklist is the one failure this rule exists to prevent.
+- `mechanism` — the subject's **single named mechanism**, written in Vietnamese, one or two plain sentences. **`craft/doctrine` §2 governs it** — what qualifies, what does not, and how it is stated — so judge every candidate against that section as read live in Step 2, never against a paraphrase (this file deliberately carries none). Three structural facts you do hold: it lives on the **idea**, not the brief (settled once here and inherited unchanged by every angle brief beneath it, save for the bounded angle-local override `ssc-ads-brief` may author and always reports — **one angle, one mechanism**, never *one subject, one mechanism* — which is what stops one subject sprouting undeclared contradictory mechanisms across personas); it is **optional at draft** and required only before approval (Step 7); and it must be **traceable** — drawn from `plan.context`'s candidate mechanisms or from what `programme/kieu-my-story` actually documents, never invented, and never a number or an outcome claim. If a subject's mechanism is not yet known, **save the draft without one** and let Step 7 flag it. Passing a filler mechanism to clear a checklist is the one failure this rule exists to prevent.
+  **Provenance is a REPORT field, never a ROW field.** `save_idea` takes one free-text `mechanism` argument and no provenance argument — there is no `bank_id` column and no `valence` column, and none is being added. So the mechanism you pass is the bare Vietnamese sentence and nothing else: never prefix it with an id, never append a bracket tag (`[…]`), a slug, an `in_bank` note, a valence marker, or any other label, and never widen the sentence to mention where it came from. That string is what every angle brief beneath the subject inherits and what the Writer carries verbatim — a smuggled label corrupts the one string the whole chain depends on. Where the provenance goes instead is Step 7's report.
 - `score` — **self-rate every subject on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how genuinely felt/credible the tension/insight/myth/proof-territory is, and how well it serves the month's approved bets (the head's `tactics`) — not structural integrity (there is no structure left to check). Rate honestly and **use the full range**: 5 = a standout you'd build several angles on; 3 = solid; 1–2 = weak/generic/filler. Nothing auto-approves on it.
 - `comment` — a **one-line rationale for the score, written in natural Vietnamese**: the single biggest reason the subject is strong or weak — e.g. `"Insight thật, nhiều chị gặp phải, chưa ai khai thác"` or `"Quá gần với chủ đề khác trong pool, thiếu sắc nét"`. Always Vietnamese; keep it short and honest.
 
@@ -213,6 +224,31 @@ For each subject in the second list, do **one** of these — in this order of pr
 
 **Never** invent a mechanism to move a subject into the first list. A subject held back honestly is the intended outcome of this pass; a fabricated mechanism defeats the whole requirement, and a subject whose mechanism is invented cannot produce copy that carries one.
 
+**Carry each settled mechanism's provenance — into the REPORT, never onto the row.**
+
+For every subject in the READY TO APPROVE list, hold the label the supplying candidate carried in `plan.context` (Step 1), in exactly one of three states:
+
+- **`bank_id: <slug>`** — the supply candidate named a `craft/mechanism-bank` entry. Carry that slug through into the Step 8 report.
+- **`in_bank: false`** — the supply candidate was gap-filled by Approaches rather than drawn. Carry the flag through as it stands.
+- **off-supply** — the mechanism came from somewhere the supply did not offer (typically what `programme/kieu-my-story` actually documents). This permission is unchanged; the run's report **names it as off-supply**, attaches no `bank_id` to it, and never labels it `in_bank: false` — that flag is a statement about the supply's gap-fill, not about a choice you made here.
+
+Never attach a `bank_id` to a mechanism no candidate drew from the bank, and never infer one from a mechanism's wording. If the candidate you used carries no provenance label in the approved document, report `provenance not stated in the approved supply` for that subject rather than reconstructing it. And none of these three ever enters the `mechanism` sentence itself — provenance is a report field, not a row field (Step 4).
+
+**The negative-valence cap — no more than a third of the period's assets.**
+
+Read each settled mechanism's `valence` off its candidate block in the approved Approaches document (Step 1). The two legal values, their definitions and the priority between them live in **`craft/mechanism-bank` §2 and nowhere else** — this file restates neither of them, and this step does **not** read the bank: the labels arrive on the supply.
+
+1. **Tally** how many of the pool's `N` subjects carry a **negative**-valence mechanism. Count it; do not eyeball it.
+2. **Compare** that tally against **one third of `N`** — this channel's assets for the period are the pool itself, sized to the head's Ad creative count in Step 1b.
+3. **Over the line → re-mechanise from the supply's POSITIVE candidates.** Go back to `plan.context`, find a positive candidate that genuinely explains the subject, and correct the draft the usual way (`delete(entity='idea', id, expected_version)` + a fresh `save_idea`). Re-mechanise only where the positive candidate genuinely fits: a forced fit is a worse outcome than an honestly reported breach.
+4. **Never invent a mechanism to satisfy the count.** That is precisely the fabrication the whole mechanism rule exists to stop, and a quota met by a fabricated mechanism is worse than a visible skew — the skew is reported, the fabrication is not.
+5. **Too few positives → a NAMED GAP, not a fabrication.** If the supply does not hold enough positive candidates to bring the share under a third, leave the cap breached, name the shortfall in the Step 8 summary, and say plainly that the fix is the next Approaches run.
+6. **No valence labels at all.** An Approaches document approved before those labels existed carries none. Report `valence not stated in the approved supply — cap not applied`, and apply no cap. Never infer a valence from a mechanism's wording — a guessed valence enforces a cap nobody's document supports.
+
+The cap is a statement about the **settled set**, so run it here, on the pool as it stands after the quality loop — and after any re-mechanising that replaced a subject, re-run Step 5's pool-size and plan-wide distinctiveness checks.
+
+**This step runs NO per-mechanism spread tally, and does not gain one here.** `ssc-post-ideate` holds any single mechanism to about a quarter of its batch; this skill has never had that tally and is deliberately not being given one. The concentration failure that cap was written for was observed in the **post** batch, ads subjects are already held plan-wide distinct **by meaning** (Step 5, check 2), and importing the rule would be a second, unapproved rule change riding along on the valence cap. If the ads pool ever shows the same failure, that is its own change with its own evidence — do not "restore" this tally on the assumption it was left out by mistake.
+
 **Two boundaries this pass does not cross:**
 
 - **You do not approve, and you do not ask the server to.** The server refuses to approve an ad idea with no mechanism, and it is the authority; this pass exists so the operator is never handed a subject that will bounce, not to pre-empt their decision. Approval stays a human act in the dashboard, on every subject in both lists.
@@ -256,6 +292,21 @@ All saved subjects ≥ 4★: <yes / no — list any bounded positions>
 (Drafting was not blocked by any of these; they are saved drafts. Nothing here is approved by this
 skill — approval is the operator's act in the dashboard.)
 
+### Mechanism provenance (reported here only — nothing of this is written to any row)
+| Subject | Provenance |
+|---|---|
+| <title> | bank_id: <slug> / in_bank: false / off-supply / provenance not stated in the approved supply |
+
+### Valence mix
+Negative-valence subjects: <n> of <N> — cap is a third of <N> = <n> → PASS / OVER CAP
+Re-mechanised from the supply's positive candidates: <n subjects, or none>
+Named gap: <"the supply holds too few positive candidates to bring the share under the cap — the fix
+is the next Approaches run", or none>
+[or, where the approved supply carries no labels: "valence not stated in the approved supply — cap not
+applied" — reported, never inferred]
+(No per-mechanism spread tally is run here: that ~¼ cap is `ssc-post-ideate`'s and is deliberately not
+imported into this channel.)
+
 ---
 Curate and approve subjects in the dashboard at: Ideas → <period> (filter channel = ad). Approving an
 ad subject requires its mechanism — the server refuses an ad idea without one, and subjects listed
@@ -271,14 +322,17 @@ the Brief step (`/ssc-ads-brief <ideaId>`), which is a separate command — the 
 
 - One DRAFT subject per planned creative — sized to the head's Ad creative count, shaped by the Approaches-authored coverage target — saved via `save_idea(channel='ad', plan_id, source='ai', status='draft', title=<persona-free subject>, mechanism=<when known>, score, comment)`. No `terms`, no ad-set link — subjects carry no structural tag.
 - No gate flipped — subjects are drafts awaiting human curation
-- Summary showing pool-size accuracy against the head's Ad creative count, the coverage target consumed (and any pair left unreached), the plan-wide distinctiveness check result, and the split between subjects ready to approve and subjects held back for a missing mechanism
+- Summary showing pool-size accuracy against the head's Ad creative count, the coverage target consumed (and any pair left unreached), the plan-wide distinctiveness check result, the split between subjects ready to approve and subjects held back for a missing mechanism, each settled mechanism's provenance (`bank_id` / `in_bank: false` / off-supply), and the period's valence mix against the one-third negative cap — including any named gap where the supply held too few positive candidates to reach it
 
 ## Governance
 
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard.
 - **Title = the subject; nothing else.** The `title` is the bare tension/insight/myth/proof-territory as ONE concise Vietnamese line — no persona, no layer/tier, no value/frame/against/entry/experience code, no `/`-delimited structural string, no parenthetical taxonomy code, no slot/ad-set name.
 - **No persona, no framing, no layer.** A subject is persona-free and tier-free by construction: `save_idea` is called with no `terms` at all. Choosing persona × route is the Brief step's job, run separately after a subject is approved — this skill never pre-assigns an archetype, a value/frame/against/entry/experience code, or a layer.
-- **Mechanism gates APPROVAL-READINESS, never DRAFTING.** A subject with no mechanism is drafted, saved and kept; it is simply not proposed as ready for approval (Step 7). Never withhold, delay or refuse a draft for a missing mechanism, and never invent one to make a subject look ready. The mechanism lives on the IDEA — one per subject, inherited unchanged by every angle brief beneath it — so this skill is the only place it is authored, and no brief may restate or contradict it. What a mechanism *is* lives in `craft/doctrine` §2, read live; it is not restated here.
+- **Mechanism gates APPROVAL-READINESS, never DRAFTING.** A subject with no mechanism is drafted, saved and kept; it is simply not proposed as ready for approval (Step 7). Never withhold, delay or refuse a draft for a missing mechanism, and never invent one to make a subject look ready. The mechanism lives on the IDEA — settled once here and inherited unchanged by every angle brief beneath it, save for the bounded angle-local override `ssc-ads-brief` may author and always reports (**one angle, one mechanism**) — so this skill is the only place the SUBJECT's mechanism is authored, and no brief may restate or contradict it. What a mechanism *is* lives in `craft/doctrine` §2, read live; it is not restated here.
+- **Bank provenance is a REPORT field, never a ROW field.** Each candidate in the approved Approaches document carries a `bank_id` (or `in_bank: false`) and a `valence`; this step reads them, carries the provenance of the mechanism each subject settled into the Step 8 report, and writes none of it anywhere else. `save_idea` takes one free-text `mechanism` argument and no provenance argument — there is no `bank_id` column and no `valence` column, and none is being added — so nothing may stuff an id, a slug, a bracket tag, an `in_bank` note or a valence marker into the Vietnamese mechanism sentence, which is the one string every angle brief inherits and the Writer carries verbatim. A `bank_id` is never attached to a mechanism no candidate drew from the bank, never inferred from a mechanism's wording, and an unlabelled candidate is reported as unlabelled rather than reconstructed.
+- **Negative-valence mechanisms carry no more than a third of the period's assets** (Step 7). Over the line, subjects are re-mechanised from the supply's **positive** candidates — never by inventing a mechanism to satisfy the count, which is the exact fabrication the mechanism rule exists to stop. Where the supply holds too few positives to get under the cap, the breach is left standing and reported as a **named gap** whose fix is the next Approaches run. Where the approved supply carries no valence labels at all, the cap is **not applied** and that is reported; a valence is never inferred from a mechanism's wording. The two legal valence values and the priority between them live in `craft/mechanism-bank` §2 and are restated nowhere in this file — this step reads the labels off the approved supply and does not read the bank, so Step 2's knowledge-path list is unchanged.
+- **No per-mechanism spread tally lives here, and none is added.** `ssc-post-ideate` caps any single mechanism at about a quarter of its batch; this skill has never carried that tally. The concentration failure it was written for was observed in the post batch, ads subjects are already held plan-wide distinct **by meaning** (Step 5, check 2), and importing the cap would be a second, unapproved rule change. Its absence is deliberate — never "restore" it as an oversight; if the ads pool ever shows the same failure, that is its own change with its own evidence.
 - **Legacy approved subjects are grandfathered.** An ad idea approved before the mechanism requirement landed stays approved, stays usable, and is never re-opened, demoted, deleted, re-approved or reported as invalid (`craft/doctrine` §7, read live). The requirement binds approvals made after it landed. This skill never fabricates a mechanism for a legacy row and never treats its absence as an error.
 - **`creative_target` is consumed, never authored.** The coverage target (persona × route × angle count) is written by the **Approaches** step and read here from `get_channel_plan` — including its `creative_coverage` read-back. This skill holds no `save_channel_plan` tool and must never re-derive, amend, override or substitute the target, nor turn it into a subject count, a per-persona quota or a term on an idea. Coverage shape belongs to the channel; volume and budget belong to the monthly head. An absent target is reported as a gap, never invented.
 - **No finished copy.** Beyond the subject title, do NOT produce finished ad copy — no hook, headline, body, or CTA. This skill stops at the subject pool; angle derivation is the Brief step's job, finished copy is the Writer's.

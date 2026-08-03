@@ -320,8 +320,10 @@ Invoke **`ssc-ads-ideate`**, passing `period`. It gate-checks
 consumed, never written there), and saves one **DRAFT, persona-free, tier-free**
 subject per planned creative via `save_idea(channel='ad', plan_id)`. Each subject
 carries **one mechanism**, drawn from the candidate mechanisms in the approved
-Approaches; the mechanism lives on the idea and is inherited by every angle brief
-beneath it. A subject carries no persona, no route, no awareness stage, no
+Approaches — themselves drawn bank-first from `craft/mechanism-bank`, not
+authored fresh each period; the mechanism lives on the idea and is inherited by
+every angle brief beneath it, which may carry a bounded angle-local override the
+Brief step authors and reports — **one angle, one mechanism**. A subject carries no persona, no route, no awareness stage, no
 media-layer tag and no ad-set link — **persona enters later**, at the Brief step,
 which fans one subject into one angle per fitting persona × route.
 

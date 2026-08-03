@@ -1,6 +1,6 @@
 ---
-argument-hint: '[focus] [review|audit|revise]'
-description: Launch the Cambridge Diet Vietnam Knowledge-base health cycle — review → audit → research → revise/gap-fill. Produces propose-only KB revisions; nothing is applied automatically.
+argument-hint: '[focus] [review|audit|revise|harvest] [period]'
+description: Launch the Cambridge Diet Vietnam Knowledge-base health cycle — review → audit → research → revise/gap-fill, plus harvest (grow the standing mechanism bank from a period's approved work). Produces propose-only KB revisions; nothing is applied automatically.
 metadata:
   dispatches: [ssc-kb-agent]
 ---
@@ -14,14 +14,16 @@ $ARGUMENTS
 Consider the user input above before proceeding (if not empty). Expected inputs:
 
 - **Focus** (`focus`, optional) — a KB area to concentrate on (e.g. `rules`, `ad`, `voice`).
-- **Mode** (`mode`, optional) — `review` (default), `audit`, or `revise`.
+- **Mode** (`mode`, optional) — `review` (default), `audit`, `revise`, or `harvest`.
+- **Period** (`period`, optional) — only for `mode: harvest`, e.g. `2026-08`.
+- **The period's approved Approaches document** (`mode: harvest` only) — **required for anything to be proposed.** A proposed bank entry's `valence`, `fits` and `proof_family` exist only in that document, and no tool in the harvest path can fetch it, so paste it (or the candidate-mechanism section of it) alongside the `period`. Without it the run **reports the gap and proposes nothing** — it never invents a `valence`, a `fits` or a `proof_family`.
 
 If no input is given, run a full-surface `review` pass.
 
 ## What to do
 
 This command is a thin entry point — it holds **no** orchestration logic.
-Dispatch the **`ssc-kb-agent`**, passing `focus`/`mode` if provided. The agent
+Dispatch the **`ssc-kb-agent`**, passing `focus`/`mode`/`period` if provided. The agent
 runs the knowledge-base health cycle and stops at the human gate.
 
 | Mode | The agent does | Then the operator… |
@@ -29,6 +31,7 @@ runs the knowledge-base health cycle and stops at the human gate.
 | **review** | Scans the KB for contradictions, stale guidance, gaps, angle drift | Reviews findings in the **Knowledge dashboard** |
 | **audit** | Verifies each claim in `rules/`/`ad/`/`winners/` traces to evidence | Reviews flagged claims, decides cite-or-remove |
 | **revise** | Drafts propose-only revisions + gap-fill candidates | **Approves** revisions in the **Knowledge dashboard → Proposals** tab |
+| **harvest** | Diffs the mechanisms a `period`'s approved ideas/briefs settled against the live `craft/mechanism-bank` and proposes the genuinely new ones (near-duplicates as revisions of the entry they matched) — needs the period's **approved Approaches document** supplied, or it reports the gap and proposes nothing | **Approves** the single bank proposal in the **Knowledge dashboard → Proposals** tab |
 
 ## Governance
 

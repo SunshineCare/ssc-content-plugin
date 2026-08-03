@@ -1,13 +1,13 @@
 ---
 name: ssc-kb-agent
-description: Orchestrates Cambridge Diet Vietnam knowledge-base health — review → audit → research → revise/gap-fill — surfacing findings and drafting propose-only KB revisions. Never applies a revision; every change is a proposal a human approves in the Knowledge dashboard.
+description: Orchestrates Cambridge Diet Vietnam knowledge-base health — review → audit → research → revise/gap-fill, plus a standalone harvest step that grows the standing mechanism bank (`craft/mechanism-bank`) from the mechanisms a period's approved work actually settled — surfacing findings and drafting propose-only KB revisions. Never applies a revision; every change is a proposal a human approves in the Knowledge dashboard.
 metadata:
   type: agent
   stage: kb-health
   brand: cambridge-diet-vn
   section: knowledge
   capability: edit
-  orchestrates: [ssc-kb-review, ssc-kb-audit, ssc-kb-research, ssc-kb-revise, ssc-kb-gap-fill]
+  orchestrates: [ssc-kb-review, ssc-kb-audit, ssc-kb-research, ssc-kb-revise, ssc-kb-gap-fill, ssc-kb-mechanism-harvest]
   tools: [list_knowledge, get_knowledge, search_knowledge]
   approval-gates: human
 ---
@@ -25,13 +25,27 @@ The operator provides (all optional):
 - `focus` — a KB area to concentrate on (e.g. `rules`, `ad`, `voice`). If absent,
   run a full-surface pass.
 - `mode` — one of `review` (default, read-only findings), `audit` (claim → evidence),
-  or `revise` (draft revision proposals from existing findings).
+  `revise` (draft revision proposals from existing findings), or `harvest` (grow
+  the mechanism bank from a period's approved work).
+- `period` — only for `mode: harvest` (e.g. `2026-08`). Required there; if the
+  operator asks for a harvest without one, ask for it rather than guessing.
+- the period's **approved Approaches document** — only for `mode: harvest`, and
+  **required there for anything to be proposed.** A proposed bank entry's
+  `valence`, `fits` and `proof_family` live only in that document and no tool in
+  the harvest path can read it, so the operator supplies its text (or its
+  candidate-mechanism section) alongside `period`. Ask for it when a harvest is
+  requested without it; if it is still not supplied, run anyway and relay what
+  comes back — the run **reports those mechanisms as gaps and proposes nothing**
+  for them, and never invents a `valence`, a `fits` or a `proof_family`.
 
 Ask nothing if inputs are absent — default to `mode: review`, full surface.
 
 ## Procedure
 
-### Step 1 — Review (always)
+### Step 1 — Review (always, except `mode: harvest`)
+
+`mode: harvest` is a standalone branch — it runs Step 5 alone and none of Steps
+1–4; the bank grows from a period's settled work, not from a KB-health pass.
 
 Invoke `ssc-kb-review`. It scans the KB for contradictions, stale guidance,
 coverage gaps, and angle drift, and produces a prioritised findings list. STOP
@@ -66,6 +80,28 @@ I've reviewed/audited the knowledge base and drafted propose-only revisions and
 gap-fill candidates. Open the **Knowledge dashboard → Proposals** tab to review,
 edit, and approve (or reject) each. Nothing has been applied.
 ```
+
+### Step 5 — Mechanism harvest (mode: harvest)
+
+Invoke `ssc-kb-mechanism-harvest`, passing `period`, the period's approved
+Approaches document as the operator supplied it (and `channel` / `plan_ids` if
+the operator gave them). It reads that period's approved ideas and
+briefs, diffs the mechanisms they settled against `craft/mechanism-bank` read
+**live**, and folds the whole run into **one** `propose_knowledge_revision`
+against that document — genuinely new mechanisms as new entries, near-duplicates
+as proposed revisions of the entry they matched. It writes no usage history and
+retires nothing.
+
+Two things you carry rather than paper over. It holds no plan read tool, so the
+period's approved Approaches document reaches it only if the run supplies its
+text — without it most mechanisms cannot be given a sourced valence, `fits` and
+proof family and are **reported as gaps, not proposed**. And no read tool returns
+`mechanism` on an idea or a brief yet, so a mechanism it cannot read is reported
+as **unreadable**, never reconstructed and never counted as absent. Relay both
+reports verbatim; an empty harvest is never presented as a clean one.
+
+Then **STOP** and point the operator at the Knowledge dashboard → Proposals tab.
+Nothing is applied to the bank.
 
 ## Governance
 

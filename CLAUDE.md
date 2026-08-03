@@ -312,6 +312,9 @@ claude plugin marketplace update ssc-content-plugin
 claude plugin update ssc@ssc-content-plugin
 ```
 
+The update pair is also `scripts/update.sh` (repo-root, so it does **not** ship with
+the installed plugin — it is for someone working from a clone).
+
 First use prompts an OAuth login to the BrandOS server via the SSC portal.
 
 ## Local development (testing an unpushed working tree)

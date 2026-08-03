@@ -1,7 +1,7 @@
 ---
 name: ssc-brief-core
 description: >-
-  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs that already exist. It CARRIES the idea's MECHANISM — inherited from the idea, written TO, never restated, and never varied on its own initiative — with ONE bounded exception: an ANGLE-LOCAL OVERRIDE, opened only where the inherited mechanism does not serve that angle's persona x route, sourced bank-first from `craft/mechanism-bank`, judged against `craft/doctrine` §2 read live, grounded in an attributed voice-of-customer item from the approved Approaches document (it runs no outward pass of its own), proof-routed from this period's stated inventory and DROPPED — not softened, not re-traced — if `rules/compliance` refuses that route, never written onto the idea and never re-opening a sibling angle (one angle, one mechanism), and always reported naming its `bank_id` or `in_bank: false`. It persists none of it — it holds no mutation tool and the caller saves. It also carries the caller's declared AWARENESS STAGE through onto the fields — every channel that briefs declares one, posts included — plus the LAYER on a channel that has media layers (ads do; a post has no media home). It never declares a LEAD: the awareness-to-lead mapping is overlapping by design, and the lead is picked per asset by the writer, from the set the declared stage admits. `cta` is a DIRECTION only, never fixed wording, and is always subordinate to the declared layer's close job. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, anchor, the awareness stage, and — only where the channel has media layers — the layer); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + scored field sets to the caller, which owns every save. Never hard-codes a knowledge-base rule: it names the doc and section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction; it holds no mutation tools at all.
+  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs that already exist. It CARRIES the idea's MECHANISM — inherited from the idea, written TO, never restated, and never varied on its own initiative — with ONE bounded exception: an ANGLE-LOCAL OVERRIDE, opened only where the inherited mechanism does not serve that angle's persona x route, sourced bank-first from `craft/mechanism-bank`, judged against `craft/doctrine` §2 read live, grounded in an attributed voice-of-customer item from the approved Approaches document (it runs no outward pass of its own), proof-routed from the proof lines that same approved Approaches document already states (the only proof route readable here — marked unverified for the period where it states none the override can carry) and DROPPED — not softened, not re-traced — if `rules/compliance` refuses that route, never written onto the idea and never re-opening a sibling angle (one angle, one mechanism), and always reported naming its `bank_id` or `in_bank: false`. It persists none of it — it holds no mutation tool and the caller saves. It also carries the caller's declared AWARENESS STAGE through onto the fields — every channel that briefs declares one, posts included — plus the LAYER on a channel that has media layers (ads do; a post has no media home). It never declares a LEAD: the awareness-to-lead mapping is overlapping by design, and the lead is picked per asset by the writer, from the set the declared stage admits. `cta` is a DIRECTION only, never fixed wording, and is always subordinate to the declared layer's close job. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, anchor, the awareness stage, and — only where the channel has media layers — the layer); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + scored field sets to the caller, which owns every save. Never hard-codes a knowledge-base rule: it names the doc and section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction; it holds no mutation tools at all.
 metadata:
   type: skill
   stage: shared
@@ -329,9 +329,17 @@ authored**.
   must not improvise one out of `search_knowledge`. A phrase you cannot attribute
   to that approved document supports **no** override; the angle falls back to the
   inherited mechanism or returns below bar.
-- **Proof-routed from this period's stated proof inventory**, on exactly the terms
-  an Approaches candidate is. Where the period states no inventory, the route is
-  marked **unverified for the period** rather than assumed.
+- **Proof-routed from the proof lines the approved Approaches document already
+  states** — the document the caller passed in `grounding`, the same one the
+  voice-of-customer item comes from, and the only proof route readable here (you
+  read no plan state, so the period's proof inventory is not directly visible to
+  you). Every candidate mechanism in that document carries its own route (proof
+  family + trace, already selected from this period's stated inventory and already
+  marked verified or `unverified_for_period`); an override carries one of those
+  routes on exactly the terms the Approaches candidate carries it, and never
+  re-derives one. Where that document states no route an override can carry — or no
+  such document was passed — the route is marked **unverified for the period**
+  rather than assumed.
 - **Dropped — not softened, not re-traced — if `rules/compliance` refuses its only
   route.** Never soften the claim and never re-trace it onto a family that document
   did not clear: routing around a refusal by moving the mechanism down one level is
@@ -349,10 +357,13 @@ authored**.
   drift, so the report is not optional prose.
 
 **You persist none of it.** You hold **no mutation tool**: the override is
-*returned* to the caller, which owns every save. Where the caller cannot persist it
-— `briefs.mechanism` not yet available on the server — the correct outcome is
-**reported, not persisted**, said plainly in those terms so the absence is not read
-as a dropped write. It is never smuggled into another field: not into a narrative
+*returned* to the caller, which owns every save. Whether it can then be persisted is
+the **caller's** observation, not yours — only it holds the save tool and can see
+whether `briefs.mechanism` is available, so you leave the `persistence` line of the
+return empty for it to fill. Where the caller cannot persist it — `briefs.mechanism`
+not yet available on the server — the correct outcome is **reported, not persisted**,
+said plainly in those terms by the caller so the absence is not read as a dropped
+write. It is never smuggled into another field: not into a narrative
 field, not into the angle label, and never onto the idea.
 
 **What still fails.** An angle that can be written to **neither** the inherited
@@ -407,7 +418,8 @@ above 3:
 - **an override that fails any one of Step 4's bounding conditions** — not
   bank-first, not judged against `craft/doctrine` §2 read live, not grounded in an
   attributed voice-of-customer item from the approved Approaches document, not
-  proof-routed from this period's inventory, softened or re-traced after a
+  proof-routed from the proof lines that document already states (nor marked
+  unverified for the period where it states none the override can carry), softened or re-traced after a
   compliance refusal, touching `idea.mechanism` or a sibling angle, or not reported
   with its `bank_id` / `in_bank: false`. A set whose override fails a condition is
   capped **and** the override is withdrawn — the angle falls back to the inherited
@@ -474,9 +486,13 @@ overrides:       [ { angle,
                                          #   approved Approaches document
                      proof: { family, trace,
                               verified | unverified_for_period },
-                     persistence } ]     # "caller persists" — or
-                                         #   "reported, not persisted:
-                                         #    briefs.mechanism not available"
+                     persistence } ]     # LEFT EMPTY BY YOU — the CALLER's field
+                                         #   to fill, because only it holds the
+                                         #   save tool and can see whether
+                                         #   `briefs.mechanism` is available:
+                                         #   "caller persists" — or "reported,
+                                         #    not persisted: briefs.mechanism
+                                         #    not available". Never guess it here.
                  # or: "none — every angle carries the idea's mechanism"
 taken_compared:  <N briefs>
 audit:           <PASS, or the specific violations you could not resolve>
@@ -505,7 +521,9 @@ returned value, never a write. If the caller cannot persist it, that is stated a
 - The idea's mechanism, carried through — or its absence reported, never filled in
 - Every **angle-local mechanism override**, each naming the angle, the mechanism it
   departed from, why that mechanism does not serve the angle's persona × route, its
-  `bank_id` or `in_bank: false`, and whether the caller can persist it — or an
+  `bank_id` or `in_bank: false`, and an **empty `persistence` line for the CALLER
+  to fill** — only it holds the save tool and can see whether `briefs.mechanism`
+  is available, so never guess it here — or an
   explicit "none: every angle carries the idea's mechanism". Never a write: this
   skill holds no mutation tool and the caller persists
 - `angle_count` scored field sets, each with its Vietnamese comment
@@ -548,8 +566,11 @@ returned value, never a write. If the caller cannot persist it, that is stated a
   read live**, the same definition every other mechanism meets; **grounded in an
   attributed voice-of-customer item from the approved Approaches document** for
   this period, this skill running **no** voice-of-customer pass and opening no
-  second outward account of it; **proof-routed from this period's stated
-  inventory**; and **dropped — not softened, not re-traced —** where
+  second outward account of it; **proof-routed from the proof lines that same
+  approved Approaches document already states** — the only proof route readable
+  here, carried on the terms that candidate carries it, never re-derived, and
+  marked **unverified for the period** where the document states no route the
+  override can carry (or no such document was passed), never assumed; and **dropped — not softened, not re-traced —** where
   `rules/compliance` refuses its only route. Fail any one and no override is
   authored: the angle falls back to the inherited mechanism or returns below bar.
 - **An override's blast radius is one angle (hard rule).** `idea.mechanism` is

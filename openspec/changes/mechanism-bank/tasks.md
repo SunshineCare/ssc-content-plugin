@@ -104,11 +104,11 @@ approved this group.** Per the workspace cross-repo rule, the list below is the
 approval list. Groups 1–11 ship without it; the override degrades to
 reported-not-persisted, which group 7.4 states in prose.
 
-- [ ] 12.1 Get the user's explicit approval for this group's four items before editing anything in `content/`.
-- [ ] 12.2 Add a nullable `mechanism` text column to the `briefs` table, with the migration applied DB-before-code per the workspace's Postgres rule.
-- [ ] 12.3 `save_brief` accepts `mechanism`; `edit(entity='brief')`'s allowlist gains it as an **ordinary, non-approval-bearing** field — the governance hook, its `hooks.json` matchers and the approval-field rule stay untouched, and no new gate appears.
-- [ ] 12.4 `get_brief` and `list_briefs` return `mechanism`.
-- [ ] 12.5 `get_idea` and `list_ideas` return `mechanism` — verified live that they do **not** today. Harvest cannot see a period's mechanisms without this.
+- [x] 12.1 Get the user's explicit approval for this group's four items before editing anything in `content/`.
+- [x] 12.2 Add a nullable `mechanism` text column to the `briefs` table, with the migration applied DB-before-code per the workspace's Postgres rule.
+- [x] 12.3 `save_brief` accepts `mechanism`; `edit(entity='brief')`'s allowlist gains it as an **ordinary, non-approval-bearing** field — the governance hook, its `hooks.json` matchers and the approval-field rule stay untouched, and no new gate appears.
+- [x] 12.4 `get_brief` and `list_briefs` return `mechanism`.
+- [x] 12.5 `get_idea` and `list_ideas` return `mechanism`. ~~Verified live that they do **not** today. Harvest cannot see a period's mechanisms without this.~~ **Premise retracted — see design.md Drift Log DL2:** both tools have returned `mechanism` since `c391926` (2026-08-01), before this change opened, so this item shipped as tool-description edits only. The dependent plugin prose was corrected in group 14.
 - [ ] 12.6 Deploy brandos-express and confirm the live tool schemas carry the new field before reporting the group done — a session caches tool schemas at start, so check the pod's startTime against the commit rather than trusting the tool list.
 
 ## 13. Corrective — scope the bank read in the brief skills
@@ -124,3 +124,37 @@ angle exercises.
 - [x] 13.1 In `plugins/ssc/skills/ssc-brief-core/SKILL.md`, scope the `craft/mechanism-bank` read to override consideration — read it live **whenever an override is being considered**, exactly as `rules/compliance` is scoped there; a failed read then means **no override may be authored this run** (stated, not silent), never a halted run and never a fallback to a remembered bank.
 - [x] 13.2 Apply the identical scoping in `plugins/ssc/skills/ssc-ads-brief/SKILL.md`, including its Step 1c load list and its STOP bullets, so the two files agree.
 - [x] 13.3 Confirm `ssc-approaches-core`'s bank read stays **unconditional** — its supply is bank-first, so a missing bank there genuinely is a stopped run.
+
+## 14. Corrective — the retracted `get_idea` premise, and the post override's production path
+
+Raised by the Phase-4 review. Three independent defects, all recorded in
+design.md's Drift Log (DL2–DL4):
+
+- Task 12.5's premise was wrong. `get_idea` / `list_ideas` have returned
+  `mechanism` since `c391926` (2026-08-01), *before* this change opened. Every
+  skill written on top of "the idea surface exposes no mechanism" shipped a
+  false claim, and harvest shipped **inert**.
+- `ssc-post-ideate` round 3 persists an angle-local override, but the post
+  production chain still resolved from `idea.mechanism` alone — so
+  `ssc-post-authority` **rejected** copy written to an override the same
+  pipeline had just persisted.
+- Override bound 5 cited a proof inventory neither brief skill holds a tool to
+  read, leaving the bound silently unenforced.
+
+- [x] 14.1 `ssc-kb-mechanism-harvest`: read `mechanism` off the idea row; scope the unreadable-surface note to `get_brief` / `list_briefs`; bucket Step 3 and the Output block per surface, so an idea row returning null reads as "recorded none", never as a tool-surface limitation.
+- [x] 14.2 `ssc-kb-agent`: narrow the same claim one layer up, mirroring the skill's Boundary 2 — the agent relays its report verbatim, so a stale premise there survives the skill's correction.
+- [x] 14.3 `ssc-post-ideate`: tally the negative-valence cap over the period's **full settled set** read back from `list_ideas`, not just this run's ideas; report an unreadable count only for rows whose read genuinely returns null.
+- [x] 14.4 `ssc-post-ideate`: scope both 3d cap remedies to **not-yet-approved** ideas. An approved idea counts toward the tally, but a breach it causes is reported as a named gap and never patched — design.md's Non-Goals forbid re-mechanising an approved idea.
+- [x] 14.5 `ssc-post-produce` / `ssc-post-authority`: apply D8's brief-override-first resolution to the post chain, and judge the authority floor against the **resolved** mechanism. Also fix the `date` entry path, which reached the resolution step without ever calling `get_brief`.
+- [x] 14.6 `ssc-post-schedule`: correct the same refuted premise and restore the mechanism-indirectness sort it disabled.
+- [x] 14.7 `ssc-ads-brief` / `ssc-brief-core`: name the readable source for override bound 5 — the approved Approaches document's per-candidate proof lines — and align **every** restatement of the bound in both files, frontmatter descriptions included. A partial edit here leaves the strictest stale copy winning.
+- [x] 14.8 `ssc-brief-core`: `overrides[].persistence` is the caller's field to stamp, not the view-only core's to guess.
+- [x] 14.9 `ssc-ads-writer`: resolve on what the `get_brief` response actually carries; stop asserting the server's current shape as fact.
+- [x] 14.10 design.md: merge the two Drift Log sections, renumber DL1–DL4, and mark each superseded statement of the retracted premise in place (D10 item 4, the Risks row, DL1's "second inert path"). Annotate task 12.5 with the retraction.
+- [x] 14.11 `specs/angle-mechanism-override`: amend the "no channel-shaped copy" sentence so it does not contradict D7, which requires `ssc-ads-brief` to restate the rule because it cannot reach the shared core.
+- [x] 14.12 `ssc-post-approaches`: correct the §3 cross-reference — the candidate blocks are composed in Step 6, not Step 5b (5b only receives the core's block).
+- [x] 14.13 `ssc-post-ideate`: widen 3a's read to the plan's **whole** idea set (drafts and approved alike). Round 3 runs pre-approval, so an approved-only read made 3d's period-wide tallies cover exactly the rows the remedies may not touch — every breach an unfixable gap, and the caps never biting.
+- [x] 14.14 `ssc-post-ideate`: run the valence ratio over rows with a **readable** `valence`, excluding off-supply rows (no §3 candidate block, so no label) from both sides. Counting them in the denominator reported a false "within cap" — 5 negatives among 11 labelled rows reads as 5/31 rather than 45%.
+- [x] 14.15 `ssc-post-writer-agent`: resolve the mechanism brief-override-first and add it to the 2b hand-off list. The `image_content` section skips the writer entirely, so nothing surfaced the authority's newly required input and every such run stalled asking for it — the agent already holds `get_brief`.
+- [x] 14.16 `ssc-brief-core` / `ssc-ads-writer` / `ssc-kb-mechanism-harvest`: close the last stale copies the partial edits left — the core's Output line still promising a persistence verdict, the writer's frontmatter description and case-2 line still asserting the server's shape, and harvest's self-check still bucketing a null idea row as a surface limitation.
+- [x] 14.17 design.md + `specs/angle-mechanism-override`: record DL5 and widen the resolution requirement to name the post consumers. D8 named `ssc-ads-writer` alone, so the extension of brief-override-first resolution to the post chain (14.5, 14.15) was implemented against no artifact.

@@ -476,7 +476,7 @@ the operator can see what was excluded and why. This section holds no rules of i
 own and points at nothing in §1: it is the evidence §3 and §4 stand on.
 
 **§3 — Cơ chế đề xuất.** The period's supply — one short block per candidate in the core's
-`candidate_mechanisms` block, composed in Step 5b. This section RENDERS what the core returned; it
+`candidate_mechanisms` block, composed in Step 6. This section RENDERS what the core returned; it
 never re-derives it. What a candidate must satisfy — what qualifies as a mechanism, how the bank is
 matched before anything is authored, how a proof route is selected against this period's stated
 inventory, how indirectness is judged against the inherited sophistication read, and when a

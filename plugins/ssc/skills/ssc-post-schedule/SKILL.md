@@ -225,12 +225,14 @@ Every approved idea appears exactly once: no omissions, no duplicates.
    Where §1 records `NOT STATED`, or carries no sophistication line, apply **no**
    ordering preference at all and assume no stage.
 
-   **What you sort on — `mechanism` is not readable here.** `list_ideas` does not
-   return `mechanism`; the field is write-only on this tool surface. Judge how
-   indirect a post is only from what is actually on the row: the idea's `tags`
-   (`journey_stage`, `frame`, `entry`) and its brief fields (`hook_direction`,
-   `core_message`, and `awareness_stage` where it was persisted). **Never re-derive a
-   mechanism to sort by.** A guessed mechanism used as a sort key is a silent,
+   **What you sort on — the row's OWN `mechanism`, never a derived one.**
+   `list_ideas` returns the idea's `mechanism`, so sort on it where the row carries
+   one: a mechanism-led idea is the more indirect one and takes the earlier free day.
+   Where a row carries none, judge how indirect it is from the other signals actually
+   on the row — the idea's `tags` (`journey_stage`, `frame`, `entry`) and its brief
+   fields (`hook_direction`, `core_message`, and `awareness_stage` where it was
+   persisted) — and never back-fill the gap by re-deriving a mechanism for it.
+   **Never re-derive a mechanism to sort by.** A guessed mechanism used as a sort key is a silent,
    invisible error — nothing downstream can see it, and the resulting order reads as
    deliberate. If those signals do not separate two ideas, leave their order as the
    spread produced it and say nothing.
@@ -353,9 +355,10 @@ never move an idea outside the month to make a check pass.
 - **Never derive a sophistication read, and never re-derive a mechanism to sort
   by.** The read is inherited from §1 of the approved Approaches doc, held off the
   `get_channel_plan` response Step 2 already fetches — no extra call, no extra tool,
-  no extra KB doc. `mechanism` is not returned by `list_ideas`, so the sequencing
-  judgement uses only readable signals (`tags`, `hook_direction`, `core_message`,
-  `awareness_stage`); a guessed mechanism as a sort key is a silent error. No read
+  no extra KB doc. `mechanism` **is** returned by `list_ideas`, so the sequencing
+  judgement uses the row's own mechanism where it carries one and the other readable
+  signals (`tags`, `hook_direction`, `core_message`, `awareness_stage`) where it does
+  not; a guessed mechanism as a sort key is a silent error. No read
   stated → no bar, no ordering claim, and the report says so.
 - **The sequencing preference never outranks a constraint.** Key-date pins and the
   adjacency repair govern; the preference only picks which idea fills an already-free

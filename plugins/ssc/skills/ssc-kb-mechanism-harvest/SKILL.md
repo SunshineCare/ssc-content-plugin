@@ -1,7 +1,7 @@
 ---
 name: ssc-kb-mechanism-harvest
 description: >-
-  Harvests the mechanisms a period's approved ideas and briefs actually settled and proposes the genuinely new ones into the knowledge base's standing mechanism bank (`craft/mechanism-bank`), so a mechanism authored to fill a gap stops being re-invented in the next period that meets the same objection. Membership in the bank is a DIFF, never a lookup: nothing persists a bank id, an `in_bank` flag or a valence anywhere on a row, so this skill reads `craft/mechanism-bank` LIVE and derives membership by comparing the harvested mechanism's TEXT — its meaning, not its wording — against the entries that document actually carries. A harvested mechanism restating an existing entry in different words becomes a proposed REVISION of that entry, naming which entry it matched and why, never a second entry saying the same thing and never a silent merge. All of a run's additions and revisions fold into ONE proposal against the single bank document, whose `proposed_content` reproduces the live document verbatim plus the changes, because two competing proposals on one path block each other. It tags every proposed entry with a `valence` from the vocabulary the bank's own §2 defines (read live, never remembered), a `fits` taken from the attributed voice-of-customer item the mechanism was grounded in, and a `proof_family` taken from the proof route it was actually traced to — it invents none of the three, and an entry whose grounding it cannot establish from a recorded source is REPORTED as a gap rather than proposed. Propose-only BY CONSTRUCTION: its only write is `propose_knowledge_revision`; it holds no `save_knowledge`, no `edit`, no `approve` and no publish or schedule tool, so it cannot change the live knowledge base at all — every adoption reaches the bank through an operator's approval on the existing KB revision screen. It writes no usage history, no last-used period and no retired flag, and it retires nothing: a weak entry is a proposed revision or a reported finding, never a removal. Today no read tool returns `mechanism` on an idea or a brief, so the skill names exactly which mechanisms it could not read and proposes nothing for them — it never reconstructs a mechanism from a title, and it never reports an empty harvest as a clean one. A failed read of `craft/mechanism-bank` STOPS the run and names the document; it never proposes against a remembered bank. Persisted prose is Vietnamese; field labels are structural English.
+  Harvests the mechanisms a period's approved ideas and briefs actually settled and proposes the genuinely new ones into the knowledge base's standing mechanism bank (`craft/mechanism-bank`), so a mechanism authored to fill a gap stops being re-invented in the next period that meets the same objection. Membership in the bank is a DIFF, never a lookup: nothing persists a bank id, an `in_bank` flag or a valence anywhere on a row, so this skill reads `craft/mechanism-bank` LIVE and derives membership by comparing the harvested mechanism's TEXT — its meaning, not its wording — against the entries that document actually carries. A harvested mechanism restating an existing entry in different words becomes a proposed REVISION of that entry, naming which entry it matched and why, never a second entry saying the same thing and never a silent merge. All of a run's additions and revisions fold into ONE proposal against the single bank document, whose `proposed_content` reproduces the live document verbatim plus the changes, because two competing proposals on one path block each other. It tags every proposed entry with a `valence` from the vocabulary the bank's own §2 defines (read live, never remembered), a `fits` taken from the attributed voice-of-customer item the mechanism was grounded in, and a `proof_family` taken from the proof route it was actually traced to — it invents none of the three, and an entry whose grounding it cannot establish from a recorded source is REPORTED as a gap rather than proposed. Propose-only BY CONSTRUCTION: its only write is `propose_knowledge_revision`; it holds no `save_knowledge`, no `edit`, no `approve` and no publish or schedule tool, so it cannot change the live knowledge base at all — every adoption reaches the bank through an operator's approval on the existing KB revision screen. It writes no usage history, no last-used period and no retired flag, and it retires nothing: a weak entry is a proposed revision or a reported finding, never a removal. An IDEA's `mechanism` IS returned by `list_ideas` and `get_idea` and is read straight off the row; what is not yet readable is a BRIEF's angle-local `mechanism` override, which stays unreadable until that server field ships — so the skill names exactly which mechanisms it could not read and proposes nothing for them, it never reconstructs a mechanism from a title or a hook, and it never reports an empty harvest as a clean one. A failed read of `craft/mechanism-bank` STOPS the run and names the document; it never proposes against a remembered bank. Persisted prose is Vietnamese; field labels are structural English.
 metadata:
   type: skill
   stage: harvest
@@ -33,20 +33,23 @@ comparing text** — by meaning, not by string match — and that derivation is
 weaker than a stored flag would be. Treat every match as a judgement you must
 show your working for, and never assert a provenance you did not derive here.
 
-**2. You are reading a surface that does not yet expose the field.** No read tool
-returns `mechanism` today: `get_idea` and `list_ideas` carry `hero`, the tags and
-the brief fields and **no `mechanism` key at all**, on any channel; a brief's own
-mechanism (the angle-local override) is likewise not returned until the server
-field ships. This is a real, current limitation, not a data problem to work
-around. Its consequence is stated once and enforced everywhere below: **what you
-cannot read, you report as unreadable and do not harvest.** You never reconstruct
+**2. The idea surface exposes the field; the brief surface does not yet.**
+`get_idea` and `list_ideas` **do return the idea's `mechanism`** — read it
+straight off the row, on any channel. What is **not** readable is a brief's own
+mechanism (the angle-local override): that server field has not shipped, so
+`get_brief` and `list_briefs` carry no `mechanism` key. This is a real, current
+limitation of the BRIEF surface only, not a data problem to work around. Its
+consequence is stated once and enforced everywhere below: **what you cannot read,
+you report as unreadable and do not harvest.** You never reconstruct
 a plausible mechanism from a title, a hook direction or a core message — a
 guessed mechanism proposed into doctrine is the worst outcome this skill can
 produce, because every future period would then draw from it.
 
 An empty harvest reported as a clean one is the second-worst. Say *"the tool
 surface does not expose `mechanism` for these rows"* — never *"this period
-authored no new mechanisms"*.
+authored no new mechanisms"*. And because ideas ARE readable, an empty idea
+harvest is a real finding about the period, not a surface limitation: do not
+attribute it to the tool surface.
 
 ## Inputs
 
@@ -128,14 +131,24 @@ briefs read, pages followed.
 For each approved idea and each of its briefs, take the mechanism **only** from a
 source that actually recorded it:
 
-- the `mechanism` field on the row, **once the tool surface returns it**;
+- the `mechanism` field on the row — **read it off every idea row** (`list_ideas`
+  / `get_idea` return it); on a brief, only once that server field ships;
 - the approved Approaches document supplied with the run, where it states which
   candidate a subject carried;
 - a mechanism the operator stated directly for a named row.
 
 Everything else is **unreadable**, and unreadable is a reported state, not a gap
-to fill. For every idea or brief whose mechanism you could not read, record it
-under *not readable through the tool surface* with its id, and move on. Do not
+to fill — but which state applies depends on the surface, so bucket it per
+surface:
+
+- **A brief** whose angle-local mechanism you could not read goes under *not
+  readable through the tool surface* with its id — that override field has not
+  shipped.
+- **An idea** whose `mechanism` came back empty is an idea that **recorded no
+  mechanism**: the field IS returned, so record it as a period finding, never
+  under *not readable through the tool surface*.
+
+Either way, propose nothing for it and move on. Do not
 infer it from the title, the hero, the angle label or the brief's five narrative
 fields; do not infer it from a sibling angle; do not infer it from what the
 Approaches supply "probably" gave it.
@@ -280,8 +293,12 @@ Before calling `propose_knowledge_revision`, verify every item:
       **recorded source**; none was inferred from the mechanism's wording
 - [ ] No `fits` names a persona
 - [ ] Every new `id` is distinct from every `id` in the document read in Step 1
-- [ ] Every mechanism that could not be read is listed as **unreadable**, not
-      counted as absent and not reconstructed from a title
+- [ ] Every **brief** whose angle-local mechanism could not be read is listed
+      under *not readable through the tool surface*, not counted as absent and
+      not reconstructed from a title
+- [ ] Every **idea** whose `mechanism` came back empty is listed under
+      `ideas_recording_no_mechanism` — a finding about the period, never under
+      *not readable through the tool surface* — and not reconstructed from a title
 - [ ] `evidence_note` is present and names the period and the rows the harvest
       drew on
 - [ ] No `save_knowledge`, no `edit`, no `approve`, no publish or schedule call
@@ -314,8 +331,11 @@ harvested_but_not_proposed:            # grounding not recorded
   - source: <idea/brief id>
     missing: <valence | fits | proof_family — and where it would come from>
 
-not_readable_through_the_tool_surface: # Step 3 — never counted as "no mechanism"
-  - <idea/brief ids>
+not_readable_through_the_tool_surface: # Step 3 — briefs only (angle-local override
+  - <brief ids>                        #   not shipped); never counted as "no mechanism"
+
+ideas_recording_no_mechanism:          # Step 3 — the field IS returned, so this is a
+  - <idea ids>                         #   finding about the period, not a surface limit
 ```
 
 Then the single proposal: report its `proposal_id`, `path: craft/mechanism-bank`,
@@ -326,10 +346,12 @@ revisions proposed in one proposal, G not proposed for want of grounding, U not
 readable through the tool surface. State plainly: **"Proposed — awaiting approval
 in the KB dashboard. Nothing applied to the bank."**
 
-If nothing was readable at all, say exactly that — *"no readable mechanisms for
-this period: the tool surface does not expose `mechanism` on an idea or a
-brief"* — and propose nothing. Do **not** report it as a period that authored no
-new mechanisms.
+If nothing was readable at all, say exactly that — and say **why**, per surface:
+an idea whose `mechanism` came back empty is an idea that recorded none (the
+field is returned), while a brief's angle-local override is *"not exposed by the
+tool surface yet"*. Propose nothing for either. Do **not** blame the tool surface
+for ideas, and do **not** report an unreadable brief as a brief that authored no
+new mechanism.
 
 ## Governance
 

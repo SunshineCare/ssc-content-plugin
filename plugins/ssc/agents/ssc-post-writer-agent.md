@@ -163,13 +163,25 @@ its Step 0 reads `list_content(brief=<brief_id>)`, resolves the section, and enf
 **2b — Authority (resolve section → draft image_content if that's the target → score →
 present → review/revise → save on go-ahead).** Invoke `ssc-post-authority`, passing the
 resolved `brief_id`, the `section` (if the operator gave one), the N in-conversation variations
-(when 2a ran), the idea's brief/tags, and `n`. It **scores each variation 1–5** with a Vietnamese rationale
+(when 2a ran), the idea's brief/tags, the **resolved mechanism** (below), and `n`. It **scores each variation 1–5** with a Vietnamese rationale
 `comment` judged against `rules/{banned-words,compliance,food-placeholder,review-standards}`
 + `voice/*` + `content/quick-checklist`, runs the **drop-and-regenerate quality loop** (any
 variation rated ≤3 is dropped and the writer regenerates a same-angle replacement, bounded at
 2 attempts per slot) until N variations are rated **≥4**. It then **PRESENTS the candidate set
 to the operator in chat** (numbered: full Vietnamese body + self-score + Vietnamese comment
 per variation) and **PAUSES** — it does **not** save yet.
+
+**The RESOLVED mechanism is YOURS to hand over — on every section, including `image_content`.**
+The authority holds no `get_idea` and never re-resolves it; when `image_content` runs there is no
+writer step to surface it, so if you do not pass it the authority stops and asks. Resolve it from
+the `get_brief` response you already hold (Step 1), **brief-override-first**: use the brief's
+**angle-local mechanism override** where the response you actually received carries one, otherwise
+the owning idea's `mechanism`, and **none** where neither side carries one. Resolve on what the
+response actually carries — never on an assumption about which fields the server returns; a brief
+carrying no override is the ordinary case. Hand the authority the resolved sentence **plus which
+side it came from**, or an explicit "none carried on either side" — an absent mechanism is
+**reported, never invented**, and you never author or back-fill either field (you hold no write
+tool).
 
 This is a **human checkpoint in the operator's conversation**. The operator either:
 - **requests revisions** — the writer (`ssc-post-produce`) regenerates the named

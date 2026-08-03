@@ -42,6 +42,7 @@ Cowork-native: you (Claude) score and judge the copy directly. There are **no ap
 - `section` (optional) — **`copy` or `image_content`**. Names the target section, and an explicit name **always wins over the auto-pick** (naming `copy` targets `copy` even when one is already approved, yielding a fresh batch); **omit to auto-pick the next open one** (Step 0).
 - The **N draft copy variations** the writer (`ssc-post-produce`) just produced in this conversation — each a full Vietnamese Facebook post body, with a one-line angle/hook note. These are **unsaved**; they live in the conversation. **`copy` section only** — for `image_content` there is no writer hand-off; you draft the candidates yourself (Step 1b).
 - The idea's **brief + strategic tags** (pillar, persona, `core_message`, `why_now`) as the writer surfaced them — the strategic frame each candidate must honour.
+- The **RESOLVED mechanism** — the one sentence every candidate's mechanism beat is judged against, handed to you already resolved **brief-override-first**: the brief's **angle-local mechanism override** where the payload you were handed carries one, otherwise the owning idea's, and **none** where neither side carries one. `ssc-post-ideate` round 3 may author that override on the very brief this run is anchored to, so the guarantee is **one brief, one mechanism** — not one idea, one mechanism. Judge on **what you were actually handed**, never on an assumption about which fields the server returns; a brief carrying no override is the ordinary case (the brief-level field is staged server work), and it resolves to the idea's mechanism exactly as before the override rule existed. You **never** re-resolve it from prose, never treat a narrative field as an override, and never author or back-fill either field — you hold no `get_idea`, no `save_idea` and no `save_brief`, and `edit` is only ever the content fix-up above. If the resolved mechanism was not surfaced at all (neither a sentence nor an explicit "none carried"), ask for it rather than inferring one — an inferred mechanism is exactly the fabrication Step 7 forbids.
 - `n` — the target number of **floor-passing** candidates to persist. **Default 4** (matches the writer's default). Every persisted candidate has **passed the floor**; no candidate is persisted on the strength of its rating.
 
 If the target section is `copy` and the writer's variations are not present in the conversation, STOP and ask the operator to run `ssc-post-produce` first — there is nothing for the authority to score.
@@ -172,7 +173,8 @@ compliance rule is exactly the drift this repo has already been burned by.
 - `craft/doctrine` — the spine. **§6** is the routing table: which document owns which rule (person rule,
   floor, coverage, close job, proof families, register), so a cap you apply always traces to the owning doc
   rather than to this file. It is also where the failed-read stop rule above comes from. **§2** is the
-  mechanism requirement — every asset carries a mechanism beat, inherited from the idea, never re-invented.
+  mechanism requirement — every asset carries a mechanism beat, inherited (from the brief's angle-local
+  override where one was carried, otherwise from the idea — see Inputs), never re-invented.
 - `craft/copy-floor` — the **per-asset floor, and the only floor there is**: six numbered items,
   mục 1–mục 6, judged **pass/fail**, plus the table saying which items apply to which section (this channel
   has `copy` and `image_content`; `storyboard` rows from the video pipeline are not yours). Apply it **item
@@ -415,10 +417,13 @@ impression, and name the doc + section in the `comment` for whichever one reject
   axis on every channel, so it never appears in a set's missing-axis list and a set is never faulted for
   using one permitted frame twice.
 - **Mechanism — `craft/doctrine` §2, tested as `craft/copy-floor` mục 1.** The variation must carry a
-  mechanism beat — why this works, or why the earlier attempts failed — inherited from the idea's single
-  mechanism, not re-invented and not contradicted. A variation that only describes a benefit or a result is
-  **rejected**. Where the idea carries no recorded mechanism (a **legacy row** — approved before that
-  requirement existed), production proceeds: you do **not** reject the variation for the idea's gap, you
+  mechanism beat — why this works, or why the earlier attempts failed — written to **the RESOLVED
+  mechanism** (Inputs): the brief's angle-local override where one was carried, otherwise the idea's. It is
+  inherited, not re-invented and not contradicted. **Judge against whichever side won that resolution and
+  nothing else** — a variation written to the brief's override is *correct*, never a departure from "the
+  idea's mechanism", and a variation that only describes a benefit or a result is **rejected**. Where
+  **neither** side carries a recorded mechanism (a **legacy row** — approved before that
+  requirement existed), production proceeds: you do **not** reject the variation for that gap, you
   **name the absent mechanism** in the presentation and in the run's report, and you **invent none**
   (Step 7's legacy rule).
 - **Close — `craft/copy-floor` mục 4 → `craft/cta` §6 → `craft/close-job` §2.** A post has **no media
@@ -511,7 +516,7 @@ Name the **target section** at the top of the presentation (`copy` or `image_con
 
 Then show the **SET-level coverage verdict**, once, above or below the list: `pass` / `fail` / `pending`, the axis kinds the set spans, the axis kinds it did **not** span, and your one-line Vietnamese rationale. **State plainly that this verdict — not the ratings — is what decides whether the set ships**, and that a set failing it does not ship even though every member passed the floor.
 
-Also name here anything you could not judge against: a brief with no declared funnel stage (so `craft/cta` §6 assigned no close job), an idea with no recorded mechanism, an axis never recorded (reported as **unjudged**, per `craft/coverage` §7), or a missing/unapproved Approaches. **Name the absent input; never fill it in.**
+Also name here anything you could not judge against: a brief with no declared funnel stage (so `craft/cta` §6 assigned no close job), no recorded mechanism on either side of the brief-override-first resolution (Inputs), an axis never recorded (reported as **unjudged**, per `craft/coverage` §7), or a missing/unapproved Approaches. **Name the absent input; never fill it in.**
 
 Then **ask the operator to choose**, unambiguously, one of two things:
 
@@ -586,13 +591,14 @@ After persisting the approved set, output:
 | … | … | … | … | … | … | … |
 
 **Set coverage (the verdict that decided whether this set ships):** <pass | fail | pending> — axes judged: <the craft/coverage §5 subset for this section> · axes not spanned: <axes_missing, or "—"> · <one-line Vietnamese rationale>. Length band judged ordinally (`craft/coverage` §6). `opening_frame` is recorded, not an axis (§4.1).
+**Mechanism judged against:** <the resolved sentence, verbatim> — resolved from <the BRIEF's angle-local override | the IDEA's, no override carried on the brief | NONE carried on either — reported, not invented>
 **Rejections:** <count> variation(s) REJECTED at the floor + regenerated on the same axis position; <count> replacement round(s) triggered by a coverage failure. No variation was dropped or kept on a rating.
 **In-chat review:** <count> revision round(s) requested by the operator before the go-ahead to save.
 **Doctrinal inputs absent (invented: none):** <list, or "—">
 ```
 
 - If a slot hit its 2-attempt bound and could not pass the floor, note which slot, which floor item kept rejecting it, that it was NOT presented/persisted (the operator is short one variation), **and what that leaves the set's coverage verdict at**.
-- **Name every doctrinal input that was absent**, and name it as absent: a brief with no declared funnel stage (no close job could be assigned per `craft/cta` §6), an idea with no recorded mechanism, an axis never recorded on a legacy row (reported **unjudged**, `craft/coverage` §7), an Approaches that was missing or unapproved. **Invent none of them**, and never report an unrecorded input as satisfied.
+- **Name every doctrinal input that was absent**, and name it as absent: a brief with no declared funnel stage (no close job could be assigned per `craft/cta` §6), no recorded mechanism on either side of the brief-override-first resolution (Inputs), an axis never recorded on a legacy row (reported **unjudged**, `craft/coverage` §7), an Approaches that was missing or unapproved. **Invent none of them**, and never report an unrecorded input as satisfied.
 - **Legacy rows: production proceeds, and the report is where the gap is named.** A post idea, brief or content row **approved before this change** stays valid — it is **never re-opened, never re-judged and never blocked** by a doctrinal input that did not exist when it was approved (a missing mechanism, an unrecorded axis, a brief with no declared funnel stage). Produce the section, judge the new work against the new bar, and **name each absent input in this summary**, in the report line above. **Invent none of them** — not a mechanism, not an axis value, not a funnel stage — and never backfill one onto the legacy row. New approvals are held to the new bar; old ones are not retro-fitted to it.
 - If **Step 0 stopped** (an `image_content` request with no approved copy), emit that stop message plainly instead — name the gate and the exact next action (approve ≥1 copy in `/post/[month]/[id]` → Copy, then re-invoke) — and confirm nothing was written.
 - End with the next action for the section just saved:

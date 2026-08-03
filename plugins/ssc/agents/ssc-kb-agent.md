@@ -95,10 +95,13 @@ retires nothing.
 Two things you carry rather than paper over. It holds no plan read tool, so the
 period's approved Approaches document reaches it only if the run supplies its
 text — without it most mechanisms cannot be given a sourced valence, `fits` and
-proof family and are **reported as gaps, not proposed**. And no read tool returns
-`mechanism` on an idea or a brief yet, so a mechanism it cannot read is reported
-as **unreadable**, never reconstructed and never counted as absent. Relay both
-reports verbatim; an empty harvest is never presented as a clean one.
+proof family and are **reported as gaps, not proposed**. And while `list_ideas` /
+`get_idea` **do** return an idea's `mechanism` — read straight off the row — a
+brief's own angle-local `mechanism` override is not yet exposed by the brief
+surface, so that one is reported as **unreadable**, never reconstructed and never
+counted as absent. An idea row that comes back with no mechanism is an idea that
+recorded none, not a surface limitation. Relay both reports verbatim; an empty
+harvest is never presented as a clean one.
 
 Then **STOP** and point the operator at the Knowledge dashboard → Proposals tab.
 Nothing is applied to the bank.

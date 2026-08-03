@@ -406,11 +406,15 @@ Four items, all in the `content` repo, verified live rather than assumed:
    `hooks.json` matchers and the `edit`-carrying-an-approval-field rule are all
    untouched, and no new gate appears.
 3. `get_brief` / `list_briefs` return it.
-4. `get_idea` / `list_ideas` return `mechanism`. **They do not today** —
-   `ssc-post-ideate` states this explicitly and works around it by declining to
+4. `get_idea` / `list_ideas` return `mechanism`. ~~**They do not today**~~ —
+   ~~`ssc-post-ideate` states this explicitly and works around it by declining to
    reconstruct a mechanism from a title. An override rule is unsound while the
    brief cannot read what it is overriding, and harvest cannot see a period's
-   mechanisms at all, so this item is not optional.
+   mechanisms at all, so this item is not optional.~~
+   > **SUPERSEDED — see Drift Log DL2.** The premise was wrong: both tools have
+   > returned `mechanism` since `c391926` (2026-08-01), *before* this change
+   > opened. This item reduced to tool-description edits. The still-unshipped
+   > field is item 1's `briefs.mechanism`, not the idea's.
 
 **This is a second repository**, so per the workspace cross-repo rule the list is
 presented for approval before any file in `content` is touched, and it is tracked
@@ -538,12 +542,14 @@ is the propose-only invariant at its most consequential.
   the run report in the operator's own terms ("override authored, not persisted —
   server field not yet available"), and the Migration Plan below makes it a named
   phase rather than an accident.
-- **Harvest is inert until server item 4 lands** → `list_ideas` / `get_idea` do
+- ~~**Harvest is inert until server item 4 lands**~~ → ~~`list_ideas` / `get_idea` do
   not return `mechanism` today, so a harvest run before that ships can see almost
-  nothing. Mitigation: the skill reports "no readable mechanisms for this period —
-  the tool surface does not expose the field" rather than reporting an empty
-  harvest as a clean one. An empty result that looks successful is the worse
-  failure.
+  nothing.~~ **SUPERSEDED — see Drift Log DL2**: the idea surface already exposed
+  the field, so this risk never existed on the idea side. What remains is narrower —
+  a harvest cannot read a **brief's** angle-local override until item 1 ships.
+  Mitigation (unchanged in kind): the skill reports the unreadable surface by name
+  rather than reporting an empty harvest as a clean one. An empty result that looks
+  successful is the worse failure.
 - **Valence cannot be tallied against an Approaches doc approved before this
   change** → Those documents carry no `valence` labels. Mitigation: Ideate reports
   "valence not stated in the approved supply — cap not applied" and applies no cap.
@@ -563,8 +569,9 @@ is the propose-only invariant at its most consequential.
   `ssc-approaches-core`, both Approaches callers, both Ideate skills and
   `ssc-brief-core` are shared. Mitigation: this design was written against the
   files as they stand *after* that change shipped (2.56.0), and D6 is explicitly
-  the edit its DL2 licensed. Nothing here re-freezes or re-opens a DL1/DL2
-  resolution. Archive order does not matter; edit order does — do not implement
+  the edit its DL2 licensed. Nothing here re-freezes or re-opens **the in-flight
+  change's** DL1/DL2 resolution (not to be confused with this change's own
+  DL1–DL5, recorded in the Drift Log below). Archive order does not matter; edit order does — do not implement
   this change against a pre-2.55.0 working tree.
 - **The bundle build only checks wiring, not content** → It cannot catch a missing
   `valence` label in a doc template or a persona name smuggled into the bank
@@ -635,6 +642,10 @@ None blocking. Two items are tracked as coordination, not as unresolved design:
 
 ## Drift Log
 
+Each entry names the decision as designed, what shipped instead, and why the
+divergence stands. DL1 was recorded during implementation; DL2–DL5 during the
+Phase-4 review.
+
 ### DL1 — Harvest cannot fetch the Approaches document, so the operator supplies it
 
 **Decision affected:** D9. Each proposed bank entry carries its `valence`, its `fits`
@@ -659,6 +670,95 @@ that D9 deliberately kept out, and the propose-only construction is easier to de
 when the tool list is small and fixed. The cost is one more thing the operator must hand
 in; the benefit is that the skill still cannot reach anything it does not need.
 
-**Second inert path, recorded.** Combined with `get_idea` / `list_ideas` not returning
+~~**Second inert path, recorded.** Combined with `get_idea` / `list_ideas` not returning
 `mechanism` until D10 lands (Migration Stage 2), harvest has **two** independent reasons
-to propose nothing. Both are reported, neither is silent, and neither is worked around.
+to propose nothing.~~ **PARTLY SUPERSEDED — see DL2.** The idea surface already returned
+`mechanism`, so that second path was never real on the idea side; what narrows it to is a
+**brief's** angle-local override, unreadable until D10 item 1 ships. The path recorded in
+*this* entry — no Approaches document supplied — stands unchanged. Both are reported,
+neither is silent, and neither is worked around.
+
+### DL2 — `get_idea` / `list_ideas` already returned `mechanism` (D10, task 12.5)
+
+**As designed.** D10 and task 12.5 asserted, "verified live", that `get_idea` and
+`list_ideas` carry no `mechanism` key, so the idea's mechanism was unreadable through
+the tool surface until group 12 shipped it. Harvest's inert-path note above, and
+`ssc-post-ideate`'s decision to scope the negative-valence cap to "only the mechanisms
+readable in THIS run", both rest on that premise.
+
+**What is actually true.** `ideas.mechanism` has been projected on both the list row and
+the detail row since commit `c391926` (2026-08-01, `content` repo,
+`mcp-server/lib/brandos/read/ideas.ts:435,523,635`) — i.e. *before* this change opened.
+The premise was wrong. Group 12 therefore reduced, on the idea side, to tool-description
+edits; the genuinely new server field is the **brief's** angle-local override
+(`briefs.mechanism`), which remains uncommitted and undeployed.
+
+**Resolution — code corrected, design amended.** The dependent prose was fixed rather
+than the premise preserved: `ssc-kb-mechanism-harvest` now reads `mechanism` off the
+idea row and scopes its unreadable-surface note to `get_brief` / `list_briefs` only, and
+`ssc-post-ideate` now tallies the valence cap over the period's **full settled set**,
+reporting an unreadable count only for rows whose read genuinely returns null. Also
+corrected on the same premise: `ssc-kb-agent`, `ssc-post-schedule`, and the D10 item-4 /
+Risks statements above, each marked superseded in place.
+
+**What the inert paths actually are now.** DL1's "second inert path" paragraph is partly
+superseded by this entry. Harvest still has **two** reasons to propose nothing, but the
+second one is narrower than recorded: not "the idea surface exposes no mechanism", but
+"a **brief's** angle-local override is unreadable until D10 item 1 ships". The
+missing-Approaches-document path of DL1 is unaffected.
+
+### DL3 — the bank read is scoped in the brief skills, unconditional only in the core (D11)
+
+**As designed.** D11 states that a failed KB read STOPS the run and names the document,
+"in the core, in the brief skills, and in harvest".
+
+**What shipped.** Task group 13 (raised during implementation) deliberately narrowed
+`craft/mechanism-bank` in `ssc-brief-core` and `ssc-ads-brief` to **override
+consideration**, scoped exactly as `rules/compliance` already is there. A failed read in
+those two skills means *no override may be authored this run* — stated, never silent —
+and does not halt the run.
+
+**Why it stands.** In the brief skills the bank is needed only for the exception; as
+originally written, every `/ssc-ads-brief` run would halt until the operator seeded the
+document, blocking the whole pipeline for a permission almost no angle exercises. The
+unconditional rule remains correct — and unchanged — in `ssc-approaches-core`, whose
+entire supply is bank-first, and in harvest, which exists to diff against the bank.
+
+### DL4 — `ssc-ads-brief` carries an ads-shaped restatement of the override rule (D7)
+
+**As designed.** The `angle-mechanism-override` delta spec forbids any skill from
+restating the rule "in a channel-shaped copy of its own".
+
+**What shipped.** `ssc-ads-brief` states all six bounds, the blast-radius rule and the
+reporting obligation in full.
+
+**Why it stands.** D7 establishes that `ssc-ads-brief` does **not** dispatch
+`ssc-brief-core`, so there is no shared file for it to inherit the rule from — the
+restatement is required, not redundant. The spec sentence is the thing that is wrong; it
+is read here as forbidding a *divergent* channel-shaped variant, not a faithful
+restatement in the one skill that cannot reach the shared core. Any edit to the rule must
+be applied to both files in the same commit.
+
+### DL5 — the brief-override resolution extends to the post production chain (D8)
+
+**As designed.** D8 and the `angle-mechanism-override` delta spec named
+**`ssc-ads-writer` only** as the consumer that resolves the brief's override before the
+idea's.
+
+**What shipped.** The same resolution was extended to `ssc-post-produce`,
+`ssc-post-authority` and `ssc-post-writer-agent`.
+
+**Why it stands.** D10/round 3 gave `ssc-post-ideate` a persist path for a post's
+angle-local override, but the post production chain still resolved from `idea.mechanism`
+alone — and `ssc-post-authority`'s floor **rejected** any variation whose mechanism beat
+was "not the idea's single mechanism". The pipeline therefore persisted an override and
+then failed the copy written to it. Naming one channel's writer in D8 was an omission,
+not a decision: the resolution order is a property of the override itself, and a rule
+"stated once and applied everywhere" (the delta spec's own words) cannot hold if only one
+of two production chains applies it. The spec requirement has been widened to name the
+post consumers rather than left contradicting the code.
+
+**Scope check — nothing else moved.** No new mutation tool, no frontmatter `tools:`
+change, no new gate: `ssc-post-writer-agent` already held `get_brief` and already called
+it in Step 1. `ssc-post-authority` still reads no idea or brief itself; the resolved
+mechanism reaches it by hand-off, as the brief and tags already did.

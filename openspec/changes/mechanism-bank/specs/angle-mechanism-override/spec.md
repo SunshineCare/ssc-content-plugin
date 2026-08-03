@@ -181,11 +181,19 @@ from a library they govern or something authored this run.
 
 ### Requirement: Downstream consumers resolve the brief's override first, then the idea's
 
-`ssc-ads-writer` SHALL resolve the mechanism it writes to as **the brief's override if
-present, otherwise the idea's**. It SHALL still never restate, vary, sharpen, soften or
-contradict whichever one it resolved, and SHALL still never invent one. Its existing
-legacy tolerance SHALL be unchanged: where neither the brief nor the idea carries a
-mechanism, production proceeds, the absence is reported, and nothing is fabricated.
+Every production consumer of a mechanism SHALL resolve it as **the brief's override if
+present, otherwise the idea's** — resolving on what the `get_brief` response actually
+carries, never on an assumption about the server's current shape. This binds
+`ssc-ads-writer` on the ads side and, on the post side, `ssc-post-produce`,
+`ssc-post-authority` (which SHALL judge its mechanism floor against the **resolved**
+mechanism, so copy written to a persisted override is not read as a departure from the
+idea's) and `ssc-post-writer-agent` (which owns the resolution on the `image_content`
+section, where no writer step runs to surface it).
+
+A consumer SHALL still never restate, vary, sharpen, soften or contradict whichever one
+it resolved, and SHALL still never invent one. The existing legacy tolerance SHALL be
+unchanged: where neither the brief nor the idea carries a mechanism, production proceeds,
+the absence is reported, and nothing is fabricated.
 
 A resolution order stated once and applied everywhere is what stops two consumers of the
 same brief writing to two different mechanisms. Writing to the override is the whole
@@ -215,7 +223,11 @@ The override rule SHALL be written channel-agnostically in the shared brief core
 that core is shared. A post has **exactly one angle**, so a post's single brief has no
 sibling angle a mechanism could serve differently and the permission is in practice an
 ads-channel affordance. No skill SHALL branch this rule on channel name, and no skill
-SHALL restate the rule in a channel-shaped copy of its own.
+that can reach the shared core SHALL restate the rule in a copy of its own. The one
+skill that cannot — `ssc-ads-brief`, which does not dispatch `ssc-brief-core` — SHALL
+carry a **faithful** restatement of all six bounds, the blast-radius rule and the
+reporting obligation, and any edit to the rule SHALL be applied to both files in the
+same commit.
 
 Channel-shaped copies of a shared rule diverge the day one is edited and the stale copy
 wins wherever it is read first — the same reasoning that put the sophistication read, the

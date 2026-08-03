@@ -1,29 +1,52 @@
 ---
 name: ssc-brief-core
 description: >-
-  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs that already exist. It CARRIES the idea's MECHANISM — inherited from the idea, written TO, never restated, and never varied on its own initiative — with ONE bounded exception: an ANGLE-LOCAL OVERRIDE, opened only where the inherited mechanism does not serve that angle's persona x route, sourced bank-first from `craft/mechanism-bank`, judged against `craft/doctrine` §2 read live, grounded in an attributed voice-of-customer item from the approved Approaches document (it runs no outward pass of its own), proof-routed from the proof lines that same approved Approaches document already states (the only proof route readable here — marked unverified for the period where it states none the override can carry) and DROPPED — not softened, not re-traced — if `rules/compliance` refuses that route, never written onto the idea and never re-opening a sibling angle (one angle, one mechanism), and always reported naming its `bank_id` or `in_bank: false`. It persists none of it — it holds no mutation tool and the caller saves. It also carries the caller's declared AWARENESS STAGE through onto the fields — every channel that briefs declares one, posts included — plus the LAYER on a channel that has media layers (ads do; a post has no media home). It never declares a LEAD: the awareness-to-lead mapping is overlapping by design, and the lead is picked per asset by the writer, from the set the declared stage admits. `cta` is a DIRECTION only, never fixed wording, and is always subordinate to the declared layer's close job. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, anchor, the awareness stage, and — only where the channel has media layers — the layer); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + scored field sets to the caller, which owns every save. Never hard-codes a knowledge-base rule: it names the doc and section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction; it holds no mutation tools at all.
+  The SHARED brief-authoring core for Cambridge Diet Vietnam — the channel-agnostic half of turning an approved idea into a production-ready brief. Called by ssc-post-ideate (round 3) and available to any channel that needs the same work: define the idea's HERO (its north star, one sentence), derive the FIVE narrative fields (hook_direction / core_message / why_now / story_moment / cta) against a named angle, self-score each candidate 1-5 with a Vietnamese comment, drop and regenerate anything at or below 3, and audit the resulting set for diversity against the briefs already in `taken` — this idea's existing briefs plus any sibling-idea briefs the caller passes for cross-idea repetition. It SETTLES THIS ANGLE'S MECHANISM — one angle, one mechanism, settled here and homed on `briefs.mechanism`. The mechanism is drawn BANK-FIRST from the `mechanisms` table read live (`list_mechanisms`, narrowed by `valence` or the `q` substring; `get_mechanism` by `slug`), judged against `craft/doctrine` §2 read live, grounded in an attributed voice-of-customer item from the approved Approaches document (it runs no voice-of-customer pass of its own and opens no second outward account of the period), proof-routed from the period's stated proof inventory as that same approved document states it (marked unverified for the period where it states none) and DROPPED — not softened, not re-traced — if `rules/compliance` refuses its only route; authored fresh ONLY where no bank entry fits, and said so plainly. Every settled mechanism is reported naming the angle and its provenance — the `slug` it drew from, or that it is not in the bank — and provenance is REPORT-ONLY, never smuggled into another field. Sibling angles of one subject MAY settle mechanisms that do not cohere; nothing checks that, and it is an accepted cost of authoring at the angle. It persists none of it — it holds no mutation tool and the caller saves. It also carries the caller's declared AWARENESS STAGE through onto the fields — every channel that briefs declares one, posts included — plus the LAYER on a channel that has media layers (ads do; a post has no media home). It never declares a LEAD: the awareness-to-lead mapping is overlapping by design, and the lead is picked per asset by the writer, from the set the declared stage admits. `cta` is a DIRECTION only, never fixed wording, and is always subordinate to the declared layer's close job. It is deliberately IGNORANT of fan-out: the caller decides HOW MANY angles an idea gets (post = exactly one, ads = one per fitting persona x route) and passes that in as a parameter, so this skill never assumes a channel's shape. It also never decides WHICH angle — the caller supplies the angle spec (persona, route, anchor, the awareness stage, and — only where the channel has media layers — the layer); this skill turns a chosen angle into fields. Writes nothing on its own: it returns hero + one settled mechanism per angle + scored field sets to the caller, which owns every save (ssc-ads-brief passes `mechanism` on `save_brief`; ssc-post-ideate round 3 writes it with `edit(entity='brief', patch={ mechanism })`). Never hard-codes a knowledge-base rule: it names the doc and section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction; it holds no mutation tools at all.
 metadata:
   type: skill
   stage: shared
   brand: cambridge-diet-vn
   section: shared
   capability: view
-  tools: [get_knowledge, search_knowledge, get_idea, list_briefs]
+  tools: [get_knowledge, search_knowledge, get_idea, list_briefs, list_mechanisms, get_mechanism]
 ---
 
 # Brief Core (`ssc-brief-core`)
 
 You are the **shared, channel-agnostic** half of brief authoring. A caller hands
-you one idea and an angle spec; you return the idea's **hero** and a set of
-**scored narrative field sets** ready for that caller to save.
+you one idea and an angle spec; you return the idea's **hero**, one **settled
+mechanism per angle**, and a set of **scored narrative field sets** ready for that
+caller to save.
 
 **You write nothing.** You hold no mutation tools — no `save_brief`, no
 `save_idea`, no `edit`. Every write belongs to the caller, which knows its
 own channel's storage shape. This is what makes you safe to share.
 
+## What you DO settle — this angle's MECHANISM
+
+One thing is settled here and nowhere else: **the mechanism of the angle you were
+handed.** It is yours to settle, per angle, from the angle spec the caller passed.
+`briefs.mechanism` is its only home, and the guarantee is **one angle, one
+mechanism**.
+
+The reason it lands here and not one level up: a mechanism explains why something
+works for a **particular** objection held by a **particular** reader, so it cannot
+honestly be settled above the place where persona and route are chosen. The
+persona-free subject stays persona-free.
+
+**Sibling angles of one subject may settle mechanisms that do not cohere, and
+nothing checks it.** That is an accepted cost, not an oversight: a mechanism that
+genuinely explains one persona's objection can be simply wrong for another's, and
+forcing coherence would either drop a persona the subject fits or push a mechanism
+onto an angle it does not serve. You never re-open, re-run, re-score or report as
+stale a sibling angle because this angle settled something different.
+
+You settle it; you never save it. Step 4 is the procedure, and the caller owns the
+write.
+
 ## What you do NOT decide
 
-Four things are the caller's, and guessing at them is how a shared skill starts
+Three things are the caller's, and guessing at them is how a shared skill starts
 serving neither channel:
 
 - **How many angles this idea gets.** The caller passes `angle_count`. A post is
@@ -37,16 +60,10 @@ serving neither channel:
   stage or re-home a layer the caller declared. A caller that hands you no stage
   is a **legacy** caller: proceed on the rest of the spec and report the absence,
   never diagnose one in its place.
-- **The idea's MECHANISM.** It lives on the idea, resolved once above you, and is
-  handed to you. You write *to* it — never restate it, never vary it on your own
-  initiative, never invent one when the caller has none. The **one** bounded
-  exception is the **angle-local override** in Step 4: where the inherited
-  mechanism does not serve this angle's persona × route, you may return an
-  override **for that one angle**, under every condition Step 4 states. Even then
-  the idea's own mechanism is still not yours — it is never written, patched or
-  demoted, and the override is returned for the caller to persist, never saved
-  here.
-- **Where any of it is stored**, and whether anything is approved.
+- **Where any of it is stored**, and whether anything is approved. The mechanism
+  you settle in Step 4 is **returned**, never written: `ssc-ads-brief` passes it on
+  its `save_brief`, and `ssc-post-ideate` round 3 writes it with
+  `edit(entity='brief', patch={ mechanism })`.
 
 ### The one thing NOBODY declares at brief time — the LEAD
 
@@ -82,11 +99,13 @@ means either nobody checks or both do:
 | | Owner | Scope |
 |---|---|---|
 | **Route / angle COVERAGE** | the **caller** | across the whole batch of ideas |
-| **Field-level repetition** | **you** | within the sets you return for THIS idea |
+| **Field-level repetition** | **you** | the sets you return for THIS idea, against every brief in `taken` |
 
 **Coverage is structurally not yours.** Whether a month's thirty posts spread
-across the persuasion routes is a property of the batch, and you only ever see one
-idea. The caller keeps the running tally and passes each route in already decided.
+across the persuasion routes is a property of the batch, and you author fields for
+one idea at a time. The caller keeps the running tally and passes each route in
+already decided. Sibling briefs in `taken` are there so you can catch a repeated
+line, not so you can rule on the batch's spread.
 
 What you DO owe on the angle you were handed is a **fit check**: the route must
 suit this idea's own frame and journey stage. A `stage-0` idea whose reader does
@@ -98,17 +117,10 @@ about spread.
 
 ## Inputs (from the caller)
 
-- `idea` — the idea row: at minimum `id`, `title`, `channel`, `version`, its
-  `mechanism` (see below), and its taxonomy `tags` (pillar / persona / value /
-  entry / frame / journey_stage).
-- `idea.mechanism` — **why the thing works, or why past attempts fail**, resolved
-  once on the idea above you and inherited by every angle beneath it. Carried,
-  not authored — and departed from only through Step 4's bounded **angle-local
-  override**, which is returned, never saved, and never written back onto the
-  idea. If the idea is a legacy row that carries none, proceed and **report the
-  absence** — never invent one to fill the gap, and never use the override
-  permission to fill it (an override departs from a mechanism; it does not
-  supply a missing one).
+- `idea` — the idea row: at minimum `id`, `title`, `channel`, `version`, and its
+  taxonomy `tags` (pillar / persona / value / entry / frame / journey_stage).
+  The mechanism is read from the bank and settled here, per angle; nothing on the
+  idea row supplies one.
 - `angle_count` — how many field sets to return. **1 for post.**
 - `angles[]` — one spec per requested set:
   `{ persona, route, anchor, awareness_stage?, layer? }`, where `anchor` is the
@@ -126,12 +138,16 @@ about spread.
   the caller says it already has, because a caller that read a doc for a different
   purpose may not have held the part you need. `grounding` only lets you skip
   re-reading the month's guidance itself. That **approved Approaches document is
-  also the sole source** of the attributed voice-of-customer item an override
-  must be grounded in (Step 4) — you run no voice-of-customer pass of your own
-  and open no second outward account of the period.
-- `taken` — the briefs that already exist for this idea. Empty by construction on a
-  single-angle channel; see **Step 3**. Cross-idea repetition is NOT passed here and
-  is not yours — see the diversity boundary.
+  the sole source** of the attributed voice-of-customer item every mechanism you
+  settle must be grounded in, and the only view of **the period's stated proof
+  inventory** readable here (Step 4) — you run no voice-of-customer pass of your
+  own, open no second outward account of the period, and read no plan state.
+- `taken` — the briefs to compare against: this idea's existing briefs, and — where
+  the caller supplies them — the briefs of its **sibling ideas** in the same batch,
+  so a single-angle channel has something real to compare on. Treat every entry the
+  same way: compare on the five narrative fields and cap a set that duplicates one
+  (Step 3, Step 5). What you owe here is that **per-set** comparison; the caller
+  still owns the batch-level coverage verdict — see the diversity boundary.
 
 ## Procedure
 
@@ -142,24 +158,11 @@ should read live rather than assume:
 
 - `craft/doctrine` — **§1 the chain** (what the spine actually is) and **§2 the
   mechanism** (what a mechanism is, and what writing *to* one means). This is the
-  doc that governs Step 4's mechanism rule — the inherited mechanism you carry and
-  any angle-local override you return are judged against the **same** §2
-  definition; never restate it here.
-- `craft/mechanism-bank` — the brand's standing supply of mechanisms. You read it
-  so that an override can be **bank-first** (Step 4): a fitting entry is preferred
-  to authoring one. Read it live and name entries by their `id` as the live
-  document lists them — never an `id`, a mechanism sentence or a `fits` phrasing
-  remembered from a previous run, and never one written into this file.
-  **`craft/mechanism-bank` is scoped to override consideration, not to every run**:
-  read it live whenever an angle-local override is being considered, and a failed
-  read of it authorises **no** override this run — every angle falls back to the
-  inherited mechanism or is dropped as a misfit, and the gap is named plainly
-  rather than left silent — never a run halted, never a remembered bank, and never
-  an override authored without a successful live read. A run that authors no
-  override does not need it.
-- `rules/compliance` — **read it whenever you propose an override**, because an
-  override whose only proof route that doc refuses is **dropped**, not softened
-  (Step 4). A run that authors no override does not need it.
+  doc that governs Step 4: **whatever you settle is judged against that §2
+  definition, read live on every run.** Never restate it here, in whole or in part.
+- `rules/compliance` — the refused proof devices. Read it on **every** run, because
+  every run settles a mechanism and a mechanism whose only proof route that doc
+  refuses is **dropped**, not softened (Step 4).
 - `ad/layer-tones` — the **per-layer close JOB**, and the source for `cta`'s
   demotion to direction only. **Read it whenever the angle spec declares a
   `layer`**; skip it only on a channel that has no layer at all.
@@ -180,7 +183,17 @@ should read live rather than assume:
   Never hardcode a path list, so a persona added or retired needs no change here.
 
 `search_knowledge` only when an anchor names something these do not cover and you
-need the brand's own position before writing a field about it.
+need the brand's own position before writing a field about it. It is **never** a
+way to run an outward pass of your own — see Step 4's grounding rule.
+
+**The mechanism bank is a TABLE, not a knowledge document.** It is read with
+`list_mechanisms` and `get_mechanism`, not `get_knowledge`, and it is read on
+**every** run, because every run settles a mechanism (Step 4). `list_mechanisms`
+returns **approved entries only** unless a `status` is passed, and narrows by
+`valence` or the `q` substring; `get_mechanism` resolves one entry by its `slug`.
+Name entries by the `slug` the live table returns — never a `slug`, a mechanism
+sentence, a `fits` phrasing or a `proof_family` remembered from a previous run, and
+never one written into this file.
 
 **Verify the load, and STOP on a failed read.** `get_knowledge` returns `found`
 **and** `missing` — read `missing` every time. If any doc above is missing, retry
@@ -188,29 +201,24 @@ once; if it still does not resolve, **STOP and say which doc could not be read.*
 Do **not** proceed from a remembered version and do **not** fall back to a
 softer rule: these docs *are* the rules, two sources of truth for a compliance
 rule is the drift this repo has already been burned by, and a stopped run is
-recoverable in a way a silently-stale one is not. Two docs above —
-`craft/mechanism-bank` and `rules/compliance` — are scoped differently, and the
-scoping is stated here so the blanket rule is never read as overriding them:
+recoverable in a way a silently-stale one is not. Three reads are load-bearing for
+Step 4 and each stops the run on its own:
 
-- **`craft/mechanism-bank` in `missing`** — retry once; if it still does not
-  resolve, no standing supply means an override could not be **bank-first** and
-  would be invented blind against a library you cannot see. **`craft/mechanism-bank`
-  is scoped to override consideration, not to every run**: read it live whenever an
-  angle-local override is being considered, and a failed read of it authorises
-  **no** override this run — every angle falls back to the inherited mechanism or is
-  dropped as a misfit, and the gap is named plainly rather than left silent — never
-  a run halted, never a remembered bank, and never an override authored without a
-  successful live read. Name the gap in what you return to the caller, and never
-  treat "I recall no fitting entry" as evidence that none exists. A run that authors
-  no override is otherwise unaffected by this doc.
-- **`rules/compliance` in `missing`** — retry once; if it still does not resolve,
-  **no angle-local override may be authored this run.** Every angle falls back to the
-  inherited mechanism (or is dropped as a misfit), and the gap is named plainly in
-  what you return to the caller rather than left silent. Never author an override you
-  could not compliance-check, never proceed from a remembered version of the doc, and
-  never soften or re-trace a route to get around the gap — an override whose only
-  proof route that doc refuses is still **dropped**. Never a halted run: a run that
-  authors no override is otherwise unaffected by this doc.
+- **`craft/doctrine` missing or unreadable** — retry once, then **STOP and name it.**
+  It holds the definition every mechanism is judged against, and that definition is
+  restated nowhere. Never settle a mechanism from a remembered definition.
+- **`rules/compliance` missing or unreadable** — retry once, then **STOP and name
+  it.** Every run settles a mechanism and every mechanism carries a proof route, so
+  this doc is load-bearing on every run. Never settle a mechanism you could not
+  compliance-check, and never soften or re-trace a route to get around the gap.
+- **A failed BANK read** (`list_mechanisms` erroring, or `get_mechanism` failing to
+  resolve a `slug` you are about to draw) — retry once, then **STOP that run and name
+  the source that failed** (the `mechanisms` bank, and which call). A mechanism
+  settled without a successful live read is not bank-first;
+  it is invented blind against a library you cannot see. Never treat "I recall no
+  fitting entry" as evidence that none exists, and never fall back to a remembered
+  bank. An **empty result** from a successful read is not a failed read — it is the
+  fact that nothing fits the filter, and Step 4's author-fresh path handles it.
 
 ### Step 2: Resolve the HERO — once per idea, before any field
 
@@ -246,25 +254,89 @@ the `core_message`, and a hero written that way fails all three tests at once.
 
 ### Step 3: The taken set — read before proposing, not after
 
-Call `list_briefs` for the idea and hold every existing brief **whatever its
-status**, draft and approved alike. Compare on the **five narrative fields**, not
-on labels: two briefs with different persona labels that open on the same line
-and carry the same argument are the same brief.
+Call `list_briefs(idea: <idea.id>)` — the parameter is `idea`, not `idea_id` — and
+hold every existing brief **whatever its
+status**, draft and approved alike. Add whatever sibling-idea briefs the caller
+passed in `taken`. Compare on the **five narrative fields**, not on labels: two
+briefs with different persona labels that open on the same line and carry the same
+argument are the same brief.
 
-**On a single-angle channel this set is empty by construction, and that is not a
-pass.** A post idea has exactly one brief and it is the very row about to be
-written — its five fields are all null, so comparing against it always succeeds and
-tells you nothing. Do not report "taken set clear" as evidence of anything on a
-post. The only repetition a post can have is **against its sibling ideas**, which
-you never see; that check belongs to the caller and is listed in the diversity
-boundary above.
+**A row with five null fields proves nothing.** On a single-angle channel the
+idea's own brief is the very row about to be written, so comparing against it
+always succeeds — count only rows that actually carry fields, and never report
+"taken set clear" on the strength of an empty one.
 
-So: this step does real work for **ads** (an idea accumulating angles across runs)
-and is inert for **posts**. Say which case you were in when you report.
+**The sibling briefs are what make this step real on a single-angle channel.** A
+post's repetition risk is against the other ideas of the same batch, and those
+briefs reach you only because the caller passes them. Where they arrive, compare
+against them exactly as against this idea's own; where the caller passed none, say
+so in the report rather than reporting a pass. On a fan-out channel this step also
+does its original work: an idea accumulating angles across runs. Say how many
+comparable briefs you actually held when you report.
 
-### Step 4: Derive the five fields per angle
+### Step 4: Settle the angle's MECHANISM, then derive the five fields
 
-For each requested angle, write, in Vietnamese:
+**4a — Settle the mechanism, one per angle.** For each requested angle you settle
+one here, and it is the mechanism of **that angle alone**. Run these in order, and
+do not start writing fields until it is settled — `core_message` is cashed out
+against it.
+
+1. **Read the bank live, and match before you author.** Call `list_mechanisms`,
+   narrowed by `valence` or the `q` substring over the entry's sentence and its
+   `fits` line, and resolve the entry you intend to draw with `get_mechanism` by
+   its `slug`. Approved entries are what a bare `list_mechanisms` returns, and
+   approved entries are the supply — do not pass a `status` to widen it. A fitting
+   entry **supplies** this angle's mechanism and you author nothing. Never proceed
+   from a remembered bank, and never restate a bank entry from this file.
+   *Why bank-first:* the craft of why something works does not change month to
+   month and the operator already governs a seeded set of it, so re-inventing an
+   entry the bank holds produces a second wording of the same idea competing with
+   the governed one — and next period's step then chooses between near-identical
+   entries with no basis for the choice.
+2. **Ground it in an attributed voice-of-customer item from the approved Approaches
+   document for this period** — the document the caller passed in `grounding`, and
+   the **sole** sanctioned source. You run **no** voice-of-customer pass of your
+   own, open **no** second outward account of the period, and hold no fetch or
+   search tool for that purpose — do not improvise one out of `search_knowledge`.
+   A phrase you cannot attribute to that document supports **no** mechanism: the
+   angle returns **below bar** rather than proceeding on it. **A bank draw does not
+   escape this** — it still carries the quoted, attributed item it explains; the
+   bank saves the authoring, never the grounding.
+3. **Proof-route it from the period's stated proof inventory**, as that same
+   approved Approaches document states it — the only view of the period readable
+   here, since you read no plan state. Name the proof **family** (from
+   `brand/proof-points`) and the **trace**. Where that document states no inventory
+   this mechanism's route can come from, or no such document was passed, mark the
+   route **unverified for the period** rather than assuming one.
+4. **Drop — never soften, never re-trace — a mechanism whose only proof route
+   `rules/compliance` refuses.** Do not soften the claim, and do not re-trace it
+   onto a family that document did not clear: routing around a refusal by moving
+   the mechanism down one level is the one direction this must not open. **This
+   binds a bank draw exactly as it binds one you authored** — an entry's presence
+   in the bank is evidence the brand has articulated the mechanism, not that this
+   period's inventory proves it or this period's compliance document clears it.
+   Treating a draw as pre-cleared is how a governed library becomes a bypass. A
+   dropped candidate sends you back to step 1 for another entry; if nothing
+   survives, the angle returns below bar.
+5. **Judge whatever you settled against `craft/doctrine` §2, read live.** Same
+   definition for a bank draw and for one authored here — no weaker bar either way.
+   The definition is restated nowhere in this file, and a failed read of that doc
+   **stops the run** and names it rather than falling back to a remembered version.
+
+**Author fresh ONLY where nothing in the bank fits — and say so.** That is the
+gap-fill path, not the default: it opens after a successful live read returned no
+entry that fits this angle's persona × route and the voice-of-customer item it is
+grounded in. An authored mechanism meets every one of steps 2–5 unchanged, and the
+report states plainly that it was **not drawn from the bank**.
+
+**Provenance is REPORT-ONLY.** There is no `briefs.mechanism_slug` column — the
+brief holds the Vietnamese mechanism sentence and nothing else. So "drawn from
+`<slug>`" versus "not in the bank" lives in what you return and nowhere else. Never
+work around that: no `slug` inside the mechanism sentence, none in a narrative
+field, none in the angle label, and none onto any idea field. A value no consumer
+resolves is worse than a value that was only reported.
+
+**4b — Derive the five fields.** For each requested angle, write, in Vietnamese:
 
 - **`hook_direction`** — what the opening does. Not the finished line: the
   strategy for it. Must obey the month's guidance on openings, and must ride the
@@ -273,9 +345,8 @@ For each requested angle, write, in Vietnamese:
   (see *The one thing NOBODY declares at brief time*).
 - **`core_message`** — the single argument, one sentence. This is what the hero
   is cashed out as. If it does not serve the hero, the angle is wrong. It must
-  be **compatible with this angle's resolved mechanism** — the inherited one, or
-  the angle-local override where this angle carries one (see below) — and every
-  lead the declared stage admits has to be able to reach it.
+  be **compatible with the mechanism this angle settled in 4a**, and every lead
+  the declared stage admits has to be able to reach it.
 - **`why_now`** — why this month, tied to something real in the month's guidance
   (a date, a seasonal trigger, a signal). No evergreen filler; "always true" is a
   failed `why_now`.
@@ -285,94 +356,42 @@ For each requested angle, write, in Vietnamese:
   this angle in a few Vietnamese words; never hand down a finished call-to-action
   sentence for the writer to paste.
 
-**Carry the mechanism; never restate it — and depart from it only through the
-bounded override.** The mechanism is the idea's, resolved once above you
-(`idea.mechanism`) and inherited by every angle beneath it. Your default, and the
-outcome on the overwhelming majority of angles, is to write **to** it: your fields
-must be consistent with the angle's resolved mechanism — the inherited one, or the
-override where this angle carries one — and must leave the writer able to hit the
+**Write TO the mechanism; never restate it.** The fields must be consistent with
+the mechanism this angle settled in 4a and must leave the writer able to hit the
 mechanism beat. They must **not** reproduce it as a field of their own, paraphrase
 it into `core_message`, sharpen it or soften it.
 **Writing *to* a mechanism is not reproducing it** — that distinction is
 `craft/doctrine` §2's, read live; never restate the definition here.
 
-**You never vary the inherited mechanism on your own initiative.** There is
-exactly one exception, and it is not an initiative: the **angle-local override**
-below, which opens only where the inherited mechanism genuinely **does not serve
-this angle's persona × route**. An angle that *can* be written to the inherited
-mechanism is never overridden merely because a different mechanism would also
-work — that is drift wearing a permission's clothes.
-
 **This rule does not branch on channel.** You are shared, so it is stated once and
-applies wherever you are called: a channel whose idea gets exactly one angle simply
-has one angle that could override, and a channel that fans out has several. Nothing
-here reads the channel name, and no caller keeps a channel-shaped copy of this rule
-— a copy diverges the day one side is edited, and the stale one wins wherever it is
-read first.
+applies wherever you are called: a channel whose idea gets exactly one angle settles
+one mechanism, and a channel that fans out settles one per angle. Nothing here reads
+the channel name, and no caller keeps a channel-shaped copy of this rule — a copy
+diverges the day one side is edited, and the stale one wins wherever it is read
+first. The only channel branch anywhere near this is the server's own approval bar,
+which binds `ad` and `post` and leaves `youtube` untouched.
 
-**The angle-local override, and every condition that bounds it.** All of these
-hold together; a candidate override that fails any one of them is **not
-authored**.
+**You persist none of it.** You hold **no mutation tool**: the settled mechanism is
+*returned* to the caller, which owns the save — `ssc-ads-brief` passes it on its
+`save_brief`, `ssc-post-ideate` round 3 writes it with
+`edit(entity='brief', patch={ mechanism })`. That separation is what makes you safe
+for two pipelines to share: you reason, the caller commits, and a caller can be read
+on its own to see every write it performs.
 
-- **Bank-first.** Source it from `craft/mechanism-bank`, read live: a fitting bank
-  entry is preferred, and the override then names the `bank_id` it came from. Only
-  where **no** entry fits do you author a new mechanism, and it is then marked
-  **`in_bank: false`** so an invented mechanism is visibly invented. Never name a
-  bank entry, an `id` or a sentence from memory.
-- **Judged against `craft/doctrine` §2, read live.** An override meets the **same**
-  definition every other mechanism meets — no weaker bar because it arrived late in
-  the pipeline. The definition is not restated here, and a failed read of that doc
-  **stops the run** and names it rather than falling back to a remembered version.
-- **Grounded in an attributed voice-of-customer item from the approved Approaches
-  document for this period.** You run **no** voice-of-customer pass of your own and
-  open **no** second outward account of the period — you hold no tool for it and
-  must not improvise one out of `search_knowledge`. A phrase you cannot attribute
-  to that approved document supports **no** override; the angle falls back to the
-  inherited mechanism or returns below bar.
-- **Proof-routed from the proof lines the approved Approaches document already
-  states** — the document the caller passed in `grounding`, the same one the
-  voice-of-customer item comes from, and the only proof route readable here (you
-  read no plan state, so the period's proof inventory is not directly visible to
-  you). Every candidate mechanism in that document carries its own route (proof
-  family + trace, already selected from this period's stated inventory and already
-  marked verified or `unverified_for_period`); an override carries one of those
-  routes on exactly the terms the Approaches candidate carries it, and never
-  re-derives one. Where that document states no route an override can carry — or no
-  such document was passed — the route is marked **unverified for the period**
-  rather than assumed.
-- **Dropped — not softened, not re-traced — if `rules/compliance` refuses its only
-  route.** Never soften the claim and never re-trace it onto a family that document
-  did not clear: routing around a refusal by moving the mechanism down one level is
-  the one direction this permission must not open. The angle then falls back to the
-  inherited mechanism, or returns below bar.
-- **Angle-local, always.** `idea.mechanism` is **never** written, patched or
-  demoted — you hold no tool that could, and you never ask the caller to do it for
-  you. Sibling angles on the same idea are **never** re-opened, re-run, re-scored
-  or reported stale because this angle overrode. The guarantee this system makes is
-  **one angle, one mechanism** — never *one subject, one mechanism*.
-- **Always reported.** Every override comes back naming the angle it applies to,
-  the inherited mechanism it departed from, **why** that mechanism does not serve
-  this angle's persona × route, and its provenance — the `bank_id`, or
-  `in_bank: false`. A departure a human cannot see is indistinguishable from
-  drift, so the report is not optional prose.
+**What fails.** An angle for which **no** defensible mechanism can be settled
+— nothing in the bank fits and nothing authorable is grounded, proof-routed and
+compliance-clear — is a **misfit angle**: return it below bar and say so. Authoring
+fresh is not an escape hatch for a weak angle; it is the gap-fill path for a right
+angle the bank does not yet cover.
 
-**You persist none of it.** You hold **no mutation tool**: the override is
-*returned* to the caller, which owns every save. Whether it can then be persisted is
-the **caller's** observation, not yours — only it holds the save tool and can see
-whether `briefs.mechanism` is available, so you leave the `persistence` line of the
-return empty for it to fill. Where the caller cannot persist it — `briefs.mechanism`
-not yet available on the server — the correct outcome is **reported, not persisted**,
-said plainly in those terms by the caller so the absence is not read as a dropped
-write. It is never smuggled into another field: not into a narrative
-field, not into the angle label, and never onto the idea.
-
-**What still fails.** An angle that can be written to **neither** the inherited
-mechanism **nor** a defensible override is a **misfit angle**: return it below bar
-and say so. The override is not an escape hatch for a weak angle — it is for the
-case where the *angle* is right and the *inherited mechanism* is wrong for it. And
-if the idea carries no mechanism at all (a legacy row), proceed and **name the
-absence in the return** rather than authoring one here: an override departs from a
-mechanism, it does not supply a missing one.
+**A brief with no mechanism is still drafted.** The mechanism is a condition of
+**approving** an `ad` or `post` brief and never of drafting one: the server refuses
+`approve(entity='brief')` on a blank `mechanism`, reporting `field: 'mechanism'`.
+That bar is **enforced server-side and you neither enforce nor duplicate it** — you
+hold no approval verb. An angle you returned below bar is saved, kept and worked on;
+it is simply not proposed as ready for approval. Briefs approved before that gate
+landed carry no mechanism, and are **never** re-opened, re-mechanised or reported
+stale.
 
 **`cta` is subordinate to the layer's close job — the layer rule always wins.**
 Where the angle spec declares a `layer`, the close is governed by the per-layer
@@ -392,8 +411,8 @@ contract. So:
   a direction.
 
 Every field traces to the hero or to the angle's anchor, is consistent with the
-angle's **resolved** mechanism (the inherited one, or its override), and — where a
-layer is declared — leaves that layer's close job intact. A field that traces to none of those is decoration — cut it.
+mechanism this angle settled in 4a, and — where a layer is declared — leaves that
+layer's close job intact. A field that traces to none of those is decoration — cut it.
 
 ### Step 5: Score, drop, regenerate
 
@@ -411,21 +430,20 @@ above 3:
 - duplication of an existing brief in the taken set on the five fields
 - **a field that declares, names, or forces a lead type** — including a
   `hook_direction` only one lead could open
-- **a field that restates, sharpens, softens or contradicts the angle's resolved
-  mechanism** instead of writing to it — and any field that varies the inherited
-  mechanism **without a declared, reported override**, which is drift, not an
-  override
-- **an override that fails any one of Step 4's bounding conditions** — not
-  bank-first, not judged against `craft/doctrine` §2 read live, not grounded in an
+- **a field that restates, sharpens, softens or contradicts the mechanism this
+  angle settled** instead of writing to it
+- **a mechanism that fails any one of Step 4a's five steps** — authored without a
+  successful live bank read or against a remembered bank, not grounded in an
   attributed voice-of-customer item from the approved Approaches document, not
-  proof-routed from the proof lines that document already states (nor marked
-  unverified for the period where it states none the override can carry), softened or re-traced after a
-  compliance refusal, touching `idea.mechanism` or a sibling angle, or not reported
-  with its `bank_id` / `in_bank: false`. A set whose override fails a condition is
-  capped **and** the override is withdrawn — the angle falls back to the inherited
-  mechanism or returns below bar
-- **an override authored where the inherited mechanism does serve this angle's
-  persona × route** — the override is for a misfit, never a preference
+  proof-routed from the period's stated inventory (nor marked unverified for the
+  period where that document states none), softened or re-traced after a compliance
+  refusal, or not judged against `craft/doctrine` §2 read live. A set whose
+  mechanism fails a step is capped **and** the mechanism is withdrawn — the angle
+  returns below bar
+- **a mechanism authored fresh where a bank entry did fit** — gap-fill is for what
+  the bank does not cover, never a preference for your own wording
+- **a mechanism whose provenance was not reported**, or whose `slug` was written
+  into the mechanism sentence, a narrative field, the angle label or any idea field
 - **a `cta` that fixes wording rather than a direction, or that pulls against the
   declared layer's close job** in `ad/layer-tones`
 
@@ -451,15 +469,12 @@ have nothing to compare and are reported as not applicable, not as passed.
   in the diversity boundary; a misfit returns below bar)*
 - **No set declares or forces a lead**, and every set stays open to every lead its
   declared stage admits. *(always)*
-- **Every set is written to its resolved mechanism** — the idea's inherited one, or
-  the angle-local override this angle declared — and none restates it or varies the
-  inherited one without a declared override. *(always; on a legacy idea with no
-  mechanism, report the absence instead)*
-- **Every override clears all of Step 4's bounds and is reported** with the angle,
-  the mechanism it departed from, the reason it does not serve that angle's
-  persona × route, and its `bank_id` or `in_bank: false`. `idea.mechanism` is
-  untouched and no sibling angle was re-opened, re-run or reported stale.
-  *(whenever any set overrides)*
+- **Every set is written to the mechanism its own angle settled**, and none restates,
+  sharpens, softens or contradicts it. *(always)*
+- **Every settled mechanism clears all five of Step 4a's steps and is reported**
+  with its angle and its provenance — the bank `slug` it drew from, or that it is
+  not in the bank. No sibling angle was re-opened, re-run, re-scored or reported
+  stale, and no idea field was written. *(always)*
 - **Every `cta` is a direction, not wording, and serves its declared layer's close
   job.** *(whenever a layer is declared)*
 
@@ -471,30 +486,25 @@ Then return to the caller:
 
 ```
 hero:            <one sentence, or "unchanged">
-mechanism:       <the idea's mechanism, carried through verbatim — or
-                  "absent (legacy idea); not authored here">
 sets:            [ { angle, hook_direction, core_message, why_now,
-                     story_moment, cta, score, comment, below_bar?,
-                     mechanism_override? } ]
-overrides:       [ { angle,
-                     mechanism,          # Vietnamese, the override sentence
-                     bank_id | in_bank: false,
-                     departed_from,      # the inherited mechanism, verbatim
-                     reason,             # why it does not serve this
-                                         #   angle's persona × route
+                     story_moment, cta, score, comment, below_bar? } ]
+mechanisms:      [ { angle,
+                     mechanism,          # Vietnamese, THE sentence for this
+                                         #   angle — what the caller saves to
+                                         #   `briefs.mechanism`
+                     provenance,         # `drawn from <slug>` — the slug the
+                                         #   live table returned — or
+                                         #   `not in the bank: authored here`.
+                                         #   REPORT-ONLY: never written into
+                                         #   the sentence or any other field
                      voc,                # the attributed item from the
                                          #   approved Approaches document
                      proof: { family, trace,
-                              verified | unverified_for_period },
-                     persistence } ]     # LEFT EMPTY BY YOU — the CALLER's field
-                                         #   to fill, because only it holds the
-                                         #   save tool and can see whether
-                                         #   `briefs.mechanism` is available:
-                                         #   "caller persists" — or "reported,
-                                         #    not persisted: briefs.mechanism
-                                         #    not available". Never guess it here.
-                 # or: "none — every angle carries the idea's mechanism"
-taken_compared:  <N briefs>
+                              verified | unverified_for_period } } ]
+                 # or, per angle: "below bar — no defensible mechanism settled",
+                 #   with the reason
+taken_compared:  <N briefs actually carrying fields — this idea's, plus any
+                  sibling-idea briefs the caller passed; or "none passed">
 audit:           <PASS, or the specific violations you could not resolve>
 declared:        <awareness stage as the caller declared it, echoed back
                   unchanged — or "absent (legacy caller); not diagnosed here" —
@@ -503,29 +513,28 @@ lead:            not declared — the writer picks it per asset, from the set th
                   declared stage admits
 ```
 
-`mechanism` is echoed so the caller can see it was carried, not re-authored;
 `declared` is echoed so a caller can see its stage/layer arrived intact. The
 `lead` line is a constant, not a value you compute — it is there so a reader of
-the return can never mistake its absence for an omission. **`overrides` is never
-omitted**: a run in which no angle overrode says so in that line, because "no
-overrides" and "overrides not reported" must never look the same to a reader.
+the return can never mistake its absence for an omission. **`mechanisms` is never
+omitted and never partial**: every angle appears, either with its settled mechanism
+and provenance or with the reason it came back below bar, because a mechanism a
+human never sees is indistinguishable from drift.
 
-The caller saves. You do not — **you hold no mutation tool**, so an override is a
-returned value, never a write. If the caller cannot persist it, that is stated as
-*reported, not persisted*; it is never written into another field and never onto
-`idea.mechanism`.
+The caller saves. You do not — **you hold no mutation tool**, so a settled mechanism
+is a returned value, never a write. `ssc-ads-brief` passes it on `save_brief`;
+`ssc-post-ideate` round 3 writes it with `edit(entity='brief', patch={ mechanism })`.
+Provenance is not saved anywhere — it lives in this return only, and is never
+smuggled into a narrative field, an angle label or any idea field.
 
 ## Output
 
 - One hero per idea (new, or reported unchanged)
-- The idea's mechanism, carried through — or its absence reported, never filled in
-- Every **angle-local mechanism override**, each naming the angle, the mechanism it
-  departed from, why that mechanism does not serve the angle's persona × route, its
-  `bank_id` or `in_bank: false`, and an **empty `persistence` line for the CALLER
-  to fill** — only it holds the save tool and can see whether `briefs.mechanism`
-  is available, so never guess it here — or an
-  explicit "none: every angle carries the idea's mechanism". Never a write: this
-  skill holds no mutation tool and the caller persists
+- **One settled mechanism per angle**, each in Vietnamese and each reported with its
+  angle, its provenance (the bank `slug` it was drawn from, or that it is not in the
+  bank and was authored here), its attributed voice-of-customer item and its proof
+  route — or, for an angle where none could be defensibly settled, the reason it
+  came back below bar. Never a write: this skill holds no mutation tool and the
+  caller persists. Provenance is report-only and is written into no field
 - `angle_count` scored field sets, each with its Vietnamese comment
 - The caller's declared awareness stage + layer, echoed back unchanged
 - **No lead type, ever** — that decision belongs to the writer
@@ -552,64 +561,72 @@ returned value, never a write. If the caller cannot persist it, that is stated a
   overlap is where coverage lives: fixing the lead here would cost one operator
   approval per lead for a single creative decision, and would freeze the one axis
   that changes the first line — the part the ~125-character fold exposes.
-- **Never restates a mechanism, and never varies one on its own initiative (hard
-  rule).** The mechanism lives on the **idea**, is inherited by every angle beneath
-  it, and is written **to**, never reproduced — writing *to* a mechanism is not
-  reproducing it, per `craft/doctrine` §2 read live. An idea that carries none has
-  its absence **reported**, never filled in.
-- **The angle-local override is the ONE bounded exception, and every bound is a
-  hard rule.** It opens only where the inherited mechanism does not serve **this
-  angle's persona × route** — never because another mechanism would also work — and
-  only when **all** of the following hold: sourced **bank-first** from
-  `craft/mechanism-bank` read live (naming its `bank_id`, or marked
-  **`in_bank: false`** where nothing fits); judged against **`craft/doctrine` §2
-  read live**, the same definition every other mechanism meets; **grounded in an
-  attributed voice-of-customer item from the approved Approaches document** for
-  this period, this skill running **no** voice-of-customer pass and opening no
-  second outward account of it; **proof-routed from the proof lines that same
-  approved Approaches document already states** — the only proof route readable
-  here, carried on the terms that candidate carries it, never re-derived, and
-  marked **unverified for the period** where the document states no route the
-  override can carry (or no such document was passed), never assumed; and **dropped — not softened, not re-traced —** where
-  `rules/compliance` refuses its only route. Fail any one and no override is
-  authored: the angle falls back to the inherited mechanism or returns below bar.
-- **An override's blast radius is one angle (hard rule).** `idea.mechanism` is
-  **never** written, patched or demoted, and sibling angles are **never** re-opened,
-  re-run, re-scored or reported stale. The guarantee is **one angle, one
-  mechanism** — never *one subject, one mechanism*.
-- **Every override is reported (hard rule).** Naming the angle, the mechanism it
-  departed from, the reason, and its `bank_id` or `in_bank: false`. A run with no
-  override says so. An override a human never sees is drift.
-- **The override persists nothing here.** This skill holds no mutation tool, so an
-  override is returned for the **caller** to save. Where the caller cannot save it,
-  the outcome is **reported, not persisted**, stated in those words — never
-  smuggled into a narrative field, an angle label, or `idea.mechanism`.
-- **An override is never an escape hatch for a weak angle (hard rule).** An angle
-  that can be written to neither the inherited mechanism nor a defensible override
-  is a **misfit angle**: returned below bar, and said so.
+- **Settles one mechanism per angle (hard rule).** `briefs.mechanism` is its only
+  home and the guarantee is **one angle, one mechanism**. No idea field is ever
+  written or asked to be written.
+- **Every settled mechanism clears all five of Step 4a's steps, and each is a hard
+  rule.** Drawn **bank-first** from the `mechanisms` table read live with
+  `list_mechanisms` / `get_mechanism` (approved entries are the supply), naming the
+  `slug` it drew from; **grounded in an attributed voice-of-customer item from the
+  approved Approaches document** for this period, this skill running **no**
+  voice-of-customer pass and opening no second outward account of it, an
+  unattributable phrase supporting nothing; **proof-routed from the period's stated
+  proof inventory** as that same approved document states it — the only view of the
+  period readable here — marked **unverified for the period** where it states none,
+  never assumed; **dropped — not softened, not re-traced —** where
+  `rules/compliance` refuses its only route, on the same terms for a bank draw as
+  for one authored here, because a bank entry is never pre-cleared; and **judged
+  against `craft/doctrine` §2 read live**, the same definition either way. Fail any
+  one and no mechanism is settled: the angle returns below bar.
+- **Authoring fresh is gap-fill only, and is declared (hard rule).** A new
+  mechanism is authored **only** where a successful live bank read returned nothing
+  that fits, and the report says so plainly. Never authored because your own wording
+  reads better than a fitting entry.
+- **Sibling angles may disagree, and nothing checks it (accepted cost).** Two angles
+  of one subject may name mechanisms that do not cohere. No angle is **ever**
+  re-opened, re-run, re-scored or reported stale because another settled something
+  different, and no run stops on that basis.
+- **Every mechanism is reported with its provenance, and provenance is report-only
+  (hard rule).** Naming the angle and either the bank `slug` or that it is not in
+  the bank. There is no `briefs.mechanism_slug`, so provenance is never smuggled
+  into the mechanism sentence, a narrative field, an angle label, or any idea field.
+  A mechanism a human never sees is drift.
+- **Writes *to* the mechanism, never restates it (hard rule).** No returned field
+  reproduces, paraphrases, sharpens, softens or contradicts the angle's mechanism —
+  writing *to* a mechanism is not reproducing it, per `craft/doctrine` §2 read live.
+- **Persists nothing.** This skill holds no mutation tool, so a settled mechanism is
+  returned for the **caller** to save: `ssc-ads-brief` on `save_brief`,
+  `ssc-post-ideate` round 3 with `edit(entity='brief', patch={ mechanism })`.
+- **The mechanism gates APPROVAL, never DRAFTING, and the server holds that gate.**
+  `approve(entity='brief')` refuses an `ad` or `post` brief with a blank
+  `mechanism`, reporting `field: 'mechanism'`; `youtube` is untouched. An **approved**
+  brief is never re-opened or re-scored here, and a blank `mechanism` on one is named
+  in the report and never invented. This skill neither enforces nor duplicates the gate
+  and holds no approval verb. A brief with no mechanism is still saved, kept and worked on.
+- **Gap-fill is never an escape hatch for a weak angle (hard rule).** An angle for
+  which no defensible mechanism can be settled is a **misfit angle**: returned below
+  bar, and said so.
 - **`cta` is a direction only, and the layer rule always wins (hard rule).** No
   returned `cta` fixes wording. Where a layer is declared, the per-layer close
   **job** in `ad/layer-tones` governs — that doc's CTA phrasings are
   non-exhaustive illustration — and a `cta` that pulls against it yields to it.
 - **Never hard-codes KB content.** Name the doc and its section and read it live —
-  the doctrine and its mechanism, the mechanism bank, the compliance rules, the
-  per-layer close job, the lead taxonomy and its awareness mapping, personas and
-  their triggers, the angle vocabulary, the proof points, the banned words. No
-  persona names in closed lists, no lead roster written out here, no remembered
-  trigger — and **no mechanism sentence, no bank `id` and no `fits` phrasing
-  written into this file**, because the bank is revised on its own cadence and a
-  baked-in copy would outrank the live document it was meant to reflect.
-- **A failed KB read STOPS the run (hard rule).** Check `missing` on every load,
-  retry once, then stop and name the doc. Never proceed from a remembered
-  version and never substitute a softer rule for one you could not read.
-  **`craft/mechanism-bank` and `rules/compliance` are scoped differently, not
-  softer** — each is load-bearing only for an angle-local override.
-  **`craft/mechanism-bank` is scoped to override consideration, not to every run**:
-  read it live whenever an angle-local override is being considered, and a failed
-  read of it authorises **no** override this run — every angle falls back to the
-  inherited mechanism or is dropped as a misfit, and the gap is named plainly
-  rather than left silent — never a run halted, never a remembered bank, and never
-  an override authored without a successful live read.
+  the doctrine and its mechanism, the compliance rules, the per-layer close job, the
+  lead taxonomy and its awareness mapping, personas and their triggers, the angle
+  vocabulary, the proof points, the banned words. No persona names in closed lists,
+  no lead roster written out here, no remembered trigger. The same discipline binds
+  the **bank**, which is a table rather than a document: **no mechanism sentence, no
+  `slug`, no `fits` phrasing and no `proof_family` is written into this file**,
+  because the bank is revised on its own cadence and a baked-in copy would outrank
+  the live supply it was meant to reflect.
+- **A failed read STOPS the run (hard rule).** Check `missing` on every
+  `get_knowledge` load, retry once, then stop and name the doc. Never proceed from a
+  remembered version and never substitute a softer rule for one you could not read.
+  **`craft/doctrine`, `rules/compliance` and the bank read are all load-bearing on
+  every run**, because every run settles a mechanism: a failed `list_mechanisms` /
+  `get_mechanism` stops that run and names the bank rather than authoring blind
+  against a library it cannot see. An **empty** result from a successful bank read is
+  not a failed read — it is the gap-fill case, and it is reported as such.
 - All returned prose is **Vietnamese**; reasoning back to the caller may be the
   operator's language.
 - Requires `view` only.

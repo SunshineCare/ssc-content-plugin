@@ -1,7 +1,7 @@
 ---
 name: ssc-post-approaches
 description: >-
-  Runs the APPROACHES step — the first step and first gate of the Cambridge Diet Vietnam Posts channel, on channel_plans(channel='post', period), hanging off that period's monthly-plan head. It authors the channel's creative HOW for organic Facebook posts and nothing above it. Grounding is strictly ordered: the MONTHLY PLAN first (its narrative, themes, one outward research pass and only look-back), the QUARTERLY strategy brief second (to place the month in the quarter and fill in where the month is silent), the KNOWLEDGE BASE third (craft, persona detail, hard rules — read live by path, never remembered). Where two sources disagree the higher one wins and the doc says so in one line. What governs an APPROACH is read live and never restated here — craft/doctrine (the production chain an approach sits inside, the mandatory mechanism, and the rule-ownership table that decides what this doc may state and what it must instead point at) and craft/awareness-framework (awareness staging, and the boundary that a brief declares the stage while the writer picks the lead); the per-asset floor and the set-level coverage verdict are deliberately NOT read here, because this step produces neither. A failed KB read STOPS the run, writes nothing, and names the document that could not be read — never prose, memory or a cached copy. It INHERITS the quarter's market-sophistication read and NEVER derives, infers, adjusts or upgrades one: the read is carried verbatim into the document's first section as a single numbered rule saying how indirect this month's openings must be, or recorded as NOT STATED with no bar applied, and reported either way in the run summary. For the three channel-agnostic pieces of Approaches work it dispatches the shared sub-skill ssc-approaches-core with channel='post' — that inherited read, the per-persona VOICE-OF-CUSTOMER pass (her language, triggers, objections and myths in her own words, every quote attributed to a recorded source and a silent source named as a gap), and the CANDIDATE-MECHANISM supply (deliberately more candidates than the month can use, each carrying the quoted attributed customer line it explains, its proof route drawn only from THIS period's stated proof inventory, and how indirect the inherited read forces the lead to be) — then composes the returned blocks into two dedicated sections of a SEVEN-section document, carrying the named gaps through and never re-authoring, re-scoring, paraphrasing or re-attributing them. The composed §3 RENDERS every field the core returned per candidate — including its BANK PROVENANCE (the `bank_id` of the `craft/mechanism-bank` entry it was drawn from, or an explicit `in_bank: false` where the core gap-filled instead) and its `valence` — as structural English labels inside the Vietnamese document; there is no bank_id column and no valence column, so this document is the only carrier by which either reaches Ideate, and a label dropped here does not exist downstream. It carries the period's valence mix through as reported and enforces NO quota — the negative-valence cap belongs to Ideate, where the settled set exists. It proposes candidates only: it binds no candidate to any idea. It NEVER restates the head, NEVER runs WebSearch (the head's Research is the period's only outward pass), NEVER writes plan_targets or the detail row (the head allocates; a channel-side write is refused with retired_plan_field), and NEVER touches the head. Blocked until the month is released by the head's narrative approval. Writes Vietnamese markdown to channel_plans.context via save_channel_plan, minting the post plan row if none exists. Propose-only; ends at the Approaches gate; never sets approaches_approved.
+  Runs the APPROACHES step — the first step and first gate of the Cambridge Diet Vietnam Posts channel, on channel_plans(channel='post', period), hanging off that period's monthly-plan head. It authors the channel's creative HOW for organic Facebook posts and nothing above it. Grounding is strictly ordered: the MONTHLY PLAN first (its narrative, themes, one outward research pass and only look-back), the QUARTERLY strategy brief second (to place the month in the quarter and fill in where the month is silent), the KNOWLEDGE BASE third (craft, persona detail, hard rules — read live by path, never remembered). Where two sources disagree the higher one wins and the doc says so in one line. What governs an APPROACH is read live and never restated here — craft/doctrine (the production chain an approach sits inside, the mandatory mechanism, and the rule-ownership table that decides what this doc may state and what it must instead point at) and craft/awareness-framework (awareness staging, and the boundary that a brief declares the stage while the writer picks the lead); the per-asset floor and the set-level coverage verdict are deliberately NOT read here, because this step produces neither. A failed KB read STOPS the run, writes nothing, and names the document that could not be read — never prose, memory or a cached copy. It INHERITS the quarter's market-sophistication read and NEVER derives, infers, adjusts or upgrades one: the read is carried verbatim into the document's first section as a single numbered rule saying how indirect this month's openings must be, or recorded as NOT STATED with no bar applied, and reported either way in the run summary. For the two channel-agnostic pieces of Approaches work it dispatches the shared sub-skill ssc-approaches-core with channel='post' — that inherited read, and the per-persona VOICE-OF-CUSTOMER pass (her language, triggers, objections and myths in her own words, every quote attributed to a recorded source and a silent source named as a gap) — then composes the returned voice-of-customer block into a dedicated section of a SIX-section document, carrying the named gaps through and never re-authoring, re-scoring, paraphrasing or re-attributing it. That section matters beyond this document: once the Approaches is approved it is the SANCTIONED SOURCE of the attributed customer quote an angle brief must cite before a mechanism may be settled on it. The mechanism itself is settled ONE ANGLE AT A TIME at the ANGLE BRIEF by ssc-brief-core. What this step hands down is the period's STATED PROOF INVENTORY, recorded verbatim as a numbered rule (a null recorded as NOT STATED with no route assumed) — the inventory the brief step proof-routes from. It NEVER restates the head, NEVER runs WebSearch (the head's Research is the period's only outward pass), NEVER writes plan_targets or the detail row (the head allocates; a channel-side write is refused with retired_plan_field), and NEVER touches the head. Blocked until the month is released by the head's narrative approval. Writes Vietnamese markdown to channel_plans.context via save_channel_plan, minting the post plan row if none exists. Propose-only; ends at the Approaches gate; never sets approaches_approved.
 metadata:
   type: skill
   stage: post-pipeline
@@ -92,14 +92,16 @@ If released, hold from the head:
   dispositions. Confidence matters: a HIGH-confidence finding becomes a rule, a
   LOW-confidence one becomes a thing to try, not a rule.
 - `plan.proofInventory` — **what the business can actually stand behind this
-  period.** You do not judge it; you hold it and pass it to the core in Step 5b,
-  which is what every candidate mechanism's proof route is selected from. **A
-  `null` here is a FACT, not a missing read** — it means the head states no
-  inventory this period, and every route is then marked unverified for the
-  period. Never assume, infer or invent one.
+  period.** You do not judge it; you **record it verbatim** as a numbered §1 rule
+  (Step 6). It is a hand-down, not working material for this step: the angle
+  brief proof-routes its mechanism from the inventory **as this document states
+  it**, so a period's inventory that never reaches the page is an inventory that
+  step cannot route from. **A `null` here is a FACT, not a missing read** — it
+  means the head states no inventory this period, and the rule then records
+  `NOT STATED` with no route assumed. Never assume, infer or invent one.
 - `plan.offerState` — **the period's promotion state.** Same treatment: held and
-  passed through. **A `null` is a FACT** — no promotion this period. Never assume
-  one is running.
+  recorded, never judged. **A `null` is a FACT** — no promotion this period.
+  Never assume one is running.
 - `plan.strategyBriefId` — the quarter brief the head recorded, if any.
 
 `proofInventory` and `offerState` come off the response you have already read.
@@ -125,7 +127,7 @@ If `plan` is non-null:
   have edited it, and their edits are signal about what the doc is missing.
 - `plan.targets` — the head's Post allocation, **if it has been set yet**. When
   pillar rows are present, let the allocated emphasis shape which pillars get a
-  block in §4. When absent (the usual case at this step), take pillar emphasis
+  block in §3. When absent (the usual case at this step), take pillar emphasis
   from the head's themes and ranked terms instead, and note it in one line.
 - `plan.detail.format_mix` — the allocated format mix, if set. Same treatment.
 
@@ -190,7 +192,7 @@ These are the paths this step draws on:
 - `brand/journey-stages` — the emotional journey stages and their content
   implications
 - `brand/angles` — value / entry / against / experience dimensions and the frame
-  codes. This is the vocabulary §4's differentiation move is expressed in.
+  codes. This is the vocabulary §3's differentiation move is expressed in.
 - **The ENTIRE `voice` category** — load it with `get_knowledge(categories: ["voice"])`,
   never as an enumerated path list. All of it applies: tone, the pronoun rules, the
   vocabulary, the Vietnamese-language rules and the founder voice. A hardcoded subset
@@ -216,13 +218,15 @@ These are the paths this step draws on:
   step honest — the **brief** declares the stage and the **writer** picks the lead
   per asset — so this doc may set staging direction and must never fix a lead type
   or an opening formula for the month.
-- `brand/proof-points` — the adopted proof families. You need them to judge what
-  you compose into §3: a candidate's route names a family from this doc, and you
-  cannot check that the core's routes sit inside this period's stated
-  `proofInventory` without it. Read the families live; never restate one here.
+- `brand/proof-points` — the adopted proof families. You need them to **record**
+  the head's `proofInventory` in terms a later step can route from: the inventory
+  names families from this doc, and a rule that garbles a family name hands down
+  an inventory nobody can match. You judge no route here — the angle brief does
+  that. Read the families live; never restate one here.
 - `rules/compliance` — the refused proof devices and the constraint that refuses
-  each. Same reason: a candidate whose only route this doc refuses does not reach
-  §3 at all. Read the refusals live; never restate one here.
+  each. Same reason, and for §6's compliance line: an inventory recorded without
+  the refusals beside it reads as broader than it is. Read the refusals live;
+  never restate one here.
 - `rules/organic-vs-paid-firewall` — what organic content may say that paid may
   not, and the reverse. This channel is organic; the line matters.
 - `rules/banned-words` — hard-banned Vietnamese words and compounds. Zero
@@ -261,61 +265,47 @@ research pass is exactly what the monthly plan exists to eliminate.
 
 ### Step 5b: Dispatch `ssc-approaches-core`
 
-Three pieces of Approaches work are **channel-agnostic and live in one shared
+Two pieces of Approaches work are **channel-agnostic and live in one shared
 sub-skill**, so that this channel and the Ads channel cannot drift apart: the
-**inherited sophistication read**, the **voice-of-customer pass**, and the
-**candidate-mechanism supply**. Dispatch `ssc-approaches-core` for all three.
+**inherited sophistication read** and the **voice-of-customer pass**. Dispatch
+`ssc-approaches-core` for both.
 
 Payload:
 
 | Field | What you pass |
 |---|---|
-| `channel` | `'post'` — this is the core's only conditional, and on `post` it binds every candidate and every quoted line to `rules/organic-vs-paid-firewall` and refuses any ad-sourced line |
+| `channel` | `'post'` — this is the core's only conditional, and on `post` it binds every quoted line to `rules/organic-vs-paid-firewall` and refuses any ad-sourced line |
 | `period` | `<period>` |
-| `head` | the Step 1 payload: `plan.research`, `plan.performanceReview`, `plan.proofInventory`, `plan.offerState` — passing a `null` inventory or a `null` offer state **as the fact it is**, never as an omission |
+| `head` | the Step 1 payload the core compiles from: `plan.research` and `plan.performanceReview`. The inventory and the offer state are **not** passed — the core compiles quoted customer material only, so they have no use there; they are recorded in your own §1 instead (Step 6) |
 | `quarter` | the Step 3 payload: `sophisticationStage`, `sophisticationRead` and the marked findings — or the `NOT STATED` fact where the brief carries no read, and `{ brief: null }` passed through as itself |
 | `personas` | the personas this run features — the ones the head's themes and ranked terms point at, resolved from the live `brand/personas` roster (Step 4). Where the month narrows to none, pass none and let the core fall back to the whole roster; **never guess a subset** |
 
 The core reads its own KB list live even though you have read most of the same
 paths — that is deliberate, and you do not try to save it the reads.
 
-**What comes back** is three blocks plus provenance: `sophistication`,
-`voice_of_customer`, `candidate_mechanisms` — each candidate carrying its
-`bank_id` (or `in_bank: false`) and its `valence` alongside its existing fields —
-`valence_mix`, `gaps`, `personas_featured` and `reads`.
+**What comes back** is a fixed six-field shape: `channel`, `sophistication`,
+`voice_of_customer`, `gaps`, `personas_featured` and `reads`.
+
+Compose exactly those six fields; anything outside that shape is a defect to
+report rather than material to compose. The mechanism is settled **one angle at a
+time, at the angle brief**, by `ssc-brief-core`.
 
 **What you do with them:**
 
-- Compose `voice_of_customer` into **§2** and `candidate_mechanisms` into **§3**
-  of the document in Step 6, and the `sophistication` line into the one numbered
-  §1 rule. **Render every field the core returned** on each candidate block,
-  exactly as returned: its mechanism sentence, its quoted voice-of-customer item,
-  its **`bank_id` (or `in_bank: false`)**, its **`valence`**, its proof route
-  (`verified` / `unverified_for_period`) and its indirectness call. Render the
-  provenance and the valence label on every candidate, **without exception** —
-  Step 6's §3 says why a label dropped here is a label that does not exist
-  downstream.
-- **Carry the valence mix through** as the core reported it, into the Step 7
-  summary. You report the mix; you enforce no quota, trim nothing to hit a ratio
-  and drop no candidate for its valence — the negative-valence cap belongs to
-  Ideate, which is where the settled set exists.
+- Compose `voice_of_customer` into **§2** of the document in Step 6, and the
+  `sophistication` line into the one numbered §1 rule. Compose the block whole:
+  every quoted phrase, its attribution, each persona's gaps and the core's stated
+  refusals.
 - **Carry the named gaps through** into the document and into the Step 7 summary.
   A gap is the input the next period's head Research can act on; a swallowed gap
   is not.
 - **Never re-author, re-score, paraphrase or re-attribute what the core
-  returned**, and **never re-label a candidate's `bank_id` / `in_bank` /
-  `valence`** — a provenance or valence label is the core's finding, never this
-  step's judgement, and attaching a `bank_id` to something the core authored is
-  the one way an invention silently acquires the bank's authority. Never keep a
-  second copy of the core's rules in this file. If a candidate looks wrong, that
-  is a defect to report, not one to quietly rewrite.
-- **You trim; the core does not.** It deliberately returns more candidates than
-  the month can use. Keep the surplus: unused candidates stay in the approved doc
-  for the whole period, and Ideate draws on them. Trim only what does not fit the
-  month's themes, and say in one line what you dropped and why.
-- **You propose; you never choose.** Bind no candidate to an idea, a pillar
-  slot or a date. Ideate picks the one mechanism an idea carries and a human
-  approves it.
+  returned.** An attribution is the core's finding, never this step's judgement.
+  Never keep a second copy of the core's rules in this file. If a returned line
+  looks wrong, that is a defect to report, not one to quietly rewrite.
+- **You compose; you do not select.** Feature no persona the core did not, drop
+  no attributed line because it is inconvenient, and bind nothing to an idea, a
+  pillar slot or a date.
 - A **failed KB read inside the core STOPS this run too.** Write nothing and name
   the document it reported.
 
@@ -349,43 +339,44 @@ the English section names below. It is a persisted artifact a Vietnamese operato
 reviews, edits and approves in the dashboard. Your chat-side reasoning may stay
 English.
 
-**Length: about 2400 space-separated tokens of Vietnamese** (`wc -w` on the
+**Length: about 2000 space-separated tokens of Vietnamese** (`wc -w` on the
 document). This is working guidance an operator reads before approving and a
 writer reads before drafting. Roughly 1200 of that is the guidance, 500 is the
-examples — which are load-bearing and are not what to cut — and 700 is §2 and §3,
-the two sections the shared core supplies. **The `wc -w` check on the draft file
+examples — which are load-bearing and are not what to cut — and 300 is §2, the
+one section the shared core supplies. **The `wc -w` check on the draft file
 is a real gate, not a note:** run it before saving, and treat a number over the
 budget as a failure to compress, never as a new ceiling. It is the forcing
-function that keeps §4–§7 terse now that two sections sit above them. The way to
-hit it is to stop repeating, not to delete reasoning: §1 owns every shared rule,
-so §4–§7 cost a line each instead of a paragraph.
+function that keeps §3–§6 terse now that a compiled section sits above them. The
+way to hit it is to stop repeating, not to delete reasoning: §1 owns every shared
+rule, so §3–§6 cost a line each instead of a paragraph.
 
 ```markdown
 ## 1. Điều chung cho mọi bài tháng này  (What binds every post this month)
 ## 2. Tiếng nói khách hàng               (Voice of customer — attributed, from the core)
-## 3. Cơ chế đề xuất                     (Candidate mechanisms — the month's supply)
-## 4. Trụ cột × persona                  (Pillar × persona — only what is unique)
-## 5. Điểm khác biệt                     (Differentiation)
-## 6. Định dạng và phép thử              (Formats and the month's experiments)
-## 7. Ranh giới nội dung tự nhiên        (The organic content line)
+## 3. Trụ cột × persona                  (Pillar × persona — only what is unique)
+## 4. Điểm khác biệt                     (Differentiation)
+## 5. Định dạng và phép thử              (Formats and the month's experiments)
+## 6. Ranh giới nội dung tự nhiên        (The organic content line)
 ```
 
-**§2 and §3 sit above §4 deliberately.** §4's pillar blocks draw on the
-mechanisms, so the supply has to be on the page before the section that consumes
-it. Do not move them to the end: a supply that reads as an appendix gets ignored.
+**§2 sits above §3 deliberately.** §3's pillar blocks stand on what she actually
+said, so the attributed material has to be on the page before the section that
+draws on it. Do not move it to the end: evidence that reads as an appendix gets
+ignored — and this section is read far beyond this document (see §2's own note).
 
 **§1 is the shared section, and it exists to stop the rest of the doc repeating
 itself.** Anything true of every pillar belongs here and is stated **exactly
-once**; §4 onward reference it rather than restating it. Before you save, re-read
-the draft and ask of every sentence in §4–§7: *is this already true in §1?* If it
+once**; §3 onward reference it rather than restating it. Before you save, re-read
+the draft and ask of every sentence in §3–§6: *is this already true in §1?* If it
 is, delete it there and let §1 carry it. A doc that states its main rule five
 times reads as five rules.
 
 **Number §1's rules (1.1, 1.2, …).** The numbering is what makes the referencing
-work: §6 says "chấm theo mức nền ở mục 1.5" and §7 says "ràng buộc ở mục 1.7"
+work: §5 says "chấm theo mức nền ở mục 1.5" and §6 says "ràng buộc ở mục 1.7"
 instead of repeating the baselines and the compliance line. Without stable numbers
 the later sections have nothing to point at and the repetition comes straight
-back.
+back. It is also how the proof-inventory rule is cited downstream: an angle brief
+proof-routes against a numbered rule, not a paragraph someone has to find.
 
 **§1 — Điều chung cho mọi bài.** Turn the head's Review findings and the month's
 themes into **concrete writing rules for a post**: what the first two lines do,
@@ -395,10 +386,10 @@ that follows from it, at the level of a sentence a writer can obey. Mark each
 rule with the confidence it inherits: a high-confidence repeated finding is a
 **ràng buộc** (a constraint); a thin-sample one is a **hướng thử** (a direction
 to try). Also park here, once each: the voice/register rule, the measurement
-baselines every experiment in §6 will be scored against, the boundary with the
+baselines every experiment in §5 will be scored against, the boundary with the
 head's allocation (this doc says HOW, never how many), and a one-line compliance
-statement pointing at §7. Close §1 with the **shared chain** every pillar block
-then fills in, so §4 can be terse.
+statement pointing at §6. Close §1 with the **shared chain** every pillar block
+then fills in, so §3 can be terse.
 
 **The sophistication constraint is one numbered §1 rule, stated exactly once.**
 Take the next free number in §1's sequence and write the read the core carried
@@ -409,8 +400,20 @@ it, and do not restate the saturation ladder here; it lives in
 `craft/awareness-framework` and is read there. Where the core returned
 `NOT STATED`, write the gap line instead — that the quarter states no
 sophistication read and **no bar is applied this month** — and do not assume a
-stage. §3 and §4 point at that rule's number; the anti-repetition rule above is
-what keeps them from restating it.
+stage. §3 points at that rule's number; the anti-repetition rule above is
+what keeps it from restating it.
+
+**The period's stated proof inventory is one numbered §1 rule too, and it is a
+HAND-DOWN.** Take the next free number and record `plan.proofInventory` (Step 1)
+**as the head stated it** — which proof families the business can stand behind
+this period, and the trace each one rests on. Record it; do not judge it, rank
+it, extend it or route anything with it. Where the head carries none, write
+`NOT STATED` as the fact it is: the period states no inventory, and **no route is
+assumed to be verified** this month. Two things depend on this rule existing and
+being numbered: §6's compliance line points at it rather than re-listing the
+families, and the **angle brief proof-routes its mechanism from this period's
+inventory as this document states it** — this doc is where that step reads it, so
+an inventory left off the page is an inventory nobody downstream can route from.
 
 ### Every item in the document carries an example
 
@@ -420,8 +423,8 @@ writer can obey: "open on a belief" and "open on the product" are the same
 sentence to someone staring at a blank page. An item without an example is an
 item you have not finished writing.
 
-Three kinds, and the document says which is which. **§2 and §3 are neither of the
-first two** — their material comes from the core and is quoted, not composed:
+Three kinds, and the document says which is which. **§2 is neither of the first
+two** — its material comes from the core and is quoted, not composed:
 
 - **§1 — measured ✅/❌ pairs.** Real lines that were actually published and
   actually scored. **Never invent these.** The head's Review names the openings
@@ -431,7 +434,7 @@ first two** — their material comes from the core and is quoted, not composed:
   one** — a ❌ carrying its measured result is an argument; a bare ❌ is an opinion.
   Where no measured pair exists for a rule, compose one and do not dress it up as
   measured.
-- **§4–§7 — composed illustrations.** A suggested opening line per pillar block, a
+- **§3–§6 — composed illustrations.** A suggested opening line per pillar block, a
   suggested move per differentiation bullet, a concrete subject per format, a
   ✅/❌ per compliance line. These are written fresh to show the shape.
 - **§2 — attributed quotes, never composed illustrations.** Every line in §2 is a
@@ -441,11 +444,6 @@ first two** — their material comes from the core and is quoted, not composed:
   said: an invented customer voice is exactly the failure the core exists to
   stop, and it is indistinguishable from a real one once it is on the page. Where
   a source was silent, §2 carries the **named gap** and no example at all.
-- **§3 — one worked candidate block.** The example for §3 is not an illustration
-  written fresh; it is one of the candidates the core returned, written out in
-  full (mechanism sentence, the quoted attributed customer line it explains, its
-  `bank_id` or `in_bank: false`, its `valence`, its proof route and status, its
-  indirectness) so the rest of the section can be read against a complete one.
 
 **Every example comes from POST content — organic page material only.** Never
 source one from ad copy, the ad performance lens, or an `ad/*` doc. The two
@@ -473,59 +471,24 @@ an attribution does not go in the document at all. Where the core named a **gap*
 leave it open: it is what next period's head Research can act on. Include the
 core's refusals too, where it declined an ad-sourced line under the firewall, so
 the operator can see what was excluded and why. This section holds no rules of its
-own and points at nothing in §1: it is the evidence §3 and §4 stand on.
+own and points at nothing in §1: it is the evidence §3's pillar blocks stand on.
 
-**§3 — Cơ chế đề xuất.** The period's supply — one short block per candidate in the core's
-`candidate_mechanisms` block, composed in Step 6. This section RENDERS what the core returned; it
-never re-derives it. What a candidate must satisfy — what qualifies as a mechanism, how the bank is
-matched before anything is authored, how a proof route is selected against this period's stated
-inventory, how indirectness is judged against the inherited sophistication read, and when a
-candidate is dropped rather than softened — is `ssc-approaches-core`'s, stated there and
-deliberately not restated in this doc. Render every field it returned, per candidate:
+**§2 is read far beyond this document, and that is why nothing in it may be
+composed.** Once the Approaches is approved, this section is the **sanctioned
+source** of the attributed customer quote an angle brief must cite before a
+mechanism may be settled on it — the only place that step may take the quote
+from. So an unattributed line here is not a blemish in a planning doc; it is the
+grounding a mechanism stands on two steps later. A persona this section leaves
+empty leaves the brief step with nothing sanctioned to cite for her, which is
+exactly why the gap is **named** and left open rather than filled.
 
-- **The mechanism** — the one specific Vietnamese sentence, verbatim.
-- **What it explains** — the quoted, attributed voice-of-customer item it answers.
-- **`bank_id`: <slug>** — the `craft/mechanism-bank` entry the candidate was drawn from. Where the
-  core returned none because it gap-filled, write **`in_bank: false`** instead. Exactly one of the
-  two appears on every block: never both, never neither, and never a `bank_id` on a candidate the
-  core authored.
-- **`valence`: <positive | negative>** — as the core returned it. The two values, their definitions
-  and the priority between them live in `craft/mechanism-bank` §2, read live; none of it is restated
-  here or in this doc.
-- **Proof route** — the family, the trace, and `verified` / `unverified_for_period`, as returned.
-- **How indirect the lead must be** — as returned, `NOT STATED` included.
+**The mechanism is settled one angle at a time, at the angle brief**, by
+`ssc-brief-core`. What this document owes that step is **grounding, not craft**:
+§2's attributed customer material, and §1's numbered record of the period's
+stated proof inventory. Every section of this document stays on that side of the
+line.
 
-**`bank_id`, `in_bank` and `valence` are STRUCTURAL ENGLISH labels inside this Vietnamese document.**
-The label and its value stay in English exactly as written above — the same way the rest of the
-plugin treats a field label; everything else on the block (the mechanism sentence, the quote, the
-trace, the indirectness call) is Vietnamese, like the rest of this document.
-
-**A label dropped here is a label that does not exist downstream.** There is no `bank_id` column and
-no `valence` column anywhere — this document, persisted to `plan.context`, is what Ideate reads, so
-it is the ONLY carrier either label has. A candidate rendered without them reaches Ideate with no
-provenance to report and no valence to tally, which makes Ideate's negative-valence cap
-unenforceable — silently, since nothing downstream can tell a missing label from an absent fact.
-
-These are CANDIDATES. Ideate picks the one mechanism a subject carries and a human approves it;
-nothing here is chosen or approved by this step, and unused candidates stay available all period.
-
-**The surplus is the point.** The core returns deliberately more candidates than the month's planned
-post count can use, and the whole supply stays in the approved doc for the whole period.
-
-**Point at §1, do not restate it.** The indirectness call rides on the sophistication rule §1
-carries: reference that rule's number rather than repeating the read. Where §1 records
-`NOT STATED`, the block says so and makes no indirectness claim.
-
-**Nothing here is assigned.** No candidate names an idea, a pillar slot, a date or
-a persona pairing — Ideate picks the one mechanism an idea carries and a human
-approves it. A candidate whose only proof route `rules/compliance` refuses, or one
-that can only be argued the way paid creative argues it, **is not in this section
-at all** — the core drops it, and you do not reinstate it with a caveat. That holds
-for a candidate drawn from the bank exactly as it holds for one the core authored:
-a `bank_id` is evidence the brand has articulated the mechanism, never evidence
-that `rules/compliance` or `rules/organic-vs-paid-firewall` clears it this period.
-
-**§4 — Trụ cột × persona. Only what is unique to that pillar.** One short block
+**§3 — Trụ cột × persona. Only what is unique to that pillar.** One short block
 per priority pillar this month (the allocated pillars when `plan.targets` is set;
 otherwise the pillars the head's themes and ranked terms point at). Each block
 fills the blanks §1 left and adds nothing else:
@@ -541,22 +504,19 @@ fills the blanks §1 left and adds nothing else:
   `brand/journey-stages`.
 - **The one differentiating move** that keeps this block distinct from the others,
   so two pillars never read as the same post wearing a different label.
-- **Which §3 candidate mechanisms this pillar can draw on** — name them, by the
-  mechanism sentence's opening words, and nothing more. This is a pointer, not an
-  assignment: it tells the writer where to look, and it binds no candidate to any
-  idea. Do not repeat the candidate's proof route, its indirectness, its `bank_id`
-  / `in_bank` or its `valence` here — §3 carries all of them, once, and a second
-  copy in §4 is a label Ideate could tally twice.
+- **Which §2 material this pillar stands on** — point at the attributed lines for
+  that persona, and nothing more. It tells the writer where the evidence is, and
+  stops there.
 
 Do not restate §1's rules inside a block, and do not assign counts, dates, or
 formats per block — those are the head's allocation and the Schedule step's job.
 
-**§5 — Điểm khác biệt.** 2–4 bullets: what Cambridge Diet VN's organic posts
+**§4 — Điểm khác biệt.** 2–4 bullets: what Cambridge Diet VN's organic posts
 contrast against this month (the against dimensions in `brand/angles`, plus
 whatever the head's research surfaced), and the creative move that makes each
 contrast land on an organic feed rather than in an ad.
 
-**§6 — Định dạng và phép thử.** Formats and experiments are one section because
+**§5 — Định dạng và phép thử.** Formats and experiments are one section because
 they overlap: the month's experiments are usually format bets. For each format the
 allocation calls for (or, when allocation is not set yet, each format the month's
 themes imply): what it is **for** this month and what makes it work here — never
@@ -564,11 +524,13 @@ how many, that is the head's number. Then 1–3 deliberately experimental approa
 worth trying at small scale, each with what a win looks like, **scored against the
 baselines named in §1** rather than repeating the numbers.
 
-**§7 — Ranh giới nội dung tự nhiên.** Short. The compliance line for THIS month's
+**§6 — Ranh giới nội dung tự nhiên.** Short. The compliance line for THIS month's
 guidance, per `rules/organic-vs-paid-firewall` plus any constraint the head's
 research flagged (a platform rule, a legal change, a claim that needs review
 before use). State what this channel may say and what it must route through
-review first. Never resolve a compliance question yourself — name it and route it.
+review first, pointing at §1's proof-inventory rule by number rather than
+re-listing the families. Never resolve a compliance question yourself — name it
+and route it.
 
 **Vocabulary rule.** Check every Vietnamese string you write against
 `rules/banned-words`. Every banned term is prohibited, including compounds. Never
@@ -608,8 +570,8 @@ Report to the operator in their language:
 **Nguồn:** kế hoạch tháng <head id> → chiến lược quý <quarter brief id, or "không có"> → KB (<N> tài liệu, đọc trực tiếp)
 **Phân bổ:** <"đã có — <N> trụ cột" | "chưa có — lấy trọng tâm từ định hướng tháng">
 **Mức độ bão hoà thị trường (kế thừa từ quý):** <stage> — <read, nguyên văn như quý đã viết; ghi ở mục 1.<n>> | "quý chưa nêu (NOT STATED) — tháng này không áp mức chặn"
-**Cơ chế đề xuất:** <N> cơ chế (mục 3), nhiều hơn số bài tháng này cần — <n> lấy từ ngân hàng (`bank_id`), <n> do lõi tự soạn (`in_bank: false`)
-**Tỷ lệ valence:** <đúng như lõi báo cáo — chỉ báo cáo tại đây, không áp trần ở bước này; trần thuộc về Ideate>
+**Kho bằng chứng tháng này (ghi lại từ kế hoạch tháng, mục 1.<n>):** <các nhóm bằng chứng đúng như kế hoạch tháng nêu> | "kế hoạch tháng chưa nêu (NOT STATED) — không mặc định tuyến bằng chứng nào"
+**Tiếng nói khách hàng:** <N> persona có trích dẫn được ghi nguồn (mục 2) — nguồn để bước brief dẫn lại khi chốt cơ chế
 
 ### Điều chung cho mọi bài
 - <rule> — <ràng buộc | hướng thử>
@@ -634,15 +596,16 @@ Ideate, rồi chạy lại lệnh để sang Ideate.
 ## Output
 
 - `context` written to the post `channel_plan` (the Approaches markdown — the
-  channel's creative HOW, in **seven** sections), in Vietnamese
+  channel's creative HOW, in **six** sections), in Vietnamese
 - The inherited sophistication read carried as one numbered §1 rule — or the
   `NOT STATED` gap line, with no bar applied
-- §2 the attributed voice-of-customer pass and §3 the candidate-mechanism supply,
-  composed from the shared core's return, with its named gaps carried through
-- Every §3 candidate block rendering the core's `bank_id` (or `in_bank: false`)
-  and its `valence` as structural English labels inside the Vietnamese document —
-  the only carrier either label has, and the period's valence mix reported in the
-  run summary with no quota enforced here
+- The period's stated proof inventory recorded verbatim as a second numbered §1
+  rule — or `NOT STATED` as the fact it is — the hand-down the angle brief
+  proof-routes from
+- §2 the attributed voice-of-customer pass, composed from the shared core's
+  return with its named gaps carried through; once approved it is the sanctioned
+  source of the quote a brief cites
+- The mechanism settled at the angle brief, one angle at a time
 - The post plan row minted and linked to the period's head if it did not exist
 - `strategy_brief_id` recorded as provenance when a quarter brief exists
 - No gate flipped, no head field written, no allocation written
@@ -669,8 +632,8 @@ Ideate, rồi chạy lại lệnh để sang Ideate.
 - **Never writes quantities.** No `save_plan_targets`, no `detail` payload on
   `save_channel_plan` — both are refused with `retired_plan_field` from `2026-08`
   onward, and the refusal is correct: the head allocates.
-- **Never writes retired fields.** `tactics`, `tactics_approved` and
-  `retrospective` no longer exist on `channel_plans`.
+- **Writes only `context`** on the post `channel_plan`. The month's bets and its
+  look-back live on the head; this channel keeps neither of its own.
 - **Never runs WebSearch or fetches a page.** The period has exactly one outward
   pass and it is the head's Research step. A gap is reported, never filled here.
 - **Never restates the head.** The month's themes, its research findings and its
@@ -689,33 +652,26 @@ Ideate, rồi chạy lại lệnh để sang Ideate.
   (`craft/coverage`) and the close's wording rules (`craft/close-job`,
   `craft/cta`) are **not** read here — they govern an asset and a set, which this
   step never produces.
-- **The shared core owns three rules; this skill keeps no copy of them.** The
-  sophistication-inherit rule, the voice-of-customer pass and the
-  candidate-mechanism construction live in `ssc-approaches-core` (Step 5b) and
-  nowhere else. This skill dispatches it, composes what it returns into §1's
-  numbered rule, §2 and §3, and **never re-authors, re-scores, paraphrases,
-  re-attributes or re-labels a candidate's `bank_id` / `in_bank` / `valence`** in
-  any of it. Two copies of doctrine diverge the day one is edited,
-  and the stale copy wins wherever it is read first — that drift is exactly what
-  the shared core exists to prevent.
-- **Renders each candidate's bank provenance and valence; authors neither.** Every
-  §3 candidate block carries the core's `bank_id` (or `in_bank: false`) and its
-  `valence`, as **structural English labels inside the Vietnamese document**.
-  There is no `bank_id` column and no `valence` column: `plan.context` is the only
-  carrier that reaches Ideate, so **a label this step drops does not exist
-  downstream** and Ideate's negative-valence cap silently loses its input. This
-  step never attaches a `bank_id` to a candidate the core authored, never infers a
-  valence from a mechanism's wording, and enforces **no** valence quota — it
-  reports the mix; the cap is Ideate's, where the settled set exists. Bank
-  membership clears nothing on its own: `rules/compliance` and
-  `rules/organic-vs-paid-firewall` bind a bank-drawn candidate exactly as they
-  bind one the core authored.
+- **The shared core owns two rules; this skill keeps no copy of them.** The
+  sophistication-inherit rule and the voice-of-customer pass live in
+  `ssc-approaches-core` (Step 5b) and nowhere else. This skill dispatches it,
+  composes what it returns into §1's numbered rule and §2, and **never re-authors,
+  re-scores, paraphrases or re-attributes** any of it. Two copies of doctrine
+  diverge the day one is edited, and the stale copy wins wherever it is read
+  first — that drift is exactly what the shared core exists to prevent.
+- **The mechanism is the angle brief's (hard rule).** It is settled **one angle at
+  a time** by `ssc-brief-core`, and everything that qualifies one — proof-routing,
+  dropping rather than softening a compliance-refused route, judging indirectness
+  — lives with that step. Neither this skill's tool list nor the core's carries a
+  mechanism tool. What this document owes that step is **grounding, not craft**.
+- **Hands down the period's proof inventory; judges no route with it.**
+  `plan.proofInventory` is recorded verbatim as a numbered §1 rule — `null`
+  recorded as `NOT STATED`, never assumed, never inferred, never extended. The
+  angle brief proof-routes **from this period's inventory as this document states
+  it**, so an inventory left off the page is one nobody downstream can route from.
+  This step routes nothing itself.
 - **Sophistication is inherited, never derived** — Step 3 holds the quarter's read
   and passes it to the core; the rule lives in `ssc-approaches-core` (Step 5b).
-- **Proposes candidates; never assigns one.** §3 is a supply, deliberately larger
-  than the month can use. No candidate is bound to an idea, a pillar slot, a date
-  or a pairing; Ideate picks the one mechanism an idea carries and a human
-  approves it.
 - **A failed KB read STOPS the run** (Step 4): nothing is written, the failing
   **document is named**, and the run never falls back to prose, memory or a cached
   copy.

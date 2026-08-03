@@ -29,8 +29,8 @@ The month is decided at the **monthly-plan head** (`/ssc-plan <period>`), which 
 
 | Step | Gate | The agent does | Then the operator… |
 |---|---|---|---|
-| **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context`. It carries the quarter's **market-sophistication read** (inherited verbatim, never derived) and supplies the period's **candidate mechanisms** — both produced by the shared `ssc-approaches-core` sub-skill it dispatches | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
-| **Ideate** | ≥1 approved idea | **Three rounds, one per invocation** — see below. ① *Distribution* → the pillar split, written to the head (propose-only, no gate). ② *Titles* → one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Angle* → each **approved** idea's hero + its **one** angle, patched onto its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas to schedule |
+| **Approaches** | `approaches_approved` | The channel's creative **HOW** for organic Facebook posts, grounded in the head's themes / research / review first, the quarter's strategy second, and the KB third → written to `context`. It carries the quarter's **market-sophistication read** (inherited verbatim, never derived) and the per-persona **voice-of-customer** pass — both produced by the shared `ssc-approaches-core` sub-skill it dispatches. Once approved, its voice-of-customer section is the sanctioned source of the attributed customer quote a mechanism must be grounded in | Reviews + **approves** the Approaches in the dashboard, then re-runs this command |
+| **Ideate** | ≥1 approved idea | **Three rounds, one per invocation** — see below. ① *Distribution* → the pillar split, written to the head (propose-only, no gate). ② *Titles* → one titled DRAFT idea per planned post, audited for spread and diversity. ③ *Brief* → each **kept** idea's hero + its **one** angle + that angle's **mechanism**, patched onto its single brief | ① accept, edit the numbers in the panel, **or just re-run — re-running is acceptance**. ② prune the titles worth keeping. ③ approve the ideas and their briefs to schedule |
 | **Schedule** | `schedule_approved` | Assigns each approved idea a publish date, honouring the **allocated** cadence and the head research's calendar → written as `schedule_entries` | Reviews + **approves** the calendar in the dashboard, then re-runs this command |
 
 The three human gates are **Approaches** (`approaches_approved`) → **Ideas** (≥1 approved idea) → **Calendar** (`schedule_approved`), all downstream of the month's single narrative approval.
@@ -47,11 +47,11 @@ remembered from the last conversation**, so it always advances rather than repea
 |---|---|
 | pillar counts all `0` | ① **Distribution** — proposes the split |
 | counts set, no ideas yet | ② **Titles** |
-| ideas exist and some are approved | ③ **Angle** — on the approved ones only |
+| the ideas are there and one still lacks its angle | ③ **Brief** — on the titles you kept |
 
 Rounds exist so effort follows commitment: no titles are written against a
-distribution nobody accepted, and no hero or angle work is spent on a title you were
-going to delete.
+distribution nobody accepted, and no hero, angle or mechanism work is spent on a
+title you were going to delete.
 
 **① Distribution** proposes a post count per pillar plus the cadence band and format
 mix. Three ways to accept: say so, edit the numbers in the dashboard panel, or just
@@ -63,10 +63,14 @@ trusting its own earlier proposal.
 Scores are honest, not floored — a weak topic reads as weak, because pruning is the
 point of the checkpoint.
 
-**③ Angle** works **only ideas you approved**, so prune first. Each gets its hero and
-its single angle (persuasion route + the five narrative fields) patched onto the brief
-it already has. Routes are spread across the batch, honouring any route the month's
-themes single out for expansion.
+**③ Brief** works the titles you **kept** after pruning — so prune first, and approve
+after, not before: approval is this round's **exit** gate, and an idea approved ahead
+of it sends the next invocation straight to Schedule with the brief left empty. This
+round **is** the post's brief step: each idea gets its hero, its single angle
+(persuasion route + the five narrative fields) and that angle's **mechanism** patched
+onto the brief it already has. Routes are spread across the batch, honouring any route the month's
+themes single out for expansion. A post has one angle, and this round settles that
+angle's **one mechanism**.
 
 ## What this command is NOT
 
@@ -85,7 +89,7 @@ Every step grounds itself in the same three sources, **in this priority order**:
 
 Where two sources disagree, the higher one wins — and the step says so in one line rather than quietly picking.
 
-Approaches folds these three into the shared `ssc-approaches-core` sub-skill, which returns the inherited sophistication read, the per-persona voice-of-customer pass and the period's **candidate-mechanism supply** — the supply Ideate prefers when it settles each idea's mechanism, and the sophistication read Schedule sequences by.
+Approaches folds these three into the shared `ssc-approaches-core` sub-skill, which returns the inherited sophistication read and the per-persona voice-of-customer pass. The sophistication read is the bar Ideate's angle must clear and the read Schedule sequences by; the approved Approaches document's voice-of-customer section is the sanctioned source of the attributed customer quote a mechanism must be grounded in when it is settled, one angle at a time, at the brief.
 
 ## What to do
 
@@ -93,11 +97,11 @@ This command is a thin entry point — it holds **no** orchestration logic. Disp
 
 ## Cutover
 
-The monthly plan owns the month from **`2026-08` onward**. Periods at or before `2026-07` ran the retired five-step channel pipeline, keep `month_plan_id` NULL, render read-only in their legacy shape, and are **never** migrated or backfilled. If asked to run this command for a period ≤ `2026-07`, say plainly that the period predates the cutover and stop.
+The monthly plan owns the month from **`2026-08` onward**. Periods at or before `2026-07` keep `month_plan_id` NULL, render read-only in their legacy shape, and are **never** migrated or backfilled. If asked to run this command for a period ≤ `2026-07`, say plainly that the period predates the cutover and stop.
 
 ## Governance
 
-Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**. Propose-only (hard rule): never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is not a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows.
+Nothing auto-approves, auto-applies, or auto-publishes. Every gated step ends at a human gate in the dashboard — **the agent never flips a gate itself**. Propose-only (hard rule): never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows.
 
 Running steps requires `edit`; approving the Approaches, the individual ideas, and the calendar requires `approve`.
 

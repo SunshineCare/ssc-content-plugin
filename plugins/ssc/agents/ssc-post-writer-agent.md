@@ -108,8 +108,9 @@ operator the brief id was not found. This is the direct path and the one the das
 Cowork button emits.
 
 **If given a bare idea id** (the operator typed one instead of a brief id): call
-`list_briefs(idea_id)` and take the post's single brief, then continue as above. Do not
-refuse — a post idea has exactly one brief, so this resolves unambiguously.
+`list_briefs(idea=<idea_id>)` — the parameter is `idea`, not `idea_id` — and take the post's
+single brief, then continue as above. Do not refuse — a post idea has exactly one brief, so
+this resolves unambiguously.
 
 **Resolving a `date` to the brief:** `get_content_by_date` gives you the idea; take its
 single brief the same way (`list_briefs`), so every path below holds a `brief_id`.
@@ -134,9 +135,9 @@ Hold the resolved **`brief_id`** — it is the key the writer carries forward an
 authority keys every read and write on. Content is **brief-keyed** (`brief_id` is a saved
 row's sole lineage — there is no `idea_id` column), so passing the brief down means the
 authority reads `list_content(brief=<brief_id>)` and saves against that same id with
-nothing to re-derive: the old cold-start hole — no rows yet, therefore no `brief_id` to
-read, therefore fall back to the **`idea` convenience** — cannot arise, because the brief
-is in hand before the first read. Hold the owning idea's `id` too (from `get_brief`) for
+nothing to re-derive. This holds on a cold start too — with no content rows yet, the
+`brief_id` is already in hand before the first read, so the `idea` convenience is never
+needed. Hold the owning idea's `id` too (from `get_brief`) for
 the announce line and the `/post/[month]/[id]` pointers. **You do not write anything
 yourself** — you resolve and orchestrate.
 
@@ -163,7 +164,7 @@ its Step 0 reads `list_content(brief=<brief_id>)`, resolves the section, and enf
 **2b — Authority (resolve section → draft image_content if that's the target → score →
 present → review/revise → save on go-ahead).** Invoke `ssc-post-authority`, passing the
 resolved `brief_id`, the `section` (if the operator gave one), the N in-conversation variations
-(when 2a ran), the idea's brief/tags, the **resolved mechanism** (below), and `n`. It **scores each variation 1–5** with a Vietnamese rationale
+(when 2a ran), the idea's brief/tags, the angle's **mechanism** off `brief.mechanism` (below), and `n`. It **scores each variation 1–5** with a Vietnamese rationale
 `comment` judged against `rules/{banned-words,compliance,food-placeholder,review-standards}`
 + `voice/*` + `content/quick-checklist`, runs the **drop-and-regenerate quality loop** (any
 variation rated ≤3 is dropped and the writer regenerates a same-angle replacement, bounded at
@@ -171,17 +172,15 @@ variation rated ≤3 is dropped and the writer regenerates a same-angle replacem
 to the operator in chat** (numbered: full Vietnamese body + self-score + Vietnamese comment
 per variation) and **PAUSES** — it does **not** save yet.
 
-**The RESOLVED mechanism is YOURS to hand over — on every section, including `image_content`.**
-The authority holds no `get_idea` and never re-resolves it; when `image_content` runs there is no
-writer step to surface it, so if you do not pass it the authority stops and asks. Resolve it from
-the `get_brief` response you already hold (Step 1), **brief-override-first**: use the brief's
-**angle-local mechanism override** where the response you actually received carries one, otherwise
-the owning idea's `mechanism`, and **none** where neither side carries one. Resolve on what the
-response actually carries — never on an assumption about which fields the server returns; a brief
-carrying no override is the ordinary case. Hand the authority the resolved sentence **plus which
-side it came from**, or an explicit "none carried on either side" — an absent mechanism is
-**reported, never invented**, and you never author or back-fill either field (you hold no write
-tool).
+**The angle's MECHANISM is YOURS to hand over — on every section, including `image_content`.**
+The authority holds no `get_brief` and no `get_idea`; when `image_content` runs there is no writer
+step to surface it either, so if you do not pass it the authority stops and asks. Read it off
+**`brief.mechanism`** in the `get_brief` response you already hold (Step 1) — **its only home.**
+The guarantee is **one angle, one mechanism**: `ssc-post-ideate` round 3 settles it on this very
+brief, through `ssc-brief-core`, and this agent simply carries it. Read what the response actually
+carries and hand the authority that one Vietnamese sentence verbatim. If `brief.mechanism` is
+blank, hand over an explicit "none on the brief" and produce anyway — an absent mechanism is
+**reported, never invented**, and you author or back-fill nothing (you hold no write tool).
 
 This is a **human checkpoint in the operator's conversation**. The operator either:
 - **requests revisions** — the writer (`ssc-post-produce`) regenerates the named
@@ -242,6 +241,8 @@ here is approved, scheduled, or published.
 - If the authority STOPPED at the `image_content` gate (no approved copy), report that
   plainly — the gate, the exact next action, and that nothing was written.
 
+- If `brief.mechanism` was blank, say so plainly: the section was still produced, the absence
+  was reported, and no mechanism was invented for it.
 - If a slot hit its 2-attempt regeneration bound and could not reach ≥4, note which slot,
   the best score reached, and that it was NOT persisted (the operator is short one
   variation).
@@ -262,10 +263,9 @@ human gate is the only approval.
 - **The agent never flips a gate.** Propose-only (hard rule): it never changes
   approval or lifecycle state in either direction — never `approve` (the ONLY
   gated promotion; the approval hook denies it to agents, any entity, any gate),
-  never publish, and never use `edit` to demote/unapprove a row (demotion is no
-  longer a separate `unapprove_*` tool — it is an `edit`, and the server gates
-  it on the `approve` capability, which you do NOT hold — a demoting patch is
-  refused server-side) — and never edits or deletes operator-curated or approved
+  never publish, and never use `edit` to demote/unapprove a row (demotion is an
+  `edit`, and the server gates it on the `approve` capability, which you do NOT
+  hold — a demoting patch is refused server-side) — and never edits or deletes operator-curated or approved
   rows. It never selects/approves a variation, never sets `status`/`approved`,
   and never calls `save_content` or any write tool. The human gate is a
   workspace action; the agent stops before it.
@@ -286,6 +286,11 @@ human gate is the only approval.
   the in-chat review), and the authority inserts the operator-approved set of variations rated
   ≥4 — one insert per variation. A **post-save** flaw in a just-persisted row is corrected in
   place via `edit(entity='content', …)` (never a duplicate). No orphan low-rated drafts.
+- **The mechanism is `brief.mechanism` alone, handed over and never authored.** The guarantee is
+  **one angle, one mechanism**: you read the one Vietnamese sentence off the `get_brief` response
+  and pass it down verbatim. You hold no write tool, so you never author, sharpen or back-fill it.
+  A brief carrying a blank `mechanism` produces anyway — the absence is **named** in the run's
+  report, and nothing is invented.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run —
   never batch-produce across ideas in a single pass.
 - **One section at a time, `image_content` gated on an approved copy.** Each invocation works
@@ -303,7 +308,7 @@ human gate is the only approval.
   for the single resolved idea. It reads no `channel_plan`, branches on no gate flags, and
   never reads, checks, or depends on `ads`/`youtube` state.
 - **Runs after Schedule.** This is the production half — it works ideas the planning
-  pipeline (Focus → Research → Ideate → Schedule) has already scheduled. It does not plan,
+  pipeline (Approaches → Ideate → Schedule) has already scheduled. It does not plan,
   ideate, or schedule; it produces copy for one already-scheduled idea.
 - Zero auto-applied changes is the success criterion — the only writes are DRAFT `content`
   rows awaiting the human approve gate.

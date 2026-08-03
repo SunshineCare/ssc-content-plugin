@@ -1,6 +1,6 @@
 ---
 name: ssc-ads-approaches
-description: Runs the Approaches step of the Ads channel of a Cambridge Diet Vietnam monthly plan — the creative HOW, the doctrine's generator, and the channel's FIRST authored step. For the channel-agnostic pieces of Approaches work — the inherited market-sophistication read, the per-persona VOICE-OF-CUSTOMER pass and the CANDIDATE-MECHANISM supply — it dispatches the shared sub-skill ssc-approaches-core with channel='ad', then composes the returned blocks into its own sections, carrying the named gaps through and never re-authoring, re-scoring, paraphrasing or re-attributing them. The composed Candidate mechanisms section RENDERS every field the core returned per candidate — including its BANK PROVENANCE (the `bank_id` of the craft/mechanism-bank entry it was drawn from, or an explicit `in_bank` false flag where the core gap-filled instead) and its `valence` — as structural English labels inside the Vietnamese document; there is no bank_id column and no valence column, so this document is the only carrier by which either reaches Ideate, and a label dropped here does not exist downstream. Released by the HEAD's narrative approval (the server gates the context write on it), not by any channel flag — Focus and its tactics_approved gate are retired. Grounds in the head first (its bets, its one outward research pass, its review, its Ad allocation, and its two hand-downs — proof inventory + offer/promotion state), the quarter's strategy second (its market-sophistication read and its marked audience/ad findings), the KB third; runs NO WebSearch of its own (the head's Research is the period's only outward pass). Writes the Approaches md to context via save_channel_plan — a structured Vietnamese template (Month signals · Voice of customer · Candidate mechanisms · Route × persona approaches · Differentiation · Experiments to test) — and AUTHORS creative_target on the same call, the period's creative COVERAGE SHAPE (persona × route × angle count), whose owner this step is. Coverage shape only: volume and budget belong to the monthly head's allocation and a channel-authored volume is refused server-side. Reads every doctrinal rule LIVE from the named KB docs and STOPS the run on a failed read rather than falling back to memory. Must NOT restate the head's bets and must NOT steer per ad set or per layer — the ad set / media buy sits outside the creative pipeline entirely. Propose-only; ends at the Approaches gate; never sets approaches_approved.
+description: Runs the Approaches step of the Ads channel of a Cambridge Diet Vietnam monthly plan — the creative HOW, the doctrine's generator, and the channel's FIRST authored step. For the channel-agnostic pieces of Approaches work — the inherited market-sophistication read and the per-persona VOICE-OF-CUSTOMER pass — it dispatches the shared sub-skill ssc-approaches-core with channel='ad', then composes the returned blocks into its own sections, carrying the named gaps through and never re-authoring, re-scoring, paraphrasing or re-attributing them. The mechanism is settled one angle at a time at the ANGLE BRIEF by ssc-brief-core — one angle, one mechanism. What this step owes that step is the APPROVED Approaches document, which is the sanctioned source of the attributed customer quote a brief must cite before settling a mechanism, plus the period's stated PROOF INVENTORY recorded in the doc exactly as the head handed it down (null = NOT STATED, reported as a gap and never filled). Released by the HEAD's narrative approval, which the server gates the context write on. Grounds in the head first (its bets, its one outward research pass, its review, its Ad allocation, and its two hand-downs — proof inventory + offer/promotion state), the quarter's strategy second (its market-sophistication read and its marked audience/ad findings), the KB third; runs NO WebSearch of its own (the head's Research is the period's only outward pass). Writes the Approaches md to context via save_channel_plan — a structured Vietnamese template (Month signals · Voice of customer · Route × persona approaches · Differentiation · Experiments to test) — and AUTHORS creative_target on the same call, the period's creative COVERAGE SHAPE (persona × route × angle count), whose owner this step is. Coverage shape only, so volume and budget belong to the monthly head's allocation and a channel-authored volume is refused server-side. Reads every doctrinal rule LIVE from the named KB docs and STOPS the run on a failed read rather than falling back to memory. Must NOT restate the head's bets and must NOT steer per ad set or per layer — the ad set / media buy sits outside the creative pipeline entirely. Propose-only; ends at the Approaches gate; never sets approaches_approved.
 metadata:
   type: skill
   stage: ads-pipeline
@@ -15,11 +15,12 @@ metadata:
 
 You run the **Approaches** step of the Ads channel of a Cambridge Diet Vietnam monthly plan — the creative **HOW**, and the channel's **first authored step**. You read the month's *bets* from the HEAD (`month_plans.tactics` — which pillars/angles/themes to push in paid) plus the head's one outward research pass, and synthesise the **creative approaches** that realize those bets: which routes to emphasize for which personas, what trigger each rides, how to be different from competitors, and what to experiment with.
 
-**This step is the pipeline's GENERATOR.** The ads doctrine's front half lands here, and it is the reason this step exists at all: everything downstream arranges material, and only this step *finds* it. Three things are yours, and nothing below you can supply them:
+**This step is the pipeline's GENERATOR.** The ads doctrine's front half lands here, and it is the reason this step exists at all: everything downstream arranges material, and only this step *finds* it. Two things are yours, and nothing below you can supply them:
 
-1. **The period's voice-of-customer research** — what real customers actually say: their language, their triggers, their objections, the myths they hold, **in their own words**. Without it the pipeline invents topics. The shared core **returns** it (Step 4); this step **composes** it into the doc and **saves** it (Steps 5–6).
-2. **Candidate mechanisms** — as `craft/doctrine` §2 defines a mechanism, read live (this file defines it nowhere). Ideate may not approve a subject without one, so this step is where the supply reaches the plan. Same division: the core **returns** the candidates (Step 4), this step **composes and saves** them (Steps 5–6). The core builds that supply **bank-first** against `craft/mechanism-bank`, so each candidate arrives carrying its provenance (`bank_id`, or `in_bank: false` where the core gap-filled) and its `valence` — this step **renders both** and invents neither. You propose candidates; you never pick the one a subject carries and you never approve anything.
-3. **The creative coverage target** (Step 6b) — `creative_target` on the ad channel plan. **You own this field.** It is COVERAGE SHAPE — which personas and routes must be covered this period and in how many *angles* — never volume: the period's creative volume and budget belong to the monthly head's Ad allocation (`allocate_channel`), and a channel-authored volume is refused server-side.
+1. **The period's voice-of-customer research** — what real customers actually say: their language, their triggers, their objections, the myths they hold, **in their own words**. Without it the pipeline invents topics. The shared core **returns** it (Step 4); this step **composes** it into the doc and **saves** it (Steps 5–6). Once a human approves the doc, that section is the **sanctioned source** of the attributed customer quote an angle brief must cite before a mechanism may be settled on it — so an unattributed line here is not a blemish, it is the grounding a mechanism stands on two steps later.
+2. **The creative coverage target** (Step 6b) — `creative_target` on the ad channel plan. **You own this field.** It is COVERAGE SHAPE — which personas and routes must be covered this period and in how many *angles* — never volume: the period's creative volume and budget belong to the monthly head's Ad allocation (`allocate_channel`), and a channel-authored volume is refused server-side.
+
+**The mechanism belongs to the ANGLE BRIEF.** It is settled **one angle at a time**, by `ssc-brief-core` — **one angle, one mechanism**. What this step owes that step is the two things above plus the period's stated **proof inventory**, recorded in the doc exactly as the head handed it down (Step 1b): the brief proof-routes its mechanism from that inventory *as this document states it*, so a hand-down mis-stated or dropped here is a hand-down that does not exist downstream.
 
 The output is a markdown brief (the Approaches doc) written to `context`, plus the structured `creative_target`. You are propose-only: you write `context` + `creative_target` via `save_channel_plan`, then stop. A human reviews and approves the Approaches in the dashboard before Ideate begins. You NEVER call `approve` (the ONLY gated promotion; the approval hook denies it to agents), publish, schedule, or spend; you never use `edit` to demote/unapprove a row; and you NEVER set `approaches_approved`.
 
@@ -27,7 +28,7 @@ The output is a markdown brief (the Approaches doc) written to `context`, plus t
 
 **You add the creative "how" — you do NOT restate the month's bets.** The head's Tactics step already names the priority pillars, angles to push, and tactical themes. The Approaches doc *assumes* those bets and supplies the creative realization of them. Do not re-list the pillar bets or re-justify the angle selection — that is the head's job and re-doing it makes the UI a fragmented duplicate. Reference the bets only enough to anchor an approach, never to re-argue them.
 
-This is **step 1 of the two-step Ads channel** (**Approaches → Ideate**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`, which hangs off that period's `month_plans(period)` head. **Focus and Measure are retired steps, not skipped ones** — `channel_plans.tactics`, `tactics_approved` and `retrospective` were DROPPED from the schema, the month's bets are `month_plans.tactics`, and the month's only look-back is `month_plans.performance_review`.
+This is **step 1 of the two-step Ads channel** (**Approaches → Ideate**), keyed on `channel_plans(channel='ad', period=YYYY-MM)`, which hangs off that period's `month_plans(period)` head. The month's bets are `month_plans.tactics` and the month's only look-back is `month_plans.performance_review` — both live on the head, and this channel reads them.
 
 ## Inputs
 
@@ -47,11 +48,11 @@ Call: get_channel_plan
 
 A null plan is normal — you MINT it when you write `context`, and the server links it to the period's head automatically.
 
-Hold `plan.id` for reference only. Approaches writes no `plan_targets` and no `detail` payload — both are refused with `retired_plan_field` from `2026-08` onward, and there is no ad-set/media-buy step in the creative pipeline.
+Hold `plan.id` for reference only. Approaches writes no `plan_targets` and no `detail` payload — both are refused with `retired_plan_field` from `2026-08` onward — and the ad set / media buy sits outside the creative pipeline entirely.
 
 On a re-run the plan may already carry a `creative_target` this step wrote, read back as `creative_coverage` (target versus produced ad briefs, by persona/route label). Read it for what the period has already produced against the shape; you re-author the whole target in Step 6b, so this is context, not a delta base.
 
-**There is no channel-side gate to check here.** `tactics` and `tactics_approved` were DROPPED from the schema, so the retired Focus gate cannot be read at all. What releases this step is the HEAD:
+**The gate that releases this step lives on the HEAD** — there is no channel-side flag to check:
 
 ### Step 1b: Read the head — the release gate and the primary steering
 
@@ -64,18 +65,18 @@ Call: get_month_plan
 
 > The month is not released. The Ads channel is released by the monthly plan's Narrative approval, which is the month's only gate. Open /content/plan/<period> → Plan stage, then re-run. Nothing was written.
 
-Do not load the KB or write anything under an unapproved narrative. The server enforces the same rule — `save_channel_plan` refuses the `context` write with `narrative_not_approved` — but stop cleanly here rather than relying on the rejection. (That gate is a **move**, not a new one: it previously anchored to the retired Focus write.)
+Do not load the KB or write anything under an unapproved narrative. The server enforces the same rule — `save_channel_plan` refuses the `context` write with `narrative_not_approved` — but stop cleanly here rather than relying on the rejection.
 
 Hold from the head, in this priority order:
 
 - **`tactics`** — the month's **bets**: which pillars / angles / themes to push in paid. These are the primary steering. You realize them; you never repeat or re-decide them.
-- **`research`** — the month's ONE outward signal pass: the calendar, the seasonal triggers, the competitor/platform signals, the compliance constraints. This replaces the WebSearch this step used to run.
+- **`research`** — the month's ONE outward signal pass: the calendar, the seasonal triggers, the competitor/platform signals, the compliance constraints. It is the only outward signal this step works from.
 - **`performanceReview`** — the month's only look-back, including the ad lens read by layer. Use it for what to carry forward and what to drop.
 - **The Ad allocation** — this channel's creative count. Read it for scale awareness only; **never restate a count in the doc** (this document says HOW to write, not how many), and never treat it as the shape of `creative_target`.
 
 **The head's two hand-downs.** `get_month_plan` publishes both explicitly, and `null` is a *fact*, not a missing read:
 
-- **`proofInventory`** — which proof devices are actually available this period (`{ terms, notes }`). You hold it and pass it through to the core (Step 4); **selecting a candidate's proof route against it is the core's rule, stated there and not restated here**, and this step neither re-judges nor re-traces a route it renders. **`null` means NO stated inventory** — pass the null, and report the gap plainly in the doc and in the summary; never assume every device is available, and never invent an inventory.
+- **`proofInventory`** — which proof devices are actually available this period (`{ terms, notes }`). **You RECORD it in the doc, verbatim as the head stated it** (Step 6's *Month signals*), and you route nothing with it: which proof route a mechanism actually takes is settled at the **angle brief** by `ssc-brief-core`, against this period's inventory *as this document states it*. That is precisely why the hand-down must land in the doc intact — a brief cannot read the head, so an inventory mis-stated or dropped here is an inventory that does not exist downstream. **`null` means NO stated inventory** — write `NOT STATED` and report the gap plainly in the doc and in the summary; never assume every device is available, and never invent an inventory.
 - **`offerState`** — whether a REAL, dated promotion exists (`{ promotion, label, startsOn, endsOn, notes }`). **`null` means NO promotion**: the doc then carries no timeliness claim and you neither infer nor invent one. A stated promotion may be named ONCE, as information, subject to the urgency rule in `craft/cta` **§2**.
 
 Then read the quarter's strategy as the SECOND tier — `get_strategy_brief(<quarter>, marked_only=true)` — to place the month inside the quarter and fill in where the month is silent. It never overrides the month. Where two tiers disagree, the higher one wins and you say so in one line. Hold from it:
@@ -83,7 +84,7 @@ Then read the quarter's strategy as the SECOND tier — `get_strategy_brief(<qua
 - **`sophisticationStage` + `sophisticationRead`** — the quarter's **market-sophistication read**, authored ONCE at the quarter and inherited by the month.
 - **The marked findings** — in particular the audience and ad dimensions. These are the quarterly cycle's own voice-of-customer and competitor gathering.
 
-**These two, together with the head's `research`, `performanceReview` and the two hand-downs above, are passed to `ssc-approaches-core` in Step 4** — what the read constrains, and what the findings are worth as a source, are the core's to apply. You hold them, pass them through verbatim, and report back what the core returns (including a `NOT STATED` read) in the doc and in the Step 7 summary.
+**These two, together with the head's `research` and `performanceReview`, are passed to `ssc-approaches-core` in Step 4** — what the read constrains, and what the findings are worth as a source, are the core's to apply. You hold them, pass them through verbatim, and report back what the core returns (including a `NOT STATED` read) in the doc and in the Step 7 summary. **The two hand-downs stay with you**: the core routes no proof and claims no timeliness, so `proofInventory` and `offerState` are recorded by this step in the doc, not handed on.
 
 ### Step 2: Load ad and brand knowledge — LIVE, and a failed read STOPS the run
 
@@ -92,8 +93,8 @@ Call `get_knowledge` for each of these verified paths:
 - `craft/doctrine` — **the spine doc, and the first read of the run.** The chain (research + mechanism → awareness → lead type → the varied toolkit), the mandatory mechanism beat, what is fixed versus what is deliberately varied, the honest no-efficacy-evidence statement, and the compliance stance as a **chosen risk position**. **§6 is its rule-ownership table** — read it live to see which doc owns which rule, and follow it there rather than deciding from this skill. Nothing about the mechanism, the floor, the permitted openings or the refusals is restated in this file
 - `craft/coverage` — set-level coverage over the four axes (the in-batch diversity rule and the coverage axes are ONE reconciled statement there, and that doc is the only place they are defined). Read it live for what a set must span; this step's job is only to leave downstream enough distinct material to span them
 - `craft/awareness-framework` **§6/§7** — the lead taxonomy and the awareness→lead mapping (a stage admits two or three leads; the overlap is where coverage lives). Read live — you never fix a lead, and never restate the mapping here — plus Market Awareness × Sophistication + Emotion Audit + the persuasion-route lens (§4); shape each route's approach by the audience's awareness stage — read live for which routes serve which stage, never hardcode a route-to-stage mapping in this skill
-- `brand/proof-points` — the adopted proof families a candidate mechanism's trace may lean on
-- `rules/compliance` — the refused proof devices and the constraint that refuses each. What this means for a candidate mechanism is the **core's** rule (Step 4), applied there and not re-applied or restated here; you render what it returns
+- `brand/proof-points` — the adopted proof families, read live so the doc states the period's proof inventory against the families the brand has actually adopted
+- `rules/compliance` — the refused proof devices and the constraint that refuses each. Read live so this doc never points a pairing at a device the brand refuses. **Which route a mechanism is proof-routed on, and whether a compliance refusal drops it, is the ANGLE BRIEF's** (`ssc-brief-core`) — applied there against the inventory this doc states, and neither decided nor restated here
 - `brand/angles` — value dimensions (§1.1), entry dimensions (§1.2), against dimensions (§1.3), experience dimensions (§1.4), frame codes (§3)
 - `brand/personas` — the audience archetypes and their pain points, motivations, and entry dimensions. The archetype names, the count, and their priority tiers all live in this document — never assume a fixed count or a fixed name list; re-read it every run.
 - `brand/persona-<slug>` (one call per persona currently listed in `brand/personas`) — each persona's detail doc: ranked trigger points with content guidance, objections, real vocabulary, myths to debunk, and tone guidance. Resolve `<slug>` mechanically from that persona's taxonomy `code` with the `chi-` prefix stripped (e.g. `chi-huong` → `brand/persona-huong`) — never hardcode the path list, so a persona added later needs no procedural change here. This is a BATCH skill (one run features the pairs you select from the head's bets), so load every currently-listed persona's detail doc upfront — not just the ones you end up featuring — so the "Route × persona approaches" section can name each featured persona's actual seasonal trigger instead of a generic one.
@@ -112,7 +113,7 @@ Never substitute a remembered version, never paraphrase the doc from this file, 
 
 ### Step 3: The month's signals come from the head — run NO research of your own
 
-**There is exactly ONE outward signal pass per period, and it is the head's Research step.** This step used to run its own light `WebSearch`; it no longer does, and `WebSearch` is not in its tool list. A second scan would produce a second, competing account of the same month — and the head's is the one the operator approved.
+**There is exactly ONE outward signal pass per period, and it is the head's Research step.** `WebSearch` is not in this step's tool list. A second scan would produce a second, competing account of the same month — and the head's is the one the operator approved.
 
 Take from the head's `research` (Step 1b), and take it as given:
 
@@ -122,17 +123,20 @@ Take from the head's `research` (Step 1b), and take it as given:
 
 If the research is silent on something you need, **say so in the doc** rather than filling the gap from a search or from memory. A named gap is information the next month's Research can act on; an invented signal is not.
 
-### Step 4: Dispatch `ssc-approaches-core` — the voice-of-customer pass and the candidate-mechanism supply
+### Step 4: Dispatch `ssc-approaches-core` — the voice-of-customer pass
 
 **The generator's channel-agnostic half is not authored here.** The
-voice-of-customer pass and the candidate-mechanism supply are the **shared
-core's**: `ssc-approaches-core` holds them ONCE for both Approaches channels, so
-no second copy of that doctrine exists to drift. Every rule that governs them —
-which sources the pass compiles from and in what order of authority, what must be
-attributed, what an avoid-list does, what a candidate carries, how a proof route
-is selected against this period's inventory, how indirectness is judged against
-the inherited read — lives in that skill and is **deliberately not restated
-here.** Do not re-derive them and do not keep a local copy.
+voice-of-customer pass and the sophistication inherit are the **shared core's**:
+`ssc-approaches-core` holds them ONCE for both Approaches channels, so no second
+copy of that doctrine exists to drift. Every rule that governs them — which
+sources the pass compiles from and in what order of authority, what must be
+attributed, what an avoid-list does, what a silent source obliges — lives in that
+skill and is **deliberately not restated here.** Do not re-derive them and do not
+keep a local copy.
+
+**The core returns the sophistication read and the voice-of-customer pass, and
+those two blocks are all this step composes.** The mechanism is the **angle
+brief's**, settled there by `ssc-brief-core`.
 
 Dispatch it with what you have already read. It reads **no plan state** of its
 own (no `get_month_plan`, no `get_channel_plan`, no `get_strategy_brief`) and
@@ -143,7 +147,7 @@ save in Steps 6 / 6b stay yours — one read, one gate:
 Dispatch: ssc-approaches-core
   channel:  ad
   period:   <period>
-  head:     { research, performanceReview, proofInventory, offerState }   ← Step 1b
+  head:     { research, performanceReview }                               ← Step 1b
   quarter:  { sophisticationStage, sophisticationRead, marked findings }  ← Step 1b
   personas: <the personas this run features>
 ```
@@ -152,14 +156,14 @@ Dispatch: ssc-approaches-core
 |---|---|---|
 | `channel` | `ad` — always | This skill dispatches the core on no other channel; `post` is `ssc-post-approaches`' dispatch |
 | `period` | the plan month, `YYYY-MM` | The same period you read in Step 1 |
-| `head` | `research`, `performanceReview`, `proofInventory`, `offerState`, exactly as `get_month_plan` returned them (Step 1b) | A `null` `proofInventory` and a `null` `offerState` are **facts** — pass the null. Never an assumed inventory, never an invented promotion |
+| `head` | `research` and `performanceReview`, exactly as `get_month_plan` returned them (Step 1b) | The two sources the pass compiles from. `proofInventory` and `offerState` are **not** passed — they route no quote, and this step records them in the doc itself (Step 1b / Step 6) |
 | `quarter` | `sophisticationStage`, `sophisticationRead` and the marked findings from `get_strategy_brief` (Step 1b) | Pass them **verbatim**. A brief carrying no read comes back `NOT STATED`, which you report — never a stage you supplied |
 | `personas` | the personas this run features, selected from the head's bets against the live `brand/personas` roster (Step 2) | Pass none and the core features the whole current roster and names that fallback; never hand-guess a subset |
 
-It returns three blocks — the **inherited sophistication read**, the **per-persona
-voice-of-customer pass**, and the **candidate-mechanism supply** — plus the named
-gaps, the personas it featured, and the KB docs it read live. It writes nothing:
-**Step 5 is what you do with them.**
+It returns **two blocks** — the **inherited sophistication read** and the
+**per-persona voice-of-customer pass** — plus the named gaps, the personas it
+featured, and the KB docs it read live. It writes nothing: **Step 5 is what you
+do with what it returns.**
 
 The core runs no outward pass either, so Step 3's rule holds across the dispatch:
 there is exactly one outward signal pass per period and it is the head's.
@@ -171,25 +175,14 @@ own reads.
 
 ### Step 5: Compose the core's blocks into the doc — never re-author them
 
-The voice-of-customer pass and the candidate mechanisms are already authored; the
-core returned them in Step 4. This step is **composition**, and the material is
-handled as returned:
+The voice-of-customer pass is already authored; the core returned it in Step 4.
+This step is **composition**, and the material is handled as returned:
 
 - **Compose the doc's *Voice of customer* section** (Step 6's template) from the
   core's `voice_of_customer` block — per featured persona, with each quoted line
-  keeping the attribution the core gave it.
-- **Compose the doc's *Candidate mechanisms* section** (Step 6's template) from
-  the core's `candidate_mechanisms` block — one short block per candidate,
-  **rendering every field the core returned**, exactly as returned: its mechanism
-  sentence, its quoted voice-of-customer item, its **`bank_id` (or
-  `in_bank: false`)**, its **`valence`**, its proof route (`verified` /
-  `unverified_for_period`) and its indirectness call. **Render the provenance and
-  the valence label on every candidate, without exception** — Step 6's template
-  says why a label dropped here is a label that does not exist downstream.
-- **Carry the valence mix through** as the core reported it, into the Step 7
-  summary. You report the mix; you enforce no quota, trim nothing to hit a ratio
-  and drop no candidate for its valence — the negative-valence cap belongs to
-  Ideate, which is where the settled set exists.
+  keeping the attribution the core gave it. This section is the one the angle
+  brief later cites, so an attribution loosened in composition is grounding lost
+  two steps later.
 - **Carry the named gaps through.** The core's `gaps:` line, and any gap inside a
   persona's block, goes into the doc's Voice-of-customer section AND the Step 7
   summary, saying which source was silent about which persona. Do not fill a gap
@@ -198,25 +191,24 @@ handled as returned:
 - **Carry the sophistication read through** as the core returned it, `NOT STATED`
   included — reported in the doc and in the Step 7 summary as a gap, never filled
   with a guessed stage.
-- **Never re-author and never re-score.** Do not re-word a mechanism sentence,
-  re-attribute or re-punctuate a quote, add a candidate the core did not return,
-  drop one because it reads awkwardly, re-judge a proof route or an
-  indirectness call, or re-label a candidate's `bank_id` / `in_bank` / `valence`
-  — a provenance or valence label is the core's finding, never this step's
-  judgement, and attaching a `bank_id` to something the core authored is the one
-  way an invention silently acquires the bank's authority. Where a returned item
-  looks wrong, say so to the operator instead of silently rewriting it: a
-  caller-side edit of the core's material is a second copy of the doctrine with
-  none of its rules attached.
+- **Record the head's two hand-downs yourself** (Step 1b) — the period's stated
+  proof inventory and its offer/promotion state — into the doc's *Month signals*
+  section, verbatim, `NOT STATED` included. These do not come from the core and
+  are not re-judged here; they are stated so the angle brief can proof-route
+  against them.
+- **Never re-author and never re-score.** Do not re-attribute or re-punctuate a
+  quote, add material the core did not return, or drop a line because it reads
+  awkwardly. Where a returned item looks wrong, say so to the operator instead of
+  silently rewriting it: a caller-side edit of the core's material is a second
+  copy of the doctrine with none of its rules attached.
 
-**You propose; Ideate picks; a human approves.** This step's pipeline position is
-unchanged: Ideate picks the one mechanism a subject carries (settled once on the
-subject and inherited by every angle brief beneath it, which may carry a bounded
-angle-local override — **one angle, one mechanism**) and a human approves the
-subject. You
-choose none of them and approve none of them. Candidates the month does not use
-are not wasted — they stay in the approved Approaches doc for the period and can
-be picked up by any subject the month generates.
+**The mechanism is settled at the angle brief**, one angle at a time, by
+`ssc-brief-core` — **one angle, one mechanism**. What this document supplies is
+the *grounding*, not the craft: once a human approves it, its voice-of-customer
+section is the **only** sanctioned source of the attributed customer quote that
+brief may cite, and its stated proof inventory is what the brief proof-routes
+against. Material the month does not use is not wasted — it stays in the approved
+Approaches doc for the period and any angle the month briefs can stand on it.
 
 ### Step 6: Write the Approaches doc (`context`)
 
@@ -228,7 +220,15 @@ Call `save_channel_plan` with `channel='ad'`, `period`, and `context` — a mark
 warrant a creative surge, the seasonal pain points and motivation patterns paid can ride,
 and the competitor/platform signals worth reacting to. Bullet form. If a signal isn't there,
 say so rather than padding. This is the situational ground the approaches stand on — NOT a
-re-listing of the head's bets.>
+re-listing of the head's bets.
+
+Close the section with the head's TWO HAND-DOWNS, stated verbatim as the head stated them (Step 1b):
+- **Proof inventory** — which proof devices this period actually has (`{ terms, notes }`), or **NOT STATED**
+  written plainly as a gap where the head carries none. Never an assumed inventory, never a padded one.
+  This line is the hand-down the ANGLE BRIEF proof-routes its mechanism against; a brief cannot read the
+  head, so what is not stated here is not available downstream. This step routes nothing with it.
+- **Offer / promotion** — the stated, dated promotion, named ONCE as information and subject to the urgency
+  rule in `craft/cta` §2 — or "no promotion stated", in which case the doc carries no timeliness claim at all.>
 
 ## Voice of customer — <period>
 <Step 4's output: what real customers actually say, grouped per featured persona — her LANGUAGE
@@ -236,41 +236,13 @@ re-listing of the head's bets.>
 Every quoted phrase names its source (head research / quarterly finding / her persona doc /
 performance review). Never invent a quote. Where a source was silent, write the gap in the same
 place — "<source> nói gì về <persona>: không có" — and do NOT fill it. This section is what stops
-the pipeline inventing topics; a padded version is worse than a short honest one.>
+the pipeline inventing topics; a padded version is worse than a short honest one.
 
-## Candidate mechanisms
-<The period's supply — one short block per candidate in the core's `candidate_mechanisms` block,
-composed in Step 5. This section RENDERS what the core returned; it never re-derives it. What a
-candidate must satisfy — what qualifies as a mechanism, how the bank is matched before anything is
-authored, how a proof route is selected against this period's stated inventory, how indirectness is
-judged against the inherited sophistication read, and when a candidate is dropped rather than
-softened — is `ssc-approaches-core`'s, stated there and deliberately not restated in this doc.
-Render every field it returned, per candidate:
-- **The mechanism** — the one specific Vietnamese sentence, verbatim.
-- **What it explains** — the quoted, attributed voice-of-customer item it answers.
-- **`bank_id`: <slug>** — the `craft/mechanism-bank` entry the candidate was drawn from. Where the
-  core returned none because it gap-filled, write **`in_bank: false`** instead. Exactly one of the
-  two appears on every block: never both, never neither, and never a `bank_id` on a candidate the
-  core authored.
-- **`valence`: <positive | negative>** — as the core returned it. The two values, their definitions
-  and the priority between them live in `craft/mechanism-bank` §2, read live; none of it is restated
-  here or in this doc.
-- **Proof route** — the family, the trace, and `verified` / `unverified_for_period`, as returned.
-- **How indirect the lead must be** — as returned, `NOT STATED` included.
-
-**`bank_id`, `in_bank` and `valence` are STRUCTURAL ENGLISH labels inside this Vietnamese document.**
-The label and its value stay in English exactly as written above — the same way the rest of the
-plugin treats a field label; everything else on the block (the mechanism sentence, the quote, the
-trace, the indirectness call) is Vietnamese, like the rest of this document.
-
-**A label dropped here is a label that does not exist downstream.** There is no `bank_id` column and
-no `valence` column anywhere — this document, persisted to `plan.context`, is what Ideate reads, so
-it is the ONLY carrier either label has. A candidate rendered without them reaches Ideate with no
-provenance to report and no valence to tally, which makes Ideate's negative-valence cap
-unenforceable — silently, since nothing downstream can tell a missing label from an absent fact.
-
-These are CANDIDATES. Ideate picks the one mechanism a subject carries and a human approves it;
-nothing here is chosen or approved by this step, and unused candidates stay available all period.>
+**Once this doc is approved, this section is the SANCTIONED SOURCE of the attributed customer quote an
+angle brief must cite before a mechanism may be settled on it** — `ssc-brief-core` may take that item
+from nowhere else. So an item recorded without its attribution, or a persona left empty, is not a
+cosmetic gap: it is a persona the brief step has nothing sanctioned to cite for. Name the gap; never
+fill it to make the section look complete.>
 
 ## Route × persona approaches
 <The heart of the doc — the creative HOW, expressed as per-route/per-persona differentiation
@@ -283,14 +255,16 @@ pipeline entirely and this doc never names it). Ground this in the head's bets (
   seasonal context (Step 3) to one of her stated triggers rather than inventing a generic one.
 - **How the route attacks it** — per `craft/awareness-framework` §4's persuasion-route lens, this
   persona's awareness/sophistication position, and Cambridge's stated position on that ladder (read
-  live each run, never assumed): what this route opens on, which mechanism/proof/identification
-  lever it pulls, and the tonal register that fits her.
+  live each run, never assumed): what this route opens on, which lever that lens says it pulls, and
+  the tonal register that fits her.
 - **The differentiation move** — the entry/value/against dimension (`brand/angles`) that makes this
   pairing distinct from the plan's other featured pairings, so two pairings never read as the same
   creative idea wearing a different persona label.
-- **Which candidate mechanisms it can draw on** — name them from the Candidate mechanisms section
-  above (by their one-sentence mechanism, not restated at length). Every featured pairing must have
-  at least one, or Ideate cannot approve a subject for it.
+- **Which voice-of-customer material it stands on** — point at the attributed item(s) in the Voice of
+  customer section above that this pairing answers (by their recorded phrasing, not restated at
+  length). Every featured pairing needs at least one, or the angle brief has nothing sanctioned to
+  cite for it. **The mechanism is named at the brief, per angle** — this block points at the
+  grounding and stops there.
 
 Select the pairings from the head's `tactics` + the KB reads in Step 2. Cover the personas and
 routes the month's bets name; where the bets leave a genuine choice, prefer a pairing the head's
@@ -323,7 +297,7 @@ section if there's genuinely nothing to test.>
 
 ### Step 6b: Author `creative_target` — the period's creative COVERAGE SHAPE
 
-**This step OWNS `creative_target`.** It is the ad channel plan's creative coverage target, it is consumed by Ideate to size its subject pool, and this step is its only writer — the retired Focus step is not its home and must not be inferred as one. Write it on the SAME `save_channel_plan` call as `context` (or a second call on the same `(channel='ad', period)` pair — the upsert preserves unset fields either way):
+**This step OWNS `creative_target`.** It is the ad channel plan's creative coverage target, it is consumed by Ideate to size its subject pool, and this step is its only writer. Write it on the SAME `save_channel_plan` call as `context` (or a second call on the same `(channel='ad', period)` pair — the upsert preserves unset fields either way):
 
 ```
 Call: save_channel_plan
@@ -341,9 +315,9 @@ The rules that keep it coverage shape and not volume:
 
 - **It is COVERAGE SHAPE.** `creative_target` answers *which personas and routes must be covered this period, and in how many angles* — the shape of the creative surface. It never answers *how many creatives* or *how much budget*: **volume and budget belong to the monthly head** (`allocate_channel`), a channel-authored volume is refused server-side, and this step never calls `allocate_channel` and never writes `detail` (a `detail` allocation is refused with `retired_plan_field` from `2026-08` onward).
 - **`count` is a count of ANGLES, and of nothing else.** One angle = one persona × route brief. It is not a creative count, not an ad count, not an ad-set count, not a spend figure. Never derive it by dividing the head's Ad allocation, and never let the two be read as the same number.
-- **One entry per featured pairing**, and every entry must be a pairing the doc's *Route × persona approaches* section actually covers — the field is the machine-readable shape of that section, never a second, divergent plan. A pairing with no candidate mechanism (Step 5) does not belong in either.
+- **One entry per featured pairing**, and every entry must be a pairing the doc's *Route × persona approaches* section actually covers — the field is the machine-readable shape of that section, never a second, divergent plan. A pairing with no attributed voice-of-customer material behind it (Step 5) does not belong in either.
 - **Personas and routes are LIVE ROSTER LABELS**, resolved from `brand/personas` and the route vocabulary this run read — not term ids, and never a hardcoded list. A persona added or retired needs no change to this skill.
-- **The shape is justified in the prose, the numbers live in the field.** The doc says why a pairing carries more weight than another (the head's bets, the review's under-served pairings, the candidate-mechanism supply); the field carries the angle counts. Do not restate the counts in the prose.
+- **The shape is justified in the prose, the numbers live in the field.** The doc says why a pairing carries more weight than another (the head's bets, the review's under-served pairings, how much attributed voice-of-customer material the pairing actually has); the field carries the angle counts. Do not restate the counts in the prose.
 
 `get_channel_plan` reads it back as `creative_coverage` — target versus produced ad briefs, matched by persona/route label — which is how the operator sees the shape being met or missed. Re-running this step re-authors the whole target: state the full set every time, not a delta.
 
@@ -358,16 +332,15 @@ After saving, output:
 
 **Head steering:** loaded — Approaches realizes the month's approved bets (does not restate them)
 
-**Hand-downs:** proof inventory: <stated (n devices) | NOT STATED — gap reported> · offer/promotion: <label + dates | none stated> · sophistication read (quarter): <stage | NOT STATED — gap reported>
+**Hand-downs (recorded in the doc, verbatim):** proof inventory: <stated (n devices) | NOT STATED — gap reported> · offer/promotion: <label + dates | none stated> · sophistication read (quarter): <stage | NOT STATED — gap reported>
 
 ### Voice of customer
 - <persona>: <n> phrases / <n> triggers / <n> objections / <n> myths — sources: <…>
 - Gaps: <which source was silent about which persona, or "none">
+- (once approved, this section is the sanctioned source of the quote an angle brief cites)
 
-### Candidate mechanisms
-- <one-line mechanism> — <bank_id: <slug> | in_bank: false> · valence: <as returned> · explains: <VoC item> · proof: <family / unverified>
-- …
-- Valence mix: <as the core reported it — reported here, never capped here; the cap is Ideate's>
+### Mechanisms
+- Authored per angle at the brief (`ssc-brief-core`) — one angle, one mechanism.
 
 ### Creative target (coverage shape)
 - <persona> × <route>: <n> angles
@@ -393,30 +366,31 @@ Approaches (`context`) + `creative_target` saved to the ad channel_plan (propose
 
 ## Output
 
-- `context` written to the ad `channel_plan` (the Approaches markdown — the voice-of-customer pass, the candidate mechanisms with each one's `bank_id` / `in_bank: false` and `valence` rendered, and the creative HOW)
+- `context` written to the ad `channel_plan` (the Approaches markdown — the month's signals with the head's two hand-downs recorded verbatim, the voice-of-customer pass, and the creative HOW)
+- The mechanism settled per angle at the brief by `ssc-brief-core`
 - `creative_target` written on the same `channel_plan` — the period's creative COVERAGE SHAPE (persona × route × angle count). This step is its owner and its only writer; Ideate consumes it
 - No `plan_targets`, `detail`, ad-set, or media-buy data written — volume and budget belong to the head's Ad allocation, there is no ad-set/media-buy step in the creative pipeline, the layer/ad-set tag is the Brief step's job, and the actual media buy is a separate ops concern outside the plan entirely
 - No gate flipped
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_channel_plan` (`context` + `creative_target`); no content-creation, scheduling, publishing or spending tool — never `create_campaign` / `create_adset` / `create_ad` / `update_budget`, and never `allocate_channel`.
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is not a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. Writes only via `save_channel_plan` (`context` + `creative_target`); no content-creation, scheduling, publishing or spending tool — never `create_campaign` / `create_adset` / `create_ad` / `update_budget`, and never `allocate_channel`.
 - NEVER sets `approaches_approved` (the Approaches gate) or any approval flag. Flipping it is a dashboard-only action (`approve(entity='channel_plan', gate='approaches')`).
-- Always check the HEAD's release gate first (Step 1b). If the narrative is not approved, STOP — do not load the KB or write anything. Never read `tactics_approved`: the column was DROPPED, and the gate moved to the head.
+- Always check the HEAD's release gate first (Step 1b). If the narrative is not approved, STOP — do not load the KB or write anything. The release gate lives on the head and nowhere else.
 - **Does NOT restate the head's bets, and authors NO volume.** The Approaches doc adds the creative "how"; it assumes the bets named in the head's `tactics`. Re-listing the pillar bets / re-justifying the angle selection / naming a creative count is forbidden — it makes the dashboard a fragmented duplicate, and volume belongs to the head's allocation. The single quantity this step authors is the **angle count per persona × route pairing** in `creative_target` — coverage shape, machine-readable, never in the prose and never a creative/budget/ad-set figure.
 - **OWNS `creative_target`** — its only writer. Coverage shape only (persona × route × angle count), always the full set, always live roster labels. Never `detail` (refused with `retired_plan_field` from `2026-08`), never `plan_targets`, never `allocate_channel`.
 - **Does NOT write budget split, layer/ad-set assignment, or media-buy data** — the layer/ad-set tag is decided later, per angle, by the Brief step; the actual media buy (budgets, audiences, ad-set setup) is a separate ops concern outside the creative pipeline entirely. Approaches carries only the creative differentiation direction (`context`) and the coverage shape (`creative_target`); it never names an ad set, a layer, a budget, or an audience.
-- **The voice-of-customer pass and the candidate-mechanism supply are the SHARED CORE's** — `ssc-approaches-core`, dispatched in Step 4 with `channel='ad'`. This skill **composes** what the core returns into the Approaches doc and **saves** it (Steps 5–6); it never re-authors, re-scores, re-attributes or paraphrases it, and it keeps **no** second copy of the sophistication-inherit rule, the voice-of-customer pass or the candidate-mechanism construction — two copies of doctrine diverge the day one is edited, and the stale copy wins wherever it is read first. The core reads no plan state and holds no mutation tool: the release gate (Step 1b) and every save (Steps 6/6b) stay here.
-- **Renders each candidate's bank provenance and valence; authors neither.** Every candidate block in the Approaches doc carries the core's `bank_id` (or `in_bank: false`) and its `valence`, as **structural English labels inside the Vietnamese document**. There is no `bank_id` column and no `valence` column: `plan.context` is the only carrier that reaches Ideate, so **a label this step drops does not exist downstream** and Ideate's negative-valence cap silently loses its input. This step never attaches a `bank_id` to a candidate the core authored, never infers a valence from a mechanism's wording, and enforces **no** valence quota — it reports the mix; the cap is Ideate's, where the settled set exists.
+- **The voice-of-customer pass and the sophistication inherit are the SHARED CORE's** — `ssc-approaches-core`, dispatched in Step 4 with `channel='ad'`. This skill **composes** what the core returns into the Approaches doc and **saves** it (Steps 5–6); it never re-authors, re-scores, re-attributes or paraphrases it, and it keeps **no** second copy of either rule — two copies of doctrine diverge the day one is edited, and the stale copy wins wherever it is read first. The core reads no plan state and holds no mutation tool: the release gate (Step 1b) and every save (Steps 6/6b) stay here.
+- **The mechanism is the angle brief's (hard rule).** It is settled **one angle at a time** by `ssc-brief-core`, and proof-routing it, judging its indirectness and dropping rather than softening it on a compliance refusal all live with that step. This skill's tool list carries no mechanism tool, and this doc names no mechanism: what it hands the brief is grounding — the attributed voice-of-customer material and the period's stated proof inventory.
+- **The APPROVED doc is the sanctioned source of a brief's attributed quote, and of the period's stated proof inventory.** Both consequences bind this step's care rather than its authority: an item composed without its attribution is grounding the angle brief cannot use, and a hand-down mis-stated or omitted from *Month signals* is a hand-down that does not exist downstream, since a brief cannot read the head. Record both exactly as received, `NOT STATED` included.
 - **Runs NO outward research** (Step 3): there is exactly one outward signal pass per period and it is the head's Research step. `WebSearch` is not in the tool list, and the shared core holds none either — the voice-of-customer pass (Step 4) COMPILES from the recorded sources this step passes it, and quotes only what a source actually says.
-- **Never invents a customer voice, a mechanism's evidence, a proof device, a promotion, a sophistication stage, a bank provenance, or a valence.** Where a source is silent the gap is NAMED in the doc and in the summary and left open. Only a failed KB read stops the run; a named gap does not.
-- **Proposes mechanisms; never chooses or approves one.** Ideate picks the mechanism a subject carries (settled once on the subject and inherited by its briefs, which may carry a bounded angle-local override — **one angle, one mechanism**) and a human approves the subject.
+- **Never invents a customer voice, a proof device, an inventory, a promotion, or a sophistication stage.** Where a source is silent the gap is NAMED in the doc and in the summary and left open. Only a failed KB read stops the run; a named gap does not.
 - **Design creative for each pairing's job, not a per-ad-set/per-layer steer.** A `{persona, route}` pairing's awareness stage (read live from `craft/awareness-framework` each run) determines whether its creative should cold-open (mechanism/curiosity) or warm-close (proof/reassurance/comparison) — never hardcode a route-to-stage mapping in this skill, and never frame guidance as "L1/L2/L3" or per-ad-set. This sets the creative intent only — the look-back that grades performance is the head's Review, not this step.
-- **Holds structure, never doctrine.** Every revisable rule — the mechanism's definition and the mandatory beat, the permitted openings, the floor, the proof families and refusals, the lead taxonomy and the awareness→lead mapping, the coverage axes — is read LIVE from the doc named in Step 2 and is never restated, paraphrased or summarised in this file. `craft/doctrine` §6 is the rule-ownership table; follow it to whichever doc owns the rule.
+- **Holds structure, never doctrine.** Every revisable rule — the permitted openings, the floor, the proof families and refusals, the lead taxonomy and the awareness→lead mapping, the coverage axes — is read LIVE from the doc named in Step 2 and is never restated, paraphrased or summarised in this file. `craft/doctrine` §6 is the rule-ownership table; follow it to whichever doc owns the rule.
 - **A failed KB read STOPS the run** (Step 2): nothing is written, the failing path is named, and the run never falls back to a remembered version of a doc.
 - **Never use the acronym "RCT"** in any persisted prose — write **"nghiên cứu lâm sàng độc lập"**. All `context` prose is Vietnamese.
 - Reference only the knowledge paths listed in Step 2. Do not call `get_knowledge` for any other path.
 - All persisted prose is **Vietnamese** (including the section headings); only your chat-side reasoning stays English.
-- **NEVER writes `monthly_plans`, `targets.ads`, or `phase_status`** — those belonged to the retired shared-head model. All output goes to the ad `channel_plan`.
+- **All output goes to the ad `channel_plan`** — `context` and `creative_target`, and nothing else.
 - Operates only on the ad channel (`channel='ad'`); never reads or writes `post`/`youtube` state.
 - Requires `edit` capability (plus `view` for the reads).

@@ -38,8 +38,8 @@ next open gate**.
 **You never auto-approve, distribute, or apply anything.** Propose-only (hard
 rule): never call any tool that changes approval or lifecycle state in either
 direction — never call `approve` (the ONLY gated promotion; the approval hook
-denies it to agents, any entity, any gate), and never publish. Demotion is not a
-separate `unapprove_*` tool — it is an `edit`, and the server gates any patch
+denies it to agents, any entity, any gate), and never publish. Demotion is an
+`edit`, and the server gates any patch
 touching an approval field on the `approve` capability, which you do NOT hold:
 never use `edit` to demote, unapprove, discard, or reject a row, and never edit
 or delete operator-curated or approved rows. You never auto-advance past a gate.
@@ -65,12 +65,12 @@ and stop.
 These are not "skipped" steps — they do not exist on this channel, and no skill
 you orchestrate may reach for them:
 
-- **No channel themes.** `channel_plans.tactics` and `tactics_approved` were
-  DROPPED from the schema and from `save_channel_plan`. The month's themes are
-  `month_plans.tactics`.
+- **No channel themes.** `channel_plans` carries no `tactics` and no
+  `tactics_approved`, on the schema or on `save_channel_plan`. The month's themes
+  are `month_plans.tactics`.
 - **No channel research.** Exactly one outward pass exists per period —
   `month_plans.research`. No step here runs `WebSearch`.
-- **No channel look-back.** `channel_plans.retrospective` was DROPPED. The only
+- **No channel look-back.** `channel_plans` carries no `retrospective`. The only
   look-back is `month_plans.performance_review`.
 - **No channel-side quantities.** `save_plan_targets` and a `detail` allocation on
   `save_channel_plan` are refused with `retired_plan_field` for any period from
@@ -88,8 +88,8 @@ before `2026-07`, STOP immediately:
 
 ```
 Period <period> predates the monthly-plan cutover (2026-08). That month ran the
-retired five-step channel pipeline and stays read-only in its legacy shape —
-it is never migrated or backfilled. Nothing was written.
+stays read-only in its stored shape — it is never migrated or backfilled.
+Nothing was written.
 ```
 
 ## Month → Quarter mapping
@@ -173,7 +173,7 @@ bottom, then STOP at its gate:
     dashboard, then re-invoke you. STOP.
 - **`approaches_approved` is `true`** AND **no approved post ideas exist for this
   plan** → **Ideate** (Step 4), then STOP at whichever checkpoint the round it ran
-  ends on. Ideate is a **three-round** step — Distribution, Titles, Angle — and it
+  ends on. Ideate is a **three-round** step — Distribution, Titles, Brief — and it
   selects its own round from the data, so dispatch it without deciding the round
   yourself. (Determine "approved ideas exist" via the **Ideas check** below.)
 - **`approaches_approved` is `true`** AND **≥1 approved post idea exists** AND
@@ -309,7 +309,7 @@ head's allocation and the plan's ideas:
 |---|---|---|
 | **1 · Distribution** | the pillar split with a post count per pillar, written to the head via `allocate_channel` (propose-only, no gate) | accepts, or edits the numbers in the allocation panel — **or just re-runs the command, which is itself acceptance** |
 | **2 · Titles** | one titled DRAFT idea per planned post, sized to the accepted split | prunes the titles worth keeping |
-| **3 · Angle** | each surviving idea's hero + its ONE angle on its single brief | approves the ideas to schedule |
+| **3 · Brief** | each surviving idea's hero + its ONE angle + that angle's **mechanism**, patched onto its single brief | approves the ideas and their briefs to schedule |
 
 Do not decide the round, do not pass one, and do not re-dispatch to force the next
 one — each invocation works one round and stops. Report which round ran and its
@@ -392,9 +392,9 @@ Next: production runs per scheduled post via /ssc-post.
   The one exception is the **allocation**, which `ssc-post-ideate` round 1 proposes
   through `allocate_channel` (propose-only, no gate, operator-editable in the
   panel). The agent writes nothing itself either way.
-- **Never write retired channel fields.** `tactics`, `tactics_approved` and
-  `retrospective` no longer exist on `channel_plans`; `plan_targets` and the post
-  detail row are refused to channel-side writers from `2026-08` onward.
+- **Never write these channel fields.** `channel_plans` carries no `tactics`,
+  `tactics_approved` or `retrospective`; `plan_targets` and the post detail row are
+  refused to channel-side writers from `2026-08` onward.
 - **Channel independence:** the Posts channel never reads, checks, or depends on
   `ad`/`youtube` state. It shares only the monthly plan upstream.
 - Zero auto-applied changes is the success criterion.

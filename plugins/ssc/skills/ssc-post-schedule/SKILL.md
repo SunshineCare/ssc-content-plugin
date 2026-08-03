@@ -1,14 +1,14 @@
 ---
 name: ssc-post-schedule
 description: >-
-  Builds the proposed publish calendar for the Posts channel of a Cambridge Diet Vietnam monthly plan — the channel's THIRD and last step. Reads the month's key dates from the monthly-plan HEAD (its research calendar and tactics), the cadence and pillar counts from the head's ALLOCATION, and the adjacency / key-date-phase rules from rules/scheduling, then assigns every APPROVED post idea exactly one publish date inside the month. Writes the calendar as schedule_entries via save_schedule_entries (a SET — DELETE-then-INSERT). Released by the head's narrative approval and gated on approaches_approved plus at least one approved idea; the retired root `approved` flag is never consulted. Propose-only; the operator approves the calendar in the dashboard.
+  Builds the proposed publish calendar for the Posts channel of a Cambridge Diet Vietnam monthly plan — the channel's THIRD and last step. Reads the month's key dates from the monthly-plan HEAD (its research calendar and tactics), the cadence and pillar counts from the head's ALLOCATION, and the adjacency / key-date-phase rules from rules/scheduling, then assigns every APPROVED post idea exactly one publish date inside the month. Writes the calendar as schedule_entries via save_schedule_entries (a SET — DELETE-then-INSERT). Where §1 of the approved Approaches document requires indirect openings, it fills the remaining free days indirect-first, taking each idea's mechanism off ITS OWN BRIEF via list_briefs (parameter `idea`, one call per approved idea) — the mechanism lives on briefs.mechanism, `null` is an ordinary state placed on the other readable signals, and a mechanism is NEVER re-derived in order to sort by it. Released by the head's narrative approval and gated on approaches_approved plus at least one approved idea. Propose-only; the operator approves the calendar in the dashboard.
 metadata:
   type: skill
   stage: post-pipeline
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  tools: [get_knowledge, get_month_plan, get_channel_plan, get_strategy_brief, list_ideas, save_schedule_entries]
+  tools: [get_knowledge, get_month_plan, get_channel_plan, get_strategy_brief, list_ideas, list_briefs, save_schedule_entries]
 ---
 
 # Post Schedule (`ssc-post-schedule`)
@@ -20,8 +20,8 @@ re-score an idea.
 
 This is step **3 of 3** on the Posts channel (**Approaches → Ideate → Schedule**),
 keyed on `channel_plans(channel='post', period=YYYY-MM)`, which hangs off that
-period's `month_plans(period)` head. There is no Measure step: the month's only
-look-back is the next month's head Review.
+period's `month_plans(period)` head. The month's only look-back is the next
+month's head Review.
 
 Propose-only: you write once, via `save_schedule_entries`, and stop. The operator
 reviews and approves the calendar in the dashboard. You NEVER call `approve` (the
@@ -69,12 +69,11 @@ Hold from the head:
 
 **The server gates on this exact flag.** `replaceScheduleEntries` requires the
 head's `narrative_approved` for a plan linked to a head (or resolved by period
-post-cutover) and **does not consult the channel plan's root `approved` field** —
-that flag is the RETIRED Research gate. So a plan reading `approved: false` with
-`approaches_approved: true` is perfectly schedulable. Never read the root flag,
-never report it as a blocker, and disregard any tool description that says the
-write "REJECTS if the plan is not yet `approved`" — it describes the legacy
-pre-cutover branch only.
+post-cutover) and **does not consult the channel plan's root `approved` field**.
+So a plan reading `approved: false` with `approaches_approved: true` is perfectly
+schedulable. Never read the root flag, never report it as a blocker, and
+disregard any tool description that says the write "REJECTS if the plan is not
+yet `approved`".
 
 ### Step 1b: Read the quarter — briefly, and only for a multi-month window
 
@@ -138,9 +137,8 @@ Approaches step carried it down, and you carry it further. You never infer, adju
 upgrade or default a stage of your own, and you name §1 as where it came from when
 you apply it.
 
-- Where §1 records `NOT STATED`, or carries no sophistication line at all (a
-  document approved before this section existed), that is a **fact**: apply no
-  bar, make no sequencing claim, and say so in the report.
+- Where §1 records `NOT STATED`, or carries no sophistication line at all, that
+  is a **fact**: apply no bar, make no sequencing claim, and say so in the report.
 - Read nothing else from the document here. Pillars, personas, differentiation and
   format rules were already spent at Ideate; re-reading them at Schedule invites you
   to re-judge work you are only arranging. Key dates in particular are **not** here
@@ -177,6 +175,39 @@ report, not one to guess at.
 operator curated; the allocation is what was planned. Schedule **what is approved**
 and report the per-pillar delta in one line (e.g. `P1 5 approved vs 6 allocated`).
 Never pad, drop, or duplicate an idea to make the numbers match.
+
+### Step 3b: Read each idea's brief — the sort key, and only when §1 asks for one
+
+The sequencing preference in Step 5 sorts on a **mechanism**, and a mechanism lives
+on `briefs.mechanism`. The sort key is read off the brief.
+
+**Skip this step entirely where §1 recorded `NOT STATED` or carried no
+sophistication line.** With no read there is no ordering preference to apply (Step
+5.3), so there is nothing to sort by and these calls buy nothing.
+
+Otherwise, per approved idea:
+
+```
+Call: list_briefs
+  idea: <idea id>
+```
+
+**`list_briefs` is scoped to ONE idea** — there is no plan-scoped brief listing — so
+this is one call per approved idea and only that. A post idea has exactly one brief;
+where a row somehow carries more than one, take none of them as that idea's
+mechanism, report it, and let the other signals decide its place.
+
+Each row carries the angle's own `mechanism` — the one Vietnamese sentence it argues
+from — or `null`, plus the brief's `hook_direction`, `core_message` and
+`awareness_stage`. Hold those four per idea and read nothing else here: you are
+collecting a sort key, not re-judging a brief. You never write to a brief — no
+`save_brief`, no `edit(entity='brief', …)` — and you never author, restate or
+sharpen a mechanism; that is the brief step's work, already done.
+
+**`mechanism: null` is an ordinary state, not an error.** An angle may not have
+settled one yet. Such a brief is never re-opened, re-mechanised or reported stale — the absence
+simply means that idea is placed on the other signals (Step 5.3), and the count of
+such ideas is named once in the report.
 
 ### Step 4: Load the scheduling rules
 
@@ -225,13 +256,15 @@ Every approved idea appears exactly once: no omissions, no duplicates.
    Where §1 records `NOT STATED`, or carries no sophistication line, apply **no**
    ordering preference at all and assume no stage.
 
-   **What you sort on — the row's OWN `mechanism`, never a derived one.**
-   `list_ideas` returns the idea's `mechanism`, so sort on it where the row carries
-   one: a mechanism-led idea is the more indirect one and takes the earlier free day.
-   Where a row carries none, judge how indirect it is from the other signals actually
-   on the row — the idea's `tags` (`journey_stage`, `frame`, `entry`) and its brief
-   fields (`hook_direction`, `core_message`, and `awareness_stage` where it was
-   persisted) — and never back-fill the gap by re-deriving a mechanism for it.
+   **What you sort on — the BRIEF's own `mechanism`, never a derived one.** The
+   mechanism lives on `briefs.mechanism`, so the value is the one Step 3b read off
+   `list_briefs`. Sort on it where the
+   idea's brief carries one: a mechanism-led idea is the more indirect one and takes
+   the earlier free day. Where the brief's `mechanism` is `null`, judge how indirect
+   the idea is from the other signals actually readable — the idea's `tags`
+   (`journey_stage`, `frame`, `entry`) and the brief's `hook_direction`,
+   `core_message` and `awareness_stage` — and never back-fill the gap by re-deriving
+   a mechanism for it.
    **Never re-derive a mechanism to sort by.** A guessed mechanism used as a sort key is a silent,
    invisible error — nothing downstream can see it, and the resulting order reads as
    deliberate. If those signals do not separate two ideas, leave their order as the
@@ -291,6 +324,8 @@ Bài đã xếp: <N> · nhịp <min>–<max> bài/tuần · <one line on any dri
 Thứ tự theo mức bão hòa: <mức bão hòa kế thừa từ mục 1 của tài liệu Hướng tiếp cận>
   — <quy tắc đã áp dụng, một dòng: bài thiên về cơ chế / gián tiếp xếp trước, bài
   trực diện xếp sau; xếp sau ngày trọng điểm và luật kề trụ cột>
+  — cơ chế đọc từ brief của từng bài; <n>/<N> brief chưa có cơ chế, xếp theo tín
+  hiệu khác
 
 | Ngày | Thứ | Trụ cột | Định dạng | Tiêu đề | Ghi chú |
 |---|---|---|---|---|---|
@@ -343,23 +378,28 @@ never move an idea outside the month to make a check pass.
   operator's act in the dashboard (`approve(entity='channel_plan', gate='schedule')`).
 - **Never write anything but the calendar.** No `save_idea`, and no
   `edit(entity='idea', …)` (titles, tags, formats, heroes and scores belong to
-  Ideate and to the operator), no
+  Ideate and to the operator), no `save_brief` and no `edit(entity='brief', …)` —
+  the brief is read for its mechanism and never touched, and the mechanism itself is
+  never authored, restated, sharpened or contradicted here — no
   `save_channel_plan`, no `save_month_plan`, no `allocate_channel`. The allocation
   is read here and written only by Ideate round 1.
-- **Never write retired fields.** `channel_plans.tactics`, `tactics_approved` and
-  `retrospective` no longer exist; `save_plan_targets` and a `detail` payload on
-  `save_channel_plan` are refused with `retired_plan_field` from `2026-08` onward.
-- **Never read the retired root `approved` flag**, and never gate on it. Release is
+- **Never write these fields.** `save_plan_targets` and a `detail` payload on
+  `save_channel_plan` are refused with `retired_plan_field` from `2026-08` onward,
+  and `channel_plans` carries no `tactics`, `tactics_approved` or `retrospective`.
+- **Never read the channel plan's root `approved` flag**, and never gate on it. Release is
   the head's `narrative_approved`; the channel's own precondition is
   `approaches_approved` plus ≥1 approved idea.
 - **Never derive a sophistication read, and never re-derive a mechanism to sort
   by.** The read is inherited from §1 of the approved Approaches doc, held off the
   `get_channel_plan` response Step 2 already fetches — no extra call, no extra tool,
-  no extra KB doc. `mechanism` **is** returned by `list_ideas`, so the sequencing
-  judgement uses the row's own mechanism where it carries one and the other readable
-  signals (`tags`, `hook_direction`, `core_message`, `awareness_stage`) where it does
-  not; a guessed mechanism as a sort key is a silent error. No read
-  stated → no bar, no ordering claim, and the report says so.
+  no extra KB doc. The **mechanism** is a different value with a different source: it
+  lives on `briefs.mechanism` and is read per approved idea via `list_briefs`
+  (parameter `idea`, Step 3b) — never off a remembered value, never invented. The
+  sequencing judgement uses that brief's mechanism where it
+  carries one and the other readable signals (the idea's `tags`, the brief's
+  `hook_direction`, `core_message`, `awareness_stage`) where it does not; a guessed
+  mechanism as a sort key is a silent error. No read stated → no bar, no ordering
+  claim, no brief read at all, and the report says so.
 - **The sequencing preference never outranks a constraint.** Key-date pins and the
   adjacency repair govern; the preference only picks which idea fills an already-free
   day, and it never moves a pinned post.

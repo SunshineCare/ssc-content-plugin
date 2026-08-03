@@ -1,6 +1,6 @@
 ---
 name: ssc-post-produce
-description: The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by brief id via get_brief, or by date via get_content_by_date), reads the idea's brief + strategic tags, loads the GOVERNING FRAME (the post channel plan's Approaches `context` for the post's period via get_channel_plan — the month's binding writing rails, its pillar × persona blocks and its organic boundaries — then the month plan's research + tactics via get_month_plan), and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in the whole voice/content/rules KB slices plus channels/facebook, brand/angles and the measured winners/losers indexes. Precedence when they disagree: Approaches → month plan → KB; the brief is the instance, the Approaches rails are the frame, and a rail always wins over a brief instruction that would break it. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. A rejected variation's replacement RE-OCCUPIES THE AXIS POSITION IT HELD — the same lead type, proof device, register and length band, read off the record this skill published for that variation, fixing only what was named, with the whole set re-judged afterwards; matching the set's angle is NOT the constraint, since the angle is fixed across every variation by the brief and so bound nothing while the four axes drifted. The ≥3-distinct proof-point bar is SET-level on BOTH post sections (`copy` and `image_content`) per craft/coverage §4.2 read live — no variation is required to carry three and none may cram three to satisfy it alone. A LEGACY row (approved before this doctrine) is tolerated rather than failed: it is never re-opened, production proceeds, the absent doctrinal inputs are named in the run's report, and none of them is invented. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Writes inside the cross-channel content doctrine, read LIVE and never restated here — craft/doctrine (the chain, the mandatory mechanism, fixed-vs-varied, the floor-vs-coverage split), craft/copy-floor (the six-item pass/fail floor it drafts inside), craft/coverage (the axes the SET spans, the per-section subset, the ordinal length band), craft/awareness-framework (the six leads and the awareness→lead mapping the writer picks from), craft/close-job and craft/cta (the close's job and this channel's close rule) — plus rules/person-rule, the GRAMMATICAL opening rule that rules/banned-words structurally cannot catch: every variation opens inside one of that doc's permitted opening frames and hands the frame it used to the authority as the opening_frame recorded on the saved row (recorded on every asset, never a coverage axis). A failed KB read STOPS the run and names the document that could not be read; nothing proceeds from prose, memory or a cached copy. Propose-only; never approves, publishes, or flips a gate.
+description: "The WRITER step of the standalone Cambridge Diet Vietnam post-writer production workflow. Resolves a single scheduled post (by brief id via get_brief, or by date via get_content_by_date), reads the idea's brief + strategic tags, loads the GOVERNING FRAME (the post channel plan's Approaches `context` for the post's period via get_channel_plan — the month's binding writing rails, its pillar × persona blocks and its organic boundaries — then the month plan's research + tactics via get_month_plan), and drafts N (default 4) DISTINCT Vietnamese Facebook post-copy variations — each a different angle/hook, every one written AS Kiều My (the channel's first-person founder voice per voice/founder-voice) — grounded in the whole voice/content/rules KB slices plus channels/facebook, brand/angles and the measured winners/losers indexes. Precedence when they disagree: Approaches → month plan → KB; the brief is the instance, the Approaches rails are the frame, and a rail always wins over a brief instruction that would break it. Drafts the variations IN-CONVERSATION and hands them to ssc-post-authority WITHOUT persisting — the authority scores them, presents the set to the operator in chat, and (during the operator's in-chat review loop) asks the writer to REVISE named variations, which this skill regenerates in-conversation, still unsaved. A rejected variation's replacement RE-OCCUPIES THE AXIS POSITION IT HELD — the same lead type, proof device, register and length band, read off the record this skill published for that variation, fixing only what was named, with the whole set re-judged afterwards; matching the set's angle is NOT the constraint, since the angle is fixed across every variation by the brief and so bound nothing while the four axes drifted. The ≥3-distinct proof-point bar is SET-level on BOTH post sections (`copy` and `image_content`) per craft/coverage §4.2 read live — no variation is required to carry three and none may cram three to satisfy it alone. A row missing a doctrinal input is tolerated rather than failed: production proceeds, the absent inputs are named in the run's report, and none of them is invented. Nothing is saved until the operator gives the go-ahead. Does NOT call save_content. Writes inside the cross-channel content doctrine, read LIVE and never restated here — craft/doctrine (the chain, the mandatory mechanism, fixed-vs-varied, the floor-vs-coverage split), craft/copy-floor (the six-item pass/fail floor it drafts inside), craft/coverage (the axes the SET spans, the per-section subset, the ordinal length band), craft/awareness-framework (the six leads and the awareness→lead mapping the writer picks from), craft/close-job and craft/cta (the close's job and this channel's close rule) — plus rules/person-rule, the GRAMMATICAL opening rule that rules/banned-words structurally cannot catch: every variation opens inside one of that doc's permitted opening frames and hands the frame it used to the authority as the opening_frame recorded on the saved row (recorded on every asset, never a coverage axis). A failed KB read STOPS the run and names the document that could not be read; nothing proceeds from prose, memory or a cached copy. Propose-only; never approves, publishes, or flips a gate."
 metadata:
   type: skill
   stage: post-production
@@ -60,9 +60,9 @@ Call: get_brief
 
 It returns `{ brief, idea }` — the brief's five narrative fields **and** the owning post idea (core lifecycle fields, post-channel detail, `tags[]`) — so one call gives you both the strategic frame and the idea context. If it returns `{ brief: null }`, STOP and tell the operator the brief id was not found.
 
-**If resolved from a `date` instead**, take the idea's single brief (`list_briefs`) so you carry a `brief_id` forward either way — then call `get_brief(id: <brief_id>)` **once** on it. The date path resolves an idea, not a brief, so this is the call that gives it the same `{ brief, idea }` response the `brief_id` path already has; every later step (Step 2's mechanism resolution included) reads off it. Both entry paths therefore hold exactly one `get_brief` response before Step 2.
+**If resolved from a `date` instead**, take the idea's single brief (`list_briefs`) so you carry a `brief_id` forward either way — then call `get_brief(id: <brief_id>)` **once** on it. The date path resolves an idea, not a brief, so this is the call that gives it the same `{ brief, idea }` response the `brief_id` path already has; every later step (Step 2's mechanism read included) reads off it. Both entry paths therefore hold exactly one `get_brief` response before Step 2.
 
-Hold the resolved idea's `id` and report it to the authority — the authority passes it to `save_content` as the **`idea` convenience** (content is brief-keyed; the server binds the idea's single brief) when it persists each passing variation. You do not save; you only carry the id forward.
+Hold the resolved `brief_id` and hand it to the authority — content is **brief-keyed**, and the `brief_id` it was invoked with is what it passes to `save_content` when it persists each passing variation. Carry the idea's `id` alongside it for **reporting only**. You do not save; you only carry both forward.
 
 ### Step 2: Read the idea's brief and strategic tags
 
@@ -86,69 +86,60 @@ And the **strategic tags** from `tags[]` (each tag is `{ term_id, kind, code, la
 
 The brief is the strategic frame you must honour. The `core_message`, `pillar`, `persona`, and `why_now` are fixed across all N variations — what changes is the **angle and hook**. Do not drift off the brief's pillar/persona/message.
 
-**RESOLVE THE MECHANISM: the brief's override first, then the idea's.** The guarantee is **one angle, one
-mechanism** — not one idea, one mechanism. On this channel a post's single brief *is* that
-one angle, so the canonical rule and the brief you hold are the same scope. `ssc-post-ideate` round 3 may author an **angle-local mechanism
-override** on the very brief this run is anchored to, for the case where the idea's mechanism does not
-serve *that* brief's persona × route; where it did, that override is what this run writes to and the
-idea's mechanism is not. Resolve it from the **one `get_brief` response Step 1 left you holding** — on
-either entry path (the `brief_id` path calls it directly; the `date` path calls it on the `brief_id`
-`list_briefs` yielded). It returns the brief **and** its owning idea together, so there is no further call
-to make here. Resolve on **what
-the response actually carries**, never on an assumption about which fields the server returns:
+**READ THE MECHANISM off `brief.mechanism` — the field that carries it.** The
+guarantee is **one angle, one mechanism**. On this channel a post's
+single brief *is* that one angle, so the canonical rule and the brief you hold are the same scope.
+`ssc-post-ideate` round 3 settles it — bank-first, via `ssc-brief-core` — and writes it onto the very brief
+this run is anchored to with `edit(entity='brief', patch={ mechanism })`.
 
-| `brief.mechanism` | `idea.mechanism` | The **resolved mechanism** |
-|---|---|---|
-| carried | (either) | **the brief's override** — the idea's is not what this run writes to |
-| not carried | carried | **the idea's** — exactly as before the override rule existed |
-| not carried | not carried | **none** — reported, never invented (the legacy rule below) |
+Read it off the **one `get_brief` response Step 1 left you holding** — on either entry path (the
+`brief_id` path calls it directly; the `date` path calls it on the `brief_id` `list_briefs` yielded). It
+returns the brief **and** its owning idea together, so there is no further call to make here. Read
+**what the response actually carries** on the brief, never an assumption about which fields the server
+returns — and never hunt for a mechanism anywhere else: not in the five narrative fields,
+not in `theme`, and never by reading the brief's prose as one.
 
-Everything downstream reads the **resolved** mechanism and nothing else: each variation's mandatory
+Everything downstream reads `brief.mechanism`: each variation's mandatory
 mechanism beat is written from it, `craft/copy-floor` mục 1 is satisfied from it, it is what you hand the
-authority, and the Step 5 summary says which side of the resolution won. **You still never restate or vary
-whichever one you resolved** — writing *to* a mechanism is not reproducing it, and what that distinction
+authority, and the Step 5 summary carries it verbatim. **You never restate or vary
+it** — writing *to* a mechanism is not reproducing it, and what that distinction
 means is `craft/doctrine` §2's to state, read live in Step 3 and deliberately not restated here. Carry the
-resolved sentence **verbatim** as the material you write to; never sharpen, soften, translate or
+sentence **verbatim** as the material you write to; never sharpen, soften, translate or
 paraphrase it into a variation.
 
-**This skill authors no mechanism and writes neither field.** It holds no `save_idea`, no `save_brief` and
-no `edit` — it never overrides one itself, never patches or demotes `idea.mechanism`, and never back-fills
-a brief's override. Authoring an angle-local override is `ssc-post-ideate`'s job and its alone.
+**This skill authors no mechanism and never writes that field.** It holds no `save_idea`, no `save_brief`
+and no `edit` — it settles none of its own and back-fills none onto the brief it is anchored to. Settling
+a post's mechanism is `ssc-post-ideate` round 3's job, through `ssc-brief-core`, and its alone.
 
-> **A brief carrying no override is the ORDINARY case, not a dropped write.** The brief-level mechanism
-> field is staged server work: where the response does not carry it, every brief resolves to the idea's
-> mechanism — which is exactly the behaviour that shipped before this rule. An override authored in that
-> window was **reported to the operator and not persisted**, by design. So never read a missing override as
-> a lost write, never hunt for it in another field (not the five narrative fields, not `theme`), and never
-> treat the brief's prose as an override.
+> **A blank `brief.mechanism` is an absence to REPORT.** `approve(entity='brief')` refuses a `post` brief
+> whose `mechanism` is blank, reporting `field: 'mechanism'`, and that bar is enforced **server-side** —
+> this skill neither enforces nor duplicates it. Where the field is blank the brief stays valid and is
+> never re-opened: production proceeds, and the absence is **named** in the Step 5 summary (the
+> absent-inputs rule below). Never read it as a dropped write, and never invent one to fill the line.
 
 **Resolve the persona's detail-doc path.** The persona tag's taxonomy `code` maps to a KB detail-doc path by a fixed rule: `brand/persona-<slug>`, where `<slug>` is the `code` with the leading `chi-` prefix removed (e.g. a code of `chi-huong` resolves to `brand/persona-huong`). This is a mechanical derivation, not a lookup table — it holds for any persona currently listed in `brand/personas`, including ones added later, and no roster is written here. Hold this ONE resolved path forward into Step 3 (you load only the detail doc for the persona actually in play this run, never the whole roster).
 
-**Legacy rows PROCEED — record the absence, invent nothing.** The doctrine is **not retroactive**. A
-post idea, brief, or earlier saved row **approved before this change stays valid, is never re-opened,
+**A row with an absent input PROCEEDS — record the absence, invent nothing.** A
+post idea, brief, or earlier saved row missing a doctrinal input **stays valid, is never re-opened,
 never re-scored, and never blocked** — and producing a new section on one **never STOPs for that reason
 alone**. Build an explicit **absent-inputs list** as you resolve Steps 1–2 and carry it to the Step 5
 summary. Record, do not repair:
 
-- **No declared `awareness_stage` on the brief — the LEGACY case only.** A post brief authored under
-  the current doctrine **declares** its stage (`ssc-post-ideate` round 3 chooses it and it is written
-  at brief-creation time), so a brief that carries one is **read, never inferred** and never
-  re-diagnosed. Inference is reserved for a **legacy** brief — one authored before post briefs declared
-  the stage, or one whose stage could not be persisted when it was written. Only then: infer the stage
-  from the brief's own prose against the live `craft/awareness-framework` (Step 4) and report it in the
-  summary as an **inference**, never as a declared field.
-- **No named mechanism on EITHER side of the resolution above** — neither an override on the brief nor one
-  on the idea. Name the absence plainly. Never invent one, and never present a mechanism you wrote for a
-  variation as one the brief or the idea carries.
+- **No declared `awareness_stage` on the brief.** A post brief normally **declares** its stage
+  (`ssc-post-ideate` round 3 chooses it and it is written at brief-creation time), so a brief that
+  carries one is **read, never inferred** and never re-diagnosed. Only where the field is blank: infer
+  the stage from the brief's own prose against the live `craft/awareness-framework` (Step 4) and report
+  it in the summary as an **inference**, never as a declared field.
+- **No mechanism on the brief** — a blank `brief.mechanism` (Step 2). Name the absence plainly. Never
+  invent one, and never present a mechanism you wrote for a variation as one the brief carries.
 - **Earlier rows under this brief carrying no recorded axis terms and no `opening_frame`** — report them
   as **untagged**. Never count an untagged historical row as occupying an axis, and never count it as a
   zero.
 
 **An absence is REPORTED, never filled.** A fabricated mechanism or a guessed axis term is a data-shaped
 absence dressed as completeness, which is the worst failure a recording system can have. A run that
-names three absent inputs in its Step 5 summary is a **successful** run. **New** ideas and briefs
-approved *after* this change are held to the new bar — that gate belongs to the ideate step, not to this
-one.
+names three absent inputs in its Step 5 summary is a **successful** run. Enforcing the bar on a NEW
+idea or brief belongs to the ideate step, not to this one.
 
 ### Step 2b: Load the governing frame — the channel's Approaches, then the month plan
 
@@ -431,9 +422,9 @@ particular:
   overlapping *by design*, and that overlap is where the variety lives. **A post brief declares its
   stage** — the ideate step chooses it against that doc's awareness-level ladder — so **read
   `awareness_stage` off the brief and work from it as declared**; never re-diagnose a stage the brief
-  already carries, however much the prose suggests another rung. **Inference is the LEGACY path
-  only:** when the brief carries no stage — a legacy row, or one whose stage could not be persisted at
-  authoring time — infer it from the brief's own prose against that doc, **say in the Step 5 summary
+  already carries, however much the prose suggests another rung. **Inference applies only where the
+  field is blank:** when the brief carries no stage, infer it from the brief's own prose against that
+  doc, **say in the Step 5 summary
   that it was inferred**, and pick leads only from what the inferred stage admits. Never invent a
   stage, never present an inference as a declared field, and never fix one lead across the set.
 - **Proof device, register and length band are the other three axes.** Two variations leaning on the
@@ -513,13 +504,13 @@ After drafting all N variations, present them for the authority to judge:
 **Brief honoured:** core_message, pillar, persona, why_now held fixed across all variations; angle/hook varied.
 **Frame read:** Approaches (channel plan <period>, approaches_approved <yes|no>) · month plan <period> (research + tactics) · KB voice/content/rules
 **Doctrine read live:** `craft/doctrine` · `craft/copy-floor` · `craft/coverage` · `craft/awareness-framework` · `craft/close-job` · `craft/cta` · `rules/person-rule` — all read this run, none restated
-**Awareness stage:** <declared on the brief: `<stage>` | INFERRED from brief prose (legacy brief, no declared stage) : `<stage>` — say which, always>
-**Mechanism written to:** <the resolved sentence, verbatim> — resolved from <the BRIEF's angle-local override | the IDEA's, no override carried on the brief | NONE carried on either — reported, not invented>
+**Awareness stage:** <declared on the brief: `<stage>` | INFERRED from brief prose (no declared stage) : `<stage>` — say which, always>
+**Mechanism written to:** <`brief.mechanism`, verbatim | NONE carried on the brief: reported, not invented>
 **Axes varied across the set:** lead type <…> · proof device <…> · register <…> · length band <…>
 **Opening frames used:** <frame per variation — RECORDED per `rules/person-rule` §4, never a coverage axis>
 **Proof bar:** ≥3 distinct proof points across the SET (`craft/coverage` §4.2) — families spread: <…>; no variation required to carry three, none crammed
 **Rails held:** <the constraints the Approaches marks binding, named as that doc names them — all held across all N>
-**Absent doctrinal inputs (legacy row):** <name each — no declared awareness_stage (stage inferred) / no named mechanism on either the brief or the idea / earlier rows untagged on the axes — or "none". NONE of them invented.>
+**Absent doctrinal inputs:** <name each — no declared awareness_stage (stage inferred) / no mechanism on the brief / earlier rows untagged on the axes — or "none". NONE of them invented.>
 **Replacements this run:** <none | variation <n> regenerated on its RECORDED axis position (lead <…> · proof device <…> · register <…> · length band <…>), fixing <the named failure> — position held, opening frame re-declared>
 **Conflicts:** <none | a brief instruction that would break a rail, and which way it was resolved>
 
@@ -544,17 +535,17 @@ If the date had more than one scheduled post (Step 1, `count > 1`), add a line n
 - N (default 4) DISTINCT Vietnamese Facebook post-copy variations drafted **in the conversation** and presented for the authority to score + present — each a full Vietnamese body with a one-line angle/hook label, all tied to the resolved post's `brief_id`
 - Per variation, the **`opening_frame`** it used (named as `rules/person-rule` §4 names it) plus its position on each coverage axis — handed to the authority so **every post asset it saves records the permitted opening frame it used**
 - Any **revised/replacement** variations regenerated in-conversation on request (from the authority's quality loop or the operator's in-chat review) — each **re-occupying the recorded axis position of the item it replaces**, with its four positions restated and its `opening_frame` re-declared — still unsaved
-- The run's **absent doctrinal inputs** on a legacy row, named in the Step 5 summary and none of them invented
+- The run's **absent doctrinal inputs**, named in the Step 5 summary and none of them invented
 - **Nothing persisted.** No `save_content` call; no `content` row written; no `score`/`comment` set — the authority step (`ssc-post-authority`) scores the variations, presents them, and saves the set only on the operator's go-ahead
 - No gate flipped — variations await scoring + in-chat review (authority) then human selection/approval (workspace)
 
 ## Governance
 
-- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is no longer a separate `unapprove_*` tool — it is an `edit`, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. (This skill persists nothing at all — the note holds a fortiori.)
+- Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is an `edit`, not a tool of its own, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. (This skill persists nothing at all — the note holds a fortiori.)
 - **Does NOT persist.** This skill writes nothing — it has no `save_content` and calls no write tool. It drafts (and, on request, revises) variations in-conversation and hands them to `ssc-post-authority`, which saves the set only after the operator approves it in chat (one `save_content` insert per variation).
 - **A replacement RE-OCCUPIES THE REJECTED ITEM'S AXIS POSITION (hard rule).** Read the position off the record you published for the item being replaced — same lead type, same proof device, same register, same length band — and fix only what was named. A replacement landing on a different position is not a replacement: it moves the hole instead of filling it, and is redrawn on the recorded position. `opening_frame` is never inherited (a per-item `rules/person-rule` §4 choice, re-declared on the replacement); the **set** is re-judged as a whole afterwards (`craft/coverage` §7, `craft/copy-floor`, `craft/doctrine` §3.2 — all read live). **"Same angle" is not a constraint**: the angle is fixed across the whole set by the brief, so it bound nothing while lead, proof device, register and length drifted — the sameness that loop produced is what this rule exists to end.
 - **The ≥3-distinct proof bar is the SET's, on BOTH post sections (hard rule).** `craft/coverage` §4.2 owns it and is read live: no variation is required to carry three, none may cram three to satisfy it alone, and two variations leaning on the same proof family fail the set on the proof-device axis. The `copy` set drafted here and the `image_content` set the authority drafts obey the same rule — there is no post-specific bar and no per-variation bar on either section.
-- **A LEGACY row proceeds; its absences are REPORTED, never invented (hard rule).** The doctrine is not retroactive: an idea, brief or saved row approved before this change stays valid, is never re-opened or re-scored, and production on it never STOPs for that reason alone. Every absent doctrinal input — no declared `awareness_stage` (and that the stage was therefore inferred, the legacy path only: a brief that declares one is read, never inferred), no named mechanism on either side of the brief-override-first resolution (Step 2), earlier rows untagged on the axes — is named in the Step 5 summary and **none is fabricated**. Never invent a mechanism, never guess an axis term, never present an inference as a declared field, never count an untagged row as occupying an axis or as a zero. New approvals are held to the new bar by the ideate step, not by this one.
+- **A row with an absent input proceeds; the absence is REPORTED, never invented (hard rule).** An idea, brief or saved row missing a doctrinal input stays valid, is never re-opened or re-scored, and production on it never STOPs for that reason alone. Every absent doctrinal input — no declared `awareness_stage` (and that the stage was therefore inferred; a brief that declares one is read, never inferred), no mechanism on `brief.mechanism` (Step 2), earlier rows untagged on the axes — is named in the Step 5 summary and **none is fabricated**. Never invent a mechanism, never guess an axis term, never present an inference as a declared field, never count an untagged row as occupying an axis or as a zero. Enforcing the bar on a new approval belongs to the ideate step, not to this one.
 - **Writer, not authority.** Produce (and revise) variations only — leave scoring, the Vietnamese `comment`, the drop-and-regenerate quality loop, the in-chat presentation, AND the saving to `ssc-post-authority`. Do not pre-empt it; do not save your own drafts (saving — and any `edit`/`delete` (`entity='content'`) fix-up of just-saved rows — is the authority's single responsibility over the set). Revision during the operator's in-chat review is your job, but it is still in-conversation and unsaved.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run — never batch-produce across ideas in a single pass.
 - **All drafted prose in Vietnamese.** The variation bodies you draft MUST be Vietnamese (the authority persists them verbatim). Chat-side reasoning/analysis may stay English.

@@ -1,7 +1,7 @@
 ---
 argument-hint: '<brief_id> [script|storyboard|keyframe|clip] [scene_index] [rewrite | revise: <note>]'
 description: >-
-  Launch the PROPOSE-ONLY, ZERO-CREDIT Cambridge Diet Vietnam video-production chain (011-video-production-redraw) for ONE approved brief — Script → Storyboard → per-scene (Keyframe → Clip) → Assemble. BRIEF-KEYED: the owning idea AND the channel are resolved from the brief via get_brief, so there is no idea_id and no channel argument (`ad` and `post` are accepted; any other channel stops cleanly). Thin entry point that dispatches ssc-video-agent, which is state-driven — it reads the run, derives the SINGLE next open step, dispatches that step's skill, and stops at its human gate. The scene count is parsed from the approved Storyboard; a scene marked `real` is a filmed shot whose still and footage are uploads, and the agent reports that gate rather than generating. A step may be named positionally with an optional 0-based scene index, and `rewrite` / `revise: <note>` re-author the targeted step at zero cost. Nothing auto-approves; generation is the operator's click in the VideoStudio.
+  Entry point for the Cambridge Diet Vietnam video-production chain on ONE approved `brief_id` — Script → Storyboard → per-scene Keyframe → Clip → Assemble. Dispatches ssc-video-agent, which runs the single next open step and stops at its human gate. A step may be named positionally with a 0-based scene index; `rewrite` / `revise: <note>` re-author it at zero cost.
 metadata:
   dispatches: [ssc-video-agent]
   brand: cambridge-diet-vn
@@ -37,7 +37,7 @@ Both leave every already-selected candidate untouched and **spend no credits**. 
 
 ## What to do
 
-This command holds **no** orchestration logic. Dispatch **`ssc-video-agent`**, passing the `brief_id` and any step / scene index / re-author marker **verbatim**.
+This command holds **no** orchestration logic. Dispatch **`ssc-video-agent`** (the chain is spec'd as `011-video-production-redraw`), passing the `brief_id` and any step / scene index / re-author marker **verbatim**.
 
 The agent is a **state-driven stepper**: it resolves the run (`get_video_run`, which get-or-CREATEs), reads which text-spine rows are approved and which addresses hold a selected candidate, derives the **single next open step**, dispatches that step's skill, and **stops**.
 

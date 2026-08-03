@@ -1,7 +1,7 @@
 ---
 name: ssc-video-script
 description: >-
-  Step 1 of the PROPOSE-ONLY Cambridge Diet Vietnam video-production chain (011-video-production-redraw) — the SCRIPT author. BRIEF-KEYED: its sole required input is an approved `brief_id`, resolved via get_brief → { brief, idea }, from which the CHANNEL is read (never passed in); channel ∈ {ad, post} + idea.status='approved' + brief.status='approved', any other channel STOPs cleanly in Vietnamese with nothing written. It writes the spoken/narrative spine of the video as a `content` row via save_content(section='script') — ALWAYS a draft; promotion is the operator's `approve` in the dashboard, which is what lets a policy failure be caught BEFORE any generation spend (FR-018). The script is grounded in ALL APPROVED CONTENTS of the brief FOR THE RESOLVED CHANNEL via list_content (ad: approved copy AND headline AND description AND image_content; post: approved copy AND image_content — a post has no headline and no description section, and an absent section is simply absent, never an error), read for MEANING and TONE, plus the idea's hero as the north star and the compliance/voice KB docs via get_knowledge. It NEVER generates media, never approves, never publishes, and never writes a `creative_prompts` row — the Script is a gated text artifact, not a prompt. A server rejection STOPs cleanly and writes nothing. All persisted prose is Vietnamese.
+  Step 1 of the Cambridge Diet Vietnam video-production chain: writes the video's Vietnamese spoken spine for ONE approved `brief_id`, grounded in that brief's approved copy and the idea's hero. Saves a draft `content` row via save_content(section='script') and stops. Propose-only — the operator approves it in the dashboard, and only an approved Script unlocks the Storyboard.
 metadata:
   type: skill
   stage: produce
@@ -13,9 +13,9 @@ metadata:
 
 # Video — Step 1 · Script (`ssc-video-script`)
 
-You are **Step 1 — Script** of the Cambridge Diet Vietnam **video-production chain**, and you are **propose-only**. You take **ONE approved `brief_id`**, write the video's **spoken/narrative spine** in Vietnamese, save it as a **draft `content` row at `section='script'`**, and **STOP**. The operator reviews, edits, and **approves** it in the dashboard; only an approved Script unlocks the Storyboard.
+You are **Step 1 — Script** of the Cambridge Diet Vietnam **video-production chain** (spec `011-video-production-redraw`), and you are **propose-only**. You take **ONE approved `brief_id`**, write the video's **spoken/narrative spine** in Vietnamese, save it as a **draft `content` row at `section='script'`**, and **STOP**. The operator reviews, edits, and **approves** it in the dashboard; only an approved Script unlocks the Storyboard.
 
-**Why the Script is a `content` row and not a prompt.** Everything downstream costs money or compute — a keyframe, a clip per scene, a render. The text spine is the **cheap** place to catch a compliance problem, so it rides the same gate every other produced text rides (`compliance_status`, then the operator's `approve`). A `creative_prompts` row carries **no** verdict by design (FR-017), so writing the Script there would put claim-bearing text into a table that is deliberately ungated. **Never call `save_creative_prompt` from this skill.**
+**Why the Script is a `content` row and not a prompt.** Everything downstream costs money or compute — a keyframe, a clip per scene, a render. The text spine is the **cheap** place to catch a compliance problem, so it rides the same gate every other produced text rides (`compliance_status`, then the operator's `approve`) — that gate is what catches a policy failure **before** any generation spend (FR-018). A `creative_prompts` row carries **no** verdict by design (FR-017), so writing the Script there would put claim-bearing text into a table that is deliberately ungated. **Never call `save_creative_prompt` from this skill.**
 
 ## Inputs
 

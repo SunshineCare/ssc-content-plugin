@@ -1,20 +1,10 @@
 ---
 name: ssc-ads-ideate
 description: >-
-  Generates the month's plan-level pool of persona-free, tier-free ad SUBJECTS for the Ads channel of
-  a Cambridge Diet Vietnam monthly plan — one concrete tension / insight / myth / proof-territory per
-  planned creative, sized to the creative count in the monthly-plan HEAD's Ad allocation. Gated on the
-  approved Approaches (`approaches_approved`).
-  Saves each subject via `save_idea` (channel='ad', plan_id, source='ai', title=<the subject, one
-  concise Vietnamese line>, score, comment) — `save_idea` always mints a `draft`, and the subject
-  carries no persona, value, frame, layer, or any other structural term: the idea tags nothing,
-  because persona × route is chosen later, by the Brief step, per subject. The mechanism belongs one
-  level down, to the ANGLE BRIEF (`ssc-ads-brief`). This step CONSUMES the coverage shape the
-  Approaches step authors on `channel_plans.creative_target` (persona × route × angle count) — volume
-  comes from the monthly head's Ad allocation. Distinctiveness is enforced plan-wide (no two subjects
-  restate the same underlying tension/insight/myth/proof-territory), followed by an honest-scoring
-  quality-replacement loop. Propose-only; subjects are drafts a human curates and approves in the
-  dashboard.
+  Generates the month's pool of persona-free, tier-free ad SUBJECTS — one concrete tension,
+  insight, myth or proof-territory per planned creative, sized to the monthly head's Ad
+  allocation and shaped by the Approaches-authored creative_target. Saves each as a DRAFT idea
+  via save_idea. Runs after the Approaches gate; propose-only — a human curates and approves.
 metadata:
   type: skill
   stage: ads-pipeline

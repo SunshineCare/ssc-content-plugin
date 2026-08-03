@@ -1,7 +1,12 @@
 ---
 name: ssc-post-schedule
 description: >-
-  Builds the proposed publish calendar for the Posts channel of a Cambridge Diet Vietnam monthly plan — the channel's THIRD and last step. Reads the month's key dates from the monthly-plan HEAD (its research calendar and tactics), the cadence and pillar counts from the head's ALLOCATION, and the adjacency / key-date-phase rules from rules/scheduling, then assigns every APPROVED post idea exactly one publish date inside the month. Writes the calendar as schedule_entries via save_schedule_entries (a SET — DELETE-then-INSERT). Where §1 of the approved Approaches document requires indirect openings, it fills the remaining free days indirect-first, taking each idea's mechanism off ITS OWN BRIEF via list_briefs (parameter `idea`, one call per approved idea) — the mechanism lives on briefs.mechanism, `null` is an ordinary state placed on the other readable signals, and a mechanism is NEVER re-derived in order to sort by it. Released by the head's narrative approval and gated on approaches_approved plus at least one approved idea. Propose-only; the operator approves the calendar in the dashboard.
+  Builds the proposed publish calendar for the Cambridge Diet Vietnam Posts
+  channel — its third and last step. Assigns each approved post idea one
+  publish date in the month from the head's key dates and allocation plus
+  rules/scheduling, sorting indirect-first on each brief's own mechanism
+  where the Approaches asks for it. Writes it as a set via
+  save_schedule_entries. Propose-only.
 metadata:
   type: skill
   stage: post-pipeline

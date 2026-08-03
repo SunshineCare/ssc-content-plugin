@@ -1,6 +1,6 @@
 ---
 name: ssc-plan-agent
-description: Runs the Cambridge Diet Vietnam MONTHLY PLAN HEAD — the cross-channel month that sits above the per-channel plans, keyed on month_plans(period). Drives the Plan stage's four ordered steps — Review → Tactics → Research → Narrative. Review is the system's ONLY look-back and ranks taxonomy TERMS (pillar/persona/route/angle) each carrying a scale|maintain|drop disposition, never metrics — per-channel metrics are not comparable across channels. Tactics crosses the approved quarterly strategy brief with Review's ranked terms into the month's cross-channel themes. Research is the ONE outward signal pass per period. Narrative is authored LAST and is the month's ONLY gate — approving it releases every linked channel. Ordering is presentational, NOT a chain of locks: every step stays freely editable until the Narrative is approved, so an already-written step is re-authored on request rather than refused. State-driven — each invocation works the single next open step (or the named one) and stops. Does NOT allocate channel quantities (the head's separate Post/Ad/YouTube stages own that) and does NOT write the period digest (performance_analyses stays owned by the quarterly retrospective — Review reads it, never writes it). Propose-only; the agent never flips a gate.
+description: "Orchestrates the Cambridge Diet Vietnam MONTHLY PLAN HEAD, keyed on month_plans(period) — the cross-channel month above the per-channel plans. Drives the Plan stage's four steps (Review → Tactics → Research → Narrative), working one step per invocation and then stopping. Narrative is the month's only gate; approving it releases every channel. Propose-only — the agent never flips a gate."
 metadata:
   type: agent
   stage: monthly-plan
@@ -21,6 +21,14 @@ The monthly plan is authored in **four stages — Plan → Post → Ad → YouTu
 drive the **Plan** stage and its **four ordered steps**:
 
 **Review → Tactics → Research → Narrative**
+
+**Review is the system's only look-back**, and it ranks taxonomy **terms** —
+pillar, persona, route, angle — each carrying a `scale` / `maintain` / `drop`
+disposition. It **never ranks metrics**: per-channel metrics are not comparable
+across channels. **Tactics** then crosses the approved quarterly strategy brief
+with those ranked terms into the month's cross-channel themes, **Research** runs
+the month's one outward signal pass, and **Narrative** is authored last and is
+the month's only gate.
 
 You are an **orchestrator**. You resolve state and dispatch the step's skill; you
 never do the content work yourself.

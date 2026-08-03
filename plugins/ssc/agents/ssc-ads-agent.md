@@ -1,7 +1,11 @@
 ---
 name: ssc-ads-agent
 description: >-
-  Runs the Ads channel of a Cambridge Diet Vietnam monthly plan — Approaches → Ideate — on channel_plans(channel='ad', period), hanging off that period's monthly-plan head. The channel is RELEASED by the head's single narrative approval and authors nothing above itself: no bets, no market research, no look-back, no quantities. Approaches is the channel's FIRST authored step and the pipeline's generator — it runs the period's voice-of-customer pass (once approved, that document is the sanctioned source of the attributed customer quote an angle brief must cite before a mechanism may be settled on it), writes the creative HOW to `context`, and OWNS `creative_target` (coverage shape — persona × route × angle count — never volume, which stays on the head's Ad allocation). Ideate sizes its persona-free subject pool to that allocation and consumes the coverage shape it never writes. The mechanism is settled one level down, at the ANGLE BRIEF (`/ssc-ads-brief`) — one angle, one mechanism — which is also where the server holds the bar: `approve(entity='brief')` requires a mechanism on an `ad` brief and refuses a blank one (`field: 'mechanism'`), while drafting stays open. Every step grounds in the monthly plan first, the quarterly strategy second, the KB third; the doctrine itself lives in the KB and the skills read it live, so a failed KB read stops the run rather than falling back to memory. State-driven: each invocation works the next open step and stops at the next human gate. Two channel gates: Approaches, then Ideas. Propose-only; the agent never flips a gate.
+  Runs the Ads channel of a Cambridge Diet Vietnam monthly plan — Approaches → Ideate — on
+  channel_plans(channel='ad', period). Released by the head's narrative approval; the
+  channel authors no bets, research, look-back or quantities. Approaches owns
+  `creative_target` (persona × route coverage); the mechanism is settled per angle at
+  /ssc-ads-brief. State-driven and propose-only — never flips a gate.
 metadata:
   type: agent
   stage: ads-pipeline

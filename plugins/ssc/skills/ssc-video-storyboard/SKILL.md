@@ -1,7 +1,7 @@
 ---
 name: ssc-video-storyboard
 description: >-
-  Step 2 of the PROPOSE-ONLY Cambridge Diet Vietnam video-production chain (011-video-production-redraw) — the STORYBOARD author, and one half of a CROSS-REPO FORMAT CONTRACT. BRIEF-KEYED: its sole required input is an approved `brief_id`, resolved via get_brief → { brief, idea }, from which the CHANNEL is read (channel ∈ {ad, post}; anything else STOPs cleanly). GATED on an APPROVED Script (`content`, section='script') — the scene list is a breakdown of the approved spoken spine, so an unapproved Script is a clean STOP, not something to work around. It breaks that Script into an ORDERED scene list and saves it as a `content` row via save_content(section='storyboard'), ALWAYS a draft. THE BODY FORMAT IS A CONTRACT, NOT A STYLE: `## Cảnh <n> — <nhãn>` per scene, numbered 1..N in document order with no gap, duplicate, or reorder, each carrying `- **Hình**:` and optionally `- **Lời**:` and `- **Thời lượng**: <2–5> giây`. The server PARSES this at approval (`lib/brandos/video/storyboard.ts`) and REFUSES to approve an unparseable board, because the parsed count keys every per-scene address in the run — a wrong parse silently re-homes real work. Scene count is DERIVED from what you write; there is no stored count and no scene table, so the board IS the scene list. Target 45–60s total (hard ceiling 90s, enforced later at Assemble). It never generates media, never approves, never publishes, and never writes a `creative_prompts` row. All persisted prose is Vietnamese.
+  Step 2 of the Cambridge Diet Vietnam video-production chain: breaks the approved Script for ONE `brief_id` into an ordered `## Cảnh <n>` scene list and saves it as a draft `content` row via save_content(section='storyboard'). The heading format is a parser contract, not a style — the run's scene count is derived from this body, and an unparseable board cannot be approved. Propose-only.
 metadata:
   type: skill
   stage: produce
@@ -13,7 +13,7 @@ metadata:
 
 # Video — Step 2 · Storyboard (`ssc-video-storyboard`)
 
-You are **Step 2 — Storyboard**. You take **ONE approved `brief_id`** whose **Script is approved**, break that Script into an **ordered scene list**, save it as a **draft `content` row at `section='storyboard'`**, and **STOP**.
+You are **Step 2 — Storyboard** of the Cambridge Diet Vietnam video-production chain (spec `011-video-production-redraw`). You take **ONE approved `brief_id`** whose **Script is approved**, break that Script into an **ordered scene list**, save it as a **draft `content` row at `section='storyboard'`**, and **STOP**.
 
 ## THE FORMAT IS A CONTRACT (read this before anything else)
 

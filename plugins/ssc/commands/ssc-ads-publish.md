@@ -1,29 +1,11 @@
 ---
 argument-hint: '<brief_id> <ad_set_id> [ad_account_id]'
 description: >-
-  Prepare the publish-ready payload for ONE approved angle brief and STOP — the fifth and terminal
-  stage of the ads pipeline (Approaches → Ideate → Brief → Writer → Publish), and a thin entry point
-  that dispatches ssc-ads-publish. It PREPARES, never creates: the operator commits with the Publish
-  click in the /ad/[month]/[id] workspace, a dashboard-only path that re-resolves the whole stage
-  server-side and creates from its own result. Entered only deliberately — Publish is NOT a section of
-  the writer's per-section stepper, which auto-picks the next open section and would otherwise make
-  publishing something the pipeline drifts into once sections run out; the writer knows nothing about
-  this stage. Two inputs: a required approved brief_id, and a REQUIRED, explicitly named target ad set
-  — never inferred, never guessed, because guessing spends the wrong budget; missing it is a clean
-  stop with no payload. The stage resolves publishable state (brief approved; a section with rows but
-  none approved blocks and is named; copy required; an already-published brief is reported DONE and
-  never mints a second payload), assembles an asset_feed_spec from the approved set — N bodies from
-  copy, N titles from headline, N descriptions from description, text VERBATIM, a section with no
-  approved rows omitted rather than emitted empty or invented, image_content and storyboard never
-  included — RE-RUNS the compliance floor per asset across exactly the assets being published and
-  RECORDS each verdict via record_compliance (a save_content row sits at compliance_status='pending',
-  and an unrecorded verdict is treated as a FAILURE at publish, never a pass), re-runs the set-level
-  coverage judgement across exactly that set and blocks a collapsed set naming the unspanned axis, and
-  resolves BOTH linkage grains onto the payload — ad → brief, and ad asset → content row on normalised
-  exact text (a 4/5/4 set resolves 13 links) — which is what makes attribution unskippable by
-  construction. Propose-only and money-safe: it never calls create_campaign, create_adset, create_ad or
-  update_budget, never approves, and flips no gate; its only write is the floor verdict it records on
-  the assets it just judged.
+  Terminal ads stage: assembles the publish-ready creative payload for ONE approved angle
+  brief into an ad set the operator already made (`<brief_id> <ad_set_id>`), records a
+  compliance verdict per asset, then presents the payload and STOPS. It creates nothing —
+  the operator commits with the dashboard's Publish click, and it never calls
+  create_campaign, create_adset, create_ad or update_budget.
 metadata:
   dispatches: [ssc-ads-publish]
   brand: cambridge-diet-vn
@@ -75,9 +57,23 @@ the assets being published (recording each verdict — an unrecorded verdict is 
 a pass) and the **set-level coverage** judgement across exactly that set, resolves **both linkage
 grains** onto the payload, then presents it and stops.
 
+**What the `asset_feed_spec` carries.** N bodies from the approved `copy` rows, N titles
+from `headline`, N descriptions from `description` — the text **VERBATIM**. A section
+with **no approved rows is omitted** rather than emitted empty or invented, and
+`image_content` and `storyboard` are **never** included.
+
+**The compliance floor is re-run per asset**, across exactly the assets being published.
+A row saved by `/ssc-ad` sits at `compliance_status='pending'`; the stage records each
+verdict via `record_compliance`, and an **unrecorded verdict is treated as a FAILURE at
+publish, never a pass**.
+
+**Both linkage grains are resolved onto the payload** — **ad → brief**, and **ad asset →
+content row**, matched on normalised exact text (a 4/5/4 set resolves 13 links). That is
+what makes attribution unskippable by construction.
+
 | The stage does | Then the operator… |
 |---|---|
-| Prepares and presents the payload — target ad set, assembled asset feed, floor verdict per asset, coverage verdict per section, and both linkage grains with the link count — and **creates nothing**. Or it **stops cleanly** with no payload: no ad set supplied; brief not approved; sections written but unapproved (named); no assets; a floor failure (asset + rule named); a coverage collapse (axis named); already published. | Opens `/ad/[month]/[id]` and clicks **Publish**. The dashboard first **prepares** server-side (a read that creates nothing) and offers the button **only** for a `ready` payload; the commit then sends `{ brief, ad_set }` — **not** the payload — so the server re-resolves the stage and creates the ad from its **own** result. |
+| Prepares and presents the payload — target ad set, assembled asset feed, floor verdict per asset, coverage verdict per section, and both linkage grains with the link count — and **creates nothing**. Or it **stops cleanly** with no payload: no ad set supplied; brief not approved; sections written but unapproved (named); no approved `copy` (it is required); no assets; a floor failure (asset + rule named); a coverage collapse (axis named); already published — an already-published brief is reported DONE and never mints a second payload. | Opens `/ad/[month]/[id]` and clicks **Publish**. The dashboard first **prepares** server-side (a read that creates nothing) and offers the button **only** for a `ready` payload; the commit then sends `{ brief, ad_set }` — **not** the payload — so the server re-resolves the stage and creates the ad from its **own** result. |
 
 **The presented payload is a faithful preview, not the committed artifact.** The server's
 re-resolution at commit time is authoritative — it is also where the already-published check and the

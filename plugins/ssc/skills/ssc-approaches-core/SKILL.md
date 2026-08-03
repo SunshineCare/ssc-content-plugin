@@ -1,7 +1,12 @@
 ---
 name: ssc-approaches-core
 description: >-
-  Shared sub-skill, dispatched by the two Approaches skills, never invoked directly by an operator — the SHARED, channel-agnostic core of the Approaches step of a Cambridge Diet Vietnam monthly plan, dispatched by ssc-ads-approaches and ssc-post-approaches. It returns TWO blocks of text for the caller to compose into its own document: the INHERITED market-sophistication read (carried through verbatim from the quarter the caller passed in, never derived — `NOT STATED` is returned as a fact, never filled with a guessed stage); and the per-persona VOICE-OF-CUSTOMER pass (her language, triggers, objections and myths in her own words, COMPILED from four ranked recorded sources, every quote attributed, never invented, each persona's avoid-list respected, and a silent source named as a gap that does not stop the run). That pass carries real weight downstream: once the caller's document is approved, it is the SANCTIONED SOURCE of the attributed customer quote an angle brief must cite before a mechanism may be settled on it — a quote no downstream step may attribute to anything this pass did not record. Its return is exactly those two blocks; the mechanism itself is settled one angle at a time at the ANGLE BRIEF by ssc-brief-core, against the mechanisms bank read there. It has exactly ONE conditional, `channel` — on `post` it binds every quoted line to rules/organic-vs-paid-firewall and refuses any ad-sourced line; on `ad` there is no firewall binding and no extra read. It writes nothing, holds no mutation tool, reads NO plan state (the head, the quarter brief and the featured personas all arrive from the caller, which owns the release gate and every save), runs no outward pass, and never hard-codes a knowledge-base rule — it names the doc and its section and reads it live, and a failed read STOPS the run rather than falling back to a remembered version. Propose-only by construction.
+  Shared sub-skill dispatched by ssc-ads-approaches and ssc-post-approaches
+  — never invoked directly. Returns two blocks for the caller to compose:
+  the market-sophistication read inherited verbatim from the quarter, and
+  the per-persona voice-of-customer pass, every quote attributed to a
+  recorded source. View-only — it holds no mutation tool, reads no plan
+  state, and the caller saves.
 metadata:
   type: skill
   stage: shared

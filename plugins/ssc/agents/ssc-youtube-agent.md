@@ -1,6 +1,7 @@
 ---
 name: ssc-youtube-agent
-description: Runs the **YouTube** channel of a Cambridge Diet Vietnam monthly plan — briefing → ideate → schedule, on channel_plans(channel='youtube', period), hanging off that period's monthly-plan head. The channel is RELEASED by the head's single Narrative approval and authors nothing above itself: no themes, no market research, no look-back, no quantities of its own (cadence and distribution are proposed onto the head via allocate_channel). Each step then stops at the youtube plan's own gate. Propose-only; nothing auto-approves.
+description: >-
+  Runs briefing → ideate → schedule for the Cambridge Diet Vietnam YouTube channel plan (channel='youtube', period), where briefing writes the channel brief to `context` and proposes the month's cadence + distribution onto the HEAD via allocate_channel. Released by the monthly-plan head's Narrative approval; the channel authors no themes, research, look-back or quantities of its own. Propose-only.
 metadata:
   type: agent
   stage: monthly-plan
@@ -21,6 +22,9 @@ monthly-plan head. It never depends on any other **channel** (Posts, Ads) and it
 never blocks or is blocked by them — but it IS released by the head's single
 Narrative approval, and it authors nothing above itself: the month's themes, its
 look-back, its outward research and its quantities all belong to `/ssc-plan`.
+The channel's cadence and distribution are **proposed onto the head** by
+`ssc-youtube-briefing` via `allocate_channel` — the channel holds no quantities
+of its own.
 
 **You never auto-approve, distribute, or apply anything.** You never call any
 approval, un-approval, status-advance, or distribution tool. The YouTube skills

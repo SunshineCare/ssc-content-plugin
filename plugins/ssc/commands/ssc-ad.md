@@ -1,6 +1,11 @@
 ---
 argument-hint: '<brief_id> [copy|headline|description|image_content]'
-description: Produce ad TEXT for ONE approved ad concept, anchored to the operator's chosen approved angle brief — a thin entry point. Dispatches ssc-ads-writer with a required brief_id and an optional section. ssc-ads-writer resolves the chosen approved brief AND its owning concept via get_brief (brief_id → { brief, idea }, so no separate idea_id input), then produces copy first (mandatory cold start, grounded in ONLY that one brief's five narrative fields + angle_label); once copy is approved, headline, description, and image_content are each independently producible — gated only on copy, not on each other, and re-invocable any time for a fresh revision — chosen via the optional section argument or auto-picked among those not yet approved. It self-scores + saves the passing (≥4-rated) drafts straight to the server, and stops. The operator reviews/edits/approves at /ad/[month]/[id], then re-runs this command for any other freed section in any order; headline distils the approved copies, description compresses those copies (complementing an approved headline when one exists), image_content builds on those copies plus headlines/descriptions when they exist — all inside the one chosen angle. Brief generation is the separate FIRST step /ssc-ads-brief <idea_id> (angle briefs are produced before any copy; the operator approves one to get the brief_id). Propose-only; the writer saves drafts, never approves.
+description: >-
+  Produces ad TEXT for ONE approved angle brief (`<brief_id> [section]`) — copy first,
+  then headline, description and image_content, each gated only on approved copy.
+  `brief_id` is the sole input: the writer resolves the owning concept from it via
+  get_brief, and every saved row is brief-keyed. It self-scores, saves the passing
+  drafts, and stops. Propose-only — it never approves.
 metadata:
   dispatches: [ssc-ads-writer]
   brand: cambridge-diet-vn
@@ -35,6 +40,11 @@ This command is a thin entry point — it holds **no** orchestration logic. It d
 | The writer does | Then the operator… |
 |---|---|
 | Resolves the ONE approved brief + its owning concept via `get_brief(brief_id)` as the angle anchor; reads `list_content(brief=brief_id)`. If `copy` isn't approved yet, produces it (cold start, from that brief). Otherwise resolves the target section (named, or auto-picked among headline/description/image_content without an approved row) and produces N Vietnamese variations for THAT section only, grounded in whichever of copy/headline/description is currently approved **plus the same brief** — pressing Cambridge proof points sized to format (each copy weaves in ≥3 distinct; a headline/description carries 1–2 and the section's set covers ≥3) from brand/positioning + brand/proof-points — self-scores each 1–5 with a Vietnamese comment, drops + regenerates any ≤3, then **saves the passing (≥4-rated) drafts to the server** via `save_content` (`channel='ad'`, `brief_id`, `section` — content is brief-keyed, so `brief_id` is required and there is no `idea_id`) — **every saved row records the `brief_id` of the angle it was written from**, in all four sections — and **stops**. | Opens `/ad/[month]/[id]`, **reviews / edits / approves** the saved drafts for that section, then **re-runs `/ssc-ad <brief_id> [section]`** — for any other freed section, or the same one again for a fresh revision. |
+
+**Each freed section derives from the approved copy — all inside the one chosen angle.**
+`headline` distils the approved copies; `description` compresses those same copies,
+complementing an approved headline when one exists; `image_content` builds on those copies
+plus whichever headlines/descriptions exist.
 
 **This flow renders no pictures** — the `image_content` step is the on-image COPY as structured text (headline hook + USP/proof subheadline + 3 USP/proof bullets), saved under `section='image_content'` for the dashboard to render. Each targeted section **saves drafts immediately** (no in-chat presentation or revise loop); all review / edit / approval happens in the dashboard. If the target section already has unapproved drafts, the writer stops and asks the operator to approve/reject them first (it does not pile up a second batch).
 

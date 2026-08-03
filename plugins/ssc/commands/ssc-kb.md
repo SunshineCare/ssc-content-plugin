@@ -1,6 +1,7 @@
 ---
 argument-hint: '[focus] [review|audit|revise|harvest] [period]'
-description: Launch the Cambridge Diet Vietnam Knowledge-base health cycle — review → audit → research → revise/gap-fill, plus harvest (grow the standing mechanism bank — the BrandOS `mechanisms` table — from the mechanisms a period's BRIEFS settled, drafting the genuinely new ones in, sharpening near-duplicates in place under bounds, and reporting the period's mechanism mix). Knowledge-document revisions stay propose-only and a harvested bank entry is a DRAFT, not supply; nothing is approved, promoted or published automatically.
+description: >-
+  Launch the Cambridge Diet Vietnam knowledge-base health cycle — review → audit → research → revise / gap-fill, plus harvest, which grows the standing mechanism bank from the mechanisms a period's briefs settled. Propose-only: revisions are proposals, a harvested bank entry is a draft, and nothing is approved or published automatically.
 metadata:
   dispatches: [ssc-kb-agent]
 ---

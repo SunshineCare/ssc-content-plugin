@@ -1,7 +1,7 @@
 ---
 name: ssc-strategy-ad-intelligence
 description: >-
-  Diagnoses the Vietnamese meal-replacement / weight-loss ad market (awareness stage + sophistication) and assesses Cambridge Diet VN's own paid angles — grounded in our ACTUAL ingested ad-set performance (get_ad_performance: spend, CTR, cost-per-result) alongside the angle KB and a competitor scan. Flags fatigued/inefficient angles and winning ones. Saves findings via save_strategy_finding (dimension=ad_market). It is the ONE step of the quarterly cycle that derives the market-sophistication read — named in craft/awareness-framework §2's own stage vocabulary, read live, plus its Vietnamese reasoning — and it REPORTS that pair back to ssc-strategy-agent rather than writing it: the agent is the brief row's only writer, the quarter authors the read once, and the month inherits it.
+  Diagnoses the Vietnamese meal-replacement / weight-loss ad market — awareness stage and sophistication — and assesses Cambridge Diet VN's own paid angles against ingested ad-set performance, flagging winning and fatigued ones. Saves findings via save_strategy_finding (dimension=ad_market). The one quarterly step that derives the market-sophistication read, which it reports rather than writes.
 metadata:
   type: skill
   stage: strategy

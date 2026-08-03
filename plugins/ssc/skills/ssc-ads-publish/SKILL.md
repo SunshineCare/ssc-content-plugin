@@ -1,32 +1,10 @@
 ---
 name: ssc-ads-publish
 description: >-
-  The FIFTH and terminal stage of the Cambridge Diet Vietnam ads pipeline (Approaches → Ideate →
-  Brief → Writer → Publish) — it PREPARES a publish-ready payload for ONE approved angle brief and
-  STOPS. It never creates anything in the Meta ad account: the operator commits with the Publish
-  click in the `/ad/[month]/[id]` workspace, a dashboard-only HTTP path, and that commit re-resolves
-  the whole stage server-side and creates from its OWN result. Entered only by deliberate dispatch —
-  it is NOT a section of the writer's per-section stepper, and the writer neither offers nor
-  auto-picks nor advances into it (design D1). Its two inputs are a required approved `brief_id` and
-  a REQUIRED, explicitly named target ad set — the ad set is never inferred, never guessed, never
-  "the obvious one" (D7); missing it is a clean stop with no payload. It resolves publishable state
-  (brief approved; every section that has rows has an approved row; `copy` required), assembles an
-  `asset_feed_spec` from the approved content set — N bodies from `copy`, N titles from `headline`, N
-  descriptions from `description`, text VERBATIM, a section with no approved rows OMITTED rather than
-  emitted empty or invented (`image_content` and `storyboard` are never Meta text assets) — then
-  RE-RUNS the compliance floor per asset across exactly the assets being published and RECORDS each
-  verdict via `record_compliance`, because a `save_content` row is left `compliance_status='pending'`
-  and the server's publish-time floor treats an unrecorded verdict as a FAILURE, never a pass: the
-  floor is re-judged at publish and never inherited from section-level approval (D4). It also judges
-  set-level coverage across exactly that set and blocks a set that has collapsed onto one option on
-  an axis the section must span, naming the axis. It resolves BOTH linkage grains onto the payload —
-  `ad → brief` (one id) and `ad asset → content row` (one link per assembled asset, many-to-many on
-  normalised exact text; a 4/5/4 set resolves 13) — which is what makes attribution unskippable by
-  construction rather than by discipline (D2/D3). A brief that already has a published ad is reported
-  as DONE and never mints a second payload. Propose-only and money-safe: it NEVER calls
-  `create_campaign`, `create_adset`, `create_ad` or `update_budget`, never approves, never flips a
-  gate, and its only write is the floor verdict it records on the assets it just judged. All
-  persisted prose (recorded compliance reasons) is Vietnamese.
+  Assembles the publish-ready creative payload for ONE approved angle brief into an ad_set the
+  operator names — verbatim approved copy/headline/description, a re-run per-asset compliance
+  floor and set coverage check, and both attribution links — then presents it and STOPS. Holds no
+  money-moving tool: the ad is created by the operator's dashboard Publish click.
 metadata:
   type: skill
   stage: ads-pipeline

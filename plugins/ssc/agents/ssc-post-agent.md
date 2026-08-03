@@ -1,7 +1,11 @@
 ---
 name: ssc-post-agent
 description: >-
-  Runs the Posts channel of a Cambridge Diet Vietnam monthly plan — Approaches → Ideate → Schedule — on channel_plans(channel='post', period), hanging off that period's monthly-plan head. The channel is RELEASED by the head's single narrative approval and authors nothing above itself: no themes, no market research, no look-back, no quantities. Every step grounds in the monthly plan first, the quarterly strategy second, the KB third. State-driven: each invocation works the next open step and stops at the next human gate. Propose-only; the agent never flips a gate.
+  Runs the Posts channel of a Cambridge Diet Vietnam monthly plan — Approaches → Ideate →
+  Schedule — on channel_plans(channel='post', period). Released by the head's narrative
+  approval; the channel authors no themes, research, look-back or quantities of its own.
+  State-driven: each invocation works the next open step and stops at the next human gate.
+  Propose-only — the agent never flips a gate.
 metadata:
   type: agent
   stage: post-pipeline

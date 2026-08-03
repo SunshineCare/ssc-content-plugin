@@ -1,6 +1,7 @@
 ---
 name: ssc-strategy-agent
-description: The Cambridge Diet Vietnam quarterly strategy agent — one deep cycle per quarter that gathers 8-dimension market intelligence AND feeds the validated findings back into the knowledge base as propose-only revisions. Runs across three human-gated phases in separate Cowork sessions — (1) draft research directions, (2) run the 8 dimensions into a strategy brief, (3) turn the curated findings into KB review + revision proposals. Purely quarterly — no ad-hoc modes; for one-off strategy work the operator invokes ssc-strategy-eval / ssc-strategy-develop / ssc-strategy-audit directly. Every output is propose-only; nothing auto-approves, publishes, or applies. The quarter authors the market-sophistication read ONCE — the ad-market dimension derives it, this agent stamps it onto the quarterly brief — and every monthly plan linked to that brief inherits it; no monthly artifact authors a read of its own. A quarter whose dimensions are already complete is re-runnable only on an explicit trailing `rerun` marker, which re-runs all 8 dimensions, appends findings, and does not bypass the directions gate. Feeds the Monthly Plan, which reads the refreshed KB.
+description: >-
+  The Cambridge Diet Vietnam quarterly strategy agent — one deep cycle per quarter in three human-gated phases: draft research directions, run the 8 market-intelligence dimensions into a strategy brief, then turn the curated findings into propose-only KB revisions. Quarterly only — ssc-strategy-eval / -develop / -audit are standalone skills, not entry points here. Nothing auto-approves.
 metadata:
   type: agent
   stage: strategy
@@ -237,6 +238,10 @@ Call: save_strategy_brief
 **No extra call.** The read rides the status write, so it is crash-safe on exactly the terms
 the status map is. No other dimension reports a position, you never derive one yourself, and
 you never write these two fields from any other step.
+
+**The quarter authors this read ONCE.** Every monthly plan linked to this brief inherits it,
+and **no monthly artifact authors a read of its own** — the month applies what the quarter
+established, so a second read written anywhere downstream is a second source of truth.
 
 **Omission, never a guess.** If the dimension established **no** position — it could not read
 `craft/awareness-framework` §2, found no signals, or the ladder position was ambiguous —

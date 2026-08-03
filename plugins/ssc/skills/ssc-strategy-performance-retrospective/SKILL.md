@@ -1,6 +1,7 @@
 ---
 name: ssc-strategy-performance-retrospective
-description: Synthesises the prior cycle's performance for Cambridge Diet Vietnam by READING what's already been ingested into Brand OS — the digested per-month analysis (get_performance_analysis), the ingested per-post Facebook metrics (get_post_performance), and the ingested paid-ad metrics (get_ad_performance). It never triggers ingestion (pull_*) and never writes a raw performance row. Only records "no prior performance data" when all three reads are empty. Saves findings via save_strategy_finding (dimension=performance_retrospective) AND writes its cross-source cycle synthesis back into the shared per-period digest via save_performance_analysis (its own summary block, draft) — the write that stops the digest every later phase reads from being permanently empty.
+description: >-
+  Synthesises the prior quarter's performance for Cambridge Diet Vietnam by reading what Brand OS has already ingested — the per-month digest, the per-post Facebook metrics and the paid-ad metrics. Saves findings via save_strategy_finding (dimension=performance_retrospective) and writes its cross-source cycle synthesis back into the shared digest as a draft summary block. Never triggers ingestion.
 metadata:
   type: skill
   stage: strategy

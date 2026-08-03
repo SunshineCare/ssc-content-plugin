@@ -1,7 +1,11 @@
 ---
 argument-hint: '<brief_id|YYYY-MM-DD> [copy|image_content] [n]'
 description: >-
-  Launch the standalone Cambridge Diet Vietnam post-writer production loop — resolve a scheduled post (by brief id, or by date) → produce N Vietnamese variations for ONE section → self-score + drop/regenerate to brand → PRESENT the set in chat for the operator's review (revise loop) → save as idea-linked drafts only on the operator's go-ahead. Produces TWO sections: `copy` (the mandatory cold start; every saved variation is stamped `section='copy'`) and `image_content` (the structured on-image copy the ImageStudio's Text layer renders), which is GATED on an approved copy — either named via an optional section argument — BOTH `copy` and `image_content` are valid explicit values (`/ssc-post <brief_id> copy` / `… image_content`), and an explicit name always wins over the auto-pick, so naming `copy` after a copy is approved yields a FRESH copy batch — or auto-picked as the next open section when omitted. Interactive: waits for the operator's review before saving; does not save autonomously. Runs after the planning pipeline's Schedule. Propose-only; no /ssc-plan or /ssc-post-plan dependency.
+  Produces post TEXT for ONE scheduled post (`<brief_id|YYYY-MM-DD> [section] [n]`) — N
+  Vietnamese variations for ONE section: `copy` (the mandatory cold start) or
+  `image_content` (the on-image copy, gated on an approved copy). Interactive: it
+  self-scores, presents the set in chat for review, and saves drafts only on the
+  operator's go-ahead — never autonomously. Propose-only.
 metadata:
   dispatches: [ssc-post-writer-agent]
   brand: cambridge-diet-vn

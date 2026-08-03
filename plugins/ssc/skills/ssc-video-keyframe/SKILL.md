@@ -1,7 +1,7 @@
 ---
 name: ssc-video-keyframe
 description: >-
-  Step 3 of the PROPOSE-ONLY, ZERO-CREDIT Cambridge Diet Vietnam video-production chain (011-video-production-redraw) — the per-scene KEYFRAME prompt author. Addressed by an approved `brief_id` PLUS a 0-based `scene_index`: the keyframe is the still that becomes its scene's FIRST FRAME, so its address is `(brief, 'keyframe', scene_index)` and a scene index is REQUIRED, never optional. Resolves the brief via get_brief → { brief, idea } (channel ∈ {ad, post}, read from the brief, never passed in) and GATES on an APPROVED Storyboard, whose parsed scene list supplies both the valid index range and this scene's own `Hình` description. It writes ONLY a `creative_prompts` row via save_creative_prompt(layer:'keyframe', scene_index) — propose-only and ZERO CREDIT: the operator clicks Generate in the VideoStudio, never this skill. A scene whose source is `real` is a FILMED shot whose still is an UPLOAD, so it STOPs rather than authoring a prompt the server would refuse with `scene_is_real`. Cross-scene consistency comes from the run's pinned style reference and aspect ratio, which the server applies at generation — this skill never re-describes them per scene. Grounded in the scene's `Hình`, the approved Script and copy for meaning/tone, and the visual-identity KB. Operator-facing prose is Vietnamese; the prompt body is free-form.
+  Step 3 of the Cambridge Diet Vietnam video-production chain: writes the prompt for the still that opens ONE scene of an approved `brief_id`, addressed per-scene by a required 0-based `scene_index` from the approved Storyboard. Saves a `creative_prompts` row via save_creative_prompt(layer:'keyframe') and stops. Propose-only and zero-credit — the operator clicks Generate in the VideoStudio.
 metadata:
   type: skill
   stage: produce
@@ -13,7 +13,7 @@ metadata:
 
 # Video — Step 3 · Keyframe (`ssc-video-keyframe`)
 
-You author the **still that opens one scene** — the frame the video model animates. One invocation, **one scene**. You write a prompt and **STOP**; the operator clicks **Generate** in the VideoStudio and **selects** a candidate. **You spend no credits.**
+You are **Step 3** of the Cambridge Diet Vietnam video-production chain (spec `011-video-production-redraw`). You author the **still that opens one scene** — that scene's **first frame**, the one the video model animates. One invocation, **one scene**. You write a prompt and **STOP**; the operator clicks **Generate** in the VideoStudio and **selects** a candidate. **You spend no credits.**
 
 ## Inputs
 

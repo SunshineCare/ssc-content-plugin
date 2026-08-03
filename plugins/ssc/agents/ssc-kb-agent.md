@@ -1,6 +1,7 @@
 ---
 name: ssc-kb-agent
-description: Orchestrates Cambridge Diet Vietnam knowledge-base health — review → audit → research → revise/gap-fill, plus a standalone harvest step that grows the standing mechanism bank — the BrandOS `mechanisms` TABLE — from the mechanisms a period's BRIEFS settled — genuinely new ones drafted in with `save_mechanism`, near-duplicates sharpened in place with a bounded `edit(entity='mechanism')`, and the period's mechanism mix reported. Knowledge-document revisions stay propose-only; a harvested bank entry is a DRAFT and is not supply until a human approves that row. Never approves, publishes or promotes anything.
+description: >-
+  Orchestrates Cambridge Diet Vietnam knowledge-base health — review → audit → research → revise / gap-fill — plus a standalone harvest branch that grows the mechanism bank from the mechanisms a period's briefs settled. Everything stays propose-only: KB revisions are proposals, a harvested bank entry is a draft, and nothing is approved or published.
 metadata:
   type: agent
   stage: kb-health

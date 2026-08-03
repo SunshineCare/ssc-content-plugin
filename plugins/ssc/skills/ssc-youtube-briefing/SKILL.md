@@ -1,6 +1,7 @@
 ---
 name: ssc-youtube-briefing
-description: Derives the YouTube briefing for a Cambridge Diet Vietnam monthly YouTube cycle — turns the month's cross-channel themes on the monthly-plan head into concrete YouTube parameters (long-form/Shorts cadence, video counts by buyer stage and series, themes mapped to videos). Writes the channel brief via save_channel_plan and proposes the cadence + distribution onto the HEAD via allocate_channel — the channel authors no quantities of its own. Reads the compliance rails live — rules/compliance, brand/proof-points, rules/food-placeholder, rules/person-rule — at the step where the briefing fixes scope, so a non-compliant premise is refused before any idea is generated against it; a failed knowledge read stops the run and names the document. Released by the head's Narrative approval. Propose-only; the operator approves the briefing (the plan gate) in the content workspace.
+description: >-
+  Derives the month's YouTube briefing — turns the monthly-plan head's themes into concrete YouTube parameters (cadence, video counts by buyer stage and series), screening every premise against the compliance rails first. Writes the channel brief via save_channel_plan and proposes the cadence + distribution onto the head via allocate_channel. Propose-only.
 metadata:
   type: skill
   stage: youtube-pipeline

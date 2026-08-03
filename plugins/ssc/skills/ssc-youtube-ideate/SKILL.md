@@ -1,6 +1,7 @@
 ---
 name: ssc-youtube-ideate
-description: Generates the month's YouTube video ideas for a Cambridge Diet Vietnam monthly YouTube cycle — reads the approved youtube channel_plan (the briefing's buyer-stage + series distribution and cadence detail) and the channel knowledge base, and produces draft video ideas via save_idea (channel='youtube', tagged to the plan), self-enforcing diversity, hook-variety, and the COMPLIANCE RAILS — rules/compliance (the refusal table and its evidence-trace rule), brand/proof-points (the proof families every claim must trace to), rules/food-placeholder and rules/person-rule — all read LIVE and none restated in the skill, so a refused proof device is refused citing the rule that forbids it and an untraceable claim is refused rather than rated down. A failed KB read STOPS the run and names the document that could not be read. Gated on the approved briefing (the plan gate). Propose-only; the ideas are drafts a human curates and approves in the content workspace.
+description: >-
+  Generates the month's YouTube video ideas — reads the approved youtube channel_plan and the channel knowledge base, then saves draft ideas via save_idea, self-checking diversity, hook variety and the compliance rails (read live). Step 2 of the YouTube pipeline, gated on the approved briefing. Propose-only: every idea is a draft a human curates and approves.
 metadata:
   type: skill
   stage: youtube-pipeline

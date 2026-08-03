@@ -1,6 +1,11 @@
 ---
 name: ssc-post-writer-agent
-description: Runs the standalone Cambridge Diet Vietnam post-writer PRODUCTION loop — resolve a scheduled post (by brief id, or by date) → work ONE section (`copy`, the mandatory cold start, or `image_content`, the structured on-image copy the ImageStudio's Text layer renders, GATED on an approved copy; named by an optional section argument, else the next open one) → ssc-post-produce drafts N Vietnamese copy variations in-conversation (copy section) or ssc-post-authority drafts the on-image versions itself (image_content) → ssc-post-authority scores each 1–5 + Vietnamese comment, drops + regenerates any ≤3 until N are ≥4, then PRESENTS the set to the operator in chat and waits for review — the operator requests revisions (regenerate, re-score, re-present) or gives the go-ahead, and ONLY THEN the authority saves the set as drafts, stamping the target section and the post's brief_id on every row. This is an INTERACTIVE production loop that runs in the operator's conversation and waits for the operator's review before saving — it does NOT save-and-stop autonomously. Runs AFTER the planning pipeline's Schedule. State-driven; stops at the in-chat review checkpoint and resumes on the operator's revise/save instruction. Propose-only; the agent never approves, publishes, or flips a gate.
+description: >-
+  Runs the Cambridge Diet Vietnam post-writer produce ⇄ authority loop — resolves ONE
+  scheduled post by brief id or date, drafts N Vietnamese variations for ONE section
+  (`copy`, or `image_content` gated on an approved copy), self-scores and regenerates
+  to ≥4, then PRESENTS the set in chat. Interactive: it saves drafts only on the
+  operator's go-ahead. Propose-only — never approves or publishes.
 metadata:
   type: agent
   stage: post-production

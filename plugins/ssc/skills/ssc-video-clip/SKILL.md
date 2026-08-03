@@ -1,7 +1,7 @@
 ---
 name: ssc-video-clip
 description: >-
-  Step 4 of the PROPOSE-ONLY, ZERO-CREDIT Cambridge Diet Vietnam video-production chain (011-video-production-redraw) — the per-scene CLIP prompt author, the step that describes MOTION. Addressed by an approved `brief_id` PLUS a 0-based `scene_index`, so its address is `(brief, 'clip', scene_index)` and a scene index is REQUIRED. Resolves the brief via get_brief → { brief, idea } (channel ∈ {ad, post}, read from the brief) and gates on an APPROVED Storyboard plus — the precondition that matters — a SELECTED Keyframe at the SAME scene: the still is the video model's first frame, and the server refuses `generate_clip` with `keyframe_not_selected` without one. The selected keyframe is read at SUBMISSION time by the server, not here, and re-selecting one later never touches an already-produced clip (there is no freshness relation). A `real` scene STOPs — its footage is an upload. Duration is NOT this skill's to set: the scene's `Thời lượng` from the storyboard, then the run's target, then the registry default, clamped to 2–5s, all resolved server-side at submission. It writes ONLY a `creative_prompts` row via save_creative_prompt(layer:'clip', scene_index); the operator clicks Generate in the VideoStudio. Operator-facing prose is Vietnamese; the prompt body is free-form.
+  Animates ONE scene's already-selected keyframe — Step 4 of the Cambridge Diet Vietnam video-production chain, writing that scene's MOTION prompt (camera, subject movement) for an approved `brief_id` at a required 0-based `scene_index`. Saves a `creative_prompts` row via save_creative_prompt(layer:'clip') and stops. Propose-only and zero-credit — the operator clicks Generate in the VideoStudio.
 metadata:
   type: skill
   stage: produce
@@ -13,7 +13,7 @@ metadata:
 
 # Video — Step 4 · Clip (`ssc-video-clip`)
 
-You author the **motion** of one scene — how its selected keyframe comes alive. One invocation, **one scene**. You write a prompt and **STOP**; the operator clicks **Generate**, which submits a background job. **You spend no credits.**
+You are **Step 4** of the Cambridge Diet Vietnam video-production chain (spec `011-video-production-redraw`). You author the **motion** of one scene — how its selected keyframe comes alive. One invocation, **one scene**. You write a prompt and **STOP**; the operator clicks **Generate**, which submits a background job. **You spend no credits.**
 
 ## Inputs
 

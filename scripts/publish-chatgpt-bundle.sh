@@ -48,7 +48,23 @@
 # The linter resolves against `DATABASE_URL_BRANDOS`. Supply it (and `PLUGIN_REPO`
 # is set for you) the same way every other authoritative run does — note that
 # `content/.env` and `content/mcp-server/.env.local` point at a STALE LOCAL
-# `brand_os`, so a run without an explicit cluster URL reports false positives.
+# `brand_os`, so a run without an explicit cluster URL reports false positives
+# (~414 phantom "unresolved citation" errors — the DB is empty, not the prose).
+#
+# THE WORKING INVOCATION — port-forward the cluster Postgres, read the real URL
+# out of the cluster secret, and rewrite its host to the forwarded port:
+#
+#   kubectl -n postgresql port-forward svc/ssc-rw 55432:5432 &
+#   cd <this repo> && \
+#     export DATABASE_URL_BRANDOS="$(kubectl --request-timeout=10s -n ssc \
+#       get secret brandos-secrets -o jsonpath='{.data.DATABASE_URL_BRANDOS}' \
+#       | base64 -d \
+#       | sed 's#ssc-rw.postgresql.svc.cluster.local:5432#127.0.0.1:55432#')" && \
+#     scripts/publish-chatgpt-bundle.sh
+#   kill %1   # do not leave the port-forward running
+#
+# A healthy scoped run reports roughly `KB citations OK (plugin-skills): 897
+# resolved`. A three-figure error count means the stale local DB, not real drift.
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

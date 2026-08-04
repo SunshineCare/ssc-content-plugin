@@ -12,7 +12,7 @@ metadata:
   brand: cambridge-diet-vn
   section: post
   capability: edit
-  orchestrates: [ssc-post-approaches, ssc-post-ideate, ssc-post-schedule, ssc-approaches-core]
+  orchestrates: [ssc-post-approaches, ssc-post-ideate, ssc-post-schedule]
   # ssc-post-ideate itself dispatches the shared ssc-brief-core in its round 3
   # ssc-approaches-core is a shared sub-skill dispatched INSIDE Approaches by
   #   ssc-post-approaches — not a fourth operator stage, and never invoked directly

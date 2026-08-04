@@ -440,8 +440,11 @@ A `stale_version` error means the doc changed between the two calls — re-read 
 `get_knowledge` and retry once. Record every retired doc (path + rationale) in the
 final report.
 
-Every revision proposal MUST carry a target path, the proposed change, a
-rationale, and an **evidence citation** — an `evidence_note` naming the
+Every revision proposal MUST carry a target path, the **whole revised document**
+(read the doc live, edit that exact text, propose the complete "after" —
+`proposed_content` replaces the doc wholesale on approval, so never a patch, a
+lone section, or an elided doc), a rationale, and an **evidence citation** — an
+`evidence_note` naming the
 substantiating source or signal (a marked finding from this cycle qualifies).
 `evidence_note` is the tool's only evidence field. A proposal without evidence is
 not produced.

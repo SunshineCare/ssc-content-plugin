@@ -84,7 +84,10 @@ edit the KB.
 
 For docs flagged in Steps 1–3, invoke `ssc-kb-revise` to draft precise,
 evidence-backed revision proposals via `propose_knowledge_revision` (target path
-+ change + rationale + citation). For KB domains with NO coverage, invoke
++ **the whole revised document** + rationale + citation). A revision always reads
+the current doc live, edits that exact text, and proposes the complete "after" —
+`proposed_content` replaces the doc wholesale on approval, so a patch, a lone
+section, or an elided doc destroys the rest of it. For KB domains with NO coverage, invoke
 `ssc-kb-gap-fill` to draft candidate documents. Both are propose-only.
 
 Then **STOP** and emit:

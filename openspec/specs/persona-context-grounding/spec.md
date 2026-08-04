@@ -52,7 +52,7 @@ or a literal enum of persona names (e.g. `'Chị Lan' | 'Chị Hương' | 'Chị
 Every reference to "the personas" or "the archetypes" SHALL defer to
 `brand/personas` as the live source of truth for both the count and the names.
 
-#### Scenario: Archetype-presence check no longer assumes a fixed count
+#### Scenario: Archetype-presence check assumes no fixed count
 
 - **WHEN** `ssc-ads-ideate` checks archetype presence across L1 slots
 - **THEN** it checks against the personas currently listed in `brand/personas`, not against a hardcoded list of 3 named archetypes

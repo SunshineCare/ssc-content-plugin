@@ -253,7 +253,7 @@ approval an operator action on a row rather than a merge into prose.
 - **AND** it resolves `id` through `get_mechanism` when it needs to target a verb at that
   row
 
-### Requirement: The `craft/mechanism-bank` document describes the bank it no longer stores
+### Requirement: The `craft/mechanism-bank` document holds the bank's law, and the table holds its entries
 
 `craft/mechanism-bank` SHALL remain a knowledge-base document but SHALL NOT be a source
 of mechanism entries. §1 SHALL state the bank-first relationship with the **Brief** step
@@ -302,8 +302,8 @@ nothing, and SHALL change no brief. The correction SHALL be the operator's, on
 not-yet-approved briefs. No other skill SHALL enforce either ratio.
 
 Failure framing is the easiest thing to write from a voice-of-customer objection, so the
-mix drifts negative unless something states a preference — but the caps can no longer sit
-at Ideate, which neither writes the field nor owns the rows. Harvest already reads the
+mix drifts negative unless something states a preference — but the caps cannot sit at
+Ideate, which neither writes the field nor owns the rows. Harvest already reads the
 period's settled mechanisms, so it is the one place the ratio can be computed from what
 was actually settled rather than from what was planned. Making it a report rather than an
 enforcement keeps the skew visible without letting a skill re-mechanise approved work to

@@ -19,10 +19,9 @@ tool; the caller saves. Ideate touches no mechanism at all, producers read
 ### Requirement: The angle brief authors its own mechanism, and nothing is inherited
 
 The mechanism SHALL be authored at the **angle brief** and SHALL live in
-`briefs.mechanism` alone. There SHALL be no mechanism on the idea, no inheritance from
-the subject down to its angles, no override of an inherited value, and no resolution
-step anywhere in the system. `ideas.mechanism` no longer exists, `save_idea` accepts no
+`briefs.mechanism` alone. An idea SHALL carry no mechanism: `save_idea` accepts no
 `mechanism`, and no skill SHALL read, write, patch or reconstruct one on an idea.
+Each angle settles its own, so there is nothing to inherit and nothing to resolve.
 
 The persona-free subject stays persona-free. A mechanism explains why something works
 for a **particular** objection held by a **particular** reader, so it cannot honestly be
@@ -306,7 +305,7 @@ cap, no negative-valence cap, and no approvability verdict keyed on a mechanism 
 rounds. A missing mechanism on a drafted subject SHALL NOT be a gate at ideation, and the
 prose stating that SHALL point at the brief.
 
-Ideate no longer settles mechanisms, so a cap enforced there would be counting a field it
+Ideate settles no mechanism, so a cap enforced there would be counting a field it
 does not write, on rows it does not own. The subject stays persona-free and therefore
 cannot honestly judge whether a mechanism fits a reader it has not chosen yet.
 
@@ -367,10 +366,9 @@ SHALL be invented. `ssc-post-schedule` SHALL take its indirect-first sort key fr
 mechanism in order to sort by it.
 
 One field read the same way everywhere is what stops two consumers of the same brief
-writing to two different mechanisms. `list_ideas` no longer returns a mechanism, so a
-sort key still reading it would silently degrade to no ordering at all rather than fail
-visibly — moving the key to the field that actually holds the value is the only fix that
-does not involve re-deriving one.
+writing to two different mechanisms. `list_ideas` returns no mechanism, so a sort key
+reading it there would silently degrade to no ordering at all rather than fail visibly —
+keying on the field that actually holds the value is what avoids re-deriving one.
 
 #### Scenario: The producer writes to the brief's mechanism
 

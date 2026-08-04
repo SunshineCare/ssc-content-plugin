@@ -2,59 +2,29 @@
 
 ## Purpose
 
-The `craft/mechanism-bank` knowledge-base document and the skills that draw on it:
-a standing, governed supply of mechanisms an operator can read as a set and a revision
-cycle can improve, so the craft half of Approaches stops being re-derived every month.
-`ssc-approaches-core` builds each period's candidate supply **bank-first** — matching
-entries against that period's voice-of-customer pass before authoring anything — and
-marks gap-fill invention `in_bank: false` so the two are never confused downstream.
-Consumption is capped by valence, not authoring. `ssc-kb-mechanism-harvest` grows the
-bank propose-only, through the existing KB revision review screen.
+The `mechanisms` table and the skills that read and write it: a standing, governed
+supply of mechanisms an operator can read as a set, so the craft half of the work is
+drawn from rather than re-derived every month. The angle brief settles each mechanism
+**bank-first**, matching approved entries against that period's attributed
+voice-of-customer item before authoring anything, and reports which entry it drew or
+that it authored one at the brief. A read returns approved entries only, so a draft is
+not supply until a human approves it. `craft/mechanism-bank` is the document that holds
+the bank's law — the valence vocabulary, the priority rule and the usage ceiling —
+while the table holds the entries. `ssc-kb-mechanism-harvest` grows the bank with
+drafts plus human approval, and sharpens a near-duplicate in place under bounds it
+always reports.
 
 ## Requirements
 
-### Requirement: The bank is a knowledge-base document with a fixed three-section contract
-
-The mechanism bank SHALL be a single knowledge-base document at `craft/mechanism-bank`,
-category `craft`, written in Vietnamese as structured Markdown. It SHALL carry exactly
-three sections: **§1** what the document is, **§2** the valence vocabulary and its
-priority rule, and **§3** the bank itself. §1 SHALL point at `craft/doctrine` §2 for the
-**definition** of a mechanism — what qualifies, what does not, and the mandatory
-mechanism beat it feeds — and SHALL NOT restate any part of that definition. §2 SHALL
-define exactly two valence values, `positive` (why this works; what builds the result)
-and `negative` (why past attempts fail; what quietly undoes progress), and SHALL state
-that `positive` is the default and the priority while `negative` is a minority device
-capped at consumption time.
-
-The document's Vietnamese entries are brand content seeded by the operator in BrandOS
-and are not a repository artifact; this change ships the structure and the §1/§2 rules
-only.
-
-One rule, one home. The doctrine already owns what a mechanism *is*, and a second copy
-of that definition inside the bank would diverge the day either is edited, with the
-stale copy winning wherever it is read first. `id` uniqueness and valence legality are
-conventions of the document, enforced by nothing — the accepted cost of keeping the bank
-in Markdown that an operator can read and revise as a set.
-
-#### Scenario: The definition is pointed at, not copied
-
-- **WHEN** §1 of the bank is read
-- **THEN** it names `craft/doctrine` §2 as the definition of a mechanism
-- **AND** it restates no part of what qualifies, what does not, or the beat it feeds
-
-#### Scenario: Valence has exactly two values and a stated priority
-
-- **WHEN** §2 of the bank is read
-- **THEN** the only valence values are `positive` and `negative`
-- **AND** `positive` is stated as the default and the priority
-
 ### Requirement: Every bank entry carries six fields, and `fits` is described rather than persona-named
 
-Each entry in §3 SHALL be one `###` block carrying exactly these fields: `id` (a short
-stable slug, so a skill can name a mechanism without quoting it), `mechanism` (the one
-specific Vietnamese sentence), `valence` (`positive` or `negative`), `fits` (which
-triggers, objections or myths it answers), `proof_family` (which `brand/proof-points`
-family its trace would lean on), and `notes` (what it is not; where it has failed).
+Each bank entry SHALL carry exactly these six **content** fields: `slug` (the short
+stable key a step cites, so a mechanism can be named without quoting it), `mechanism`
+(the one specific Vietnamese sentence), `valence` (`positive` or `negative`), `fits`
+(which triggers, objections or myths it answers), `proof_family` (which
+`brand/proof-points` family its trace would lean on), and `notes` (what it is not; where
+it has failed). Alongside them the table SHALL carry the system fields `id` (the row id a
+verb is targeted at), `status` (`draft` | `approved`) and `version`.
 
 `fits` SHALL be written as a **description** of the trigger, objection or myth. It SHALL
 NOT name a persona, and no entry SHALL be keyed to, scoped to, or filed under a persona.
@@ -64,7 +34,8 @@ persona name would have to be rewritten whenever a persona is added or retired, 
 would quietly become a second, unreviewed roster competing with `brand/personas`.
 Describing the trigger instead lets any persona whose detail doc records that trigger
 draw on the entry, which is what makes the bank a shared library rather than a set of
-per-persona lists.
+per-persona lists. Separating `slug` from `id` is what lets a report cite an entry in a
+form that survives, while a verb still targets the row it has to target.
 
 #### Scenario: An entry names a trigger, not a persona
 
@@ -77,355 +48,361 @@ per-persona lists.
 - **WHEN** a persona is added to `brand/personas`
 - **THEN** no bank entry requires a change for that persona to draw on it
 
+#### Scenario: The system fields are present alongside the six
+
+- **WHEN** an entry is read back
+- **THEN** it carries `slug`, `mechanism`, `valence`, `fits`, `proof_family` and `notes`
+- **AND** it also carries `id`, `status` and `version`
+
 ### Requirement: The bank is a static library and records no usage
 
-The bank SHALL record no usage history, no last-used period, and no retired state. No
-skill SHALL write such a field onto an entry, and no skill SHALL rotate, expire or
-retire an entry on the basis of when it was last drawn.
+The bank SHALL record no usage history, no last-used period, and no usage-derived retired
+state. No skill SHALL write such a field onto an entry, and no skill SHALL rotate, expire
+or retire an entry on the basis of when it was last drawn. An entry's `status` SHALL
+change only by an **operator** action in the dashboard, and a soft `delete` SHALL be an
+operator action likewise.
 
-Rotation stays where it already lives and already works: the per-period concentration
-cap at Ideate. Cross-period bookkeeping written in prose with nothing enforcing it would
-be stale within two periods and would present itself as a fact, and the concentration
-failure it would address is already bounded inside a single period.
+Rotation lives in the period mix that harvest reports, not in cross-period bookkeeping.
+Bookkeeping written by a skill with nothing enforcing it would be stale within two periods
+and would present itself as a fact, and the concentration failure it would address is
+already bounded and already reported inside a single period.
 
 #### Scenario: No usage field is written
 
-- **WHEN** any skill in this change interacts with the bank
+- **WHEN** any skill interacts with the bank
 - **THEN** it writes no usage count, no last-used period and no retired flag
 
-#### Scenario: Rotation stays at Ideate
+#### Scenario: Rotation is a report, not a bank field
 
 - **WHEN** one mechanism would repeat across a period
-- **THEN** the correction is Ideate's per-period concentration cap
+- **THEN** the correction surfaces as harvest's per-period concentration report
 - **AND** the bank is not consulted for when the entry was last used
+
+#### Scenario: Status changes are the operator's
+
+- **WHEN** an entry moves from `draft` to `approved`, or is retired
+- **THEN** an operator made that change in the dashboard
+- **AND** no skill wrote it
 
 ### Requirement: The shared core reads the bank live, and a failed read stops the run
 
-`ssc-approaches-core` SHALL add `craft/mechanism-bank` to the documents it reads live in
-its knowledge-base load step, on every run. The existing failed-read rule SHALL apply to
-it unchanged: check `missing`, retry once, and if it still does not resolve **STOP the
-run, produce no block, and name the document that could not be read**. The core SHALL
-NOT proceed from a remembered bank, SHALL NOT paraphrase the bank from its own file, and
-SHALL restate no entry — no mechanism sentence, no `id`, and no valence example SHALL
+The shared core that reads the bank SHALL be `ssc-brief-core`, on every run, using
+`list_mechanisms` and `get_mechanism`. `ssc-approaches-core` SHALL NOT read the bank at
+all. The failed-read rule SHALL apply unchanged: retry once, and if the read still does
+not resolve **STOP the run, produce no block, and name the bank read that failed**. No
+skill SHALL proceed from a remembered bank, SHALL paraphrase the bank from its own file,
+or SHALL restate any entry — no mechanism sentence, no `slug` and no valence example SHALL
 appear in any skill file.
 
-The bank is revised on its own cadence through the knowledge-base revision cycle, so a
-baked-in copy goes stale silently and then overrides the live document it was meant to
-reflect. A stopped run is recoverable in a way a silently-stale one is not.
+The read belongs to the step that actually chooses a mechanism. The bank is revised on its
+own cadence by operators approving and sharpening rows, so a baked-in copy goes stale
+silently and then overrides the live table it was meant to reflect. A stopped run is
+recoverable in a way a silently-stale one is not.
 
-#### Scenario: The bank is loaded every run
+#### Scenario: The bank is loaded every run of the brief step
 
-- **WHEN** the core runs
-- **THEN** it reads `craft/mechanism-bank` live alongside the other doctrine documents
+- **WHEN** `ssc-brief-core` runs
+- **THEN** it reads the bank live with `list_mechanisms`
 - **AND** it does so regardless of what the caller says it already loaded
+
+#### Scenario: Approaches does not read the bank
+
+- **WHEN** `ssc-approaches-core` runs
+- **THEN** it performs no bank read and holds no bank read tool
 
 #### Scenario: An unreadable bank stops the run
 
-- **WHEN** `craft/mechanism-bank` comes back missing or unreadable after one retry
-- **THEN** the run stops and names that document
-- **AND** no candidate-mechanism supply is produced from a remembered version
+- **WHEN** the bank read comes back unresolvable after one retry
+- **THEN** the run stops and names that read
+- **AND** no mechanism is settled from a remembered version
 
 #### Scenario: No bank content is written into a skill file
 
-- **WHEN** any skill file changed by this capability is read
-- **THEN** it names `craft/mechanism-bank` and its section
-- **AND** it contains no mechanism sentence, no bank `id` and no valence example
-
-### Requirement: The candidate supply is built bank-first, and every drawn candidate names its `bank_id`
-
-The core SHALL build its candidate-mechanism supply by **matching bank entries against
-the voice-of-customer items its own pass found for this period, before authoring
-anything new**. Every candidate drawn from the bank SHALL name the `bank_id` it came
-from.
-
-Re-derivation is the expensive half of the Approaches step and the half that does not
-need to be per-period. The voice-of-customer reading genuinely changes month to month;
-the craft of why something works does not. Naming the `bank_id` is also what lets every
-downstream reader — and the harvest path — tell a draw from an invention without
-guessing.
-
-#### Scenario: A fitting entry is drawn rather than re-authored
-
-- **WHEN** a bank entry's `fits` matches a voice-of-customer item this period surfaced
-- **THEN** that entry supplies the candidate
-- **AND** the candidate names that entry's `bank_id`
-
-#### Scenario: Matching happens before authoring
-
-- **WHEN** the core builds the supply
-- **THEN** it matches the bank against this period's voice-of-customer items first
-- **AND** it authors a new candidate only where the match found nothing
-
-### Requirement: Gap-fill is the only invention the core makes, and it is visibly marked
-
-Where no bank entry fits a voice-of-customer item, the core SHALL author a new candidate
-and SHALL mark it `in_bank: false`. That flag SHALL be carried on the returned candidate.
-Gap-fill SHALL be the only place the core authors a mechanism that is not in the bank.
-
-An invented mechanism must be visibly invented. The flag is what the harvest path later
-acts on, and it is also what stops the bank's authority being quietly claimed by
-something no operator has ever seen.
-
-#### Scenario: A gap is filled and marked
-
-- **WHEN** a voice-of-customer item is matched by no bank entry
-- **THEN** the core authors a candidate for it
-- **AND** returns that candidate with `in_bank: false`
-
-#### Scenario: An invention is never presented as a draw
-
-- **WHEN** the core returns an authored candidate
-- **THEN** its `bank_id` is `null` and `in_bank: false` is stated
-- **AND** no bank `id` is attached to it
+- **WHEN** any skill file that touches mechanisms is read
+- **THEN** it names the bank tools it calls
+- **AND** it contains no mechanism sentence, no bank `slug` and no valence example
 
 ### Requirement: The bank saves the authoring, never the grounding
 
-A bank entry SHALL still require an **attributed voice-of-customer quote from this
-period** before it may be supplied as a candidate. A bank entry with nothing this period
-to explain SHALL NOT be supplied. The bank SHALL NOT relax, substitute for, or stand in
-place of the grounding requirement.
+A bank entry SHALL still require an **attributed voice-of-customer quote from the
+approved Approaches document for that period** before it may be settled onto an angle. A
+bank entry with nothing that period to explain SHALL NOT be settled. The bank SHALL NOT
+relax, substitute for, or stand in place of the grounding requirement, and a bank draw
+SHALL be dropped on a compliance refusal on exactly the same terms as a mechanism authored
+at the brief.
 
 The bank removes the cost of writing the mechanism sentence again; it says nothing about
-whether this month's readers are actually saying the thing that mechanism explains. A
-supply drawn from the bank alone would be a standing list dressed as a reading of the
+whether this period's readers are actually saying the thing that mechanism explains. A
+mechanism drawn from the bank alone would be a standing list dressed as a reading of the
 period, which is exactly the blandness the voice-of-customer pass exists to prevent.
 
-#### Scenario: A bank entry with no live quote is not supplied
+#### Scenario: A bank entry with no live quote is not settled
 
-- **WHEN** a bank entry fits nothing this period's voice-of-customer pass recorded
-- **THEN** it is not included in the supply
+- **WHEN** a bank entry fits nothing the period's approved Approaches document recorded
+- **THEN** it is not settled onto the angle
 
-#### Scenario: A drawn candidate still carries its quote
+#### Scenario: A drawn mechanism still carries its quote
 
-- **WHEN** a candidate names a `bank_id`
+- **WHEN** an angle's mechanism names a bank `slug`
 - **THEN** it still carries the quoted, attributed voice-of-customer item it explains
-
-### Requirement: Every other supply constraint is unchanged by the bank
-
-The bank SHALL NOT change any other rule governing the candidate supply. A candidate's
-proof route SHALL be selected only from this period's stated `head.proofInventory`, and
-where that inventory is absent every candidate's route SHALL be marked
-`unverified_for_period` rather than assumed. A candidate whose only proof route is
-refused by `rules/compliance` SHALL be **dropped, not softened and not re-traced** onto a
-family the compliance document did not clear — this applies to a bank draw exactly as it
-applies to an invention. Indirectness SHALL be judged against the **inherited**
-sophistication read, and where the quarter states none, no bar SHALL be derived. Both
-existing volume floors SHALL stand unchanged: one candidate per featured persona, and
-enough candidates that no single one would have to carry more than about a quarter of the
-period's planned assets.
-
-An entry's presence in the bank is evidence that the brand has articulated the
-mechanism, not that it is compliant this period, provable from this period's inventory,
-or indirect enough for the read the quarter set. Treating a bank draw as pre-cleared is
-the one way a governed library becomes a bypass. The bank makes the floors cheaper to
-reach; it does not lower them.
-
-#### Scenario: A compliance-refused bank draw is dropped
-
-- **WHEN** a candidate drawn from the bank has only one proof route and `rules/compliance`
-  refuses it
-- **THEN** the candidate is dropped from the supply
-- **AND** it is neither softened nor re-traced onto another family
-
-#### Scenario: The volume floors are unchanged
-
-- **WHEN** the core sizes the supply for a period
-- **THEN** it applies the per-persona floor and the quarter-of-planned-assets floor as
-  before
-- **AND** the availability of bank entries does not reduce either floor
-
-#### Scenario: No bar is derived where the quarter states none
-
-- **WHEN** the inherited sophistication read is `NOT STATED`
-- **THEN** indirectness is reported as unjudged and no bar is applied
-- **AND** no stage is assumed in order to judge a bank draw
-
-### Requirement: The return shape gains exactly two fields and loses none
-
-Each candidate in the core's returned `candidate_mechanisms` block SHALL gain exactly two
-fields: `bank_id` (the entry's slug, or `null`) and `valence`. No existing field SHALL be
-renamed, dropped or re-ordered, and no further field SHALL be added. The return SHALL
-also state the period's valence mix.
-
-The return shape is a contract two channel Approaches skills are read against. Widening
-it by exactly the two facts a consumer cannot recover on its own — where the candidate
-came from, and which way it argues — keeps both callers readable without either having
-to re-derive anything.
-
-#### Scenario: Two fields, and only two
-
-- **WHEN** the core returns a candidate
-- **THEN** it carries `bank_id` and `valence` in addition to its existing fields
-- **AND** no existing field has been renamed or dropped
-
-#### Scenario: The mix is reported
-
-- **WHEN** the core returns its supply
-- **THEN** the return states how the candidates split across `positive` and `negative`
 
 ### Requirement: The core still holds no mutation tool and enforces no quota
 
 `ssc-approaches-core` SHALL remain `capability: view` with read tools only. It SHALL NOT
-gain a write to the bank, SHALL NOT hold `propose_knowledge_revision`, `save_knowledge`
-or `edit`, and SHALL NOT approve anything. It SHALL NOT enforce the valence quota — it
-proposes candidates and reports the mix.
+gain a write to the bank, SHALL NOT hold `propose_knowledge_revision`, `save_knowledge`,
+`save_mechanism` or `edit`, and SHALL NOT approve anything. It SHALL NOT enforce the
+valence quota and SHALL NOT count either ratio. It SHALL keep its voice-of-customer pass,
+which becomes the sanctioned source of a brief's attributed quote, and it SHALL supply **no
+candidate mechanisms** — the candidate-mechanism section is removed rather than emptied,
+and the `in_bank` marker goes with it.
 
 Holding no mutation tool is precisely what makes a skill safe for two pipelines to share,
-and this change does not touch it. A quota is a rule about *usage*, and usage happens at
-Ideate: enforcing it in the supply would silently trim candidates a caller might
-legitimately have used, from a skill that cannot see how many assets the period will
-actually carry.
+and this change does not touch it. A quota is a rule about *usage*, and usage is now
+visible only after the period's briefs are settled — enforcing it in a planning step would
+mean counting a field that step does not write. Keeping the voice-of-customer pass while
+dropping the supply leaves Approaches doing the half that genuinely changes month to month
+and stops it doing the half the brief step can now do against a queryable table.
 
-#### Scenario: The tool list stays read-only
+#### Scenario: The tool list stays read-only and bank-free
 
 - **WHEN** the core's frontmatter is read
 - **THEN** its capability is `view`
-- **AND** its tool list contains no knowledge-base write and no other mutation tool
+- **AND** its tool list contains no knowledge-base write, no bank tool and no other
+  mutation tool
 
-#### Scenario: The core reports the mix but does not cap it
+#### Scenario: The voice-of-customer pass stays
 
-- **WHEN** the supply is skewed toward negative-valence candidates
-- **THEN** the core reports the mix
-- **AND** it removes no candidate and enforces no cap
+- **WHEN** the core runs
+- **THEN** it produces its voice-of-customer pass
+- **AND** the approved Approaches document is the sanctioned source of a brief's
+  attributed quote
 
-### Requirement: Ideate carries `bank_id` through onto the mechanism it settles
+#### Scenario: No candidate mechanisms are returned
 
-`ssc-post-ideate` and `ssc-ads-ideate` SHALL carry the supplying candidate's `bank_id`
-through onto the mechanism they settle on an idea, so a bank draw is distinguishable from
-an invention downstream. The existing permission to settle an **off-supply** mechanism
-SHALL stand, and SHALL remain subject to the existing requirement that the run's report
-names it as off-supply.
-
-Everything else about the mechanism rule SHALL be unchanged: it is a condition of
-*proposing* an idea as ready for approval and never of drafting one; an idea without a
-mechanism is still titled, saved, kept and given its angle; and ideas approved before a
-requirement landed are grandfathered.
-
-Provenance that is not carried is provenance that has to be guessed at, and a guessed
-provenance is what the harvest path would then act on.
-
-#### Scenario: A supply-drawn mechanism keeps its provenance
-
-- **WHEN** Ideate settles a mechanism taken from a supply candidate that named a `bank_id`
-- **THEN** that `bank_id` is carried through onto the idea's mechanism
-
-#### Scenario: An off-supply mechanism is still permitted and still named
-
-- **WHEN** Ideate settles a mechanism no supply candidate offered
-- **THEN** the mechanism is settled
-- **AND** the run's report names it as off-supply
-
-#### Scenario: Drafting is still never blocked
-
-- **WHEN** an idea has no mechanism yet
-- **THEN** it is still titled, saved and kept
-- **AND** it is simply not proposed as ready for approval
-
-### Requirement: Negative-valence mechanisms carry no more than a third of the period's assets
-
-`ssc-post-ideate` and `ssc-ads-ideate` SHALL hold negative-valence mechanisms, taken
-together, to no more than **one third** of the period's assets. The existing
-per-mechanism concentration cap — no single mechanism on more than about a quarter of the
-period's assets — SHALL be unchanged and SHALL apply alongside it. Where the negative
-share exceeds the cap, ideas SHALL be re-mechanised **from the supply's positive
-candidates**, and a mechanism SHALL NOT be invented in order to satisfy the count. Where
-the supply holds too few positives to get under the cap, that SHALL be reported as a
-**named gap** in the run's report, and the fix SHALL be the next Approaches run.
-
-Failure framing is the easiest thing to write from a voice-of-customer objection, so the
-mix drifts negative unless something states a preference. Inventing a positive mechanism
-to hit the ratio would be the exact fabrication the whole mechanism rule exists to stop —
-a quota satisfied by a fabricated mechanism is worse than an honestly reported skew,
-because the skew is visible and the fabrication is not.
-
-#### Scenario: The negative share is counted, not eyeballed
-
-- **WHEN** Ideate finishes settling the period's mechanisms
-- **THEN** it tallies how many assets carry a negative-valence mechanism
-- **AND** compares that tally against a third of the period's assets
-
-#### Scenario: Over the cap, ideas are re-mechanised from positives
-
-- **WHEN** negative-valence mechanisms exceed a third of the period's assets
-- **THEN** ideas are re-mechanised from the supply's positive candidates
-
-#### Scenario: A thin positive supply is a named gap, not a fabrication
-
-- **WHEN** the supply holds too few positive candidates to bring the share under the cap
-- **THEN** the run reports the shortfall as a named gap
-- **AND** no mechanism is invented to satisfy the count
+- **WHEN** the core returns its block
+- **THEN** it contains no candidate mechanism, no `bank_id` and no `in_bank` marker
 
 ### Requirement: A harvest skill proposes newly authored mechanisms into the bank
 
-A new skill `ssc-kb-mechanism-harvest` SHALL be created, registered in
-`ssc-kb-agent`'s `orchestrates:` list, and SHALL for a given period read that period's
-approved ideas and briefs, collect every mechanism marked `in_bank: false` together with
-any off-supply mechanism Ideate settled, diff them against `craft/mechanism-bank` read
-live, and **propose** the genuinely new ones into the document via
-`propose_knowledge_revision`. Each proposed entry SHALL carry its `valence`, its `fits`
-taken from the voice-of-customer item the mechanism was grounded in, and its
-`proof_family` taken from the route it was traced to.
+`ssc-kb-mechanism-harvest` SHALL be registered in `ssc-kb-agent`'s `orchestrates:` list
+and SHALL, for a given period: read that period's **briefs** and collect the mechanisms
+actually settled; diff them against the bank read live with `list_mechanisms` /
+`get_mechanism`; and for each genuinely new mechanism call `save_mechanism`, which mints a
+**draft**. Each drafted entry SHALL carry its `valence`, its `fits` taken from the
+voice-of-customer item the mechanism was grounded in, and its `proof_family` taken from
+the route it was traced to. The skill SHALL fold the whole run — drafts, in-place
+sharpenings and the mix audit — into one report.
 
-Without a return path the bank only ever holds what was seeded, and every gap-fill is
-re-invented in the next period that meets the same objection. The harvest belongs to the
-knowledge-base pipeline because that is where a proposal already meets an operator's
-review screen.
+Without a return path the bank only ever holds what was seeded, and every mechanism
+authored at a brief is re-invented in the next period that meets the same objection. The
+harvest belongs to the knowledge-base pipeline because that is where an operator already
+reviews what the brand knows, and the briefs are the only place a settled mechanism now
+lives.
 
-#### Scenario: An invented mechanism reaches the bank as a proposal
+#### Scenario: A new mechanism reaches the bank as a draft
 
-- **WHEN** a period's approved work carries a mechanism marked `in_bank: false` that
-  matches no existing entry
-- **THEN** the skill proposes it as a new entry via `propose_knowledge_revision`
-- **AND** the proposal carries `valence`, `fits` and `proof_family`
+- **WHEN** a period's briefs carry a mechanism that matches no existing entry
+- **THEN** the skill calls `save_mechanism` for it
+- **AND** the entry carries `valence`, `fits` and `proof_family` and is minted `draft`
 
 #### Scenario: The bank is diffed live, not from memory
 
 - **WHEN** the skill diffs harvested mechanisms against the bank
-- **THEN** it reads `craft/mechanism-bank` live for that diff
+- **THEN** it reads the bank live with `list_mechanisms` for that diff
 
-### Requirement: A near-duplicate is proposed as a revision of the existing entry
+#### Scenario: The period's mechanisms come from the briefs
 
-The harvest skill SHALL propose a **revision of an existing bank entry**, rather than a
-new entry, wherever a harvested mechanism restates that entry in different words, and
-SHALL name which entry it matched and why.
+- **WHEN** the skill collects what a period settled
+- **THEN** it reads the period's briefs
+- **AND** it reads no mechanism off an idea
+
+### Requirement: The bank is a `mechanisms` table read and written through its own tools
+
+The mechanism bank SHALL be the BrandOS `mechanisms` table, not a knowledge-base
+document. It SHALL be read with `list_mechanisms` — which returns **approved entries
+only** unless a `status` is asked for, and which narrows by `valence`, `status`, the `q`
+substring and `limit` — and with `get_mechanism`, which resolves one entry by `slug` and
+returns its `id` and `version`. It SHALL be written with `save_mechanism`, which **mints
+a `draft` and takes no `status` argument**. `edit`, `approve` and `delete` on
+`entity='mechanism'` SHALL be the generic verbs, and `delete` SHALL be soft. A retired
+entry SHALL never be returned by the approved-only read.
+
+Markdown that an operator reads as a set cannot also be a queryable supply: matching a
+period's voice-of-customer items against it meant loading the whole document and
+re-parsing entries whose `id` uniqueness and valence legality nothing enforced. A table
+gives the step that actually chooses a mechanism a narrowed query, gives an entry a real
+`status` so a machine-written draft is not silently treated as governed supply, and makes
+approval an operator action on a row rather than a merge into prose.
+
+#### Scenario: The default read returns only approved entries
+
+- **WHEN** `list_mechanisms` is called without a `status`
+- **THEN** it returns approved entries only
+- **AND** it returns no draft and no retired entry
+
+#### Scenario: A save mints a draft
+
+- **WHEN** `save_mechanism` writes a new entry
+- **THEN** that entry's status is `draft`
+- **AND** no `status` argument is passed and none is accepted
+
+#### Scenario: An entry is cited by slug and targeted by id
+
+- **WHEN** a step names one bank entry
+- **THEN** it cites the entry's `slug`
+- **AND** it resolves `id` through `get_mechanism` when it needs to target a verb at that
+  row
+
+### Requirement: The `craft/mechanism-bank` document describes the bank it no longer stores
+
+`craft/mechanism-bank` SHALL remain a knowledge-base document but SHALL NOT be a source
+of mechanism entries. §1 SHALL state the bank-first relationship with the **Brief** step
+and SHALL keep pointing at `craft/doctrine` §2 for the definition of a mechanism without
+restating any part of it. §2 SHALL keep the valence vocabulary — exactly `positive` (why
+this works; what builds the result) and `negative` (why past attempts fail; what quietly
+undoes progress) — and the rule that `positive` is the default and the priority, with the
+ceiling sentence retargeted to a ratio measured over a period's **briefs** and reported by
+the KB harvest run. §3 SHALL describe the table's fields rather than hold entries. §4
+SHALL state **what to do when no entry fits** — author at the brief, report it as
+not-from-bank, and let harvest propose it in. No skill SHALL read `craft/mechanism-bank`
+§3 as a source of mechanisms.
+
+The valence vocabulary and the positive-priority rule are brand craft, not schema, and
+they belong where the operator reviews craft. The entries themselves belong where they
+can be queried and governed row by row. Keeping the document as a describing doc rather
+than deleting it preserves the one thing it uniquely holds while removing the second copy
+of the supply that would otherwise diverge from the table.
+
+#### Scenario: The document is not read for entries
+
+- **WHEN** a step needs a mechanism from the bank
+- **THEN** it calls `list_mechanisms` or `get_mechanism`
+- **AND** it does not read `craft/mechanism-bank` §3 for entries
+
+#### Scenario: Valence stays in the document
+
+- **WHEN** §2 of the document is read
+- **THEN** the only valence values are `positive` and `negative`
+- **AND** `positive` is stated as the default and the priority
+
+#### Scenario: The definition is still pointed at, not copied
+
+- **WHEN** §1 of the document is read
+- **THEN** it names `craft/doctrine` §2 as the definition of a mechanism
+- **AND** it restates no part of what qualifies, what does not, or the beat it feeds
+
+### Requirement: The period's mechanism mix is audited at harvest and reported, never enforced
+
+`ssc-kb-mechanism-harvest` SHALL report a period's mechanism mix, measured over that
+period's **briefs**: per-mechanism **concentration** — one mechanism carried by more than
+about **one quarter** of the period's assets — and **negative valence** — negative-valence
+mechanisms carrying more than **one third** of them. Each breach SHALL be **named**. The
+audit SHALL be **report-only**: harvest SHALL propose no re-mechanising, SHALL re-open
+nothing, and SHALL change no brief. The correction SHALL be the operator's, on
+not-yet-approved briefs. No other skill SHALL enforce either ratio.
+
+Failure framing is the easiest thing to write from a voice-of-customer objection, so the
+mix drifts negative unless something states a preference — but the caps can no longer sit
+at Ideate, which neither writes the field nor owns the rows. Harvest already reads the
+period's settled mechanisms, so it is the one place the ratio can be computed from what
+was actually settled rather than from what was planned. Making it a report rather than an
+enforcement keeps the skew visible without letting a skill re-mechanise approved work to
+satisfy a count — a quota met by a fabricated mechanism is worse than an honestly reported
+skew, because the skew is visible and the fabrication is not.
+
+#### Scenario: The mix is counted over the period's briefs
+
+- **WHEN** harvest runs for a period
+- **THEN** it tallies each mechanism's share and the negative-valence share over that
+  period's briefs
+
+#### Scenario: A breach is named, not corrected
+
+- **WHEN** one mechanism exceeds about a quarter of the period's assets, or negative
+  valence exceeds a third
+- **THEN** the run names the breach
+- **AND** it re-mechanises nothing, re-opens nothing and edits no brief
+
+#### Scenario: No skill enforces the ratio
+
+- **WHEN** any pipeline skill other than harvest runs
+- **THEN** it counts neither ratio and blocks nothing on either
+
+### Requirement: A near-duplicate is sharpened in place, bounded to content fields and always reported
+
+`ssc-kb-mechanism-harvest` SHALL sharpen an existing bank entry in place with
+`edit(entity='mechanism')`, rather than minting a second one, wherever a harvested
+mechanism restates **that** entry in different words. The edit SHALL be bounded by
+**all** of: content fields only — `mechanism`, `fits`, `proof_family`, `notes` — and
+**never** `status` and **never** `slug`; **sharpening only**, never repurposing an entry
+to a different meaning; and **every edit reported with its before and after**, naming
+which entry was matched and why.
 
 A bank that accumulates three wordings of the same mechanism stops being a library an
-operator can read as a set, and the next period's matching step then has to choose
-between near-identical entries with no basis for the choice. Naming the matched entry is
-what lets the operator disagree with the merge instead of silently inheriting it.
+operator can read as a set, and the next period's matching step then has to choose between
+near-identical entries with no basis for the choice. This is the plugin's one live-supply
+write that does not go through a proposal, and it is deliberate: the operator chose
+in-place sharpening over report-only, and the three bounds are the compensation. Barring
+`status` keeps a skill from promoting its own draft; barring `slug` keeps every citation
+in every past report resolvable; the before/after report is what lets the operator
+disagree with a merge instead of silently inheriting it.
 
-#### Scenario: A restatement becomes a revision
+#### Scenario: A restatement sharpens the matched entry
 
 - **WHEN** a harvested mechanism restates an existing entry in different words
-- **THEN** the skill proposes a revision of that entry
+- **THEN** harvest edits that entry in place
 - **AND** names the entry it matched and the reason
 
-#### Scenario: Merges are visible, never silent
+#### Scenario: The edit touches content fields only
 
-- **WHEN** the skill treats a harvested mechanism as a near-duplicate
-- **THEN** the run's report states the match rather than dropping the mechanism quietly
+- **WHEN** harvest edits a bank entry
+- **THEN** the patch carries only `mechanism`, `fits`, `proof_family` or `notes`
+- **AND** it carries neither `status` nor `slug`
 
-### Requirement: The harvest skill is propose-only and retires nothing
+#### Scenario: Every edit shows its before and after
 
-`ssc-kb-mechanism-harvest` SHALL hold only `get_knowledge`, `list_ideas`, `list_briefs`,
-`get_idea`, `get_brief` and `propose_knowledge_revision`. It SHALL NOT hold
-`save_knowledge`, SHALL NOT use `edit(entity='knowledge')`, and SHALL NOT call `approve`,
-`unapprove` or any publish or schedule tool. It SHALL write no usage history onto an
-entry and SHALL retire nothing.
+- **WHEN** a run edits one or more entries
+- **THEN** the report states each entry's prior and new content
+- **AND** no near-duplicate is dropped quietly
 
-Every adoption reaches the bank through a proposal and an operator's approval on the
-existing knowledge revision screen. `save_knowledge` and `edit(entity='knowledge')` both
-write the live knowledge base directly and ungated, which is the one thing a skill that
-grows a governed document must not be able to do.
+#### Scenario: Sharpening never repurposes
 
-#### Scenario: The declared tool list holds no direct knowledge write
+- **WHEN** the harvested mechanism means something different from the matched entry
+- **THEN** it is not merged into that entry
+- **AND** it is drafted as a new entry instead
+
+### Requirement: The harvest skill holds no approval verb, mints only drafts, and retires nothing
+
+`ssc-kb-mechanism-harvest` SHALL hold the bank reads (`list_mechanisms`, `get_mechanism`),
+the brief reads (`list_briefs`, `get_brief`), `save_mechanism` and `edit`. It SHALL NOT
+hold `approve` or `unapprove` in any form, SHALL NOT hold `propose_knowledge_revision`
+for bank entries, SHALL NOT hold `save_knowledge`, and SHALL NOT call any publish or
+schedule tool. It SHALL write no usage history onto an entry and SHALL retire nothing —
+it SHALL neither `delete` an entry nor mark one unused. A weak entry SHALL be reported as
+a finding.
+
+`save_mechanism` mints a draft and cannot mint anything else, and `edit` is bounded to
+content fields, so the only two writes harvest can perform both stop short of the
+governance line: a draft is not supply until a human approves it in the dashboard, and a
+sharpened entry says the same thing more precisely. Holding an approval verb would let the
+skill promote its own draft in one run, which is the exact loop propose-only exists to
+break.
+
+#### Scenario: The declared tool list holds no approval verb
 
 - **WHEN** the skill's frontmatter is read
-- **THEN** its tool list contains `propose_knowledge_revision`
-- **AND** it contains neither `save_knowledge` nor `edit`, and no approval verb
+- **THEN** its tool list contains `save_mechanism` and `edit`
+- **AND** it contains no `approve`, no `unapprove`, no `propose_knowledge_revision` and no
+  `save_knowledge`
+
+#### Scenario: A drafted entry is not supply
+
+- **WHEN** harvest mints a draft
+- **THEN** the next period's approved-only bank read does not return it
+- **AND** it becomes supply only after a human approves it in the dashboard
 
 #### Scenario: A weak entry is reported, not retired
 
-- **WHEN** the skill finds an existing entry it judges weak
-- **THEN** it proposes a revision or reports it as a finding
-- **AND** it neither retires the entry nor marks it as unused
+- **WHEN** harvest finds an existing entry it judges weak
+- **THEN** it reports it as a finding
+- **AND** it neither deletes the entry nor marks it as unused

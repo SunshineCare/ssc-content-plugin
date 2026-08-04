@@ -151,17 +151,16 @@ period, which is exactly the blandness the voice-of-customer pass exists to prev
 `ssc-approaches-core` SHALL remain `capability: view` with read tools only. It SHALL NOT
 gain a write to the bank, SHALL NOT hold `propose_knowledge_revision`, `save_knowledge`,
 `save_mechanism` or `edit`, and SHALL NOT approve anything. It SHALL NOT enforce the
-valence quota and SHALL NOT count either ratio. It SHALL keep its voice-of-customer pass,
-which becomes the sanctioned source of a brief's attributed quote, and it SHALL supply **no
-candidate mechanisms** — the candidate-mechanism section is removed rather than emptied,
-and the `in_bank` marker goes with it.
+valence quota and SHALL NOT count either ratio. Its voice-of-customer pass is the
+sanctioned source of a brief's attributed quote, and its return carries the inherited
+sophistication read and that pass — **the mechanism itself is settled at the angle
+brief**.
 
-Holding no mutation tool is precisely what makes a skill safe for two pipelines to share,
-and this change does not touch it. A quota is a rule about *usage*, and usage is now
-visible only after the period's briefs are settled — enforcing it in a planning step would
-mean counting a field that step does not write. Keeping the voice-of-customer pass while
-dropping the supply leaves Approaches doing the half that genuinely changes month to month
-and stops it doing the half the brief step can now do against a queryable table.
+Holding no mutation tool is precisely what makes a skill safe for two pipelines to share.
+A quota is a rule about *usage*, and usage is visible only once the period's briefs are
+settled — enforcing it in a planning step would mean counting a field that step does not
+write. Approaches owns the half that genuinely changes month to month; settling a
+mechanism belongs to the step that knows the persona and route and can query the bank.
 
 #### Scenario: The tool list stays read-only and bank-free
 
@@ -177,10 +176,11 @@ and stops it doing the half the brief step can now do against a queryable table.
 - **AND** the approved Approaches document is the sanctioned source of a brief's
   attributed quote
 
-#### Scenario: No candidate mechanisms are returned
+#### Scenario: The return carries the read and the pass
 
 - **WHEN** the core returns its block
-- **THEN** it contains no candidate mechanism, no `bank_id` and no `in_bank` marker
+- **THEN** it carries the inherited sophistication read and the voice-of-customer pass,
+  and the mechanism is settled at the angle brief
 
 ### Requirement: A harvest skill proposes newly authored mechanisms into the bank
 

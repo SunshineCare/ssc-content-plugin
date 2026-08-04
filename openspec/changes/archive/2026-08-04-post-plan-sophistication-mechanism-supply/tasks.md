@@ -67,7 +67,7 @@ caller dispatches it, and wiring lands after every file it names.
 
 - [x] 7.1 `node scripts/build-chatgpt-bundle.mjs` passes — it validates `metadata.dispatches`, the skill-dir/`name` match and every `orchestrates` entry, so this is the gate that proves the new skill is wired. Report the exit code.
 - [x] 7.2 `node --test hooks/` from `plugins/ssc/` — unchanged by this work; run it to confirm nothing regressed and report actual counts.
-- [ ] 7.3 `scripts/publish-chatgpt-bundle.sh` run and `chatgpt/workflows.json` committed here; `scripts/publish-chatgpt-bundle.sh --check` exits 0. The mirror commit in the `content` repo and the brandos-express deploy are named as operator actions and are **not** performed by this change.
+- [x] 7.3 `scripts/publish-chatgpt-bundle.sh` run and `chatgpt/workflows.json` committed here; `scripts/publish-chatgpt-bundle.sh --check` exits 0. The mirror commit in the `content` repo and the brandos-express deploy are named as operator actions and are **not** performed by this change.
 - [x] 7.4 `openspec validate post-plan-sophistication-mechanism-supply` passes.
 - [x] 7.5 Invariant sweep across every file touched (design D9): no `approve` / `unapprove` / publish / schedule tool added anywhere, no `edit`-to-demote, no gate added or moved, no hard-coded KB content or persona name in a closed list, no `WebSearch` on the core, every MCP tool named exists on the BrandOS surface, and all persisted prose is Vietnamese including headings.
 - [x] 7.6 Confirm against a live BrandOS read that `get_strategy_brief` returns the two sophistication fields and `get_month_plan` returns `proofInventory` / `offerState` for a real period — rather than trusting the design's account of them.

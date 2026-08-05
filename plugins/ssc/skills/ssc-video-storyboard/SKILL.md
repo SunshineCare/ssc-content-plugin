@@ -80,11 +80,11 @@ save_content(
   section:  'storyboard',
   body:     <the scene list, in the contract format above>,
   score:    <your 1–5 self-rating>,
-  comment:  <Vietnamese rationale, at most 15 words — see the cap below>
+  comment:  <Vietnamese rationale, at most 500 characters — see the cap below>
 )
 ```
 
-**The `comment` is capped.** **At most 15 Vietnamese words, counted** — the reason
+**The `comment` is capped.** **At most 500 characters, counted** — the reason
 this is strong or weak. How many sentences those words form is your call; there is
 no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not
 the formula, not the opening frame, not the axis terms (those ride this run's

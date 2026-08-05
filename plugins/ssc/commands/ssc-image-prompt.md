@@ -10,7 +10,7 @@ description: >-
 metadata:
   dispatches: [ssc-image-prompt-agent]
   brand: cambridge-diet-vn
-  section: ads
+  section: image
 ---
 
 ## User Input

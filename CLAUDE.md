@@ -77,7 +77,8 @@ its agent, and a skill together:
    stops at the next human gate. They never do the content work themselves.
 3. **Skills** (`skills/<name>/SKILL.md`) are the **work units** — one pipeline
    step each. Frontmatter carries `metadata.section` (live values: `strategy`,
-   `ads`, `post`, `knowledge`, `youtube`, `video`, `plan`, `shared`), `stage`,
+   `ads`, `post`, `knowledge`, `youtube`, `image`, `video`, `plan`, `shared`),
+   `stage`,
    `capability`, and the `tools:` (BrandOS MCP tools) it calls. All four are
    required on every skill — nothing enforces that yet, so a missing one ships
    silently.

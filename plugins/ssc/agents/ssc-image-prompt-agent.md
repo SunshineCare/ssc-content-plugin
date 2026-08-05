@@ -10,7 +10,7 @@ metadata:
   type: agent
   stage: produce
   brand: cambridge-diet-vn
-  section: ads
+  section: image
   capability: edit
   orchestrates: [ssc-image-prompt-scene, ssc-image-prompt-subject, ssc-image-prompt-composition, ssc-image-prompt-edit, ssc-image-prompt-text]
   tools: [get_brief, get_idea, list_creatives, list_creative_prompts, list_content, list_gallery_media, view_image]

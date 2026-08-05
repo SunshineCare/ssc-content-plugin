@@ -13,7 +13,7 @@ metadata:
   type: skill
   stage: produce
   brand: cambridge-diet-vn
-  section: ads
+  section: image
   capability: edit
   tools: [get_brief, get_idea, list_content, list_creatives, list_creative_prompts, list_taxonomies, get_channel_plan, get_month_plan, get_knowledge, view_image, save_content, save_creative_prompt]
 ---

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "plugin": "ssc",
-  "plugin_version": "2.60.1",
+  "plugin_version": "2.60.2",
   "source": "ssc-content-plugin/plugins/ssc",
   "workflows": [
     {
@@ -121,7 +121,7 @@
       "command": "/ssc-image-prompt",
       "argument_hint": "<brief_id> [scene|subject|composition|edit|text] [setup: <n>|rewrite|image_content|revise: <note>]",
       "description": "Authors the ImageStudio per-step image prompts and generation settings for one approved briefId, dispatching ssc-image-prompt-agent to work the next open step of Scene → Subject → Composition → Edit → Text — the Text step first writing the on-image copy fitted to the selected image, then the prompt that places it. The only image path Cowork has, and it is zero-credit — the operator clicks Generate in the ImageStudio dashboard, which is what spends fal credits.",
-      "section": "ads",
+      "section": "image",
       "entry": {
         "kind": "agent",
         "name": "ssc-image-prompt-agent"
@@ -646,7 +646,7 @@
       "kind": "agent",
       "name": "ssc-image-prompt-agent",
       "description": "Runs the Cambridge Diet Vietnam ImageStudio image-prompt pipeline for one approved briefId — Scene → Subject → Composition → Edit → Text, all optional. State-driven: each invocation resolves the brief's studio state, dispatches the single next-open step's skill, and stops. Propose-only and zero-credit — it only reads and dispatches; the operator Generates and selects candidates in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",
@@ -669,7 +669,7 @@
       "kind": "skill",
       "name": "ssc-image-prompt-composition",
       "description": "Authors the Composition step of the Cambridge Diet Vietnam ImageStudio image-prompt pipeline — the anchor-gated compose that brings the locked real identity and the real Cambridge packshot into one image, onto a selected Scene or around the anchors. Anchored to one approved briefId; saves via save_creative_prompt(layer:'composition'). Zero-credit — the operator clicks Generate in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",
@@ -688,7 +688,7 @@
       "kind": "skill",
       "name": "ssc-image-prompt-edit",
       "description": "Authors the optional, repeatable Edit step of the Cambridge Diet Vietnam ImageStudio image-prompt pipeline — one requested change (lighting, product, clutter, composition) applied to the chain tip as a Kontext reference-edit. Anchored to one approved briefId; saves via save_creative_prompt(layer:'edit'). Zero-credit — the operator clicks Generate in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",
@@ -707,7 +707,7 @@
       "kind": "skill",
       "name": "ssc-image-prompt-scene",
       "description": "Authors the Scene step of the ImageStudio image-prompt pipeline for Cambridge Diet Vietnam ads and posts. Anchored to one approved briefId, it proposes five scene setups, waits for the operator's pick, then writes that setup's text-to-image prompt and saves it via save_creative_prompt(layer:'scene'). Zero-credit — it never generates; the operator clicks Generate in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",
@@ -725,7 +725,7 @@
       "kind": "skill",
       "name": "ssc-image-prompt-subject",
       "description": "Authors the optional Subject step of the Cambridge Diet Vietnam ImageStudio image-prompt pipeline — the persona's woman generated alone on a neutral ground, her face and pose locked as the anchor the Composition step later builds around. Anchored to one approved briefId; saves via save_creative_prompt(layer:'subject'). Zero-credit — the operator clicks Generate in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",
@@ -744,7 +744,7 @@
       "kind": "skill",
       "name": "ssc-image-prompt-text",
       "description": "Authors the final Text step of the Cambridge Diet Vietnam ImageStudio image-prompt pipeline in TWO phases: first the on-image copy itself — Vietnamese `image_content` candidates fitted to the resolved chain tip, judged and saved as DRAFTS via save_content for the operator to approve in the Image Content stage — then, once a row is approved, the placement prompt that renders that exact Vietnamese string verbatim onto a naturally clean area of the finished image, saved via save_creative_prompt(layer:'text'). Anchored to one approved briefId. Zero-credit — the operator Generates or applies the overlay in the ImageStudio.",
-      "section": "ads",
+      "section": "image",
       "tools": [
         "get_brief",
         "get_idea",

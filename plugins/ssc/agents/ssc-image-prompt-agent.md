@@ -295,10 +295,12 @@ step**, then branch:
    `image_content`, a `change:`, or a `revise:` always makes that step active and
    dispatches it.
 3. **`revise: <note>` or a bare `rewrite` supplied** → dispatch the **active step's**
-   skill to rewrite its saved prompt — with the note when `revise:` carried one, with
-   no note for a bare `rewrite` (it rewrites + re-saves its own prompt with
-   `expected_version`) → **STOP**. Never change which step is active; never drop the
-   note.
+   skill with the note when `revise:` carried one, and with no note for a bare
+   `rewrite` → **STOP**. What the note lands on is the active step's own concern: on
+   any step whose work is a saved prompt it rewrites that prompt and re-saves it with
+   `expected_version`, and on the **Text** step while the brief has no approved
+   `image_content` — where the work is the candidate set and no prompt exists yet — it
+   steers that set instead. Never change which step is active; never drop the note.
 4. **Otherwise → dispatch the active step's skill** to author the prompt +
    `generation_config` and `save_creative_prompt` → **STOP** with the "prompt saved —
    Generate in the studio" hand-off. This holds **whatever that step's own state is**:

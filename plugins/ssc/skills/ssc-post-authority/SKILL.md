@@ -526,7 +526,7 @@ After persisting the approved set, output:
 | … | … | … | … | … | … | … |
 
 **Set coverage (the verdict that decided whether this set ships):** <pass | fail | pending> — axes judged: <the craft/coverage §5 subset for `copy`> · axes not spanned: <axes_missing, or "—"> · <one-line Vietnamese rationale>. Length band judged ordinally (`craft/coverage` §6). `opening_frame` is recorded, not an axis (§4.1).
-**Mechanism judged against:** <brief.mechanism, verbatim — this angle's own, settled at the brief | "NONE on the brief — reported, not invented"> · backed by: <proof row named as brand/proof-points names it — append ` (ngoài nhóm bằng chứng của cơ chế)` where that row sits outside the family the mechanism argues from, per § Bốn Nhóm Bằng Chứng | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism>
+**Mechanism judged against:** <brief.mechanism, verbatim — this angle's own, settled at the brief | "NONE on the brief — reported, not invented"> · backed by: <proof row named as brand/proof-points names it — append ` (ngoài nhóm bằng chứng của cơ chế)` where that row sits outside the family the mechanism argues from, per the proof families that doc names | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism>
 **Rejections:** <count> variation(s) REJECTED at the floor + regenerated on the same axis position; <count> replacement round(s) triggered by a coverage failure. No variation was dropped or kept on a rating.
 **In-chat review:** <count> revision round(s) requested by the operator before the go-ahead to save.
 **Doctrinal inputs absent (invented: none):** <list, or "—">

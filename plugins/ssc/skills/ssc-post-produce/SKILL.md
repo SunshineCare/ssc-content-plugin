@@ -411,8 +411,8 @@ its planned axis position and is never withdrawn from the hand-off.
 **The mechanism beat must be proof-backed:** the beat written from `brief.mechanism` in Step 2 **leans on
 at least one row of the live `brand/proof-points`** (**§ Bảng Proof Points**), read this run and named as
 that doc names it, never from memory. **That search STARTS in the proof family the mechanism's own claim
-argues from** — read by holding the mechanism sentence against the live `brand/proof-points` **§ Bốn Nhóm
-Bằng Chứng**, never resolved by a `mechanisms` bank lookup (provenance is report-only and the brief
+argues from** — read by holding the mechanism sentence against the proof families the live `brand/proof-points`
+names, never resolved by a `mechanisms` bank lookup (provenance is report-only and the brief
 carries the sentence alone). It is a starting point, not a fence: a row **outside** that family is allowed
 outright where it substantiates the mechanism better, and where the backing row sits outside that family
 the Step 4 hand-off and the Step 5 record **say so**. **Backing the mechanism never reassigns, widens or
@@ -517,8 +517,8 @@ For each variation, while drafting, self-respect the brand bar from Step 3 (natu
   authority can judge the set's coverage without re-deriving them from the prose;
 - the **proof row backing this variation's mechanism beat**, named as `brand/proof-points`
   (**§ Bảng Proof Points**) names it in the copy you read this run. Where that row sits
-  **outside** the proof family the mechanism's own claim argues from (`brand/proof-points`
-  **§ Bốn Nhóm Bằng Chứng**, read this run), mark it "(ngoài nhóm bằng chứng của cơ chế)" on
+  **outside** the proof family the mechanism's own claim argues from (the proof families `brand/proof-points`
+  names, read this run), mark it "(ngoài nhóm bằng chứng của cơ chế)" on
   the same line — allowed outright, but never silent. **The line carries four states and they
   are never conflated:** a named row; `UNBACKED — mechanism present, no traced row this run
   (score capped ≤3)` where the brief carries a mechanism whose beat no traced row backs;

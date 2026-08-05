@@ -185,7 +185,7 @@ The `body` you author is the Kontext / control instruction sent to the engine **
 2. **Never negate** — everything named gets drawn, including inside a negation. State the **desired end-state positively** (✅ *"an uncluttered pale-wood counter bare but for a single ceramic mug"*, not *"no clutter"*).
 3. **No baked-in text, ever** — the composition adds no letters, words, or logos; text is rendered later by the Text step.
 
-**No reserved-zone rules.** The old reserved text/subject zones are **retired** — you do **not** carve out or keep clean any plane. Author a **complete, filled image**; any headroom for text is a free *framing* choice expressed positively, never a geometry demand.
+**No reserved-zone rules.** You do **not** carve out or keep clean any text or subject plane. Author a **complete, filled image**; any headroom for text is a free *framing* choice expressed positively, never a geometry demand.
 
 The composition `body` is **free-form** (English is usually best for the engines); only operator-facing prose stays Vietnamese.
 

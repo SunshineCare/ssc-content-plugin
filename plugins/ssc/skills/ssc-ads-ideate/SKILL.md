@@ -135,7 +135,7 @@ save_idea(
               itself. NOTHING else: no persona name, no layer/tier code, no value/frame/against code,
               no "/"-delimited structural string, no parenthetical taxonomy code, no ad-set/slot name>,
   score    = <your self-rating, 1-5 — see Field guidance>,
-  comment  = <one-line rationale for the score, in Vietnamese — see Field guidance>
+  comment  = <rationale for the score, in Vietnamese, at most 15 words — see Field guidance>
 )
 ```
 
@@ -145,7 +145,7 @@ Pass **no `terms`** — a subject tags no persona, value, frame, against, entry,
 
 - `title` — the subject, and only the subject: one concrete tension/insight/myth/proof-territory as ONE natural Vietnamese line. No persona, no layer, no value/frame/against/entry/experience code, no `/`-delimited path, no parenthetical taxonomy code, no slot or ad-set name. If a title needs any of those to make sense, it isn't persona-free yet — rewrite it as the bare subject.
 - `score` — **self-rate every subject on a 1–5 scale** (rendered as stars for the operator to curate by strength). Judge how genuinely felt/credible the tension/insight/myth/proof-territory is, and how well it serves the month's approved bets (the head's `tactics`) — not structural integrity. Rate honestly and **use the full range**: 5 = a standout you'd build several angles on; 3 = solid; 1–2 = weak/generic/filler. Nothing auto-approves on it.
-- `comment` — a **one-line rationale for the score, written in natural Vietnamese**: the single biggest reason the subject is strong or weak — e.g. `"Insight thật, nhiều chị gặp phải, chưa ai khai thác"` or `"Quá gần với chủ đề khác trong pool, thiếu sắc nét"`. Always Vietnamese; keep it short and honest.
+- `comment` — the rationale for the score, written in natural Vietnamese. **At most 15 Vietnamese words, counted** — the reason this is strong or weak. How many sentences those words form is your call; there is no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis terms (those are carried by `terms[]`, the coverage record and this run's report). **The cap never changes a judgement:** a floor failure is still a REJECT, a score is still honest, and a fault that does not fit goes to the run report — never a merged vague phrase, never a softened verdict. E.g. `"Insight thật, nhiều chị gặp phải, chưa ai khai thác"` or `"Quá gần với chủ đề khác trong pool, thiếu sắc nét"`. Always Vietnamese.
 
 ### Step 5: Self-check plan-wide distinctiveness and compliance
 

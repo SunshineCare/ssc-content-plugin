@@ -2,16 +2,16 @@
 name: ssc-ads-publish
 description: >-
   Assembles the publish-ready creative payload for ONE approved angle brief into an ad_set the
-  operator names — verbatim approved copy/headline/description, a re-run per-asset compliance
-  floor and set coverage check, and both attribution links — then presents it and STOPS. Holds no
-  money-moving tool: the ad is created by the operator's dashboard Publish click.
+  operator names — verbatim approved copy/headline/description, a re-run set coverage check, and
+  both attribution links — then presents it and STOPS. Holds no money-moving tool: the ad is
+  created by the operator's dashboard Publish click.
 metadata:
   type: skill
   stage: ads-pipeline
   brand: cambridge-diet-vn
   section: ads
-  capability: edit
-  tools: [get_knowledge, get_brief, list_content, record_compliance]
+  capability: view
+  tools: [get_knowledge, get_brief, list_content]
 ---
 
 # Ads Publish (`ssc-ads-publish`)
@@ -42,10 +42,9 @@ live ads were hand-built in Ads Manager and bypassed the BrandOS create path ent
 the fix: it resolves **both linkage grains onto the payload before the payload is presented**, so no
 path creates an ad without them.
 
-You are propose-only. You **never** call `create_campaign`, `create_adset`, `create_ad` or
-`update_budget`; you **never** call `approve`; you **never** use `edit` to demote a row; you flip no
-gate. Your one write is the **floor verdict** you record on the assets you just judged
-(`record_compliance`), which is a recorded assessment, not an approval and not a gate.
+You are propose-only, and read-only. You **never** call `create_campaign`, `create_adset`,
+`create_ad` or `update_budget`; you **never** call `approve`; you **never** use `edit` to demote a
+row; you flip no gate and write nothing.
 
 ## Inputs
 
@@ -98,8 +97,7 @@ You have **no MCP tool that reads the ad-asset↔content link table**, so you ca
 yourself — say so plainly rather than implying you checked. Two consequences, both binding:
 
 - If the operator tells you (or the dashboard has shown) that this brief already has a published ad,
-  **report it as done and STOP.** Do not assemble, do not re-record a floor verdict, do not present a
-  payload.
+  **report it as done and STOP.** Do not assemble, do not present a payload.
 - Otherwise proceed, and state in your report that the **authoritative** already-published check runs
   server-side when the dashboard's Publish panel re-resolves the stage — and that it is what
   ultimately refuses a duplicate, not this stage's prose.
@@ -159,87 +157,44 @@ Hard rules:
 Record the count you assembled (e.g. *4 bodies · 5 titles · 4 descriptions*) — it is what the
 dashboard will show back, and a mismatch between the two is a real signal.
 
-### Step 5: RE-RUN the compliance floor, per asset, and RECORD each verdict
-
-**This is the step that makes the re-check real, and it is load-bearing.**
+### Step 5: RE-RUN the set-level coverage judgement across exactly this set
 
 Sections are approved individually and over time. The set that actually ships is assembled later and
 may differ from any set a human ever reviewed at once — a copy approved in week 1 rides out beside
-four headlines approved in week 3. So the floor is **re-judged across exactly the assets in this
-payload and inherited from nothing** (design **D4**). Section-level approval is not evidence the
-floor still holds for the assembled set, and an approval-time override does not carry to publish.
+four headlines approved in week 3. So coverage is **re-judged across exactly the assets in this
+payload and inherited from nothing** (design **D4**). Section-level approval is not evidence the set
+still spans on coverage.
 
-Load the live floor — **never a remembered version, and never restated here**:
+**Coverage is per section and set-level**: does the assembled set give the permutation engine
+genuinely different options, or has it collapsed onto one? Coverage applies **per section** because
+Meta permutes sections independently — a single-flavour headline pool bottlenecks the whole
+permutation however well the copy pool spans.
+
+Load the live coverage doctrine — **never a remembered version, and never restated here**:
 
 ```
 Call: get_knowledge
   paths: [
-    "craft/copy-floor",
     "craft/coverage",
-    "ad/creative-guidelines",
-    "rules/banned-words",
-    "rules/compliance",
-    "rules/food-placeholder",
-    "rules/organic-vs-paid-firewall"
+    "ad/creative-guidelines"
   ]
 ```
 
-`craft/copy-floor` owns the floor's six pass/fail items; `rules/*` own the hard bans and the mandatory
-footer.
-Check `missing` on the call — an unread `missing` becomes a floor verdict that claims grounding it
-does not have. If the floor doc does not resolve, **STOP**: do not record a verdict you could not
-justify.
-
-Judge **each assembled asset** against that live floor, then record the verdict on its content row:
-
-```
-Call: record_compliance
-  content_id: <the asset's content row id>
-  status: passed | failed
-  reasons: [ <Vietnamese reasons — one per rule that decided it> ]
-```
-
-Why this call is mandatory rather than a nicety: `save_content` leaves a new row at
-`compliance_status='pending'`, and the server's publish-time floor treats **an unrecorded verdict as
-a FAILURE, not a pass** — "nobody has judged this asset" is precisely the inheritance D4 forbids. So
-a payload cannot resolve `ready` until the verdict for every assembled asset exists. Recording it is
-how the stage's floor check has anything true to read.
-
-Then:
-
-- **Any asset fails → the payload is BLOCKED.** Present the stop naming the **failing asset and the
-  specific rule it failed**, per asset — never a summary verdict, never "one asset has a problem".
-  The operator's route back is `/ssc-ad <brief_id> <section>` for a fresh variation, or a dashboard
-  edit followed by re-running this stage.
-- **Every asset passes → record the floor verdict as part of the payload you present** and continue.
-- **Never record `passed` on an asset you judged as failing**, and never soften a reason, to get a
-  payload out. That would launder a floor failure into live spend, and it is the one failure mode
-  this step exists to prevent. A blocked payload is a successful, ordinary outcome.
-- The `reasons` you record are **persisted prose → Vietnamese**. Your chat-side reasoning may be
-  English; nothing written to the row may be.
-
-### Step 6: RE-RUN the set-level coverage judgement across exactly this set
-
-The floor is per asset, pass/fail. **Coverage is per section and set-level**: does the assembled set
-give the permutation engine genuinely different options, or has it collapsed onto one? Coverage
-applies **per section** because Meta permutes sections independently — a single-flavour headline pool
-bottlenecks the whole permutation however well the copy pool spans.
-
-Read the axes and the per-section span requirement from the **live** `craft/coverage` you already
+Read the axes and the per-section span requirement from the **live** `craft/coverage` you just
 loaded; do not restate a remembered list here. Judge them across **exactly** the assets in this payload — never across everything the brief ever produced, and never
 inherited from what each section looked like when it was approved.
 
 - **A set that collapses onto one option on an axis its section must span → BLOCK**, naming the
   **unspanned axis and section**. Varying wording alone is iteration and teaches nothing; this is the
   last moment a near-identical set can be caught before it reaches the public.
-- **A set that spans → record the coverage verdict on the payload** alongside the floor verdict.
+- **A set that spans → record the coverage verdict on the payload.**
 - **Be honest about what is judgeable.** Per-asset coverage-axis *terms* are not yet recorded
   anywhere — the axis taxonomy kinds are a **separate, later change** — so the server's own coverage
   verdict currently reads `not_judged` for every axis and cannot block on your behalf. Until they
   land, **your reading of the set, presented to the operator, is the only coverage check there is.**
   Say so. An unrecorded axis is unjudgeable — never report it as "spanned" and never as "collapsed".
 
-### Step 7: Resolve BOTH linkage grains onto the payload
+### Step 6: Resolve BOTH linkage grains onto the payload
 
 Resolve them **before** presenting, not as a footnote afterwards. The payload carrying both grains is
 what makes linkage **unskippable by construction** (design **D2/D3**):
@@ -256,7 +211,7 @@ are **not stable for identical text** (77 distinct body texts minted 98 distinct
 days), so **text is the join key**; and the text stored on a link is the text **as published**, a
 historical record, so a later edit to the content row cannot break the join.
 
-### Step 8: PRESENT the payload, and STOP
+### Step 7: PRESENT the payload, and STOP
 
 Present, in the operator's language:
 
@@ -265,7 +220,6 @@ Present, in the operator's language:
   and account membership are validated **server-side** when the dashboard re-resolves the stage, and
   that a non-existent or wrong-account ad set stops there with that reason and no ad;
 - the assembled feed: the counts, and each asset's text as it will ship;
-- the **floor verdict per asset** (recorded, with the rules that decided it);
 - the **coverage verdict per section**, with what is `not_judged` named as such;
 - **both linkage grains**, with the link count.
 
@@ -273,8 +227,8 @@ Then **STOP. Nothing is created in the ad account.** Point the operator at
 `/ad/<YYYY-MM>/<idea_id>` → the **Publish** control:
 
 1. It **prepares** first (`GET /api/ad-publish`, a read that creates nothing) — the server re-resolves
-   publishable state, validates the named ad set, re-assembles the feed, re-runs the floor and
-   coverage, and re-resolves both grains. Its answer is `ready`, `stopped` or `done`.
+   publishable state, validates the named ad set, re-assembles the feed, re-runs coverage, and
+   re-resolves both grains. Its answer is `ready`, `stopped` or `done`.
 2. The **Publish** button is offered **only for a `ready` payload**, so a stop is learned before
    anything is armed — never after an ad exists.
 3. The commit sends `{ brief, ad_set }`, **not your payload**: the server re-resolves and creates from
@@ -288,12 +242,10 @@ investigating rather than working around.
 ## Output
 
 - **A presented payload, and a stop.** Nothing created, no campaign or ad set touched, no budget
-  field read or written.
-- **One recorded floor verdict per assembled asset** (`record_compliance` → `compliance_status` +
-  Vietnamese `compliance_notes`) — the stage's only write.
+  field read or written. Nothing written anywhere — this stage reads and presents only.
 - **Or a clean stop with no payload**, naming the reason: no ad set supplied; brief not approved;
-  sections written but unapproved (named); no assets; a floor failure (asset + rule named); a
-  coverage collapse (axis named); already published.
+  sections written but unapproved (named); no assets; a coverage collapse (axis named); already
+  published.
 - No gate flipped, no content row edited or deleted, no approval touched.
 
 ## Governance
@@ -310,15 +262,10 @@ investigating rather than working around.
   server. (`update_budget` is not — it declares `spendsCredits`, which makes it invisible to an agent
   and refused if reached anyway.) The plugin hook denying all four is **defence in depth, not
   server-side closure**. Never write or say that the create surface is closed off server-side.
-- **Propose-only in the approval sense.** Never `approve` (the ONLY gated promotion, denied to agents
+- **Propose-only, and read-only.** Never `approve` (the ONLY gated promotion, denied to agents
   by the hook — any entity, any gate), never un-approve, never publish, never use `edit` to
-  demote/unapprove/discard a row, and never edit or delete a content row. The operator owns every row
-  in the dashboard.
-- **`record_compliance` is a recorded assessment, not an approval.** It writes
-  `compliance_status`/`compliance_notes` on a content row and flips no gate. It requires the `edit`
-  capability, which this stage holds. Record the verdict you actually reached — a `passed` recorded to
-  unblock a payload is the worst thing this stage can do, because it converts a floor failure into
-  live spend under a verdict that looks checked.
+  demote/unapprove/discard a row, and never edit or delete a content row. This stage holds no write
+  tool at all — the operator owns every row in the dashboard.
 - **The ad set is an explicit input, never an inference (hard rule, D7).** No guessing, no defaults,
   no "the only one that appeared in a performance read". Missing → ask once, stop, assemble nothing.
 - **Creative only.** You never create or modify a campaign or an ad set, and never read or write
@@ -328,15 +275,14 @@ investigating rather than working around.
   the dashboard's server-side check rather than implying you verified it.
 - **Verbatim or nothing.** Assembled text is exactly the approved `content.body`. Editing it here
   ships unapproved copy and breaks the text-keyed join at once.
-- **Never hard-code the floor or the coverage axes into this skill.** They live in the KB
-  (`craft/copy-floor`, `craft/coverage`, `ad/creative-guidelines`, `rules/*`), are revised on their
-  own cadence, and are read live every run. Two sources of truth for a compliance rule is drift
-  waiting to happen.
+- **Never hard-code the coverage axes into this skill.** They live in the KB (`craft/coverage`,
+  `ad/creative-guidelines`), are revised on their own cadence, and are read live every run. Two
+  sources of truth for a doctrine rule is drift waiting to happen.
 - **Per-asset figures are observational.** Delivery is not randomised across assets and
   copy × headline interactions are invisible by construction. Nothing in this stage licenses a causal
   reading of per-asset performance.
-- **All persisted prose in Vietnamese** — the recorded compliance `reasons`. Chat-side reasoning may
-  stay English; nothing written to a row may.
+- **All chat-side prose in Vietnamese**, matching every other propose-only skill's convention —
+  nothing is written to a row.
 - **Cowork-native.** No app/provider-model call, no generation, no credits spent.
-- Requires the `edit` capability (for `record_compliance`), plus `view` for the `get_brief` /
-  `list_content` / `get_knowledge` reads.
+- Requires the `view` capability for the `get_brief` / `list_content` / `get_knowledge` reads. No
+  write capability at all.

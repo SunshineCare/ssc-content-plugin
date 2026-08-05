@@ -421,8 +421,17 @@ layer's close job intact. A field that traces to none of those is decoration —
 
 ### Step 5: Score, drop, regenerate
 
-Self-score each field set **1–5** with a **one-line Vietnamese comment** stating
-the single biggest reason for the number.
+Self-score each field set **1–5** with a Vietnamese comment stating the biggest reason for
+the number.
+
+> **At most 15 Vietnamese words, counted** — the reason this is strong or weak. How many
+> sentences those words form is your call; there is no one-line rule. Nothing else goes in
+> it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis
+> terms (those ride the caller's structured fields and this run's report). A field set writes
+> no mechanism beat, so **no tag is ever appended here** — never an empty one, never `NONE`.
+> **The cap never changes a judgement:** a set that scores ≤3 is dropped and regenerated
+> whatever its reason costs to state, a hard cap at 2 stays a 2, and a reason that does not
+> fit goes to the run report — never a merged vague phrase, never a softened score.
 
 **Caps that override any other merit** — a set carrying any of these cannot score
 above 3:

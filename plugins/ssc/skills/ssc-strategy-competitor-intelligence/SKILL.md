@@ -56,7 +56,9 @@ Pillar / angle | Us | Competitor A | Competitor B | Gap?
 
 ### Step 4: Save findings
 
-Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality + strategic relevance to CDV this cycle) — and a one-line Vietnamese `comment` explaining that score.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality + strategic relevance to CDV this cycle) — and a Vietnamese `comment` explaining that score.
+
+**The `comment` is capped. At most 15 Vietnamese words, counted** — the reason this finding is strong or weak. How many sentences those words form is your call; there is no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis terms (those are carried by the finding's structured `evidence` and this run's report). **The cap never changes a judgement:** a finding still carries its full consequence, and a reason that does not fit goes to the run report — never a merged vague phrase, never a softened verdict.
 
 **Quality gate — only score ≥4 is saved.** If a candidate finding (competitor signal or gap opportunity) rates ≤3, drop it (never save it) and go back to Step 2/3 for a different competitor signal or whitespace to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 5 summary. Score honestly; never inflate a weak signal to 4 just to pass the gate.
 
@@ -69,7 +71,7 @@ detail: <description of content/ad angle, format, what's working, gap this creat
 evidence: { competitor: "<name>", platform: "<fb|yt>", observation: "<what you saw>", source: "<url>" }
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 Also save one "gap opportunity" finding per identified whitespace that clears the gate (self-rated the same way):
@@ -77,7 +79,7 @@ Also save one "gap opportunity" finding per identified whitespace that clears th
 title: "Gap opportunity — <topic/angle competitors are missing>"
 detail: <why this is a gap and how CDV can own it>
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 If no meaningful competitor activity clears the gate, save one finding: `title: "Competitor — no new signals this cycle"` — omit `score`/`comment` (there is nothing to rate).

@@ -19,43 +19,34 @@ rejection, no regeneration pass, and wholly inert where the brief carries no mec
 ### Requirement: Every `copy` variation's mechanism beat is backed by a named row of the live `brand/proof-points`
 
 A `copy` variation's mechanism beat SHALL lean on **at least one row of the live
-`brand/proof-points` table**, and the variation's Vietnamese `comment` SHALL name the row
-it leans on. The row SHALL be one the table actually carries this run. Other proof points
-the variation presses SHALL remain free to answer the hook's tension without routing
-through the mechanism — the requirement is one backed mechanism, not that every proof
-point back it.
+`brand/proof-points` table**, and the variation's Vietnamese `comment` SHALL name the row it
+leans on **as one compact trailing tag** — outside the comment's 15-word cap, with
+the out-of-family marker where the row sits outside the mechanism's own proof family. The row
+SHALL be one the table actually carries this run, named as that document names it and never
+explained in the comment. Other proof points the variation presses SHALL remain free to
+answer the hook's tension without routing through the mechanism — the requirement is one
+backed mechanism, not that every proof point back it.
 
 The run's summary SHALL state, for the section it produced, which proof row backs the
 mechanism beat. `ssc-ads-writer` and `ssc-post-produce` SHALL carry this on the line that
 already reports the mechanism, and `ssc-post-authority` SHALL carry it on the line that
 already reports the mechanism it judged against.
 
-At the market-saturation position `craft/awareness-framework` §2 states for this category,
-the mechanism is the sentence that persuades. Today the mechanism rail and the proof rail
-never meet: the floor asks only that a mechanism beat exists and is faithful to
-`brief.mechanism`, while the proof gates ask only that points are distinct,
-family-spread, unswappable and hook-answering. A variation can clear all of them with its
-load-bearing claim resting on nothing. Naming the row in the `comment` is what makes the
-backing visible to the operator curating in the dashboard, where the reasoning is
-otherwise invisible.
+#### Scenario: The backing row is named as a tag
 
-#### Scenario: The mechanism beat leans on a traced row
+- **WHEN** a `copy` variation's mechanism beat leans on a row of the live table
+- **THEN** the comment's reason is followed by one compact tag naming that row
+- **AND** the tag does not count against the comment's 15-word cap
 
-- **WHEN** a `copy` variation is composed for a brief that carries a mechanism
-- **THEN** its mechanism beat leans on at least one row of the live `brand/proof-points`
-- **AND** the variation's `comment` names that row
+#### Scenario: An out-of-family backing is marked
 
-#### Scenario: Other proof points stay free
+- **WHEN** the backing row sits outside the proof family the mechanism argues from
+- **THEN** the tag carries the out-of-family marker, and the run summary names it as out-of-family
 
-- **WHEN** a variation presses proof points beyond the one backing the mechanism
-- **THEN** those points answer the hook's tension on their own terms
-- **AND** they are not required to route through the mechanism
+#### Scenario: No mechanism, no tag
 
-#### Scenario: The summary reports the backing
-
-- **WHEN** a run finishes a `copy` set
-- **THEN** its summary names the proof row backing the mechanism beat alongside the
-  mechanism it wrote to
+- **WHEN** the brief carries no mechanism, so no mechanism beat is written
+- **THEN** no tag is appended, and the absence is reported in the run summary rather than in the comment
 
 ### Requirement: The search for a backing row SHALL start in the mechanism's own proof family and MAY reach beyond it
 

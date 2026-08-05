@@ -160,7 +160,9 @@ conversion data this cycle" rather than inferring.
 
 ### Step 7: Save findings
 
-Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this learning is (real ingested metric outranks a digest-only inference; a clear signal outranks a marginal one) — and a one-line Vietnamese `comment` explaining that score.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this learning is (real ingested metric outranks a digest-only inference; a clear signal outranks a marginal one) — and a Vietnamese `comment` explaining that score.
+
+**The `comment` is capped. At most 15 Vietnamese words, counted** — the reason this finding is strong or weak. How many sentences those words form is your call; there is no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis terms (those are carried by the finding's structured `evidence` and this run's report). **The cap never changes a judgement:** a finding still carries its full consequence, and a reason that does not fit goes to the run report — never a merged vague phrase, never a softened verdict.
 
 **Quality gate — only score ≥4 is saved.** If a candidate learning rates ≤3, drop it (never save it) and go back to Step 6 for a different metric-grounded learning to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 8 summary. Score honestly; never inflate a weak learning to 4 just to pass the gate.
 
@@ -176,7 +178,7 @@ evidence: <one of:>
   paid:      { source: "ad_performance",   level: "adset|ad|campaign", name: "<ad-set/campaign>", metric: "spend|cost_per_result|ctr|purchases", value: "<n>" }
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 ### Step 7b: Persist the cycle synthesis back into the digest

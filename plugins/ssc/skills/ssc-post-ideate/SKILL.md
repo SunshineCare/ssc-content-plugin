@@ -261,11 +261,20 @@ save_idea(
   source   = 'ai',
   title    = <natural Vietnamese title, specific to this month>,
   score    = <1-5, honest>,
-  comment  = <one-line Vietnamese rationale for the score>,
+  comment  = <Vietnamese rationale for the score, at most 15 words — see the cap below>,
   terms    = [ <pillar leaf id>, <persona>, <value>, <entry>, <frame>,
                <journey_stage>, <format> ]
 )
 ```
+
+**The `comment` is capped.** **At most 15 Vietnamese words, counted** — the reason
+this is strong or weak. How many sentences those words form is your call; there is
+no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not
+the formula, not the opening frame, not the axis terms (those are carried by
+`terms[]`, the coverage record and this run's report). **The cap never changes a
+judgement:** a floor failure is still a REJECT, a score is still honest, and a
+fault that does not fit goes to the run report — never a merged vague phrase,
+never a softened verdict.
 
 Resolve every code → taxonomy id via `list_taxonomies` **once, up front**, and
 build a `code → id` map per kind. `terms` carries **ids**, never codes. `save_idea`
@@ -574,6 +583,15 @@ Set the five narrative fields plus `persona_term_id` and `route_term_id` from th
 angle. **Leave `angle_label` unset** — it is an ads field and is null for posts.
 Pass a `score` and a Vietnamese `comment`. Never pass a status: promotion is
 `approve`, which you do not hold.
+
+The brief's `comment` carries the same cap round 2's does. **At most 15
+Vietnamese words, counted** — the reason this is strong or weak. How many
+sentences those words form is your call; there is no one-line rule. Nothing else
+goes in it: not the rule or doc it traces to, not the formula, not the opening
+frame, not the axis terms (those are carried by `terms[]`, the coverage record
+and this run's report). **The cap never changes a judgement:** a floor failure is
+still a REJECT, a score is still honest, and a fault that does not fit goes to
+the run report — never a merged vague phrase, never a softened verdict.
 
 **DECLARE THE ANGLE'S `awareness_stage` ON THE BRIEF — a post has one.** The
 stage you chose in 3a is a **declared brief field on this channel**, not an

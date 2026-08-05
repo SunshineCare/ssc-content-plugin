@@ -15,7 +15,7 @@ metadata:
 
 You are **Step 1 — Script** of the Cambridge Diet Vietnam **video-production chain** (spec `011-video-production-redraw`), and you are **propose-only**. You take **ONE approved `brief_id`**, write the video's **spoken/narrative spine** in Vietnamese, save it as a **draft `content` row at `section='script'`**, and **STOP**. The operator reviews, edits, and **approves** it in the dashboard; only an approved Script unlocks the Storyboard.
 
-**Why the Script is a `content` row and not a prompt.** Everything downstream costs money or compute — a keyframe, a clip per scene, a render. The text spine is the **cheap** place to catch a compliance problem, so it rides the same gate every other produced text rides (`compliance_status`, then the operator's `approve`) — that gate is what catches a policy failure **before** any generation spend (FR-018). A `creative_prompts` row carries **no** verdict by design (FR-017), so writing the Script there would put claim-bearing text into a table that is deliberately ungated. **Never call `save_creative_prompt` from this skill.**
+**Why the Script is a `content` row and not a prompt.** Everything downstream costs money or compute — a keyframe, a clip per scene, a render. The text spine is the **cheap** place to catch a compliance problem, so it rides the `content` table's human review/approve path — the operator reads and approves it **before** any generation spend (FR-018). A `creative_prompts` row carries **no** approval path by design (FR-017), so writing the Script there would put claim-bearing text into a table nobody reviews. **Never call `save_creative_prompt` from this skill.**
 
 ## Inputs
 
@@ -57,7 +57,7 @@ A Vietnamese script of **spoken lines**, structured as prose (headings are fine)
 - **One idea per breath.** Sentences that a person can say out loud in one go — this text will be read by a voice, and long clauses are where a VO falls apart.
 - **The angle carries the middle.** Whatever the brief's angle claims is what the body of the script argues; do not smuggle in a second angle.
 - **Close on the brief's own call**, in the register the approved copy already established.
-- **Compliance is yours to self-review before saving.** No quantified weight-loss promise, no banned claim, no medical guarantee. Say plainly in your `comment` what you checked.
+- **Compliance is yours to self-review before saving.** No quantified weight-loss promise, no banned claim, no medical guarantee. Say plainly what you checked — in your report to the operator, and in the `comment` as far as its cap allows.
 
 Do **not** write scene directions, shot lists, or camera language here — that is the Storyboard's job (Step 2). A Script that already contains `## Cảnh 1` is doing the next step's work and will confuse the parser's contract.
 
@@ -69,9 +69,18 @@ save_content(
   section:  'script',
   body:     <the Vietnamese script>,
   score:    <your 1–5 self-rating>,
-  comment:  <Vietnamese rationale: the angle you carried + what you checked for compliance>
+  comment:  <Vietnamese rationale, at most 15 words — see the cap below>
 )
 ```
+
+**The `comment` is capped.** **At most 15 Vietnamese words, counted** — the reason
+this is strong or weak. How many sentences those words form is your call; there is
+no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not
+the formula, not the opening frame, not the axis terms (those ride this run's
+report). **The cap never changes a
+judgement:** a floor failure is still a REJECT, a score is still honest, and a
+fault that does not fit goes to the run report — never a merged vague phrase,
+never a softened verdict.
 
 It is written as a **draft**. You never set a status, and you never approve.
 

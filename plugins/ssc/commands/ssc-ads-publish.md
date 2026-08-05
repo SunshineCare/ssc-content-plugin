@@ -2,9 +2,9 @@
 argument-hint: '<brief_id> <ad_set_id> [ad_account_id]'
 description: >-
   Terminal ads stage: assembles the publish-ready creative payload for ONE approved angle
-  brief into an ad set the operator already made (`<brief_id> <ad_set_id>`), records a
-  compliance verdict per asset, then presents the payload and STOPS. It creates nothing —
-  the operator commits with the dashboard's Publish click, and it never calls
+  brief into an ad set the operator already made (`<brief_id> <ad_set_id>`), re-runs the
+  set coverage check, then presents the payload and STOPS. It creates nothing — the
+  operator commits with the dashboard's Publish click, and it never calls
   create_campaign, create_adset, create_ad or update_budget.
 metadata:
   dispatches: [ssc-ads-publish]
@@ -52,20 +52,13 @@ This command is a thin entry point — it holds **no** orchestration logic. It d
 
 `ssc-ads-publish` **prepares a payload and STOPS**. In order: it requires the ad set before anything
 else, resolves and gates the brief, resolves publishable state from the approved content set,
-assembles the `asset_feed_spec` **verbatim**, re-runs the **compliance floor per asset** across exactly
-the assets being published (recording each verdict — an unrecorded verdict is a failure at publish, not
-a pass) and the **set-level coverage** judgement across exactly that set, resolves **both linkage
-grains** onto the payload, then presents it and stops.
+assembles the `asset_feed_spec` **verbatim**, re-runs the **set-level coverage** judgement across
+exactly that set, resolves **both linkage grains** onto the payload, then presents it and stops.
 
 **What the `asset_feed_spec` carries.** N bodies from the approved `copy` rows, N titles
 from `headline`, N descriptions from `description` — the text **VERBATIM**. A section
 with **no approved rows is omitted** rather than emitted empty or invented, and
 `image_content` and `storyboard` are **never** included.
-
-**The compliance floor is re-run per asset**, across exactly the assets being published.
-A row saved by `/ssc-ad` sits at `compliance_status='pending'`; the stage records each
-verdict via `record_compliance`, and an **unrecorded verdict is treated as a FAILURE at
-publish, never a pass**.
 
 **Both linkage grains are resolved onto the payload** — **ad → brief**, and **ad asset →
 content row**, matched on normalised exact text (a 4/5/4 set resolves 13 links). That is
@@ -73,7 +66,7 @@ what makes attribution unskippable by construction.
 
 | The stage does | Then the operator… |
 |---|---|
-| Prepares and presents the payload — target ad set, assembled asset feed, floor verdict per asset, coverage verdict per section, and both linkage grains with the link count — and **creates nothing**. Or it **stops cleanly** with no payload: no ad set supplied; brief not approved; sections written but unapproved (named); no approved `copy` (it is required); no assets; a floor failure (asset + rule named); a coverage collapse (axis named); already published — an already-published brief is reported DONE and never mints a second payload. | Opens `/ad/[month]/[id]` and clicks **Publish**. The dashboard first **prepares** server-side (a read that creates nothing) and offers the button **only** for a `ready` payload; the commit then sends `{ brief, ad_set }` — **not** the payload — so the server re-resolves the stage and creates the ad from its **own** result. |
+| Prepares and presents the payload — target ad set, assembled asset feed, coverage verdict per section, and both linkage grains with the link count — and **creates nothing**. Or it **stops cleanly** with no payload: no ad set supplied; brief not approved; sections written but unapproved (named); no approved `copy` (it is required); no assets; a coverage collapse (axis named); already published — an already-published brief is reported DONE and never mints a second payload. | Opens `/ad/[month]/[id]` and clicks **Publish**. The dashboard first **prepares** server-side (a read that creates nothing) and offers the button **only** for a `ready` payload; the commit then sends `{ brief, ad_set }` — **not** the payload — so the server re-resolves the stage and creates the ad from its **own** result. |
 
 **The presented payload is a faithful preview, not the committed artifact.** The server's
 re-resolution at commit time is authoritative — it is also where the already-published check and the
@@ -93,9 +86,8 @@ Publish click (`POST /api/ad-publish/commit`), which is **not an agent-callable 
 (hard rule): `ssc-ads-publish` **never** calls `create_campaign`, `create_adset`, `create_ad` or
 `update_budget` — not for a dry run, not to save a click — **never** calls `approve` (the ONLY gated
 promotion, denied to agents by the approval hook; any entity, any gate), never un-approves, never uses
-`edit` to demote a row, and never edits or deletes a content row. Its **only** write is
-`record_compliance` — the floor verdict on each asset it just judged, which is a recorded assessment,
-not an approval, and flips no gate. It creates or modifies **no** campaign and **no** ad set, and reads
+`edit` to demote a row, and never edits or deletes a content row. It holds **no write tool at all** —
+it reads, assembles, and presents. It creates or modifies **no** campaign and **no** ad set, and reads
 or writes **no** budget field.
 
 The `plugins/ssc/hooks/approval-gate.mjs` PreToolUse hook backs this at the harness layer: the four
@@ -105,8 +97,8 @@ still registered as **agent-callable** MCP tools server-side (`update_budget` is
 `spendsCredits`, which makes it invisible to an agent and refused if reached anyway), so the hook is
 **defence in depth, not server-side closure**. Do not describe the create surface as closed.
 
-All persisted prose (the recorded compliance `reasons`) is **Vietnamese**. Preparing requires `edit`
-(for `record_compliance`) plus `view` for the resolve reads; committing happens in the dashboard.
+Preparing requires only `view`, for the resolve reads (`get_brief` / `list_content` / `get_knowledge`);
+committing happens in the dashboard.
 
 ## After it runs
 
@@ -116,10 +108,9 @@ exactly one ad and its creative in the named ad set, records both linkage grains
 campaign, no ad set and no budget.
 
 If the stage **stopped**: fix the named reason and re-run this command — approve the brief, approve
-(or reject) the sections it named, run `/ssc-ad <brief_id> <section>` for a fresh variation when an
-asset failed the floor or the set collapsed on an axis, or supply the ad set. A stop is an ordinary
-outcome, and it is the point of the stage: it is the last moment a floor-failing or coverage-collapsed
-set can be caught before it reaches the public.
+(or reject) the sections it named, run `/ssc-ad <brief_id> <section>` for a fresh variation when the
+set collapsed on an axis, or supply the ad set. A stop is an ordinary outcome, and it is the point of
+the stage: it is the last moment a coverage-collapsed set can be caught before it reaches the public.
 
 If the stage reported the brief **already published**: there is nothing to do — re-entry never mints a
 second ad.

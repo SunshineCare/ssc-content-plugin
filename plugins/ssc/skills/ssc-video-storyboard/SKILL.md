@@ -70,7 +70,7 @@ Optional:
 - **`Lời` carries the Script's own words** for that beat, lightly trimmed to fit the duration. Do not rewrite the approved script here; if a line will not fit, split the scene.
 - **`Hình` is what the camera sees**, in plain Vietnamese: subject, setting, action, framing. It is the grounding a Keyframe prompt is written from, so vagueness here costs a generation later.
 - **`Thời lượng`** — give one wherever the beat has an obvious length; omit it and the run's target applies.
-- **Compliance still applies.** A visual can carry a claim (a before/after implication, a scale, a medical setting) just as text can. Self-review against `rules/compliance` and say what you checked in `comment`.
+- **Compliance still applies.** A visual can carry a claim (a before/after implication, a scale, a medical setting) just as text can. Self-review against `rules/compliance` and say what you checked — in your report to the operator, and in the `comment` as far as its cap allows.
 
 ## Save
 
@@ -80,9 +80,19 @@ save_content(
   section:  'storyboard',
   body:     <the scene list, in the contract format above>,
   score:    <your 1–5 self-rating>,
-  comment:  <Vietnamese: số cảnh, tổng thời lượng dự kiến, những gì đã kiểm tra về tuân thủ>
+  comment:  <Vietnamese rationale, at most 15 words — see the cap below>
 )
 ```
+
+**The `comment` is capped.** **At most 15 Vietnamese words, counted** — the reason
+this is strong or weak. How many sentences those words form is your call; there is
+no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not
+the formula, not the opening frame, not the axis terms (those ride this run's
+report). **The cap never changes a
+judgement:** a floor failure is still a REJECT, a score is still honest, and a
+fault that does not fit goes to the run report — never a merged vague phrase,
+never a softened verdict. The scene count and the total duration are already in
+the STOP report and derived from the body, so they do not spend the count.
 
 Written as a **draft**. Before you save, **re-read your own headings and count them** — `1..N`, no gap, no duplicate. That thirty-second check is the difference between an approval and a `storyboard_unparseable` refusal.
 

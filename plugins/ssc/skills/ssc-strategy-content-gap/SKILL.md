@@ -59,7 +59,9 @@ Channel and buyer-stage are **secondary qualifiers** on each pillar gap, sourced
 
 ### Step 5: Save findings
 
-Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this gap is (evidence quality from `get_content_gaps` + strategic relevance this cycle) — and a one-line Vietnamese `comment` explaining that score. `score` is distinct from `evidence.priority`: `priority` ranks urgency among the gaps found, `score` rates how strong the evidence for this particular gap is.
+Self-rate each candidate finding before saving: `score` — an integer 1–5 for how strong/actionable this gap is (evidence quality from `get_content_gaps` + strategic relevance this cycle) — and a Vietnamese `comment` explaining that score. `score` is distinct from `evidence.priority`: `priority` ranks urgency among the gaps found, `score` rates how strong the evidence for this particular gap is.
+
+**The `comment` is capped. At most 15 Vietnamese words, counted** — the reason this finding is strong or weak. How many sentences those words form is your call; there is no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis terms (those are carried by the finding's structured `evidence` and this run's report). **The cap never changes a judgement:** a finding still carries its full consequence, and a reason that does not fit goes to the run report — never a merged vague phrase, never a softened verdict.
 
 **Quality gate — only score ≥4 is saved.** If a candidate gap rates ≤3, drop it (never save it) and move to the next-ranked pillar gap from Step 4's prioritisation to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (save nothing for it) and note the drop in the Step 6 summary. Score honestly; never inflate a weak gap to 4 just to pass the gate.
 
@@ -72,7 +74,7 @@ detail: <what's missing, why it matters, recommended content type to fill it>
 evidence: { pillar: "<name>", channel: "<fb|youtube>", stage: "<awareness|consideration|decision>", priority: "<high|medium|low>" }
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 If no gap clears the gate: `title: "Content gap — no significant gaps identified this cycle"` — omit `score`/`comment` (there is nothing to rate).

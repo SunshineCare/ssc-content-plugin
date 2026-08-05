@@ -139,7 +139,9 @@ does not write KB docs). When `get_ad_performance` was empty, judge fatigue from
 
 ### Step 6: Save findings
 
-Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality — real `get_ad_performance` metrics outrank KB-only inference — plus strategic relevance this cycle) — and a one-line Vietnamese `comment` explaining that score.
+Self-rate each finding before saving: `score` — an integer 1–5 for how strong/actionable this signal is (evidence quality — real `get_ad_performance` metrics outrank KB-only inference — plus strategic relevance this cycle) — and a Vietnamese `comment` explaining that score.
+
+**The `comment` is capped. At most 15 Vietnamese words, counted** — the reason this finding is strong or weak. How many sentences those words form is your call; there is no one-line rule. Nothing else goes in it: not the rule or doc it traces to, not the formula, not the opening frame, not the axis terms (those are carried by the finding's structured `evidence` and this run's report). **The cap never changes a judgement:** a finding still carries its full consequence, and a reason that does not fit goes to the run report — never a merged vague phrase, never a softened verdict.
 
 **Quality gate — only score ≥4 is saved, with one exception.** The market diagnosis is a single mandatory read for the cycle (there is no alternate market to substitute), so **always save it** regardless of score — but if it self-rates ≤3, do one additional research pass (re-run Step 2/3 with broader searches) before finalizing, bounded at 2 extra passes, and say so honestly in its `comment` if confidence stays low. The **winning-angle / fatigued-angle / gap** findings are each a candidate drawn from the data — if one rates ≤3, drop it (never save it) and look for a different angle/ad-set/gap in the Step 4–5 data to replace it; re-score the replacement. Bound this at 2 replacement attempts per slot — if a replacement still can't clear ≥4, drop the slot entirely (better to report fewer, stronger angles than pad with weak ones) and note the drop in the Step 7 summary. Score honestly; never inflate a weak signal to 4 just to pass the gate.
 
@@ -152,7 +154,7 @@ detail: <2-3 sentence reasoning: why we assess this level, what ad patterns conf
 evidence: { awareness_level: <the bậc number exactly as §1 numbers it>, awareness_stage: "<the §1 Mã code>", sophistication_stage: "<the §2 stage label, exactly as §2 names it>", sophistication_read: "<the Vietnamese reasoning from Step 3 — what the market has already heard, how indirect a lead must now be>", dominant_hook: "<pain|aspiration|social-proof|science>" }
 track: proven
 score: <1–5 self-rating>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 `sophistication_stage` + `sophistication_read` travel **as a pair**. Where Step 3 established no
@@ -167,7 +169,7 @@ detail: <which ad-set, why it wins (cost-per-result + CTR vs peers), recommend p
 evidence: { source: "ad_performance", adset: "<name>", metric: "cost_per_purchase|cost_per_conversion|ctr", value: "<n>" }
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 For each **fatigued angle** rated ≥4:
@@ -177,7 +179,7 @@ detail: <why it's fatigued (cite the ad-set metric when available), recommended 
 evidence: { source: "ad_performance", adset: "<name>", metric: "cost_per_result|ctr|spend", value: "<n>" }   # omit when KB-only
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 For each gap or opportunity rated ≥4:
@@ -186,7 +188,7 @@ title: "Angle gap — <opportunity name>"
 detail: <the angle no competitor is owning, why it fits CDV's positioning>
 track: proven
 score: <integer 4 or 5>
-comment: <one-line Vietnamese rationale for the score>
+comment: <Vietnamese rationale for the score — at most 15 words, counted>
 ```
 
 If no winning/fatigued/gap signal clears the gate: `title: "Ad market — no new signals this cycle"` — omit `score`/`comment` (there is nothing to rate). This fallback never replaces the mandatory market diagnosis above.

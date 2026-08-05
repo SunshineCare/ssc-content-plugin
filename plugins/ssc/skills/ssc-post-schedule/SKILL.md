@@ -306,9 +306,16 @@ Call: save_schedule_entries
 
 - `publish_at` — ISO 8601 with the Vietnam offset. Use one consistent time of day
   (`09:00:00+07:00`) unless `rules/scheduling` says otherwise.
-- `notes` — optional, **Vietnamese**, one short phrase. Use it only where the date
-  carries a reason (key date, build-up, follow-up, holiday constraint). Leave it
-  off ordinary days rather than writing filler.
+- `notes` — optional, **Vietnamese**. Use it only where the date carries a reason
+  (key date, build-up, follow-up, holiday constraint). Leave it off ordinary days
+  rather than writing filler. **At most 15 Vietnamese words, counted** — the
+  reason this date is the one. How many sentences those words form is your call;
+  there is no one-line rule. Nothing else goes in it: not the rule or doc it
+  traces to, not the formula, not the opening frame, not the axis terms (those ride this
+  run's report). **The cap
+  never changes a judgement:** a placement is still the right one or the wrong
+  one, and a constraint that does not fit goes to the run report — never a merged
+  vague phrase, never a softened verdict.
 - `status` — omit; the server defaults each row to `scheduled`.
 
 **It is a SET (DELETE-then-INSERT).** Send the COMPLETE calendar in one call —

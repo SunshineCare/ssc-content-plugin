@@ -2,10 +2,9 @@
 name: ssc-post-writer-agent
 description: >-
   Runs the Cambridge Diet Vietnam post-writer produce ⇄ authority loop — resolves ONE
-  scheduled post by brief id or date, drafts N Vietnamese variations for ONE section
-  (`copy`, or `image_content` gated on an approved copy), self-scores and regenerates
-  to ≥4, then PRESENTS the set in chat. Interactive: it saves drafts only on the
-  operator's go-ahead. Propose-only — never approves or publishes.
+  scheduled post by brief id or date, drafts N Vietnamese `copy` variations, self-scores
+  and regenerates to ≥4, then PRESENTS the set in chat. Interactive: it saves drafts only
+  on the operator's go-ahead. Propose-only — never approves or publishes.
 metadata:
   type: agent
   stage: post-production
@@ -63,22 +62,21 @@ The operator provides **one of**:
   call, and content is brief-keyed, so this is the id every downstream read and write uses.
 
 Optional:
-- `section` — **`copy` or `image_content`**. Names the target section this invocation, and
-  **an explicit section name always wins over the auto-pick** — naming `copy` targets
-  `copy` even when a copy is already approved, which is how a fresh batch of copy
-  variations is produced after the first approval. **Omit to work the next open one**
-  (`copy` while no copy is approved, `image_content` once one is). Passed through to
-  `ssc-post-authority` unchanged — it resolves and gates the section at its Step 0; you do
-  not read content state yourself.
 - `n` — the number of variations to produce. **Default 4.** Passed through to the writer
   and authority unchanged.
+- `section` — a **narrow** passthrough carrying exactly two recognized values: **`copy`**, the
+  one section this loop produces, and **`image_content`**, recognized solely so it can be
+  refused. You resolve neither yourself: you hand whatever you were given to
+  `ssc-post-authority`, whose Step 0 resolves it. An **unrecognized** value (a typo) is handed
+  over as given and falls through to `copy` there — never to undefined behavior.
 
 Ask once if neither `brief_id` nor `date` is present; never invent one.
 
-A post carries exactly **two** produced text sections — `copy` and `image_content`. There
-is no `headline` and no `description` (those are ad-only). `image_content` is **gated on
-≥1 approved `copy`**: asked for before then, the authority STOPS, says so, and writes
-nothing.
+This loop produces the post's one text section — **`copy`**. There is no `headline` and no
+`description` (those are ad-only). The **on-image copy** is authored by the ImageStudio's
+**Text** step — `/ssc-image-prompt <brief_id>` — which fits it to the image the operator
+selected; an explicit `image_content` request here STOPS at the authority's Step 0, names
+that command, and writes nothing.
 
 ## Procedure
 
@@ -153,23 +151,34 @@ yourself** — you resolve and orchestrate.
 For the **single** resolved idea, run the production loop **resolve → produce → authority
 scores → PRESENT in chat → operator review/revise → SAVE on go-ahead → STOP**:
 
-**2a — Produce (writer) — the `copy` section only.** When the target section is `copy` (no
-`section` argument and no approved copy yet), invoke `ssc-post-produce`, passing the resolved
-post (its `brief_id`) and `n` (default 4). It reads the idea's brief + strategic tags
+**2 — Section first, and the authority resolves it.** If the operator named a `section`, hand
+it to `ssc-post-authority` **before** any drafting: invoke the authority with the resolved
+`brief_id` and that `section` and **no variations**, and let its **Step 0** resolve it. This is a
+**section-first resolution call** — the authority runs Step 0 and nothing else, judges nothing,
+saves nothing, and does **not** ask for variations, because none are due yet. It ends one of two
+ways:
+
+- **`image_content`** — Step 0 STOPs there, naming `/ssc-image-prompt <brief_id> text` as where
+  on-image copy is authored. **2a never runs**, nothing is drafted and nothing is written; report
+  the stop (Step 3) and finish.
+- **`copy`** — named explicitly, omitted, or an unrecognized value falling through. The authority
+  returns that resolution **without stopping**; carry it into 2a and run the loop below. This is
+  the ordinary path for `/ssc-post <brief_id> copy`.
+
+You never resolve the section yourself and you never redirect an `image_content` request to
+`copy`. The authority's no-variations STOP belongs to the **judging** call in 2b — the one you
+make with the writer's variations in hand — so it never fires on this resolution call.
+
+**2a — Produce (writer).** Invoke `ssc-post-produce`, passing the resolved post (its
+`brief_id`) and `n` (default 4). It reads the idea's brief + strategic tags
 and the voice/content/channel knowledge, then drafts **N distinct Vietnamese Facebook copy
 variations** — each a different angle/hook — **in this conversation, UNSAVED**. It does **not**
 call `save_content`; it does **not** score its own drafts. You do not write copy yourself.
 
-When the target section is **`image_content`**, there is **no writer step** — skip 2a and go
-straight to 2b: the authority drafts the on-image versions itself, grounded in the post's
-**live approved copies**. If you cannot tell which section applies (the operator passed no
-`section` and you do not know whether a copy is approved), dispatch the authority anyway —
-its Step 0 reads `list_content(brief=<brief_id>)`, resolves the section, and enforces the gate.
-
-**2b — Authority (resolve section → draft image_content if that's the target → score →
-present → review/revise → save on go-ahead).** Invoke `ssc-post-authority`, passing the
-resolved `brief_id`, the `section` (if the operator gave one), the N in-conversation variations
-(when 2a ran), the idea's brief/tags, the angle's **mechanism** off `brief.mechanism` (below), and `n`. It **scores each variation 1–5** with a Vietnamese rationale
+**2b — Authority (resolve section → score → present → review/revise → save on go-ahead).**
+Invoke `ssc-post-authority`, passing the resolved `brief_id`, the section resolved in Step 2
+(`copy`), the N in-conversation variations from 2a, the idea's brief/tags, the angle's **mechanism** off `brief.mechanism`
+(below), and `n`. It **scores each variation 1–5** with a Vietnamese rationale
 `comment` judged against `rules/{banned-words,compliance,food-placeholder,review-standards}`
 + `voice/*` + `content/quick-checklist`, runs the **drop-and-regenerate quality loop** (any
 variation rated ≤3 is dropped and the writer regenerates a same-angle replacement, bounded at
@@ -177,9 +186,8 @@ variation rated ≤3 is dropped and the writer regenerates a same-angle replacem
 to the operator in chat** (numbered: full Vietnamese body + self-score + Vietnamese comment
 per variation) and **PAUSES** — it does **not** save yet.
 
-**The angle's MECHANISM is YOURS to hand over — on every section, including `image_content`.**
-The authority holds no `get_brief` and no `get_idea`; when `image_content` runs there is no writer
-step to surface it either, so if you do not pass it the authority stops and asks. Read it off
+**The angle's MECHANISM is YOURS to hand over.** The authority holds no `get_brief` and no
+`get_idea`, so if you do not pass it the authority stops and asks. Read it off
 **`brief.mechanism`** in the `get_brief` response you already hold (Step 1) — **its only home.**
 The guarantee is **one angle, one mechanism**: `ssc-post-ideate` round 3 settles it on this very
 brief, through `ssc-brief-core`, and this agent simply carries it. Read what the response actually
@@ -194,12 +202,12 @@ This is a **human checkpoint in the operator's conversation**. The operator eith
 - **gives the go-ahead** — and ONLY THEN the authority **persists the set**, one
   `save_content(brief_id, section, body, score, comment, channel='post')` insert per
   candidate, as a `content` row at `status='draft'` bound to the post's brief and
-  **stamped with the target `section`** (`'copy'` or `'image_content'`). The stamp is
-  load-bearing: the workspace's Copy and Image Content stages filter strictly on it, so an
-  unstamped row appears in neither and can never be approved.
+  **stamped `section: 'copy'`**. The stamp is load-bearing: the workspace's Copy stage
+  filters strictly on it, so an unstamped row appears in no stage and can never be
+  approved.
 
 The authority owns all persistence, and it happens **only after the operator approves the
-set** — the agent does NOT save-and-stop autonomously. The primary revision path is now
+set** — the agent does NOT save-and-stop autonomously. The primary revision path is
 **pre-save, in chat**; a flaw caught **after** the save in a row the authority persisted this
 run is a secondary path, corrected in place via `edit(entity='content', …)` or removed via
 `delete(entity='content', …)` (never a duplicate insert). You do **not** call
@@ -221,8 +229,8 @@ emit:
 ## Post Writer — <idea title or topic>
 
 Target brief: <brief_id> · idea <idea_id> (<pillar> · <persona>)
-Section produced: <copy | image_content>
-Variations saved: <count> of <n> target (channel='post', section='<target>', status='draft', brief-bound) — saved on the operator's go-ahead
+Section produced: copy
+Variations saved: <count> of <n> target (channel='post', section='copy', status='draft', brief-bound) — saved on the operator's go-ahead
 
 | # | Saved content id | Score | Angle / hook | Comment (VN) |
 |---|------------------|-------|--------------|--------------|
@@ -233,18 +241,16 @@ Variations saved: <count> of <n> target (channel='post', section='<target>', sta
 Quality loop: <count dropped> variation(s) rated ≤3 dropped + regenerated; final set all ≥4.
 In-chat review: <count> revision round(s) before the operator's go-ahead to save.
 
-Next (human gate): open the workspace → /post/<month>/<id> → the stage matching the section
-just produced (Copy for `copy`, Image Content for `image_content`) → review the rows and
+Next (human gate): open the workspace → /post/<month>/<id> → Copy → review the rows and
 SELECT + approve ONE (draft → approved). Saving here persisted DRAFTS to curate — nothing
 here is approved, scheduled, or published.
 ```
 
-- After **`copy`** is approved, the `image_content` section is freed — tell the operator to
-  re-invoke with `/ssc-post <brief_id> image_content`.
-- After **`image_content`** is approved, the Images stage's **Text** layer renders it; the
-  studio prompts are authored by the separate zero-credit `/ssc-image-prompt <brief_id>`.
-- If the authority STOPPED at the `image_content` gate (no approved copy), report that
-  plainly — the gate, the exact next action, and that nothing was written.
+- After the `copy` is approved, the visual work opens: tell the operator to run the separate
+  zero-credit `/ssc-image-prompt <brief_id>` — the ImageStudio chain, whose **Text** step
+  authors the on-image copy fitted to the image they selected and then renders it.
+- If the authority STOPPED on an explicit `image_content` request, report that plainly — where
+  on-image copy is authored (`/ssc-image-prompt <brief_id> text`), and that nothing was written.
 
 - If `brief.mechanism` was blank, say so plainly: the section was still produced, the absence
   was reported, and no mechanism was invented for it.
@@ -298,15 +304,14 @@ human gate is the only approval.
   report, and nothing is invented.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run —
   never batch-produce across ideas in a single pass.
-- **One section at a time, `image_content` gated on an approved copy.** Each invocation works
-  ONE section — `copy` (the mandatory cold start) or `image_content` — named by the optional
-  `section` argument or auto-picked by the authority's Step 0. An `image_content` request with
-  no approved copy STOPS and writes nothing; posts never gain a `headline` or `description`
-  section (those are ad-only). Saving `image_content` is still only a DRAFT — the loop never
-  approves it and never hands it to the image engine (generation is a human studio action).
-- **All persisted prose in Vietnamese.** Every `body` the authority writes — the post copy, and
-  every Vietnamese line of an `image_content` block — and every rating `comment` MUST be
-  Vietnamese. Chat-side reasoning/analysis and the in-chat review dialogue may stay English.
+- **One section: `copy`.** Each invocation produces the post's one text section, resolved by
+  the authority's Step 0. An explicit `image_content` request STOPS there and writes nothing —
+  the ImageStudio's Text step (`/ssc-image-prompt <brief_id> text`) authors on-image copy, and
+  the request is never silently redirected. Posts never gain a `headline` or `description`
+  section (those are ad-only).
+- **All persisted prose in Vietnamese.** Every `body` the authority writes — the post copy —
+  and every rating `comment` MUST be Vietnamese. Chat-side reasoning/analysis and the in-chat
+  review dialogue may stay English.
 - **Cowork-native.** The skills (Claude) write and score the copy directly. There are **no
   app/provider-model calls** anywhere in this loop — never reference or invoke an app model.
 - **Channel independence:** This loop operates only on the post channel (`channel='post'`)

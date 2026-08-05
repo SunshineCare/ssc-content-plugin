@@ -423,10 +423,9 @@ the brief carries **no mechanism**, the requirement is **inert** — there is no
 invented to give it something to bind to, and the absence is reported exactly as Step 2 and the Step 5
 summary already report it.
 
-**Both post sections are held to this ONE rule.** The `copy` set you draft and the `image_content` set
-the authority drafts read the same set-level bar from `craft/coverage` §4.2 — that doc binds every
-channel and every section, and its **§5** is what differs between them (which axes each section can
-physically hold). There is no post-specific proof bar, and no per-variation one on either section.
+**The `copy` set you draft is held to this ONE rule.** It reads its set-level bar from
+`craft/coverage` §4.2 — that doc binds every channel and every section, and its **§5** is what narrows
+it (which axes `copy` can physically hold). There is no post-specific proof bar, and no per-variation one.
 
 **Write for ENGAGEMENT — that is what this channel is graded on.** This page is graded on **engagement** (reactions, comments, shares, saves, read-through), so a caption that pitches well but earns no conversation has failed at its actual job. **Ads convert; posts earn conversation.** Concretely, each `copy` variation should: open on something she **recognises** as her own situation; leave her something to **answer, agree with, or tell her own version of** (a closed claim ends the thread — a question or a real moment opens it); be worth **sharing or saving**; and close soft. **Do NOT write ad copy** — no offer framing, no urgency, no hard proof-stack pitch, no Messenger CTA push; that register belongs to `ssc-ads-writer` and it actively suppresses organic reach on a community page. Organic *may* invite a comment (`rules/organic-vs-paid-firewall` marks comment CTAs acceptable organic, risky paid) — but note a post that is later **boosted becomes an ad** and must first pass that doc's boost checklist.
 
@@ -524,7 +523,7 @@ For each variation, while drafting, self-respect the brand bar from Step 3 (natu
   are never conflated:** a named row; `UNBACKED — mechanism present, no traced row this run
   (score capped ≤3)` where the brief carries a mechanism whose beat no traced row backs;
   `NONE — brief carries no mechanism` where the brief carries none, for that reason and never
-  as a missing or unbacked row; and `— not applicable to this section/density profile` where
+  as a missing or unbacked row; and `— not applicable to this section` where
   the requirement does not apply to what this variation emits, which is inert, not a miss —
   this skill emits `copy` only, so that fourth state does not arise on a post-produce run, and
   the label is carried for identity with the other two skills' reports.
@@ -549,7 +548,7 @@ After drafting all N variations, present them for the authority to judge:
 **Frame read:** Approaches (channel plan <period>, approaches_approved <yes|no>) · month plan <period> (research + tactics) · KB voice/content/rules
 **Doctrine read live:** `craft/doctrine` · `craft/copy-floor` · `craft/coverage` · `craft/awareness-framework` · `craft/close-job` · `craft/cta` · `rules/person-rule` — all read this run, none restated
 **Awareness stage:** <declared on the brief: `<stage>` | INFERRED from brief prose (no declared stage) : `<stage>` — say which, always>
-**Mechanism written to:** <`brief.mechanism`, verbatim | NONE carried on the brief: reported, not invented> · backed by: <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where it sits outside the mechanism's own proof family per `brand/proof-points` § Bốn Nhóm Bằng Chứng] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section/density profile>
+**Mechanism written to:** <`brief.mechanism`, verbatim | NONE carried on the brief: reported, not invented> · backed by: <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where it sits outside the mechanism's own proof family per the proof families `brand/proof-points` names] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section>
 **Axes varied across the set:** lead type <…> · proof device <…> · register <…> · length band <…>
 **Opening frames used:** <frame per variation — RECORDED per `rules/person-rule` §4, never a coverage axis>
 **Proof bar:** ≥3 distinct proof points across the SET (`craft/coverage` §4.2) — families spread: <…>; no variation required to carry three, none crammed
@@ -559,11 +558,11 @@ After drafting all N variations, present them for the authority to judge:
 **Conflicts:** <none | a brief instruction that would break a rail, and which way it was resolved>
 
 ### Variation 1 — <one-line angle/hook>
-*opening_frame:* <frame name> · *lead:* <lead type> · *proof device:* <…> · *register:* <…> · *length band:* <short|medium|long> · *mechanism backing:* <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where outside the mechanism's own proof family] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section/density profile>
+*opening_frame:* <frame name> · *lead:* <lead type> · *proof device:* <…> · *register:* <…> · *length band:* <short|medium|long> · *mechanism backing:* <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where outside the mechanism's own proof family] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section>
 <full Vietnamese post body>
 
 ### Variation 2 — <one-line angle/hook>
-*opening_frame:* <frame name> · *lead:* <lead type> · *proof device:* <…> · *register:* <…> · *length band:* <short|medium|long> · *mechanism backing:* <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where outside the mechanism's own proof family] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section/density profile>
+*opening_frame:* <frame name> · *lead:* <lead type> · *proof device:* <…> · *register:* <…> · *length band:* <short|medium|long> · *mechanism backing:* <proof row [+ "(ngoài nhóm bằng chứng của cơ chế)" where outside the mechanism's own proof family] | UNBACKED — mechanism present, no traced row this run (score capped ≤3) | NONE — brief carries no mechanism | — not applicable to this section>
 <full Vietnamese post body>
 
 ### … (through Variation N) — same axis line, including *mechanism backing:*
@@ -588,7 +587,7 @@ If the date had more than one scheduled post (Step 1, `count > 1`), add a line n
 - Propose-only (hard rule): never call any tool that changes approval or lifecycle state in either direction — never call `approve` (the ONLY gated promotion; the approval hook denies it to agents, any entity, any gate), and never publish. Demotion is an `edit`, not a tool of its own, so the ban lives here: never use `edit` to demote, unapprove, discard, or reject a row. Never edit or delete operator-curated or approved rows: the generic `edit`/`delete` verbs may target ONLY draft rows this skill itself created in the current run. Everything else belongs to the operator in the dashboard. (This skill persists nothing at all — the note holds a fortiori.)
 - **Does NOT persist.** This skill writes nothing — it has no `save_content` and calls no write tool. It drafts (and, on request, revises) variations in-conversation and hands them to `ssc-post-authority`, which saves the set only after the operator approves it in chat (one `save_content` insert per variation).
 - **A replacement RE-OCCUPIES THE REJECTED ITEM'S AXIS POSITION (hard rule).** Read the position off the record you published for the item being replaced — same lead type, same proof device, same register, same length band — and fix only what was named. A replacement landing on a different position is not a replacement: it moves the hole instead of filling it, and is redrawn on the recorded position. `opening_frame` is never inherited (a per-item `rules/person-rule` §4 choice, re-declared on the replacement); the **set** is re-judged as a whole afterwards (`craft/coverage` §7, `craft/copy-floor`, `craft/doctrine` §3.2 — all read live). **"Same angle" is not a constraint**: the angle is fixed across the whole set by the brief, so it bound nothing while lead, proof device, register and length drifted — the sameness that loop produced is what this rule exists to end.
-- **The ≥3-distinct proof bar is the SET's, on BOTH post sections (hard rule).** `craft/coverage` §4.2 owns it and is read live: no variation is required to carry three, none may cram three to satisfy it alone, and two variations leaning on the same proof family fail the set on the proof-device axis. The `copy` set drafted here and the `image_content` set the authority drafts obey the same rule — there is no post-specific bar and no per-variation bar on either section.
+- **The ≥3-distinct proof bar is the SET's (hard rule).** `craft/coverage` §4.2 owns it and is read live: no variation is required to carry three, none may cram three to satisfy it alone, and two variations leaning on the same proof family fail the set on the proof-device axis. It binds the `copy` set drafted here — there is no post-specific bar and no per-variation bar.
 - **A row with an absent input proceeds; the absence is REPORTED, never invented (hard rule).** An idea, brief or saved row missing a doctrinal input stays valid, is never re-opened or re-scored, and production on it never STOPs for that reason alone. Every absent doctrinal input — no declared `awareness_stage` (and that the stage was therefore inferred; a brief that declares one is read, never inferred), no mechanism on `brief.mechanism` (Step 2), earlier rows untagged on the axes — is named in the Step 5 summary and **none is fabricated**. Never invent a mechanism, never guess an axis term, never present an inference as a declared field, never count an untagged row as occupying an axis or as a zero. Enforcing the bar on a new approval belongs to the ideate step, not to this one.
 - **Writer, not authority.** Produce (and revise) variations only — leave scoring, the Vietnamese `comment`, the drop-and-regenerate quality loop, the in-chat presentation, AND the saving to `ssc-post-authority`. Do not pre-empt it; do not save your own drafts (saving — and any `edit`/`delete` (`entity='content'`) fix-up of just-saved rows — is the authority's single responsibility over the set). Revision during the operator's in-chat review is your job, but it is still in-conversation and unsaved.
 - **One post at a time.** A date with several scheduled posts is handled one idea per run — never batch-produce across ideas in a single pass.

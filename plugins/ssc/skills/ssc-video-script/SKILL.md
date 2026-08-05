@@ -40,8 +40,10 @@ Optional:
 
 1. **The idea's hero** — the idea-wide north-star sentence on the `idea` object `get_brief` already returns (`idea.hero`). This is *what the video is about*. A null/empty hero is a legacy idea, not an error — never invent one.
 2. **ALL approved contents of this brief, for the resolved channel** — via `list_content({ brief: brief_id })`, filtered to `status='approved'`:
-   - **ad** → approved `copy`, `headline`, `description`, `image_content`;
-   - **post** → approved `copy`, `image_content`. A post workspace has **no** headline and **no** description section; their absence is simply absence, never an error.
+   - **ad** → approved `copy`, `headline`, `description`;
+   - **post** → approved `copy`. A post workspace has **no** headline and **no** description section.
+
+   On either channel, read the approved `image_content` too when the brief has one — the on-image copy the ImageStudio's Text step writes onto the finished visual. Take the sections that are there: a section the channel does not have, and one not yet written, are both simply absence, never an error.
 
    Read these for **meaning and tone**. The Script is spoken language; it must sound like the same brand as the copy without reciting it.
 3. **The chosen brief's own five narrative fields** + its `angle_label` — the angle this video argues.

@@ -82,9 +82,9 @@ server is right.
 
 **Publish is deliberately NOT a writer section.** `/ssc-ad`'s stepper auto-picks the next open
 section, so folding publishing into it would make publishing something the pipeline drifts into by
-exhaustion of sections. The writer has exactly four sections (`copy`, `headline`, `description`,
-`image_content`), knows nothing about this stage, and stops when they are all approved rather than
-advancing into it.
+exhaustion of sections. The writer has exactly three sections (`copy`, `headline`, `description`) —
+on-image copy is authored at the ImageStudio Text step (`/ssc-image-prompt <brief_id> text`) — knows
+nothing about this stage, and stops when they are all approved rather than advancing into it.
 
 ## Governance
 

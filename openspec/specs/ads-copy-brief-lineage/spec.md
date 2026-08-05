@@ -10,14 +10,12 @@ the server refuses an ad content save that omits one. Content is **brief-keyed**
 
 > Tool naming: `save_post_content` → **`save_content`** and `list_post_content` →
 > **`list_content`** (renamed server-side). Requirements below use the live names.
-
 ## Requirements
-
 ### Requirement: Ad content rows record the angle brief they were written from
 
-`ssc-ads-writer` SHALL pass `brief_id` to `save_content` on every save, for every section it produces (`copy`, `headline`, `description`, `image_content`). The value MUST be the `brief_id` the skill received as a required input and wrote that section from — the skill MUST NOT derive, infer, or guess a brief (not "the idea's only brief", not the most recent, not the first approved).
+`ssc-ads-writer` SHALL pass `brief_id` to `save_content` on every save, for every section it produces (`copy`, `headline`, `description`). `ssc-image-prompt-text` SHALL pass it under the same rule on every `image_content` row it saves. The value MUST be the `brief_id` the skill received as a required input and wrote that section from — neither skill MUST derive, infer, or guess a brief (not "the idea's only brief", not the most recent, not the first approved).
 
-The skill MUST NOT omit the argument. For `ad` content `brief_id` is **REQUIRED**: the server refuses an omitted one (`brief_id_required`) and writes nothing. The skill SHALL state in prose why the argument is mandatory, because the historical hazard it prevents is invisible in the stored data: before the refusal shipped, the server bound `brief_id` for ad content **by INFERENCE**, choosing one of the idea's several approved briefs, so an omitted argument produced a row stamped with an angle the skill never chose — indistinguishable from a chosen stamp and undetectable downstream.
+Neither skill MUST omit the argument. For `ad` content `brief_id` is **REQUIRED**: the server refuses an omitted one (`brief_id_required`) and writes nothing. The skill SHALL state in prose why the argument is mandatory, because the historical hazard it prevents is invisible in the stored data: before the refusal shipped, the server bound `brief_id` for ad content **by INFERENCE**, choosing one of the idea's several approved briefs, so an omitted argument produced a row stamped with an angle the skill never chose — indistinguishable from a chosen stamp and undetectable downstream.
 
 #### Scenario: Copy saved with its brief
 
@@ -26,8 +24,13 @@ The skill MUST NOT omit the argument. For `ad` content `brief_id` is **REQUIRED*
 
 #### Scenario: Every section carries the lineage, not just copy
 
-- **WHEN** `ssc-ads-writer` saves a `headline`, `description`, or `image_content` variation written from approved brief `B`
-- **THEN** each saved row carries `brief_id = B` — the lineage is recorded for all four sections, not only the one that gates downstream work
+- **WHEN** `ssc-ads-writer` saves a `headline` or `description` variation written from approved brief `B`
+- **THEN** each saved row carries `brief_id = B` — the lineage is recorded for every section, not only the one that gates downstream work
+
+#### Scenario: On-image copy carries the same lineage from its new author
+
+- **WHEN** `ssc-image-prompt-text` saves an `image_content` candidate for approved brief `B`
+- **THEN** the `save_content` call carries `brief_id = B`, the id the step was invoked with and resolved via `get_brief`
 
 #### Scenario: The brief is never inferred by the skill
 
@@ -117,3 +120,4 @@ Consequently the lineage caution in the `ssc-image-prompt-*` skills SHALL remain
 
 - **WHEN** a row's stored Vietnamese `comment` is used as the signal for recovering which angle it was written from
 - **THEN** the comparison is made against each candidate brief's `hook_direction`, not its `angle_label` or `core_message` — sibling angles on one idea routinely share a `core_message` opener, so that field discriminates nothing, and proof-led sections (`headline`, `description`, `image_content`) reuse the same proof points across every angle, leaving many rows indeterminate by this method
+

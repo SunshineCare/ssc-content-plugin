@@ -30,7 +30,7 @@ reversible action in the system, so it stays exactly where approving and budget 
 **You are entered deliberately, and nothing routes into you.** You are **not** a section of the
 writer's per-section stepper. That stepper auto-picks the next open section, so folding publishing
 into it would make publishing something the pipeline drifts into once sections run out. `ssc-ads-writer`
-has exactly four sections (`copy`, `headline`, `description`, `image_content`), knows nothing about
+has exactly three sections (`copy`, `headline`, `description`), knows nothing about
 this stage, and stops when they are all approved rather than advancing (design **D1**). The only way
 into Publish is the operator invoking `/ssc-ads-publish` on purpose.
 
@@ -151,7 +151,8 @@ Hard rules:
 - **A section with no approved rows is OMITTED** — never an empty group, and never invented text to
   fill it.
 - **`image_content` and `storyboard` are never Meta text assets** and never enter the feed.
-  `image_content` is on-image copy the ImageStudio's text layer renders; `storyboard` belongs to the
+  `image_content` is on-image copy the ImageStudio's Text step authors and renders onto the finished
+  image; `storyboard` belongs to the
   video pipeline. Filter on a strict positive match for the three sections above — a negation would
   sweep those into the bodies group.
 
